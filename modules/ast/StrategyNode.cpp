@@ -1,15 +1,15 @@
 module;
 #include <Eigen/Dense>
+#include <iostream>
+#include "AtlasMacros.hpp"
 module StrategyNodeModule;
 
 import ExchangeModule;
 
 import ExchangeNodeModule;
 
-
 namespace Atlas
 {
-
 
 namespace AST
 {
@@ -23,23 +23,36 @@ AllocationNode::~AllocationNode() noexcept
 //============================================================================
 AllocationNode::AllocationNode(
 	UniquePtr<ExchangeViewNode> exchange_view,
+	AllocationType type,
+	Option<double> alloc_param,
 	double epsilon
 ) noexcept:
 	OpperationNode<void, Eigen::VectorXd&>(NodeType::ALLOC),
 	m_exchange_view(std::move(exchange_view)),
 	m_epsilon(epsilon),
-	m_exchange(m_exchange_view->getExchange())
+	m_exchange(m_exchange_view->getExchange()),
+	m_type(type),
+	m_alloc_param(alloc_param)
 {
 	m_mask.resize(m_exchange.getAssetCount());
 }
 
 
 //============================================================================
-UniquePtr<AllocationNode>
-AllocationNode::make(UniquePtr<ExchangeViewNode> exchange_view, double epsilon) noexcept
+Result<UniquePtr<AllocationNode>, AtlasException>
+AllocationNode::make(
+	UniquePtr<ExchangeViewNode> exchange_view,
+	AllocationType type,
+	Option<double> alloc_param,
+	double epsilon
+) noexcept
 {
+	if (type == AllocationType::CONDITIONAL_SPLIT && !alloc_param) {
+		return Err("Conditional split allocation requires a parameter");
+	}
+
 	return std::make_unique<AllocationNode>(
-		std::move(exchange_view), epsilon
+		std::move(exchange_view), type, alloc_param, epsilon
 	);
 }
 
@@ -78,7 +91,20 @@ AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
 	} else {
 		c = 0.0;
 	}
-	target = target.unaryExpr([c](double x) { return x == x ? c : 0.0; });
+
+	switch (m_type) {
+		case AllocationType::UNIFORM: {
+			target = target.unaryExpr([c](double x) { return x == x ? c : 0.0; });
+			break;
+		}
+		case AllocationType::CONDITIONAL_SPLIT: {
+			target = (target.array() < *m_alloc_param)
+				.select(-c, (target.array() > *m_alloc_param)
+				.select(c, target));
+			target = target.unaryExpr([](double x) { return x == x ? x : 0.0; });
+			break;
+		}
+	}
 }
 
 

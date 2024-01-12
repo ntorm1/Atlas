@@ -41,6 +41,7 @@ public:
 	) noexcept;
 	ATLAS_API ~Strategy() noexcept;
 
+	ATLAS_API double getAllocation(size_t asset_index) const noexcept;
 	ATLAS_API Tracer const& getTracer() const noexcept;
 	ATLAS_API auto const& getName() const noexcept { return m_name; }
 	ATLAS_API auto const& getId() const noexcept { return m_id; }

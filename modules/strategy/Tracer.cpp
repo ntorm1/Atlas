@@ -15,6 +15,7 @@ Tracer::Tracer(Exchange const& exchange, double cash) noexcept
     m_nlv = cash;
     m_initial_cash = cash;
 	m_data.resize(exchange.getAssetCount(), 1);
+    m_data.setZero();
     setTracerFlag(TracerItem::ALLOC_PCT);
 }
 

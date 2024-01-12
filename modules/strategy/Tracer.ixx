@@ -1,5 +1,10 @@
 module;
 #pragma once
+#ifdef ATLAS_EXPORTS
+#define ATLAS_API __declspec(dllexport)
+#else
+#define ATLAS_API  __declspec(dllimport)
+#endif
 #include <Eigen/Dense>
 export module TracerModule;
 
@@ -43,9 +48,10 @@ private:
 
 public:
 	Tracer(Exchange const& exchange, double cash) noexcept;
-	double getCash() const noexcept { return m_cash; }
-	double getNLV() const noexcept { return m_nlv; }
-	double getInitialCash() const noexcept { return m_initial_cash; }
+	ATLAS_API double getCash() const noexcept { return m_cash; }
+	ATLAS_API double getNLV() const noexcept { return m_nlv; }
+	ATLAS_API double getInitialCash() const noexcept { return m_initial_cash; }
+	ATLAS_API double getAllocation(size_t asset_index) const noexcept { return m_data(asset_index, ALLOC_PCT_INDEX); }
 };
 
 

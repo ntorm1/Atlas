@@ -231,7 +231,7 @@ Exchange::getSlice(size_t column, int row_offset) const noexcept
 	size_t idx = ((m_impl->current_index - 1) * m_impl->col_count) + column;
 	if (row_offset)
 	{
-		idx -= row_offset * m_impl->col_count;
+		idx -= abs(row_offset) * m_impl->col_count;
 	}
 	assert(idx < static_cast<size_t>(m_impl->data.cols()));
 	return m_impl->data.col(idx);

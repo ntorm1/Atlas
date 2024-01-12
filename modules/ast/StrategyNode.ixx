@@ -17,6 +17,12 @@ namespace Atlas
 namespace AST
 {
 
+export enum class AllocationType
+{
+	UNIFORM = 0,
+	CONDITIONAL_SPLIT = 1,
+};
+
 
 //============================================================================
 export class AllocationNode
@@ -27,16 +33,23 @@ private:
 	UniquePtr<ExchangeViewNode> m_exchange_view;
 	Exchange& m_exchange;
 	double m_epsilon;
+	AllocationType m_type;
+	Option<double> m_alloc_param;
 	Eigen::Array<bool, Eigen::Dynamic, 1> m_mask;
 
 public:
 	ATLAS_API ~AllocationNode() noexcept;
 	ATLAS_API AllocationNode(
 		UniquePtr<ExchangeViewNode> exchange_view,
+		AllocationType type = AllocationType::UNIFORM,
+		Option<double> alloc_param = std::nullopt,
 		double epsilon = 0.000f
 	) noexcept;
-	ATLAS_API [[nodiscard]] static UniquePtr<AllocationNode> make(
+	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationNode>,AtlasException>
+	make(
 		UniquePtr<ExchangeViewNode> exchange_view,
+		AllocationType type = AllocationType::UNIFORM,
+		Option<double> alloc_param = std::nullopt,
 		double epsilon = 0.000f
 	) noexcept;
 

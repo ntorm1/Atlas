@@ -1,6 +1,7 @@
 module;
 #define NOMINMAX
 #include <Eigen/Dense>
+#include <iostream>
 module StrategyModule;
 
 import ExchangeModule;
@@ -40,6 +41,9 @@ public:
 		m_target_weights_buffer.resize(m_exchange.getAssetCount());
 		m_adjustment_buffer.resize(m_exchange.getAssetCount());
 		m_alloc_epsilon = m_ast->getAllocEpsilon();
+
+		m_target_weights_buffer.setZero();
+		m_adjustment_buffer.setZero();
 	}
 };
 
@@ -68,6 +72,15 @@ Strategy::~Strategy() noexcept
 
 
 //============================================================================
+double
+Strategy::getAllocation(size_t asset_index) const noexcept
+{
+	assert(asset_index < m_impl->m_target_weights_buffer.rows());
+	return m_impl->m_target_weights_buffer[asset_index];
+}
+
+
+//============================================================================
 Tracer const&
 Strategy::getTracer() const noexcept
 {
@@ -85,6 +98,8 @@ Strategy::evaluate() noexcept
 	// get the portfolio return by calculating the sum product of the market returns and the portfolio weights
 	assert(market_returns.rows() == m_impl->m_target_weights_buffer.rows());
 	assert(!market_returns.array().isNaN().any());
+
+	// print out target weights buffer and market returns
 	double portfolio_return = market_returns.dot(m_impl->m_target_weights_buffer);
 
 	// update the tracer nlv 

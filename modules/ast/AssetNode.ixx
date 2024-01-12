@@ -63,17 +63,44 @@ private:
 
 public:
 	virtual ~AssetOpNode() noexcept = default;
+
 	AssetOpNode(
 		UniquePtr<AssetReadNode> asset_read_left,
-		UniquePtr<AssetReadNode> asset_read_right,
-		AssetOpType op_type
+		UniquePtr<AssetReadNode> asset_read_right
 	) noexcept: 
 		ExpressionNode<LinAlg::EigenCwiseBinOp<NodeCwiseBinOp>>(NodeType::ASSET_OP),
 		m_asset_read_left(std::move(asset_read_left)),
-		m_asset_read_right(std::move(asset_read_right)),
-		m_op_type(op_type)
+		m_asset_read_right(std::move(asset_read_right))
 	{
 		warmup = std::max(m_asset_read_left->getWarmup(), m_asset_read_right->getWarmup());
+		if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseProductOp>)
+		{
+			m_op_type = AssetOpType::MULTIPLY;
+		}
+		else if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseQuotientOp>)
+		{
+			m_op_type = AssetOpType::DIVIDE;
+		}
+		else if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseSumOp>)
+		{
+			m_op_type = AssetOpType::ADD;
+		}
+		else if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseDifferenceOp>)
+		{
+			m_op_type = AssetOpType::SUBTRACT;
+		}
+	}
+
+	ATLAS_API static Result<UniquePtr<AssetOpNode>, AtlasException>
+		make(
+			UniquePtr<AssetReadNode> asset_read_left,
+			UniquePtr<AssetReadNode> asset_read_right
+		) noexcept
+	{
+		return std::make_unique<AssetOpNode<NodeCwiseBinOp>>(
+			std::move(asset_read_left),
+			std::move(asset_read_right)
+		);
 	}
 
 	[[nodiscard]] size_t getWarmup() const noexcept override
@@ -116,13 +143,23 @@ export class Asset##NAME##Node : public AssetOpNode<LinAlg::OP_TYPE>          \
 public:                                                                \
     Asset##NAME##Node(                                                \
         UniquePtr<AssetReadNode> asset_read_left,                     \
-        UniquePtr<AssetReadNode> asset_read_right,                    \
-        AssetOpType op_type) noexcept :                               \
+        UniquePtr<AssetReadNode> asset_read_right                    \
+        ) noexcept :                               \
         AssetOpNode<LinAlg::OP_TYPE>(                                 \
             std::move(asset_read_left),                               \
-            std::move(asset_read_right),                              \
-            op_type)                                                   \
+            std::move(asset_read_right)                              \
+            )                                                   \
     {}                                                                 \
+	ATLAS_API static UniquePtr<Asset##NAME##Node> make( \
+		UniquePtr<AssetReadNode> asset_read_left, \
+		UniquePtr<AssetReadNode> asset_read_right \
+	) noexcept \
+	{ \
+		return std::make_unique<Asset##NAME##Node>( \
+			std::move(asset_read_left), \
+			std::move(asset_read_right) \
+		); \
+	} \
 };
 
 ASSET_OPERATION_NODE(Product, EigenCwiseProductOp)

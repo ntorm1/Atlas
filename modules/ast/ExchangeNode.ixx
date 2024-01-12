@@ -94,7 +94,7 @@ public:
 	[[nodiscard]] AssetNodeType getType() const noexcept { return m_asset_op_node.t; }
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	[[nodiscard]] auto& getExchange() { return m_exchange; }
-	[[nodiscard]] void evaluate(Eigen::VectorXd&) noexcept override;
+	ATLAS_API  [[nodiscard]] void evaluate(Eigen::VectorXd&) noexcept override;
 };
 
 
