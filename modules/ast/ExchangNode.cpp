@@ -1,5 +1,6 @@
 module;
 #include <Eigen/Dense>
+#include <iostream>
 module ExchangeNodeModule;
 
 import ExchangeModule;
@@ -57,15 +58,30 @@ ExchangeViewNode::~ExchangeViewNode() noexcept
 //============================================================================
 ExchangeViewNode::ExchangeViewNode(
 	Exchange& exchange,
-	AssetOpNodeVariant asset_op_node
+	AssetOpNodeVariant asset_op_node,
+    Option<ExchangeViewFilter> m_filter
 ) noexcept :
     OpperationNode<void, Eigen::VectorXd&>(NodeType::EXCHANGE_VIEW),
 	m_asset_op_node(std::move(asset_op_node)),
 	m_exchange(exchange),
-    m_warmup(m_asset_op_node.warmup)
+    m_warmup(m_asset_op_node.warmup),
+    m_filter(std::move(m_filter))
 {
 }
 
+
+//============================================================================
+void
+ExchangeViewNode::filter(Eigen::VectorXd& view) const noexcept
+{
+    assert(m_filter.has_value());
+    double c = m_filter.value().value;
+    switch ((*m_filter).type) {
+        case ExchangeViewFilterType::GREATER_THAN:
+            view = (view.array() > c).select(view.array(), std::numeric_limits<double>::quiet_NaN());
+		    break;
+    }
+}
 
 //============================================================================
 void
@@ -88,6 +104,9 @@ ExchangeViewNode::evaluate(Eigen::VectorXd& view) noexcept
         view = std::get<std::unique_ptr<AssetDifferenceNode>>(m_asset_op_node.value)->evaluate();
         break;
     }
+    if (m_filter.has_value()) {
+		filter(view);
+	}
 }
 
 }

@@ -47,8 +47,13 @@ Exchange::validate() noexcept
 				);
 			}
 		}
+
 		//validate asset timestamps are in ascending order
 		auto const& timestamps = asset.timestamps;
+		if (timestamps.size() == 0)
+		{
+			return Err("Asset has no timestamps");
+		}
 		for (size_t i = 1; i < timestamps.size(); i++)
 		{
 			bool is_descending = timestamps[i] < timestamps[i - 1];

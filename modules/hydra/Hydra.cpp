@@ -54,9 +54,9 @@ Hydra::getExchange(String const& name) const noexcept
 Result<Strategy const*, AtlasException>
 Hydra::addStrategy(UniquePtr<Strategy> strategy) noexcept
 {
-	if (m_state != HydraState::INIT)
+	if (m_state == HydraState::RUNING)
 	{
-		return Err("Hydra must be in init state to add strategy");
+		return Err("Hydra can not be in running to add strategy");
 	}
 	if (m_impl->m_strategy_map.contains(strategy->getName()))
 	{
@@ -102,7 +102,7 @@ Hydra::build()
 
 //============================================================================
 void
-Hydra::step()
+Hydra::step() noexcept
 {
 	assert(m_state == HydraState::BUILT || m_state == HydraState::RUNING);
 	m_impl->m_exchange_map.step();
@@ -111,6 +111,19 @@ Hydra::step()
 	{
 		strategy->evaluate();
 		strategy->step();
+	}
+}
+
+
+//============================================================================
+void
+Hydra::run() noexcept
+{
+	assert(m_state == HydraState::BUILT);
+	size_t steps = m_impl->m_exchange_map.getTimestamps().size();
+	for (size_t i = 0; i < steps; ++i)
+	{
+		step();
 	}
 }
 

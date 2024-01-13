@@ -60,7 +60,11 @@ public:
 	ATLAS_API Result<bool, AtlasException> build();
 
 	//============================================================================
-	ATLAS_API void step();
+	ATLAS_API void step() noexcept;
+
+	//============================================================================
+	ATLAS_API void run() noexcept;
+
 };
 
 

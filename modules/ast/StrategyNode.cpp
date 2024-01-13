@@ -34,7 +34,6 @@ AllocationNode::AllocationNode(
 	m_type(type),
 	m_alloc_param(alloc_param)
 {
-	m_mask.resize(m_exchange.getAssetCount());
 }
 
 
@@ -47,8 +46,11 @@ AllocationNode::make(
 	double epsilon
 ) noexcept
 {
-	if (type == AllocationType::CONDITIONAL_SPLIT && !alloc_param) {
-		return Err("Conditional split allocation requires a parameter");
+	if (
+		type == AllocationType::CONDITIONAL_SPLIT
+		&& 
+		!alloc_param) {
+		return Err("Allocation type requires a parameter");
 	}
 
 	return std::make_unique<AllocationNode>(
@@ -72,13 +74,6 @@ AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
 	// evaluate the exchange view to calculate the signal
 	m_exchange_view->evaluate(target);
 
-	// generate the boolean mask for assets out of range
-	m_mask = (m_exchange.getTradeable().array() > static_cast<int>(getWarmup()));
-
-	// apply the mask to the signal by taking the element-wise product
-	assert(target.rows() == m_mask.rows());
-	target = target.array() * m_mask.cast<double>();
-
 	// calculate the number of non-NaN elements in the signal
 	size_t nonNanCount = (target.array() == target.array()).count();
 	size_t zeroCount = (target.array() == 0.0f).count();
@@ -87,7 +82,7 @@ AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
 	nonNanCount -= zeroCount;
 	double c;
 	if (nonNanCount > 0) {
-		c = (1.0 - m_epsilon) / nonNanCount;
+		c = (1.0 - m_epsilon) / static_cast<double>(nonNanCount);
 	} else {
 		c = 0.0;
 	}

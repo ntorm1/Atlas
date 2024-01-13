@@ -1,5 +1,9 @@
+#include <iostream>
+
+
 #include "helper.h"
 #include <Eigen/Dense>
+
 #pragma warning(suppress:5050)
 import HydraModule;
 import ExchangeModule;
@@ -36,7 +40,7 @@ protected:
 	std::string exchange_id = "test";
 	std::string portfolio_id = "test_p";
 	std::string strategy_id = "test_s";
-	double initial_cash = 1000.0f;
+	double initial_cash = 100.0f;
 	size_t asset_id_1;
 	size_t asset_id_2;
 
@@ -46,6 +50,25 @@ protected:
 		auto exchange = hydra->addExchange(exchange_id, exchange_path).value();
 		asset_id_1 = exchange->getAssetIndex("asset1").value();
 		asset_id_2 = exchange->getAssetIndex("asset2").value();
+		portfolio = hydra->addPortfolio(portfolio_id, *exchange, initial_cash).value();
+	}
+};
+
+
+class ComplexExchangeTests : public ::testing::Test
+{
+protected:
+	std::shared_ptr<Atlas::Hydra> hydra;
+	Atlas::Portfolio* portfolio;
+	std::string exchange_id = "test";
+	std::string portfolio_id = "test_p";
+	std::string strategy_id = "test_s";
+	double initial_cash = 100.0f;
+
+	void SetUp() override
+	{
+		hydra = std::make_shared<Hydra>();
+		auto exchange = hydra->addExchange(exchange_id, exchange_path_sp500).value();
 		portfolio = hydra->addPortfolio(portfolio_id, *exchange, initial_cash).value();
 	}
 };
@@ -164,8 +187,58 @@ TEST_F(SimpleExchangeTests, AllocSplitTest)
 	EXPECT_DOUBLE_EQ(tracer.getNLV(), initial_cash);
 	EXPECT_DOUBLE_EQ(strategy_ptr->getAllocation(asset_id_1), 0.0f);
 	EXPECT_DOUBLE_EQ(strategy_ptr->getAllocation(asset_id_2), -1.0f);
-	//hydra->step();
-	//double avg_return = -1.0 * (asset2_close[2] - asset2_close[1]) / asset2_close[1];
-	//double nlv = initial_cash * (1.0f + avg_return);
-	//EXPECT_DOUBLE_EQ(tracer.getNLV(), nlv);
+	hydra->step();
+	double avg_return = -1.0 * (asset2_close[2] - asset2_close[1]) / asset2_close[1];
+	double nlv = initial_cash * (1.0f + avg_return);
+	EXPECT_DOUBLE_EQ(tracer.getNLV(), nlv);
+	EXPECT_DOUBLE_EQ(strategy_ptr->getAllocation(asset_id_1), .5f);
+	EXPECT_DOUBLE_EQ(strategy_ptr->getAllocation(asset_id_2), -.5f);
+	hydra->step();
+	double asset_2_return2 = (asset2_close[3] - asset2_close[2]) / asset2_close[2];
+	double asset_1_return2 = (asset1_close[2] - asset1_close[1]) / asset1_close[1];
+	double avg_return2 = (-.5f * asset_2_return2) + (.5f * asset_1_return2);
+	nlv *= (1.0f + avg_return2);
+	EXPECT_DOUBLE_EQ(tracer.getNLV(), nlv);
+}
+
+
+TEST_F(ComplexExchangeTests, SimpleTest)
+{
+	auto now = std::chrono::system_clock::now();
+	hydra->build();
+	auto const exchange = hydra->getExchange("test").value();
+	auto read_close = AssetReadNode::make("close", 0, *exchange);
+	auto read_50_ma = AssetReadNode::make("50_ma", 0, *exchange);
+	auto daily_return = AssetDifferenceNode::make(
+		std::move(*read_close),
+		std::move(*read_50_ma)
+	);
+	auto op_variant = AssetOpNodeVariant(std::move(daily_return));
+	auto filter = ExchangeViewFilter(
+		ExchangeViewFilterType::GREATER_THAN, 0.0f
+	);
+	auto exchange_view = ExchangeViewNode::make(
+		*exchange, std::move(op_variant), filter
+	);
+	auto alloc = AllocationNode::make(std::move(exchange_view));
+	auto strategy_node = StrategyNode::make(std::move(*alloc), *portfolio);
+	auto strategy = std::make_unique<Strategy>(
+		strategy_id,
+		std::move(strategy_node),
+		1.0f
+	);
+	auto res = hydra->addStrategy(std::move(strategy));
+	hydra->run();
+	auto end = std::chrono::system_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - now);
+
+	auto strategy_ptr = res.value();
+	auto tracer = strategy_ptr->getTracer();
+	auto nlv = tracer.getNLV();
+	auto total_return = (nlv - initial_cash) / initial_cash;
+	double epsilon = abs(total_return - 1.1608);
+	EXPECT_TRUE(epsilon < 0.0005);
+	std::cerr << "Duration: " << duration.count() << "us" << std::endl;
+	std::cerr << "Total Return: " << total_return << std::endl;
+	std::cerr << "Epsilon: " << epsilon << std::endl;
 }

@@ -64,6 +64,29 @@ public:
 
 
 //============================================================================
+export enum class ExchangeViewFilterType
+{
+	GREATER_THAN=0,
+};
+
+
+//============================================================================
+export struct ExchangeViewFilter
+{
+	ExchangeViewFilterType type;
+	double value;
+	
+	ExchangeViewFilter() = delete;
+	ATLAS_API ~ExchangeViewFilter() noexcept = default;
+	ATLAS_API ExchangeViewFilter(
+		ExchangeViewFilterType type,
+		double value
+	)  noexcept :
+		type(type), value(value) {}
+};
+
+
+//============================================================================
 export class ExchangeViewNode
 	final
 	: public OpperationNode<void, Eigen::VectorXd&>
@@ -72,21 +95,24 @@ private:
 	Exchange& m_exchange;
 	AssetOpNodeVariant m_asset_op_node;
 	size_t m_warmup;
+	Option<ExchangeViewFilter> m_filter;
 public:
 
 	ATLAS_API ~ExchangeViewNode() noexcept;
 	ATLAS_API ExchangeViewNode(
 		Exchange& exchange,
-		AssetOpNodeVariant asset_op_node
+		AssetOpNodeVariant asset_op_node,
+		Option<ExchangeViewFilter> m_filter
 	) noexcept;
 
 	ATLAS_API  [[nodiscard]] static UniquePtr<ExchangeViewNode> make(
 		Exchange& exchange,
-		AssetOpNodeVariant asset_op_node
+		AssetOpNodeVariant asset_op_node,
+		Option<ExchangeViewFilter> m_filter = std::nullopt
 	) noexcept
 	{
 		return std::make_unique<ExchangeViewNode>(
-			exchange, std::move(asset_op_node)
+			exchange, std::move(asset_op_node), std::move(m_filter)
 		);
 	
 	}
@@ -94,7 +120,9 @@ public:
 	[[nodiscard]] AssetNodeType getType() const noexcept { return m_asset_op_node.t; }
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	[[nodiscard]] auto& getExchange() { return m_exchange; }
-	ATLAS_API  [[nodiscard]] void evaluate(Eigen::VectorXd&) noexcept override;
+	void filter(Eigen::VectorXd& v) const noexcept;
+
+	ATLAS_API  void evaluate(Eigen::VectorXd&) noexcept override;
 };
 
 

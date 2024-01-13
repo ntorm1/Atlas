@@ -35,7 +35,6 @@ private:
 	double m_epsilon;
 	AllocationType m_type;
 	Option<double> m_alloc_param;
-	Eigen::Array<bool, Eigen::Dynamic, 1> m_mask;
 
 public:
 	ATLAS_API ~AllocationNode() noexcept;
