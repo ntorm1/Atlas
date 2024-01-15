@@ -1,7 +1,6 @@
 module;
 #define NOMINMAX
 #include <Eigen/Dense>
-#include <iostream>
 module StrategyModule;
 
 import ExchangeModule;
@@ -32,10 +31,10 @@ public:
 		UniquePtr<AST::StrategyNode> ast,
 		double cash
 	) noexcept :
-		m_ast(std::move(ast)),
 		m_portfolio(ast->getPortfolio()),
 		m_exchange(ast->getExchange()),
-		m_tracer(m_exchange, cash)
+		m_tracer(m_exchange, cash),
+		m_ast(std::move(ast))
 	{
 		m_exchange.registerStrategy(strategy);
 		m_target_weights_buffer.resize(m_exchange.getAssetCount());
@@ -75,14 +74,14 @@ Strategy::~Strategy() noexcept
 double
 Strategy::getAllocation(size_t asset_index) const noexcept
 {
-	assert(asset_index < m_impl->m_target_weights_buffer.rows());
+	assert(asset_index < static_cast<size_t>(m_impl->m_target_weights_buffer.rows()));
 	return m_impl->m_target_weights_buffer[asset_index];
 }
 
 
 //============================================================================
 Tracer const&
-Strategy::getTracer() const noexcept
+	Strategy::getTracer() const noexcept
 {
 	return m_impl->m_tracer;
 }
@@ -90,11 +89,11 @@ Strategy::getTracer() const noexcept
 
 //============================================================================
 void
-Strategy::evaluate() noexcept
+	Strategy::evaluate() noexcept
 {
 	// get the current market returns
 	LinAlg::EigenConstColView market_returns = m_impl->m_exchange.getMarketReturns();
-	
+
 	// get the portfolio return by calculating the sum product of the market returns and the portfolio weights
 	assert(market_returns.rows() == m_impl->m_target_weights_buffer.rows());
 	assert(!market_returns.array().isNaN().any());
@@ -110,7 +109,7 @@ Strategy::evaluate() noexcept
 
 //============================================================================
 void
-Strategy::step() noexcept
+	Strategy::step() noexcept
 {
 	if (!m_step_call)
 	{
@@ -124,6 +123,17 @@ Strategy::step() noexcept
 	m_impl->m_ast->evaluate(m_impl->m_target_weights_buffer);
 	assert(!m_impl->m_target_weights_buffer.array().isNaN().any());
 
+	m_step_call = false;
+}
+
+
+//============================================================================
+void
+Strategy::reset() noexcept
+{
+	m_impl->m_tracer.reset();
+	m_impl->m_target_weights_buffer.setZero();
+	m_impl->m_adjustment_buffer.setZero();
 	m_step_call = false;
 }
 

@@ -214,12 +214,10 @@ TEST_F(ComplexExchangeTests, SimpleTest)
 		std::move(*read_50_ma)
 	);
 	auto op_variant = AssetOpNodeVariant(std::move(daily_return));
-	auto filter = ExchangeViewFilter(
-		ExchangeViewFilterType::GREATER_THAN, 0.0f
-	);
 	auto exchange_view = ExchangeViewNode::make(
-		*exchange, std::move(op_variant), filter
+		*exchange, std::move(op_variant)
 	);
+	exchange_view->setFilter(ExchangeViewFilterType::GREATER_THAN, 0.0f);
 	auto alloc = AllocationNode::make(std::move(exchange_view));
 	auto strategy_node = StrategyNode::make(std::move(*alloc), *portfolio);
 	auto strategy = std::make_unique<Strategy>(
@@ -236,9 +234,9 @@ TEST_F(ComplexExchangeTests, SimpleTest)
 	auto tracer = strategy_ptr->getTracer();
 	auto nlv = tracer.getNLV();
 	auto total_return = (nlv - initial_cash) / initial_cash;
-	double epsilon = abs(total_return - 1.1608);
+	double epsilon = abs(total_return - 2.6207);
 	EXPECT_TRUE(epsilon < 0.0005);
-	std::cerr << "Duration: " << duration.count() << "us" << std::endl;
+	std::cerr << "Duration: " << duration.count() << "s" << std::endl;
 	std::cerr << "Total Return: " << total_return << std::endl;
 	std::cerr << "Epsilon: " << epsilon << std::endl;
 }

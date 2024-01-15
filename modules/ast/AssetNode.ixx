@@ -38,11 +38,11 @@ public:
 		m_warmup(static_cast<size_t>(std::abs(m_row_offset))) {}
 
 	ATLAS_API static Result<UniquePtr<AssetReadNode>, AtlasException>
-	make(
-		String const& column,
-		int row_offset,
-		Exchange const& m_exchange
-	) noexcept;
+		make(
+			String const& column,
+			int row_offset,
+			Exchange const& m_exchange
+		) noexcept;
 
 	[[nodiscard]] size_t size() const noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
@@ -52,7 +52,7 @@ public:
 
 //============================================================================
 export template <typename NodeCwiseBinOp>
-class AssetOpNode
+	class AssetOpNode
 	:public ExpressionNode<LinAlg::EigenCwiseBinOp<NodeCwiseBinOp>>
 {
 private:
@@ -67,7 +67,7 @@ public:
 	AssetOpNode(
 		UniquePtr<AssetReadNode> asset_read_left,
 		UniquePtr<AssetReadNode> asset_read_right
-	) noexcept: 
+	) noexcept :
 		ExpressionNode<LinAlg::EigenCwiseBinOp<NodeCwiseBinOp>>(NodeType::ASSET_OP),
 		m_asset_read_left(std::move(asset_read_left)),
 		m_asset_read_right(std::move(asset_read_right))
@@ -110,13 +110,15 @@ public:
 
 	//============================================================================
 	[[nodiscard]] LinAlg::EigenCwiseBinOp<NodeCwiseBinOp>
-	evaluate() noexcept override
+		evaluate() noexcept override
 	{
 		auto left_view = m_asset_read_left->evaluate();
 		auto right_view = m_asset_read_right->evaluate();
+		assert(left_view.rows() == right_view.rows());
+		assert(left_view.cols() == right_view.cols());
 
 		// if template type is EigenCwiseProductOp, return left_view.cwiseProduct(right_view);
-		if constexpr (std::is_same_v<NodeCwiseBinOp,LinAlg::EigenCwiseProductOp>)
+		if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseProductOp>)
 		{
 			return left_view.cwiseProduct(right_view);
 		}
@@ -136,36 +138,36 @@ public:
 };
 
 
-//============================================================================
+	//============================================================================
 #define ASSET_OPERATION_NODE(NAME, OP_TYPE)                            \
 export class Asset##NAME##Node : public AssetOpNode<LinAlg::OP_TYPE>          \
 {                                                                      \
 public:                                                                \
-    Asset##NAME##Node(                                                \
-        UniquePtr<AssetReadNode> asset_read_left,                     \
-        UniquePtr<AssetReadNode> asset_read_right                    \
-        ) noexcept :                               \
-        AssetOpNode<LinAlg::OP_TYPE>(                                 \
-            std::move(asset_read_left),                               \
-            std::move(asset_read_right)                              \
-            )                                                   \
-    {}                                                                 \
-	ATLAS_API static UniquePtr<Asset##NAME##Node> make( \
-		UniquePtr<AssetReadNode> asset_read_left, \
-		UniquePtr<AssetReadNode> asset_read_right \
-	) noexcept \
-	{ \
-		return std::make_unique<Asset##NAME##Node>( \
-			std::move(asset_read_left), \
-			std::move(asset_read_right) \
-		); \
-	} \
+Asset##NAME##Node(                                                \
+    UniquePtr<AssetReadNode> asset_read_left,                     \
+    UniquePtr<AssetReadNode> asset_read_right                    \
+    ) noexcept :                               \
+    AssetOpNode<LinAlg::OP_TYPE>(                                 \
+        std::move(asset_read_left),                               \
+        std::move(asset_read_right)                              \
+        )                                                   \
+{}                                                                 \
+ATLAS_API static UniquePtr<Asset##NAME##Node> make( \
+	UniquePtr<AssetReadNode> asset_read_left, \
+	UniquePtr<AssetReadNode> asset_read_right \
+) noexcept \
+{ \
+	return std::make_unique<Asset##NAME##Node>( \
+		std::move(asset_read_left), \
+		std::move(asset_read_right) \
+	); \
+} \
 };
 
-ASSET_OPERATION_NODE(Product, EigenCwiseProductOp)
-ASSET_OPERATION_NODE(Quotient, EigenCwiseQuotientOp)
-ASSET_OPERATION_NODE(Sum, EigenCwiseSumOp)
-ASSET_OPERATION_NODE(Difference, EigenCwiseDifferenceOp)
+	ASSET_OPERATION_NODE(Product, EigenCwiseProductOp)
+		ASSET_OPERATION_NODE(Quotient, EigenCwiseQuotientOp)
+		ASSET_OPERATION_NODE(Sum, EigenCwiseSumOp)
+		ASSET_OPERATION_NODE(Difference, EigenCwiseDifferenceOp)
 
 
 

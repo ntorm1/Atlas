@@ -31,6 +31,7 @@ private:
 
 	void evaluate() noexcept;
 	void step() noexcept;
+	void reset() noexcept;
 	void setID(size_t id) noexcept { m_id = id; }
 
 public:

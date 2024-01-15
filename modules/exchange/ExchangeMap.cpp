@@ -32,6 +32,19 @@ ExchangeMap::build() noexcept
 
 
 //============================================================================
+void
+ExchangeMap::reset() noexcept
+{
+	m_impl->current_index = 0;
+	m_impl->global_time = 0;
+	for (auto& exchange: m_impl->exchanges)
+	{
+		exchange->reset();
+	}
+}
+
+
+//============================================================================
 Vector<Int64> const& ExchangeMap::getTimestamps() const noexcept
 {
 	return m_impl->timestamps;

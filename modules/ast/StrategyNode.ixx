@@ -44,13 +44,13 @@ public:
 		Option<double> alloc_param = std::nullopt,
 		double epsilon = 0.000f
 	) noexcept;
-	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationNode>,AtlasException>
-	make(
-		UniquePtr<ExchangeViewNode> exchange_view,
-		AllocationType type = AllocationType::UNIFORM,
-		Option<double> alloc_param = std::nullopt,
-		double epsilon = 0.000f
-	) noexcept;
+	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationNode>, AtlasException>
+		make(
+			UniquePtr<ExchangeViewNode> exchange_view,
+			AllocationType type = AllocationType::UNIFORM,
+			Option<double> alloc_param = std::nullopt,
+			double epsilon = 0.000f
+		) noexcept;
 
 
 	[[nodiscard]] double getAllocEpsilon() const noexcept { return m_epsilon; }
@@ -88,7 +88,7 @@ public:
 	[[nodiscard]] Portfolio& getPortfolio() const noexcept { return m_portfolio; }
 	[[nodiscard]] Exchange& getExchange() noexcept;
 	[[nodiscard]] double getAllocEpsilon() const noexcept;
-	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup;}
+	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 
 };
 

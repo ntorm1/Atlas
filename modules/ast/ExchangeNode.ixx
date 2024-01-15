@@ -46,13 +46,13 @@ public:
 	size_t warmup;
 	AssetNodeType  t;
 
-	public:
-		using node_variant = std::variant <
-			std::unique_ptr<AssetReadNode>,
-			std::unique_ptr<AssetProductNode>,
-			std::unique_ptr<AssetQuotientNode>,
-			std::unique_ptr<AssetSumNode>,
-			std::unique_ptr<AssetDifferenceNode>>;
+public:
+	using node_variant = std::variant <
+		std::unique_ptr<AssetReadNode>,
+		std::unique_ptr<AssetProductNode>,
+		std::unique_ptr<AssetQuotientNode>,
+		std::unique_ptr<AssetSumNode>,
+		std::unique_ptr<AssetDifferenceNode>>;
 	AssetOpNodeVariant() = delete;
 	ATLAS_API ~AssetOpNodeVariant() noexcept;
 	AssetOpNodeVariant(const AssetOpNodeVariant&) = delete;
@@ -66,7 +66,7 @@ public:
 //============================================================================
 export enum class ExchangeViewFilterType
 {
-	GREATER_THAN=0,
+	GREATER_THAN = 0,
 };
 
 
@@ -75,7 +75,7 @@ export struct ExchangeViewFilter
 {
 	ExchangeViewFilterType type;
 	double value;
-	
+
 	ExchangeViewFilter() = delete;
 	ATLAS_API ~ExchangeViewFilter() noexcept = default;
 	ATLAS_API ExchangeViewFilter(
@@ -95,26 +95,28 @@ private:
 	Exchange& m_exchange;
 	AssetOpNodeVariant m_asset_op_node;
 	size_t m_warmup;
-	Option<ExchangeViewFilter> m_filter;
+	Option<ExchangeViewFilter> m_filter = std::nullopt;
 public:
 
 	ATLAS_API ~ExchangeViewNode() noexcept;
 	ATLAS_API ExchangeViewNode(
 		Exchange& exchange,
-		AssetOpNodeVariant asset_op_node,
-		Option<ExchangeViewFilter> m_filter
+		AssetOpNodeVariant asset_op_node
 	) noexcept;
 
-	ATLAS_API  [[nodiscard]] static UniquePtr<ExchangeViewNode> make(
+	ATLAS_API [[nodiscard]] static UniquePtr<ExchangeViewNode> make(
 		Exchange& exchange,
-		AssetOpNodeVariant asset_op_node,
-		Option<ExchangeViewFilter> m_filter = std::nullopt
+		AssetOpNodeVariant asset_op_node
 	) noexcept
 	{
 		return std::make_unique<ExchangeViewNode>(
-			exchange, std::move(asset_op_node), std::move(m_filter)
+			exchange, std::move(asset_op_node)
 		);
-	
+
+	}
+	ATLAS_API void setFilter(ExchangeViewFilterType type, double value) noexcept
+	{
+		m_filter = ExchangeViewFilter(type, value);
 	}
 
 	[[nodiscard]] AssetNodeType getType() const noexcept { return m_asset_op_node.t; }

@@ -15,6 +15,7 @@ export enum class NodeType
 	EXCHANGE_VIEW = 2,
 	ALLOC = 3,
 	STRATEGY = 4,
+	STRATEGY_RUNNER = 5,
 };
 
 

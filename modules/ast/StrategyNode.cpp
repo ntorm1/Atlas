@@ -26,7 +26,7 @@ AllocationNode::AllocationNode(
 	AllocationType type,
 	Option<double> alloc_param,
 	double epsilon
-) noexcept:
+) noexcept :
 	OpperationNode<void, Eigen::VectorXd&>(NodeType::ALLOC),
 	m_exchange_view(std::move(exchange_view)),
 	m_epsilon(epsilon),
@@ -39,16 +39,16 @@ AllocationNode::AllocationNode(
 
 //============================================================================
 Result<UniquePtr<AllocationNode>, AtlasException>
-AllocationNode::make(
-	UniquePtr<ExchangeViewNode> exchange_view,
-	AllocationType type,
-	Option<double> alloc_param,
-	double epsilon
-) noexcept
+	AllocationNode::make(
+		UniquePtr<ExchangeViewNode> exchange_view,
+		AllocationType type,
+		Option<double> alloc_param,
+		double epsilon
+	) noexcept
 {
 	if (
 		type == AllocationType::CONDITIONAL_SPLIT
-		&& 
+		&&
 		!alloc_param) {
 		return Err("Allocation type requires a parameter");
 	}
@@ -61,7 +61,7 @@ AllocationNode::make(
 
 //============================================================================
 Exchange&
-AllocationNode::getExchange() noexcept
+	AllocationNode::getExchange() noexcept
 {
 	return m_exchange;
 }
@@ -69,13 +69,13 @@ AllocationNode::getExchange() noexcept
 
 //============================================================================
 void
-AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
+	AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
 {
 	// evaluate the exchange view to calculate the signal
 	m_exchange_view->evaluate(target);
 
 	// calculate the number of non-NaN elements in the signal
-	size_t nonNanCount = (target.array() == target.array()).count();
+	size_t nonNanCount = (target.array().isNaN() == false).count();
 	size_t zeroCount = (target.array() == 0.0f).count();
 
 	// subtract the out of range assets from the count
@@ -83,29 +83,30 @@ AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
 	double c;
 	if (nonNanCount > 0) {
 		c = (1.0 - m_epsilon) / static_cast<double>(nonNanCount);
-	} else {
+	}
+	else {
 		c = 0.0;
 	}
 
 	switch (m_type) {
-		case AllocationType::UNIFORM: {
-			target = target.unaryExpr([c](double x) { return x == x ? c : 0.0; });
-			break;
-		}
-		case AllocationType::CONDITIONAL_SPLIT: {
-			target = (target.array() < *m_alloc_param)
-				.select(-c, (target.array() > *m_alloc_param)
+	case AllocationType::UNIFORM: {
+		target = target.unaryExpr([c](double x) { return x == x ? c : 0.0; });
+		break;
+	}
+	case AllocationType::CONDITIONAL_SPLIT: {
+		target = (target.array() < *m_alloc_param)
+			.select(-c, (target.array() > *m_alloc_param)
 				.select(c, target));
-			target = target.unaryExpr([](double x) { return x == x ? x : 0.0; });
-			break;
-		}
+		target = target.unaryExpr([](double x) { return x == x ? x : 0.0; });
+		break;
+	}
 	}
 }
 
 
 //============================================================================
 size_t
-AllocationNode::getWarmup() const noexcept
+	AllocationNode::getWarmup() const noexcept
 {
 	return m_exchange_view->getWarmup();
 }
@@ -132,7 +133,7 @@ StrategyNode::~StrategyNode() noexcept
 
 //============================================================================
 void
-StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
+	StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
 {
 	return m_allocation->evaluate(target);
 }
@@ -140,7 +141,7 @@ StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
 
 //============================================================================s
 Exchange&
-StrategyNode::getExchange() noexcept
+	StrategyNode::getExchange() noexcept
 {
 	return m_allocation->getExchange();
 }
@@ -148,7 +149,7 @@ StrategyNode::getExchange() noexcept
 
 //============================================================================
 double
-StrategyNode::getAllocEpsilon() const noexcept
+	StrategyNode::getAllocEpsilon() const noexcept
 {
 	return m_allocation->getAllocEpsilon();
 }

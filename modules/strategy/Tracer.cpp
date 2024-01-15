@@ -66,5 +66,15 @@ void Tracer::evaluate(bool is_reprice) noexcept
 }
 
 
+//============================================================================
+void
+Tracer::reset() noexcept
+{
+    m_cash = m_initial_cash;
+	m_nlv = m_initial_cash;
+	m_data.setZero();
+}
+
+
 
 }

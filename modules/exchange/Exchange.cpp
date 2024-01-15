@@ -205,6 +205,19 @@ Exchange::build() noexcept
 
 //============================================================================
 void
+Exchange::reset() noexcept
+{
+	m_impl->current_index = 0;
+	m_impl->current_timestamp = 0;
+	for (auto& strategy : m_impl->registered_strategies)
+	{
+		strategy->m_step_call = false;
+	}
+}
+
+
+//============================================================================
+void
 Exchange::step(Int64 global_time) noexcept
 {
 	if (m_impl->current_index >= m_impl->timestamps.size())
@@ -223,9 +236,7 @@ Exchange::step(Int64 global_time) noexcept
 	{
 		strategy->m_step_call = true;
 	}
-
 	m_impl->current_index++;
-
 }
 
 

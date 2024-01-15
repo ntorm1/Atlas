@@ -41,6 +41,7 @@ private:
 	size_t getTracerCount() const noexcept;
 
 	void evaluate(bool is_reprice) noexcept;
+	void reset() noexcept;
 
 	Eigen::MatrixXd& getTracerData() noexcept { return m_data; }
 

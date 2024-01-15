@@ -33,6 +33,7 @@ private:
 	[[nodiscard]] Result<bool,AtlasException> validate() noexcept;
 	[[nodiscard]] Result<bool,AtlasException> build() noexcept;
 
+	void reset() noexcept;
 	void step(Int64 global_time) noexcept;
 
 	EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;

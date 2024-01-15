@@ -21,6 +21,9 @@ private:
 	UniquePtr<ExchangeMapImpl> m_impl;
 
 	void build() noexcept;
+	void reset() noexcept;
+	void step() noexcept;
+
 	Vector<Int64> const& getTimestamps() const noexcept;
 
 	Result<Exchange*, AtlasException> addExchange(
@@ -32,7 +35,6 @@ private:
 		String const& name
 	) const noexcept;
 
-	void step() noexcept;
 
 public:
 	ExchangeMap() noexcept;

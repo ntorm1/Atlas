@@ -128,4 +128,21 @@ Hydra::run() noexcept
 }
 
 
+//============================================================================
+Result<bool, AtlasException>
+Hydra::reset() noexcept
+{
+	if (m_state == HydraState::INIT)
+	{
+		return Err("Hydra can not be in init state to reset");
+	}
+	m_impl->m_exchange_map.reset();
+	for (auto& strategy : m_impl->m_strategies)
+	{
+		strategy->reset();
+	}
+	return true;
+}
+
+
 }
