@@ -75,11 +75,7 @@ void
 	m_exchange_view->evaluate(target);
 
 	// calculate the number of non-NaN elements in the signal
-	size_t nonNanCount = (target.array().isNaN() == false).count();
-	size_t zeroCount = (target.array() == 0.0f).count();
-
-	// subtract the out of range assets from the count
-	nonNanCount -= zeroCount;
+	size_t nonNanCount = (target.array() == target.array()).count();
 	double c;
 	if (nonNanCount > 0) {
 		c = (1.0 - m_epsilon) / static_cast<double>(nonNanCount);

@@ -53,9 +53,9 @@ public:
 	void registerStrategy(Strategy* strategy) noexcept;
 	auto const& get_name() const noexcept{return m_name;}
 	size_t currentIdx() const noexcept;
-	EigenConstColView<int> getTradeable() const noexcept;
 	EigenConstColView<double> getMarketReturns() const noexcept;
 	Option<size_t> getColumnIndex(String const& column) const noexcept;
+	size_t getNullCount(int row_offset) const noexcept;
 
 	// ======= PUBLIC API ======= //
 	ATLAS_API Option<size_t> getAssetIndex(String const& asset) const noexcept;

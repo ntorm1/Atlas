@@ -39,7 +39,7 @@ export struct ExchangeImpl
 	Int64 current_timestamp = 0;
 	Eigen::MatrixXd data;
 	Eigen::MatrixXd returns;
-	Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> tradeable;
+	Eigen::VectorXi null_count;
 	size_t col_count = 0;
 	size_t close_index = 0;
 	size_t current_index = 0;

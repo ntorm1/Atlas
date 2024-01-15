@@ -119,12 +119,9 @@ Exchange::build() noexcept
 		m_impl->assets.size(),
 		m_impl->timestamps.size()
 	);
-	// store integer flags for count of tradeable history for each asset at each timestamp
-	m_impl->tradeable.resize(
-		m_impl->assets.size(),
-		m_impl->timestamps.size()
-	);
-
+	// store nan counts for fast access at sim time
+	m_impl->null_count.resize(m_impl->timestamps.size());
+	m_impl->null_count.setZero();
 
 	for (auto const& asset : m_impl->assets)
 	{
@@ -149,17 +146,11 @@ Exchange::build() noexcept
 				{
 					m_impl->data(asset_id, exchange_index * m_impl->headers.size() + i) = NAN_DOUBLE;
 				}
+
 				// fill returns matrix with 0
 				m_impl->returns(asset_id, exchange_index) = 0;
-				// fill tradeable matrix with 0 if first timestamp, else copy previous value
-				if (exchange_index == 0)
-				{
-					m_impl->tradeable(asset_id, exchange_index) = 0;
-				}
-				else
-				{
-					m_impl->tradeable(asset_id, exchange_index) = m_impl->tradeable(asset_id, exchange_index - 1);
-				}
+				// update null count
+				m_impl->null_count(exchange_index) += 1;
 			}
 			else 
 			{
@@ -185,16 +176,6 @@ Exchange::build() noexcept
 					m_impl->returns(asset_id, exchange_index) = ret;
 				}
 				asset_index++;
-
-				// update tradeable matrix
-				if (exchange_index == 0)
-				{
-					m_impl->tradeable(asset_id, exchange_index) = 1;
-				}
-				else
-				{
-					m_impl->tradeable(asset_id, exchange_index) = m_impl->tradeable(asset_id, exchange_index - 1) + 1;
-				}
 			}
 		}
 	}
@@ -278,13 +259,6 @@ Exchange::currentIdx() const noexcept
 
 
 //============================================================================
-EigenConstColView<int> Exchange::getTradeable() const noexcept
-{
-	return m_impl->tradeable.col(m_impl->current_index - 1);
-}
-
-
-//============================================================================
 EigenConstColView<double>
 Exchange::getMarketReturns() const noexcept
 {
@@ -301,6 +275,17 @@ Exchange::getColumnIndex(String const& column) const noexcept
 		return std::nullopt;
 	}
 	return m_impl->headers[column];
+}
+
+
+//============================================================================
+size_t
+Exchange::getNullCount(int row_offset) const noexcept
+{
+	size_t idx = ((m_impl->current_index - 1) 
+		- (static_cast<size_t>(abs(row_offset))));
+	assert(idx < static_cast<size_t>(m_impl->null_count.size()));
+	return m_impl->null_count(idx);
 }
 
 

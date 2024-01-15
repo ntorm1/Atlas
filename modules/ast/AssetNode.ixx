@@ -27,6 +27,7 @@ private:
 	size_t m_column;
 	int m_row_offset;
 	size_t m_warmup;
+	size_t m_null_count = 0;
 	Exchange const& m_exchange;
 
 public:
@@ -43,7 +44,9 @@ public:
 			int row_offset,
 			Exchange const& m_exchange
 		) noexcept;
-
+	
+	[[nodiscard]] int getRowOffset() const noexcept { return m_row_offset; }
+	[[nodiscard]] size_t getNullCount() const noexcept { return m_null_count; }
 	[[nodiscard]] size_t size() const noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	ATLAS_API [[nodiscard]] LinAlg::EigenConstColView<double> evaluate() noexcept override;
@@ -106,6 +109,14 @@ public:
 	[[nodiscard]] size_t getWarmup() const noexcept override
 	{
 		return warmup;
+	}
+
+	[[nodiscard]] size_t getNullCount() const noexcept
+	{
+		return std::max(
+			m_asset_read_left->getNullCount(),
+			m_asset_read_right->getNullCount()
+		);
 	}
 
 	//============================================================================
