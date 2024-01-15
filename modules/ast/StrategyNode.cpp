@@ -75,7 +75,7 @@ void
 	m_exchange_view->evaluate(target);
 
 	// calculate the number of non-NaN elements in the signal
-	size_t nonNanCount = (target.array() == target.array()).count();
+	size_t nonNanCount = target.unaryExpr([](double x) { return !std::isnan(x) ? 1 : 0; }).sum();
 	double c;
 	if (nonNanCount > 0) {
 		c = (1.0 - m_epsilon) / static_cast<double>(nonNanCount);
