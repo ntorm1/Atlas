@@ -22,7 +22,6 @@ size_t
 LinAlg::EigenConstColView<double>
 	AssetReadNode::evaluate() noexcept
 {
-	m_null_count = m_exchange.getNullCount(m_row_offset);
 	return m_exchange.getSlice(m_column, m_row_offset);
 }
 

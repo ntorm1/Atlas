@@ -106,13 +106,14 @@ Hydra::step() noexcept
 {
 	assert(m_state == HydraState::BUILT || m_state == HydraState::RUNING);
 	m_impl->m_exchange_map.step();
-
-	for (auto& strategy : m_impl->m_strategies)
+	
+	for (int i = 0; i < m_impl->m_strategies.size(); i++)
 	{
-		strategy->evaluate();
-		strategy->step();
+		m_impl->m_strategies[i]->evaluate();
+		m_impl->m_strategies[i]->step();
 	}
 }
+
 
 
 //============================================================================

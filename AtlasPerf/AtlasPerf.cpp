@@ -29,6 +29,7 @@ double initial_cash = 100.0f;
 auto exchange = hydra->addExchange(exchange_id, exchange_path_sp500).value();
 auto portfolio = hydra->addPortfolio(portfolio_id, *exchange, initial_cash).value();
 
+
 int main()
 {
 	hydra->build();
