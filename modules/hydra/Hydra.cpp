@@ -39,7 +39,17 @@ Hydra::~Hydra() noexcept
 Result<SharedPtr<Exchange>, AtlasException>
 Hydra::addExchange(String name, String source) noexcept
 {
-	return m_impl->m_exchange_map.addExchange(std::move(name), std::move(source));
+	if (m_state != HydraState::INIT && m_state != HydraState::BUILT)
+	{
+		return Err("Hydra must be in init state to add exchange");
+	}
+	auto res = m_impl->m_exchange_map.addExchange(std::move(name), std::move(source));
+	if (!res)
+	{
+		return res;
+	}
+	m_state = HydraState::INIT;
+	return res;
 }
 
 
@@ -55,9 +65,9 @@ Hydra::getExchange(String const& name) const noexcept
 Result<Strategy const*, AtlasException>
 Hydra::addStrategy(SharedPtr<Strategy> strategy) noexcept
 {
-	if (m_state == HydraState::RUNING)
+	if (m_state != HydraState::BUILT)
 	{
-		return Err("Hydra can not be in running to add strategy");
+		return Err("Hydra must be in build state to add strategy");
 	}
 	if (m_impl->m_strategy_map.contains(strategy->getName()))
 	{
@@ -120,12 +130,17 @@ Hydra::step() noexcept
 void
 Hydra::run() noexcept
 {
-	assert(m_state == HydraState::BUILT);
+	assert(m_state == HydraState::BUILT || m_state == HydraState::FINISHED);
+	if (m_state == HydraState::FINISHED)
+	{
+		assert(reset());
+	}
 	size_t steps = m_impl->m_exchange_map.getTimestamps().size();
 	for (size_t i = 0; i < steps; ++i)
 	{
 		step();
 	}
+	m_state = HydraState::FINISHED;
 }
 
 
@@ -142,6 +157,7 @@ Hydra::reset() noexcept
 	{
 		strategy->reset();
 	}
+	m_state = HydraState::BUILT;
 	return true;
 }
 
