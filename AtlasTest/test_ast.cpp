@@ -36,7 +36,7 @@ class SimpleExchangeTests : public ::testing::Test
 {
 protected:
 	std::shared_ptr<Atlas::Hydra> hydra;
-	Atlas::Portfolio* portfolio;
+	std::shared_ptr<Atlas::Portfolio> portfolio;
 	std::string exchange_id = "test";
 	std::string portfolio_id = "test_p";
 	std::string strategy_id = "test_s";
@@ -59,7 +59,7 @@ class ComplexExchangeTests : public ::testing::Test
 {
 protected:
 	std::shared_ptr<Atlas::Hydra> hydra;
-	Atlas::Portfolio* portfolio;
+	std::shared_ptr<Atlas::Portfolio> portfolio;
 	std::string exchange_id = "test";
 	std::string portfolio_id = "test_p";
 	std::string strategy_id = "test_s";

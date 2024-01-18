@@ -27,6 +27,19 @@ LinAlg::EigenConstColView<double>
 
 
 //============================================================================
+SharedPtr<AssetReadNode>
+AssetReadNode::pyMake(String const& column, int row_offset, SharedPtr<Exchange> exchange)
+{
+	auto node = make(column, row_offset, *exchange);
+	if (!node)
+	{
+		throw std::exception(node.error().what());
+	}
+	return std::move(*node);
+}
+
+
+//============================================================================
 Result<UniquePtr<AssetReadNode>, AtlasException>
 	AssetReadNode::make(
 		String const& column,

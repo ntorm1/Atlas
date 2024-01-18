@@ -12,7 +12,7 @@ namespace Atlas
 struct ExchangeMapImpl
 {
 	HashMap<String, size_t> exchange_id_map;
-	Vector<UniquePtr<Exchange>> exchanges;
+	Vector<SharedPtr<Exchange>> exchanges;
 	Vector<Int64> timestamps;
 	Int64 global_time;
 	size_t current_index = 0;
@@ -65,7 +65,7 @@ ExchangeMap::~ExchangeMap() noexcept
 
 
 //============================================================================
-Result<Exchange*, AtlasException>
+Result<SharedPtr<Exchange>, AtlasException>
 ExchangeMap::addExchange(String name, String source) noexcept
 {
 	EXPECT_FALSE(
@@ -82,7 +82,7 @@ ExchangeMap::addExchange(String name, String source) noexcept
 	EXPECT_TRUE(res_build, exchange->build());
 	SAFE_MAP_INSERT(m_impl->exchange_id_map, exchange->get_name(), m_impl->exchanges.size());
 	m_impl->exchanges.push_back(std::move(exchange));
-	return m_impl->exchanges.back().get();
+	return m_impl->exchanges.back();
 }
 
 

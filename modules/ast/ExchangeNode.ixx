@@ -37,27 +37,27 @@ export enum class AssetNodeType {
 export class AssetOpNodeVariant {
 public:
 	std::variant<
-		std::unique_ptr<AssetReadNode>,
-		std::unique_ptr<AssetProductNode>,
-		std::unique_ptr<AssetQuotientNode>,
-		std::unique_ptr<AssetSumNode>,
-		std::unique_ptr<AssetDifferenceNode>
+		SharedPtr<AssetReadNode>,
+		SharedPtr<AssetProductNode>,
+		SharedPtr<AssetQuotientNode>,
+		SharedPtr<AssetSumNode>,
+		SharedPtr<AssetDifferenceNode>
 	> value;
 	size_t warmup;
 	AssetNodeType  t;
 
 public:
 	using node_variant = std::variant <
-		std::unique_ptr<AssetReadNode>,
-		std::unique_ptr<AssetProductNode>,
-		std::unique_ptr<AssetQuotientNode>,
-		std::unique_ptr<AssetSumNode>,
-		std::unique_ptr<AssetDifferenceNode>>;
+		SharedPtr<AssetReadNode>,
+		SharedPtr<AssetProductNode>,
+		SharedPtr<AssetQuotientNode>,
+		SharedPtr<AssetSumNode>,
+		SharedPtr<AssetDifferenceNode>>;
 	AssetOpNodeVariant() = delete;
 	ATLAS_API ~AssetOpNodeVariant() noexcept;
-	AssetOpNodeVariant(const AssetOpNodeVariant&) = delete;
+	AssetOpNodeVariant(const AssetOpNodeVariant&) = default;
 	AssetOpNodeVariant(AssetOpNodeVariant&&) = default;
-	AssetOpNodeVariant& operator=(const AssetOpNodeVariant&) = delete;
+	AssetOpNodeVariant& operator=(const AssetOpNodeVariant&) = default;
 	AssetOpNodeVariant& operator=(AssetOpNodeVariant&&) = default;
 	ATLAS_API AssetOpNodeVariant(node_variant node) noexcept;
 };
@@ -103,6 +103,11 @@ public:
 		Exchange& exchange,
 		AssetOpNodeVariant asset_op_node
 	) noexcept;
+	ATLAS_API ExchangeViewNode(
+		SharedPtr<Exchange> exchange,
+		AssetOpNodeVariant asset_op_node
+	) noexcept:
+		ExchangeViewNode(*exchange, std::move(asset_op_node)) {}
 
 	ATLAS_API [[nodiscard]] static UniquePtr<ExchangeViewNode> make(
 		Exchange& exchange,

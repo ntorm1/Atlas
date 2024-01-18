@@ -1,6 +1,7 @@
 module;
 #include <cassert>
 #include "AtlasMacros.hpp"
+#include <stdexcept>
 module HydraModule;
 
 import ExchangeMapModule;
@@ -14,8 +15,8 @@ namespace Atlas
 struct HydraImpl
 {
 	ExchangeMap m_exchange_map;
-	Vector<UniquePtr<Strategy>> m_strategies;
-	Vector<UniquePtr<Portfolio>> m_portfolios;
+	Vector<SharedPtr<Strategy>> m_strategies;
+	Vector<SharedPtr<Portfolio>> m_portfolios;
 	HashMap<String, size_t> m_strategy_map;
 	HashMap<String, size_t> m_portfolio_map;
 };
@@ -35,7 +36,7 @@ Hydra::~Hydra() noexcept
 
 
 //============================================================================
-Result<Exchange*, AtlasException>
+Result<SharedPtr<Exchange>, AtlasException>
 Hydra::addExchange(String name, String source) noexcept
 {
 	return m_impl->m_exchange_map.addExchange(std::move(name), std::move(source));
@@ -52,7 +53,7 @@ Hydra::getExchange(String const& name) const noexcept
 
 //============================================================================
 Result<Strategy const*, AtlasException>
-Hydra::addStrategy(UniquePtr<Strategy> strategy) noexcept
+Hydra::addStrategy(SharedPtr<Strategy> strategy) noexcept
 {
 	if (m_state == HydraState::RUNING)
 	{
@@ -69,7 +70,7 @@ Hydra::addStrategy(UniquePtr<Strategy> strategy) noexcept
 
 
 //============================================================================
-Result<Portfolio*, AtlasException>
+Result<SharedPtr<Portfolio>, AtlasException>
 Hydra::addPortfolio(String name, Exchange& exchange, double initial_cash) noexcept
 {
 	if (m_state != HydraState::INIT)
@@ -80,13 +81,12 @@ Hydra::addPortfolio(String name, Exchange& exchange, double initial_cash) noexce
 	{
 		return Err("Portfolio with name " + name + " already exists");
 	}
-	auto portfolio = std::make_unique<Portfolio>(
+	auto portfolio = std::make_shared<Portfolio>(
 		std::move(name), m_impl->m_portfolio_map.size(), exchange, initial_cash
 	);	
-	auto result = portfolio.get();
-	m_impl->m_portfolios.push_back(std::move(portfolio));
-	m_impl->m_portfolio_map[result->getName()] = result->getId();
-	return result;
+	m_impl->m_portfolios.push_back(portfolio);
+	m_impl->m_portfolio_map[portfolio->getName()] = portfolio->getId();
+	return portfolio;
 }
 
 
@@ -143,6 +143,68 @@ Hydra::reset() noexcept
 		strategy->reset();
 	}
 	return true;
+}
+
+
+//============================================================================
+SharedPtr<Exchange>
+Hydra::pyAddExchange(String name, String source)
+{
+	auto res = addExchange(std::move(name), std::move(source));
+	if (!res)
+	{
+		throw std::exception(res.error().what());
+	}
+	return *res;
+}
+
+
+//============================================================================
+SharedPtr<Portfolio>
+Hydra::pyAddPortfolio(String name, SharedPtr<Exchange> exchange, double intial_cash)
+{
+	auto res = addPortfolio(std::move(name), *(exchange.get()), intial_cash);
+	if (!res)
+	{
+		throw std::exception(res.error().what());
+	}
+	return *res;
+}
+
+
+//============================================================================
+SharedPtr<Strategy>
+Hydra::pyAddStrategy(SharedPtr<Strategy> strategy)
+{
+	auto res = addStrategy(std::move(strategy));
+	if (!res)
+	{
+		throw std::exception(res.error().what());
+	}
+	return m_impl->m_strategies.back();
+}
+
+
+//============================================================================
+void
+Hydra::pyBuild()
+{
+	auto res = build();
+	if (!res)
+	{
+		throw std::exception(res.error().what());
+	}
+}
+
+
+//============================================================================
+void Hydra::pyReset()
+{
+	auto res = reset();
+	if (!res)
+	{
+		throw std::exception(res.error().what());
+	}
 }
 
 

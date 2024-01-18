@@ -22,7 +22,7 @@ AllocationNode::~AllocationNode() noexcept
 
 //============================================================================
 AllocationNode::AllocationNode(
-	UniquePtr<ExchangeViewNode> exchange_view,
+	SharedPtr<ExchangeViewNode> exchange_view,
 	AllocationType type,
 	Option<double> alloc_param,
 	double epsilon
@@ -38,9 +38,9 @@ AllocationNode::AllocationNode(
 
 
 //============================================================================
-Result<UniquePtr<AllocationNode>, AtlasException>
-	AllocationNode::make(
-		UniquePtr<ExchangeViewNode> exchange_view,
+Result<SharedPtr<AllocationNode>, AtlasException>
+AllocationNode::make(
+		SharedPtr<ExchangeViewNode> exchange_view,
 		AllocationType type,
 		Option<double> alloc_param,
 		double epsilon
@@ -69,7 +69,7 @@ Exchange&
 
 //============================================================================
 void
-	AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
+AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
 {
 	// evaluate the exchange view to calculate the signal
 	m_exchange_view->evaluate(target);
@@ -110,7 +110,7 @@ size_t
 
 //============================================================================
 StrategyNode::StrategyNode(
-	UniquePtr<AllocationNode> allocation,
+	SharedPtr<AllocationNode> allocation,
 	Portfolio& portfolio
 ) noexcept :
 	OpperationNode<void, Eigen::VectorXd&>(NodeType::STRATEGY),

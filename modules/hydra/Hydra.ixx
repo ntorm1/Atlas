@@ -33,41 +33,41 @@ public:
 
 
 	// ======= PUBLIC API ======= //
-	//============================================================================
-	ATLAS_API Result<Exchange*, AtlasException> addExchange(
+	ATLAS_API Result<SharedPtr<Exchange>, AtlasException> addExchange(
 		String name,
 		String source
 	) noexcept;
-
-	//============================================================================
 	ATLAS_API Result<Exchange*, AtlasException> getExchange(
 		String const& name
 	) const noexcept;
-
-	//============================================================================
 	ATLAS_API Result<Strategy const*, AtlasException> addStrategy(
-		UniquePtr<Strategy> strategy
+		SharedPtr<Strategy> strategy
 	) noexcept;
-
-	//============================================================================
-	ATLAS_API Result<Portfolio*, AtlasException> addPortfolio(
+	ATLAS_API Result<SharedPtr<Portfolio>, AtlasException> addPortfolio(
 		String name,
 		Exchange& exchange,
 		double initial_cash
 	) noexcept;
-
-	//============================================================================
 	ATLAS_API Result<bool, AtlasException> build();
-
-	//============================================================================
 	ATLAS_API void step() noexcept;
-
-	//============================================================================
 	ATLAS_API void run() noexcept;
-
-	//============================================================================
 	ATLAS_API Result<bool, AtlasException> reset() noexcept;
 
+	// ======= PYTHON API ======= //
+	ATLAS_API SharedPtr<Exchange> pyAddExchange(
+		String name,
+		String source
+	);
+	ATLAS_API SharedPtr<Portfolio> pyAddPortfolio(
+		String name,
+		SharedPtr<Exchange> exchange,
+		double initial_cash
+	);
+	ATLAS_API SharedPtr<Strategy> pyAddStrategy(
+		SharedPtr<Strategy> strategy
+	);
+	ATLAS_API void pyBuild();
+	ATLAS_API void pyReset();
 };
 
 

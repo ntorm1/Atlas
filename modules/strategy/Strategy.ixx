@@ -37,7 +37,7 @@ private:
 public:
 	ATLAS_API Strategy(
 		String name,
-		UniquePtr<AST::StrategyNode> ast,
+		SharedPtr<AST::StrategyNode> ast,
 		double portfolio_weight
 	) noexcept;
 	ATLAS_API ~Strategy() noexcept;
@@ -46,6 +46,8 @@ public:
 	ATLAS_API Tracer const& getTracer() const noexcept;
 	ATLAS_API auto const& getName() const noexcept { return m_name; }
 	ATLAS_API auto const& getId() const noexcept { return m_id; }
+	ATLAS_API double getNLV() const noexcept;
+
 
 };
 

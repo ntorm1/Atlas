@@ -26,7 +26,7 @@ private:
 
 	Vector<Int64> const& getTimestamps() const noexcept;
 
-	Result<Exchange*, AtlasException> addExchange(
+	Result<SharedPtr<Exchange>, AtlasException> addExchange(
 		String name,
 		String source
 	) noexcept;

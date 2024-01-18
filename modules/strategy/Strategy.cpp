@@ -23,12 +23,12 @@ public:
 	Tracer m_tracer;
 	Eigen::VectorXd m_target_weights_buffer;
 	Eigen::VectorXd m_adjustment_buffer;
-	UniquePtr<AST::StrategyNode> m_ast;
+	SharedPtr<AST::StrategyNode> m_ast;
 	double m_alloc_epsilon = 0.0;
 
 	StrategyImpl(
 		Strategy* strategy,
-		UniquePtr<AST::StrategyNode> ast,
+		SharedPtr<AST::StrategyNode> ast,
 		double cash
 	) noexcept :
 		m_portfolio(ast->getPortfolio()),
@@ -50,7 +50,7 @@ public:
 //============================================================================
 Strategy::Strategy(
 	String name,
-	UniquePtr<AST::StrategyNode> ast,
+	SharedPtr<AST::StrategyNode> ast,
 	double portfolio_weight
 ) noexcept
 {
@@ -84,6 +84,14 @@ Tracer const&
 	Strategy::getTracer() const noexcept
 {
 	return m_impl->m_tracer;
+}
+
+
+//============================================================================
+double
+Strategy::getNLV() const noexcept
+{
+	return m_impl->m_tracer.getNLV();
 }
 
 
