@@ -1,9 +1,11 @@
 module;
 #include <Eigen/Dense>
+#include <chrono>
 #include "AtlasMacros.hpp"
 module HelperNodesModule;
 
 import ExchangeModule;
+import StrategyModule;
 
 namespace Atlas
 {
@@ -33,9 +35,9 @@ static int getMonthFromEpoch(int64_t epoch) noexcept
 
 //============================================================================
 StrategyMonthlyRunnerNode::StrategyMonthlyRunnerNode(
-	Exchange const& exchange
+	Strategy const& strategy
 ) noexcept: 
-	StrategyRunnerNode(exchange)
+	TriggerNode(strategy.getExchange())
 {
 }
 
@@ -77,10 +79,10 @@ StrategyMonthlyRunnerNode::evaluate() noexcept
 
 
 //============================================================================
-Result<UniquePtr<StrategyRunnerNode>, AtlasException>
-StrategyMonthlyRunnerNode::make(Exchange const& exchange) noexcept
+Result<UniquePtr<TriggerNode>, AtlasException>
+StrategyMonthlyRunnerNode::make(Strategy const& strategy) noexcept
 {
-	auto node = std::make_unique<StrategyMonthlyRunnerNode>(exchange);
+	auto node = std::make_unique<StrategyMonthlyRunnerNode>(strategy);
 	auto result = node->build();
 	if (!result)
 	{

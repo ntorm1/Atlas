@@ -66,6 +66,7 @@ export class StrategyNode final : OpperationNode<void, Eigen::VectorXd&>
 {
 private:
 	SharedPtr<AllocationNode> m_allocation;
+	Option<SharedPtr<TriggerNode>> m_trigger;
 	Portfolio& m_portfolio;
 	size_t m_warmup;
 public:

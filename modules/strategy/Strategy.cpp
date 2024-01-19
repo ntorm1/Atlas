@@ -96,6 +96,14 @@ Strategy::getNLV() const noexcept
 
 
 //============================================================================
+Exchange const&
+Strategy::getExchange() const noexcept
+{
+	return m_impl->m_exchange;
+}
+
+
+//============================================================================
 void
 	Strategy::evaluate() noexcept
 {

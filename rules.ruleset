@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="rules" ToolsVersion="17.0">
-  <Include Path="allrules.ruleset" Action="Default" />
-</RuleSet>

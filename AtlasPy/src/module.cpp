@@ -20,8 +20,6 @@ namespace py = pybind11;
 
 
 
-
-
 PYBIND11_MODULE(AtlasPy, m) {
     auto m_core = m.def_submodule("core");
     auto m_ast = m.def_submodule("ast");

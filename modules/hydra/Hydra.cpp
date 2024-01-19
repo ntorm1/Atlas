@@ -133,7 +133,8 @@ Hydra::run() noexcept
 	assert(m_state == HydraState::BUILT || m_state == HydraState::FINISHED);
 	if (m_state == HydraState::FINISHED)
 	{
-		assert(reset());
+		auto res = reset();
+		assert(res);
 	}
 	size_t steps = m_impl->m_exchange_map.getTimestamps().size();
 	for (size_t i = 0; i < steps; ++i)
@@ -214,7 +215,8 @@ Hydra::pyBuild()
 
 
 //============================================================================
-void Hydra::pyReset()
+void
+Hydra::pyReset()
 {
 	auto res = reset();
 	if (!res)

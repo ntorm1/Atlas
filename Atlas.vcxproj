@@ -169,7 +169,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Downloads\BS_thread_pool.hpp" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\AtlasMacros.hpp" />
   </ItemGroup>

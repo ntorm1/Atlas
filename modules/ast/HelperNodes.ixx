@@ -19,7 +19,7 @@ namespace AST
 {
 
 //============================================================================
-export class StrategyRunnerNode 
+export class TriggerNode 
 	: public ExpressionNode<bool>
 {
 private:
@@ -31,33 +31,33 @@ protected:
 	Exchange const& m_exchange;
 public:
 	
-	StrategyRunnerNode(Exchange const& exchange
+	TriggerNode(Exchange const& exchange
 	)  noexcept : 
 		m_exchange(exchange),
 		ExpressionNode<bool>(NodeType::STRATEGY_RUNNER)
 	{}
+
 	virtual bool evaluate() noexcept override = 0;
 	size_t getWarmup() const noexcept override { return 0; }
-
 };
 
 
 //============================================================================
-export class StrategyMonthlyRunnerNode : public StrategyRunnerNode
+export class StrategyMonthlyRunnerNode : public TriggerNode
 {
 private:
 	virtual Result<bool, AtlasException> build() noexcept override;
 
 public:
 	StrategyMonthlyRunnerNode(
-		Exchange const& exchange
+		Strategy const& strategy
 	) noexcept;
 
 	bool evaluate() noexcept override;
 
-	ATLAS_API [[nodiscard]] static Result<UniquePtr<StrategyRunnerNode>,AtlasException>
+	ATLAS_API [[nodiscard]] static Result<UniquePtr<TriggerNode>,AtlasException>
 	make(
-		Exchange const& exchange
+		Strategy const& strategy
 	) noexcept;
 
 };

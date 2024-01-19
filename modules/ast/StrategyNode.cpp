@@ -6,6 +6,7 @@ module StrategyNodeModule;
 
 import ExchangeModule;
 
+import HelperNodesModule;
 import ExchangeNodeModule;
 
 namespace Atlas
@@ -131,6 +132,11 @@ StrategyNode::~StrategyNode() noexcept
 void
 	StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
 {
+	if (m_trigger && !(*m_trigger)->evaluate())
+	{
+		return;
+	}
+
 	return m_allocation->evaluate(target);
 }
 

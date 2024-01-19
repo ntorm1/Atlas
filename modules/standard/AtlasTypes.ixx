@@ -67,5 +67,6 @@ export namespace Atlas
 		class AssetQuotientNode;
 		class ExchangeViewNode;
 		class StrategyNode;
+		class TriggerNode;
 	}
 }
