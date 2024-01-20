@@ -134,6 +134,7 @@ Hydra::removeStrategy(String const& name) noexcept
 	for (size_t i = idx + 1; idx < m_impl->m_strategies.size() - 1; ++i)
 	{
 		m_impl->m_strategies[i]->setID(i-1);
+		m_impl->m_strategy_map[m_impl->m_strategies[i]->getName()] = i-1;
 	}
 	// erase the strategy from the vector
 	m_impl->m_strategies.erase(m_impl->m_strategies.begin() + idx);
