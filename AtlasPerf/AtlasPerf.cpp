@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include <chrono>
 
 #pragma warning(suppress:5050)
 import HydraModule;

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 
 #include "helper.h"
@@ -137,10 +138,10 @@ TEST_F(SimpleExchangeTests, AllocTest)
 		std::move(strategy_node),
 		1.0f
 	);
+	hydra->build();
 	auto res = hydra->addStrategy(std::move(strategy));
 	EXPECT_TRUE(res);
 	auto const& tracer = res.value()->getTracer();
-	hydra->build();
 	hydra->step();
 	EXPECT_DOUBLE_EQ(tracer.getNLV(), initial_cash);
 	hydra->step();
@@ -177,10 +178,10 @@ TEST_F(SimpleExchangeTests, AllocSplitTest)
 		std::move(strategy_node),
 		1.0f
 	);
+	hydra->build();
 	auto res = hydra->addStrategy(std::move(strategy));
 	auto strategy_ptr = res.value();
 	auto const& tracer = res.value()->getTracer();
-	hydra->build();
 	hydra->step();
 	EXPECT_DOUBLE_EQ(tracer.getNLV(), initial_cash);
 	hydra->step();
