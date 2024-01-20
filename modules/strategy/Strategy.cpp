@@ -105,7 +105,7 @@ Strategy::getExchange() const noexcept
 
 //============================================================================
 void
-	Strategy::evaluate() noexcept
+Strategy::evaluate() noexcept
 {
 	// get the current market returns
 	LinAlg::EigenConstColView market_returns = m_impl->m_exchange.getMarketReturns();
@@ -125,7 +125,7 @@ void
 
 //============================================================================
 void
-	Strategy::step() noexcept
+Strategy::step() noexcept
 {
 	if (!m_step_call)
 	{
