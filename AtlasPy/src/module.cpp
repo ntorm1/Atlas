@@ -1,8 +1,10 @@
+#define  _SILENCE_CXX23_DENORM_DEPRECATION_WARNING
 #include <expected>
 #include <optional>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/eigen.h>
 
 import HydraModule;
 import ExchangeModule;
@@ -13,6 +15,7 @@ import AssetNodeModule;
 import ExchangeNodeModule;
 import StrategyNodeModule;
 
+import AtlasEnumsModule;
 import AtlasException;
 import AtlasCore;
 
@@ -45,8 +48,16 @@ PYBIND11_MODULE(AtlasPy, m) {
             &Atlas::Exchange::getName,
             "get unique id of the exchange"
         );
+
+    py::enum_<Atlas::TracerType>(m, "TracerType")
+        .value("NLV", Atlas::TracerType::NLV)
+        .export_values();
+
     py::class_<Atlas::Strategy, std::shared_ptr<Atlas::Strategy>>(m_core, "Strategy")
         .def("getNLV", &Atlas::Strategy::getNLV)
+        .def("getName", &Atlas::Strategy::getName)
+        .def("enableTracerHistory", &Atlas::Strategy::enableTracerHistory)
+        .def("getHistory", &Atlas::Strategy::getHistory, py::return_value_policy::reference_internal)
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyNode>, double>());
 
 

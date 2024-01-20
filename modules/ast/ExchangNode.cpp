@@ -70,13 +70,19 @@ ExchangeViewNode::ExchangeViewNode(
 
 //============================================================================
 void
-    ExchangeViewNode::filter(Eigen::VectorXd& view) const noexcept
+ExchangeViewNode::filter(Eigen::VectorXd& view) const noexcept
 {
     assert(m_filter.has_value());
     double c = m_filter.value().value;
     switch ((*m_filter).type) {
     case ExchangeViewFilterType::GREATER_THAN:
         view = (view.array() > c).select(view.array(), std::numeric_limits<double>::quiet_NaN());
+        break;
+    case ExchangeViewFilterType::LESS_THAN:
+		view = (view.array() < c).select(view.array(), std::numeric_limits<double>::quiet_NaN());
+		break;
+    case ExchangeViewFilterType::EQUAL_TO:
+        view = (view.array().abs() - c).select(view.array(), std::numeric_limits<double>::quiet_NaN());
         break;
     }
 }

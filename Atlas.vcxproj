@@ -194,6 +194,7 @@
     <ClCompile Include="modules\portfolio\Portfolio.cpp" />
     <ClCompile Include="modules\portfolio\Portfolio.ixx" />
     <ClCompile Include="modules\standard\AtlasCore.ixx" />
+    <ClCompile Include="modules\standard\AtlasEnums.ixx" />
     <ClCompile Include="modules\standard\AtlasLinAlg.ixx" />
     <ClCompile Include="modules\standard\AtlasTypes.ixx" />
     <ClCompile Include="modules\standard\AtlasException.ixx" />

@@ -67,6 +67,8 @@ public:
 export enum class ExchangeViewFilterType
 {
 	GREATER_THAN = 0,
+	LESS_THAN = 1,
+	EQUAL_TO = 2
 };
 
 

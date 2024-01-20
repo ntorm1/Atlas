@@ -96,6 +96,21 @@ Strategy::getNLV() const noexcept
 
 
 //============================================================================
+void
+Strategy::enableTracerHistory(TracerType t) noexcept
+{
+	m_impl->m_tracer.enableTracerHistory(t);
+}
+
+
+//============================================================================
+Eigen::VectorXd const& Strategy::getHistory(TracerType t) const noexcept
+{
+	return m_impl->m_tracer.getHistory(t);
+}
+
+
+//============================================================================
 Exchange const&
 Strategy::getExchange() const noexcept
 {
@@ -120,6 +135,7 @@ Strategy::evaluate() noexcept
 	// update the tracer nlv 
 	double nlv = m_impl->m_tracer.getNLV();
 	m_impl->m_tracer.setNLV(nlv * (1.0 + portfolio_return));
+	m_impl->m_tracer.evaluate();
 }
 
 
