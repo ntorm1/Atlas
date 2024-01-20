@@ -63,7 +63,9 @@ Hydra::getExchange(String const& name) const noexcept
 
 //============================================================================
 Result<Strategy const*, AtlasException>
-Hydra::addStrategy(SharedPtr<Strategy> strategy) noexcept
+Hydra::addStrategy(
+	SharedPtr<Strategy> strategy,
+	bool replace_if_exists) noexcept
 {
 	if (m_state != HydraState::BUILT)
 	{
@@ -71,10 +73,19 @@ Hydra::addStrategy(SharedPtr<Strategy> strategy) noexcept
 	}
 	if (m_impl->m_strategy_map.contains(strategy->getName()))
 	{
-		return Err("Strategy with name " + strategy->getName() + " already exists");
+		if (!replace_if_exists)
+		{
+			return Err("Strategy with name " + strategy->getName() + " already exists");
+
+		}
+		// find the strategy and replace it in the vector
+		auto idx = m_impl->m_strategy_map[strategy->getName()];
+		m_impl->m_strategies[idx] = std::move(strategy);
+		return m_impl->m_strategies[idx].get();
 	}
 	strategy->setID(m_impl->m_strategies.size());
 	m_impl->m_strategies.push_back(std::move(strategy));
+	m_impl->m_strategy_map[strategy->getName()] = m_impl->m_strategies.size() - 1;
 	return m_impl->m_strategies.back().get();
 }
 
@@ -107,6 +118,27 @@ Hydra::build()
 	m_impl->m_exchange_map.build();
 	m_state = HydraState::BUILT;
 	return true;
+}
+
+
+//============================================================================
+void
+Hydra::removeStrategy(String const& name) noexcept
+{
+	if (!m_impl->m_strategy_map.contains(name))
+	{
+		return;
+	}
+	auto idx = m_impl->m_strategy_map[name];
+	// update all the strategy ids greater than the one we are removing
+	for (size_t i = idx + 1; idx < m_impl->m_strategies.size() - 1; ++i)
+	{
+		m_impl->m_strategies[i]->setID(i-1);
+	}
+	// erase the strategy from the vector
+	m_impl->m_strategies.erase(m_impl->m_strategies.begin() + idx);
+	// update the strategy map
+	m_impl->m_strategy_map.erase(name);
 }
 
 
@@ -191,9 +223,11 @@ Hydra::pyAddPortfolio(String name, SharedPtr<Exchange> exchange, double intial_c
 
 //============================================================================
 SharedPtr<Strategy>
-Hydra::pyAddStrategy(SharedPtr<Strategy> strategy)
+Hydra::pyAddStrategy(
+	SharedPtr<Strategy> strategy,
+	bool replace_if_exists)
 {
-	auto res = addStrategy(std::move(strategy));
+	auto res = addStrategy(std::move(strategy), replace_if_exists);
 	if (!res)
 	{
 		throw std::exception(res.error().what());

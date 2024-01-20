@@ -37,6 +37,7 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::Hydra, std::shared_ptr<Atlas::Hydra>>(m_core, "Hydra")
         .def("build", &Atlas::Hydra::pyBuild)
         .def("run", &Atlas::Hydra::run)
+        .def("removeStrategy", &Atlas::Hydra::removeStrategy)
         .def("reset", &Atlas::Hydra::pyReset)
         .def("addExchange", &Atlas::Hydra::pyAddExchange)
         .def("addStrategy", &Atlas::Hydra::pyAddStrategy)

@@ -41,7 +41,8 @@ public:
 		String const& name
 	) const noexcept;
 	ATLAS_API Result<Strategy const*, AtlasException> addStrategy(
-		SharedPtr<Strategy> strategy
+		SharedPtr<Strategy> strategy,
+		bool replace_if_exists
 	) noexcept;
 	ATLAS_API Result<SharedPtr<Portfolio>, AtlasException> addPortfolio(
 		String name,
@@ -49,6 +50,7 @@ public:
 		double initial_cash
 	) noexcept;
 	ATLAS_API Result<bool, AtlasException> build();
+	ATLAS_API void removeStrategy(String const& name) noexcept;
 	ATLAS_API void step() noexcept;
 	ATLAS_API void run() noexcept;
 	ATLAS_API Result<bool, AtlasException> reset() noexcept;
@@ -64,7 +66,8 @@ public:
 		double initial_cash
 	);
 	ATLAS_API SharedPtr<Strategy> pyAddStrategy(
-		SharedPtr<Strategy> strategy
+		SharedPtr<Strategy> strategy,
+		bool replace_if_exists = false
 	);
 	ATLAS_API void pyBuild();
 	ATLAS_API void pyReset();
