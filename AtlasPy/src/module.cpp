@@ -66,7 +66,7 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::enum_<Atlas::AST::ExchangeViewFilterType>(m_ast, "ExchangeViewFilterType")
         .value("GREATER_THAN", Atlas::AST::ExchangeViewFilterType::GREATER_THAN)
         .export_values();
-    py::enum_<Atlas::AST::AllocationType>(m, "AllocationType")
+    py::enum_<Atlas::AST::AllocationType>(m_ast, "AllocationType")
         .value("UNIFORM", Atlas::AST::AllocationType::UNIFORM)
         .value("CONDITIONAL_SPLIT", Atlas::AST::AllocationType::CONDITIONAL_SPLIT)
         .export_values();
