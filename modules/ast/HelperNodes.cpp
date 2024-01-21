@@ -87,6 +87,14 @@ StrategyMonthlyRunnerNode::build() noexcept
 
 //============================================================================
 void
+StrategyMonthlyRunnerNode::step() noexcept
+{
+	m_index_counter++;
+}
+
+
+//============================================================================
+void
 StrategyMonthlyRunnerNode::reset() noexcept
 {
 	m_index_counter = 0;
@@ -98,7 +106,6 @@ bool
 StrategyMonthlyRunnerNode::evaluate() noexcept
 {
 	bool is_tradeable = static_cast<bool>(m_tradeable_mask(m_index_counter));
-	m_index_counter++;
 	return is_tradeable;
 }
 

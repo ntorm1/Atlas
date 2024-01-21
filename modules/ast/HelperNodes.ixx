@@ -24,8 +24,12 @@ static Int64 applyDateOffset();
 export class TriggerNode 
 	: public ExpressionNode<bool>
 {
+	friend class Exchange;
 private:
 	virtual Result<bool, AtlasException> build() noexcept = 0;
+
+
+	virtual void step() noexcept = 0;
 
 protected:
 	Eigen::VectorXi m_tradeable_mask;	
@@ -51,8 +55,10 @@ public:
 export class StrategyMonthlyRunnerNode : public TriggerNode
 {
 private:
-	virtual Result<bool, AtlasException> build() noexcept override;
+	Result<bool, AtlasException> build() noexcept override;
+	void step() noexcept override;
 	bool m_eom_trigger;
+
 public:
 	ATLAS_API ~StrategyMonthlyRunnerNode() noexcept = default;
 	ATLAS_API StrategyMonthlyRunnerNode(

@@ -23,6 +23,7 @@ export class Exchange
 {
 	friend class ExchangeMap;
 	friend class AST::AssetReadNode;
+	friend class AST::TriggerNode;
 private:
 	UniquePtr<ExchangeImpl> m_impl;
 	String m_name;
@@ -35,6 +36,7 @@ private:
 
 	void reset() noexcept;
 	void step(Int64 global_time) noexcept;
+	void registerTrigger(AST::TriggerNode* trigger) noexcept;
 
 	EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;
 
@@ -54,6 +56,7 @@ public:
 	auto const& get_name() const noexcept{return m_name;}
 	size_t currentIdx() const noexcept;
 	EigenConstColView<double> getMarketReturns() const noexcept;
+	EigenBlockView<double> getMarketReturnsBlock(size_t start_idex, size_t end_idx) const noexcept;
 	Option<size_t> getColumnIndex(String const& column) const noexcept;
 	size_t getNullCount(int row_offset) const noexcept;
 

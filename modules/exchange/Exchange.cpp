@@ -6,6 +6,7 @@ module ExchangeModule;
 import ExchangePrivateModule;
 import StrategyModule;
 import AtlasUtilsModule;
+import HelperNodesModule;
 
 namespace Atlas
 {
@@ -217,7 +218,21 @@ Exchange::step(Int64 global_time) noexcept
 	{
 		strategy->m_step_call = true;
 	}
+
+	for (auto& trigger : m_impl->registered_triggers)
+	{
+		trigger->step();
+	}
+	
 	m_impl->current_index++;
+}
+
+
+//============================================================================
+void
+Exchange::registerTrigger(AST::TriggerNode* trigger) noexcept
+{
+	m_impl->registered_triggers.push_back(trigger);
 }
 
 
@@ -263,6 +278,21 @@ EigenConstColView<double>
 Exchange::getMarketReturns() const noexcept
 {
 	return m_impl->returns.col(m_impl->current_index - 1);
+}
+
+
+//============================================================================
+EigenBlockView<double>
+Exchange::getMarketReturnsBlock(
+	size_t start_idx,
+	size_t end_idx) const noexcept
+{
+	assert(start_idx < end_idx);
+	assert(end_idx < static_cast<size_t>(m_impl->returns.cols()));
+	return m_impl->returns(
+		Eigen::all,
+		Eigen::seq(start_idx, end_idx)
+	);
 }
 
 

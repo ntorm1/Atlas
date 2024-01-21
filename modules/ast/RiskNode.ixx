@@ -38,10 +38,11 @@ struct RiskLookbackDef
 //============================================================================
 export class AllocationWeightNode : public OpperationNode<void, LinAlg::EigenVectorXd&>
 {
+protected:
 	Time::TimeOffset m_lookback;
 	SharedPtr<TriggerNode> m_trigger;
 	Vector<RiskLookbackDef> m_lookback_defs;
-
+	Exchange const& m_exchange;
 	void buildLookbackDefs() noexcept;
 
 public:
@@ -51,6 +52,7 @@ public:
 		SharedPtr<TriggerNode> trigger
 	) noexcept;
 
+	virtual void cache() noexcept = 0;
 	void evaluate(LinAlg::EigenVectorXd& target) noexcept override = 0;
 
 };
@@ -59,6 +61,9 @@ public:
 //============================================================================
 export class InvVolWeight final : public AllocationWeightNode
 {
+private:
+	LinAlg::EigenVectorXd m_vol;
+	size_t m_lookback_idx = 0;
 public:
 	~InvVolWeight() noexcept;
 	InvVolWeight(
@@ -66,6 +71,7 @@ public:
 		SharedPtr<TriggerNode> trigger
 	) noexcept;
 
+	void cache() noexcept override;
 	void evaluate(LinAlg::EigenVectorXd& target) noexcept override = 0;
 
 };
