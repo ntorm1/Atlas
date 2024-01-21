@@ -49,11 +49,12 @@ export class StrategyMonthlyRunnerNode : public TriggerNode
 {
 private:
 	virtual Result<bool, AtlasException> build() noexcept override;
-
+	bool m_eom_trigger;
 public:
 	ATLAS_API ~StrategyMonthlyRunnerNode() noexcept = default;
 	ATLAS_API StrategyMonthlyRunnerNode(
-		Exchange const& exchange
+		Exchange const& exchange,
+		bool eom_trigger = false
 	) noexcept;
 
 	void reset() noexcept override;
@@ -61,7 +62,8 @@ public:
 
 	ATLAS_API [[nodiscard]] static SharedPtr<TriggerNode>
 	pyMake(
-		SharedPtr<Exchange> exchange
+		SharedPtr<Exchange> exchange,
+		bool eom_trigger = false
 	);
 
 };

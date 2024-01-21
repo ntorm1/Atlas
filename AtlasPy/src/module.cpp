@@ -104,7 +104,10 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getMask", &Atlas::AST::TriggerNode::getMask, py::return_value_policy::reference_internal);
 
     py::class_<Atlas::AST::StrategyMonthlyRunnerNode, Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::StrategyMonthlyRunnerNode>>(m_ast, "StrategyMonthlyRunnerNode")
-        .def_static("make", &Atlas::AST::StrategyMonthlyRunnerNode::pyMake);
+        .def_static("make", &Atlas::AST::StrategyMonthlyRunnerNode::pyMake,
+            py::arg("exchange"),
+            py::arg("eom_trigger") = false
+        );
     
     py::class_<Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationBaseNode>>(m_ast, "AllocationBaseNode");
 

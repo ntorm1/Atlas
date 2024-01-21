@@ -96,7 +96,7 @@ AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
 	size_t nonNanCount = target.unaryExpr([](double x) { return !std::isnan(x) ? 1 : 0; }).sum();
 	double c;
 	if (nonNanCount > 0) {
-		c = (1.0 - m_epsilon) / static_cast<double>(nonNanCount);
+		c = (1.0) / static_cast<double>(nonNanCount);
 	}
 	else {
 		c = 0.0;

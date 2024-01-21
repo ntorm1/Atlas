@@ -239,9 +239,12 @@ TEST_F(ComplexExchangeTests, SimpleTest)
 	auto total_return = (nlv - initial_cash) / initial_cash;
 	double epsilon = abs(total_return - 2.6207);
 	EXPECT_TRUE(epsilon < 0.0005);
-	std::cerr << "Duration: " << duration.count() << "s" << std::endl;
-	std::cerr << "Total Return: " << total_return << std::endl;
-	std::cerr << "Epsilon: " << epsilon << std::endl;
+#ifdef _RELEASE
+	EXPECT_TRUE(duration.count() < 500.0f);
+#endif
+	//std::cerr << "Duration: " << duration.count() << "s" << std::endl;
+	//std::cerr << "Total Return: " << total_return << std::endl;
+	//std::cerr << "Epsilon: " << epsilon << std::endl;
 }
 
 

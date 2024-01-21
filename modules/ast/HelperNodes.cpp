@@ -39,9 +39,11 @@ static int
 
 //============================================================================
 StrategyMonthlyRunnerNode::StrategyMonthlyRunnerNode(
-	Exchange const& exchange
+	Exchange const& exchange,
+	bool eom_trigger
 ) noexcept: 
-	TriggerNode(exchange)
+	TriggerNode(exchange),
+	m_eom_trigger(eom_trigger)
 {
 }
 
@@ -63,22 +65,35 @@ StrategyMonthlyRunnerNode::build() noexcept
 		{
 			return Err("Failed to get month from epoch");
 		}
-		if (t == 0 || month != previous_month)
+		// if not eom trigger, then set true to index locations where the current
+		// month does not equal the previous month
+		if (!m_eom_trigger)
 		{
-			m_tradeable_mask[t] = 1;
-			previous_month = month;
+			if (t == 0 || month != previous_month)
+			{
+				m_tradeable_mask[t] = 1;
+				previous_month = month;
+			}
 		}
-	}
-	Vector<bool> tradeable_mask;
-	for (size_t t = 0; t < timestamps.size(); ++t)
-	{
-		if (m_tradeable_mask[t])
-		{
-			tradeable_mask.push_back(true);
-		}
+		// if eom trigger, then set true to index locations where the current month
+		// does not equal the next month. Default do nothing on last timestamp
 		else
 		{
-			tradeable_mask.push_back(false);
+			// default do trigger on first timestamp
+			if (t == 0)
+			{
+				m_tradeable_mask[t] = 1;
+			}
+
+			else if (t < timestamps.size() - 1)
+			{
+				auto next_timestamp = timestamps[t + 1];
+				auto next_month = getMonthFromEpoch(next_timestamp);
+				if (next_month != month)
+				{
+					m_tradeable_mask[t] = 1;
+				}
+			}
 		}
 	}
 	return true;
@@ -105,7 +120,10 @@ StrategyMonthlyRunnerNode::evaluate() noexcept
 
 //============================================================================
 SharedPtr<TriggerNode>
-StrategyMonthlyRunnerNode::pyMake(SharedPtr<Exchange> exchange)
+StrategyMonthlyRunnerNode::pyMake(
+	SharedPtr<Exchange> exchange,
+	bool eom_trigger
+)
 {
 	auto node = std::make_unique<StrategyMonthlyRunnerNode>(*exchange);
 	auto result = node->build();
