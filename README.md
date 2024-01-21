@@ -17,7 +17,7 @@ To build simply open the Visual Studio Solution and build AtlasPy. The output of
 
 
 ## Getting Started
-Currently the only support data form is .h5 files. Here is a dummy example of what the format should look like. Provided you have a dataframe df that looks like htis
+Currently the only support data form is .h5 files. Here is a dummy example of what the format should look like. Provided you have a dataframe df that looks like this
 
 | Date                | Close         | ma_fast       | ma_slow       |
 |---------------------|---------------|---------------|---------------|
@@ -28,7 +28,7 @@ Currently the only support data form is .h5 files. Here is a dummy example of wh
 | 1548288000000000000 | 3600.865479   | 3631.826562   | 3730.904089   |
 | ...                 | ...           | ...           | ...           |
 
-Then you can save it using the following format. Note that you must have a single "Close" column (not cast sensitive) use to determine prices.
+Then you can save it using the following format. Note that you must have a single "Close" column (not cast sensitive) use to determine prices. Also, you can have arbitrary number of tickers, as long as they all have the same frequency.
 
 ```python
 output_path = os.path.join(os.getcwd(), 'data_fast.h5')
@@ -115,3 +115,5 @@ Total return: 63.519%
 Epsilon: 1.7763568394002505e-15
 ""
 ```
+
+See AtlasPy test files for more examples and comparisons
