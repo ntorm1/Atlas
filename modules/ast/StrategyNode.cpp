@@ -176,6 +176,16 @@ StrategyNode::getAllocEpsilon() const noexcept
 
 //============================================================================
 void
+StrategyNode::reset() noexcept
+{
+	if (m_trigger)
+	{
+		(*m_trigger)->reset();
+	}
+}
+
+//============================================================================
+void
 StrategyNode::setTrigger(SharedPtr<TriggerNode> trigger) noexcept
 {
 	m_trigger = trigger;

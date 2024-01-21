@@ -38,6 +38,7 @@ public:
 	{}
 
 	virtual bool evaluate() noexcept override = 0;
+	virtual void reset() noexcept = 0;
 	size_t getWarmup() const noexcept override { return 0; }
 	Eigen::VectorXi const& getMask() const noexcept { return m_tradeable_mask; }
 };
@@ -55,6 +56,7 @@ public:
 		Exchange const& exchange
 	) noexcept;
 
+	void reset() noexcept override;
 	bool evaluate() noexcept override;
 
 	ATLAS_API [[nodiscard]] static SharedPtr<TriggerNode>

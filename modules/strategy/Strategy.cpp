@@ -34,7 +34,7 @@ public:
 	) noexcept :
 		m_portfolio(ast->getPortfolio()),
 		m_exchange(ast->getExchange()),
-		m_tracer(m_exchange, cash),
+		m_tracer(*strategy, m_exchange, cash),
 		m_ast(std::move(ast))
 	{
 		m_exchange.registerStrategy(strategy);
@@ -55,7 +55,7 @@ Strategy::Strategy(
 	double portfolio_weight
 ) noexcept
 {
-	double init_cash = ast->getPortfolio().getTracer().getInitialCash();
+	double init_cash = ast->getPortfolio().getInitialCash();
 	m_impl = std::make_unique<StrategyImpl>(
 		this,
 		std::move(ast),
@@ -68,6 +68,14 @@ Strategy::Strategy(
 //============================================================================
 Strategy::~Strategy() noexcept
 {
+}
+
+
+//============================================================================
+Eigen::VectorXd const&
+Strategy::getAllocationBuffer() const noexcept
+{
+	return m_impl->m_target_weights_buffer;
 }
 
 
@@ -105,9 +113,18 @@ Strategy::enableTracerHistory(TracerType t) noexcept
 
 
 //============================================================================
-Eigen::VectorXd const& Strategy::getHistory(TracerType t) const noexcept
+Eigen::VectorXd const&
+Strategy::getHistory(TracerType t) const noexcept
 {
 	return m_impl->m_tracer.getHistory(t);
+}
+
+
+//============================================================================
+Eigen::MatrixXd const&
+Strategy::getWeightHistory() const noexcept
+{
+	return m_impl->m_tracer.m_weight_history;
 }
 
 
@@ -194,6 +211,7 @@ Strategy::reset() noexcept
 	m_impl->m_tracer.reset();
 	m_impl->m_target_weights_buffer.setZero();
 	m_impl->m_adjustment_buffer.setZero();
+	m_impl->m_ast->reset();
 	m_step_call = false;
 }
 

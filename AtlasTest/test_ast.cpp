@@ -281,5 +281,6 @@ TEST_F(ComplexExchangeTests, FixedAllocTest)
 	auto tracer = strategy_ptr->getTracer();
 	auto nlv = tracer.getNLV();
 	auto total_return = (nlv - initial_cash) / initial_cash;
-	EXPECT_DOUBLE_EQ(total_return, 14.7518f);
+	double epsilon = abs(total_return - 10.3586);
+	EXPECT_TRUE(epsilon < 0.0005);
 }

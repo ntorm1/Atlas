@@ -17,7 +17,7 @@ namespace AST
 	
 //============================================================================
 static int
-getMonthFromEpoch(int64_t epoch) noexcept
+	getMonthFromEpoch(int64_t epoch) noexcept
 {
 	std::chrono::seconds epoch_time(epoch / 1000000000);
 
@@ -27,9 +27,9 @@ getMonthFromEpoch(int64_t epoch) noexcept
 	// Convert system_clock::time_point to std::time_t
 	std::time_t time_t_value = std::chrono::system_clock::to_time_t(time_point);
 
-	// Convert std::time_t to std::tm using localtime_s
+	// Convert std::time_t to std::tm using gmtime_s for GMT time
 	std::tm time_info;
-	localtime_s(&time_info, &time_t_value);
+	gmtime_s(&time_info, &time_t_value);
 
 	// Extract month from std::tm
 	int month_number = time_info.tm_mon + 1; // tm_mon is zero-based
@@ -83,6 +83,15 @@ StrategyMonthlyRunnerNode::build() noexcept
 	}
 	return true;
 }
+
+
+//============================================================================
+void
+StrategyMonthlyRunnerNode::reset() noexcept
+{
+	m_index_counter = 0;
+}
+
 
 //============================================================================
 bool

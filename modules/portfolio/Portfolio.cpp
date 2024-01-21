@@ -1,7 +1,6 @@
 module;
 module PortfolioModule;
 
-import TracerModule;
 
 namespace Atlas
 {
@@ -9,13 +8,12 @@ namespace Atlas
 class PortfolioImpl
 {
 public:
-	Tracer m_tracer;
-
+	double initial_cash;
 	PortfolioImpl(
 		Exchange& exchange,
 		double cash
 	) noexcept
-		: m_tracer(exchange, cash)
+		: initial_cash(cash)
 	{
 
 	}
@@ -42,9 +40,11 @@ Portfolio::~Portfolio() noexcept
 
 
 //============================================================================
-Tracer const& Portfolio::getTracer() const noexcept
+double
+Portfolio::getInitialCash() const noexcept
 {
-	return m_impl->m_tracer;
+	return m_impl->initial_cash;
 }
+
 
 }

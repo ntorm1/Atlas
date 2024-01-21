@@ -5,6 +5,7 @@ export module AtlasEnumsModule;
 export namespace Atlas
 {
 	export enum class TracerType {
-		NLV
+		NLV,
+		WEIGHTS
 	};
 }

@@ -56,6 +56,7 @@ PYBIND11_MODULE(AtlasPy, m) {
 
     py::enum_<Atlas::TracerType>(m, "TracerType")
         .value("NLV", Atlas::TracerType::NLV)
+        .value("WEIGHTS", Atlas::TracerType::WEIGHTS)
         .export_values();
 
     py::class_<Atlas::Strategy, std::shared_ptr<Atlas::Strategy>>(m_core, "Strategy")
@@ -63,6 +64,7 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getName", &Atlas::Strategy::getName)
         .def("enableTracerHistory", &Atlas::Strategy::enableTracerHistory)
         .def("getHistory", &Atlas::Strategy::getHistory, py::return_value_policy::reference_internal)
+        .def("getWeightHistory", &Atlas::Strategy::getWeightHistory, py::return_value_policy::reference_internal)
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyNode>, double>());
 
 

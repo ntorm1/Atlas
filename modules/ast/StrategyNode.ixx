@@ -119,11 +119,15 @@ public:
 //============================================================================
 export class StrategyNode final : OpperationNode<bool, Eigen::VectorXd&>
 {
+	friend class Strategy;
 private:
 	SharedPtr<AllocationBaseNode> m_allocation;
 	Option<SharedPtr<TriggerNode>> m_trigger;
 	Portfolio& m_portfolio;
 	size_t m_warmup;
+
+	void reset() noexcept;
+
 public:
 	ATLAS_API StrategyNode(
 		SharedPtr<AllocationBaseNode> allocation,
