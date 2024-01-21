@@ -16,6 +16,7 @@ export enum class NodeType
 	ALLOC = 3,
 	STRATEGY = 4,
 	STRATEGY_RUNNER = 5,
+	ALLOC_WEIGHT = 6,
 };
 
 

@@ -17,7 +17,7 @@ namespace AST
 	
 //============================================================================
 static int
-	getMonthFromEpoch(int64_t epoch) noexcept
+getMonthFromEpoch(int64_t epoch) noexcept
 {
 	std::chrono::seconds epoch_time(epoch / 1000000000);
 

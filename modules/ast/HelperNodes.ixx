@@ -18,6 +18,7 @@ namespace Atlas
 namespace AST
 {
 
+
 //============================================================================
 export class TriggerNode 
 	: public ExpressionNode<bool>

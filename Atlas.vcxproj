@@ -176,6 +176,8 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="modules\ast\HelperNodes.cpp" />
     <ClCompile Include="modules\ast\HelperNodes.ixx" />
+    <ClCompile Include="modules\ast\RiskNode.cpp" />
+    <ClCompile Include="modules\ast\RiskNode.ixx" />
     <ClCompile Include="modules\ast\StrategyNode.cpp" />
     <ClCompile Include="modules\ast\StrategyNode.ixx" />
     <ClCompile Include="modules\ast\AssetNode.cpp" />
