@@ -28,21 +28,17 @@ export class TriggerNode
 private:
 	virtual Result<bool, AtlasException> build() noexcept = 0;
 
-
 	virtual void step() noexcept = 0;
 
 protected:
 	Eigen::VectorXi m_tradeable_mask;	
 	size_t m_index_counter = 0;
 	Exchange const& m_exchange;
+
 public:
 	virtual ~TriggerNode() noexcept = default;
 	TriggerNode(Exchange const& exchange
-	)  noexcept : 
-		m_exchange(exchange),
-		ExpressionNode<bool>(NodeType::STRATEGY_RUNNER)
-	{}
-
+	) noexcept;
 	virtual bool evaluate() noexcept override = 0;
 	virtual void reset() noexcept = 0;
 	size_t getWarmup() const noexcept override { return 0; }
@@ -76,7 +72,6 @@ public:
 	);
 
 };
-
 
 }
 

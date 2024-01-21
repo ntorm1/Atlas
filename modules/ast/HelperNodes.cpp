@@ -16,11 +16,13 @@ namespace AST
 
 
 //============================================================================
-Int64
-applyDateOffset()
+TriggerNode::TriggerNode(Exchange const& exchange) noexcept :
+	m_exchange(exchange),
+	ExpressionNode<bool>(NodeType::STRATEGY_RUNNER)
 {
-	return Int64();
+	const_cast<Exchange&>(m_exchange).registerTrigger(this); // TODO: ugly hack
 }
+
 	
 //============================================================================
 StrategyMonthlyRunnerNode::StrategyMonthlyRunnerNode(
