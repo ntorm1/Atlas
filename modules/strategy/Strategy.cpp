@@ -1,6 +1,7 @@
 module;
 #define NOMINMAX
 #include <Eigen/Dense>
+#include <iostream>
 module StrategyModule;
 
 import ExchangeModule;
@@ -129,6 +130,8 @@ Strategy::evaluate() noexcept
 	assert(market_returns.rows() == m_impl->m_target_weights_buffer.rows());
 	assert(!market_returns.array().isNaN().any());
 
+
+	
 	// print out target weights buffer and market returns
 	double portfolio_return = market_returns.dot(m_impl->m_target_weights_buffer);
 
@@ -136,6 +139,23 @@ Strategy::evaluate() noexcept
 	double nlv = m_impl->m_tracer.getNLV();
 	m_impl->m_tracer.setNLV(nlv * (1.0 + portfolio_return));
 	m_impl->m_tracer.evaluate();
+}
+
+
+//============================================================================
+void
+Strategy::lateRebalance() noexcept
+{
+	// if the strategy does not override the target weights buffer at the end of a time step,
+	// then we need to rebalance the portfolio to the target weights buffer according to the market returns
+	LinAlg::EigenConstColView market_returns = m_impl->m_exchange.getMarketReturns();
+
+	// update the target weights buffer according to the indivual asset returns
+	Eigen::VectorXd returns = market_returns.array() + 1.0;
+	m_impl->m_target_weights_buffer = returns.cwiseProduct(m_impl->m_target_weights_buffer);
+
+	// divide the target weights buffer by the sum to get the new weights
+	m_impl->m_target_weights_buffer /= m_impl->m_target_weights_buffer.sum();
 }
 
 
@@ -152,9 +172,17 @@ Strategy::step() noexcept
 	{
 		return;
 	}
-	m_impl->m_ast->evaluate(m_impl->m_target_weights_buffer);
+	// execute the strategy AST node. Update rebalance call if AST 
+	// did not update the target weights buffer
+	if (!m_impl->m_ast->evaluate(m_impl->m_target_weights_buffer))
+	{
+		m_late_rebalance_call = true;
+	}
+	else
+	{
+		m_late_rebalance_call = false;
+	}
 	assert(!m_impl->m_target_weights_buffer.array().isNaN().any());
-
 	m_step_call = false;
 }
 

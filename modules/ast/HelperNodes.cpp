@@ -16,28 +16,32 @@ namespace AST
 
 	
 //============================================================================
-static int getMonthFromEpoch(int64_t epoch) noexcept
+static int
+getMonthFromEpoch(int64_t epoch) noexcept
 {
-	auto const& time = std::chrono::system_clock::from_time_t(epoch);
-	auto const& time_point = std::chrono::system_clock::to_time_t(time);
+	std::chrono::seconds epoch_time(epoch / 1000000000);
 
-	// Using localtime_s to address deprecation warning
+	// Convert nanoseconds to system_clock::time_point
+	std::chrono::system_clock::time_point time_point = std::chrono::time_point<std::chrono::system_clock>(epoch_time);
+
+	// Convert system_clock::time_point to std::time_t
+	std::time_t time_t_value = std::chrono::system_clock::to_time_t(time_point);
+
+	// Convert std::time_t to std::tm using localtime_s
 	std::tm time_info;
-	if (localtime_s(&time_info, &time_point) != 0)
-	{
-		// Handle error, localtime_s failed
-		return -1;
-	}
+	localtime_s(&time_info, &time_t_value);
 
-	return time_info.tm_mon;
+	// Extract month from std::tm
+	int month_number = time_info.tm_mon + 1; // tm_mon is zero-based
+	return month_number;
 }
 
 
 //============================================================================
 StrategyMonthlyRunnerNode::StrategyMonthlyRunnerNode(
-	Strategy const& strategy
+	Exchange const& exchange
 ) noexcept: 
-	TriggerNode(strategy.getExchange())
+	TriggerNode(exchange)
 {
 }
 
@@ -54,7 +58,7 @@ StrategyMonthlyRunnerNode::build() noexcept
 	for (size_t t = 0; t < timestamps.size(); ++t)
 	{
 		auto timestamp = timestamps[t];
-		auto month = getMonthFromEpoch(t);
+		auto month = getMonthFromEpoch(timestamp);
 		if (month == -1)
 		{
 			return Err("Failed to get month from epoch");
@@ -65,6 +69,18 @@ StrategyMonthlyRunnerNode::build() noexcept
 			previous_month = month;
 		}
 	}
+	Vector<bool> tradeable_mask;
+	for (size_t t = 0; t < timestamps.size(); ++t)
+	{
+		if (m_tradeable_mask[t])
+		{
+			tradeable_mask.push_back(true);
+		}
+		else
+		{
+			tradeable_mask.push_back(false);
+		}
+	}
 	return true;
 }
 
@@ -72,7 +88,7 @@ StrategyMonthlyRunnerNode::build() noexcept
 bool
 StrategyMonthlyRunnerNode::evaluate() noexcept
 {
-	bool is_tradeable = static_cast<bool>(m_tradeable_mask[m_index_counter]);
+	bool is_tradeable = static_cast<bool>(m_tradeable_mask(m_index_counter));
 	m_index_counter++;
 	return is_tradeable;
 }
@@ -80,9 +96,9 @@ StrategyMonthlyRunnerNode::evaluate() noexcept
 
 //============================================================================
 SharedPtr<TriggerNode>
-StrategyMonthlyRunnerNode::pyMake(SharedPtr<const Strategy> strategy)
+StrategyMonthlyRunnerNode::pyMake(SharedPtr<Exchange> exchange)
 {
-	auto node = std::make_unique<StrategyMonthlyRunnerNode>(*strategy);
+	auto node = std::make_unique<StrategyMonthlyRunnerNode>(*exchange);
 	auto result = node->build();
 	if (!result)
 	{

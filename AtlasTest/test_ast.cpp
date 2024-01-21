@@ -15,6 +15,7 @@ import TracerModule;
 import AssetNodeModule;
 import ExchangeNodeModule;
 import StrategyNodeModule;
+import HelperNodesModule;
 
 using namespace Atlas;
 using namespace Atlas::AST;
@@ -61,6 +62,7 @@ class ComplexExchangeTests : public ::testing::Test
 protected:
 	std::shared_ptr<Atlas::Hydra> hydra;
 	std::shared_ptr<Atlas::Portfolio> portfolio;
+	std::shared_ptr<Atlas::Exchange> exchange_sptr;
 	std::string exchange_id = "test";
 	std::string portfolio_id = "test_p";
 	std::string strategy_id = "test_s";
@@ -69,8 +71,8 @@ protected:
 	void SetUp() override
 	{
 		hydra = std::make_shared<Hydra>();
-		auto exchange = hydra->addExchange(exchange_id, exchange_path_sp500).value();
-		portfolio = hydra->addPortfolio(portfolio_id, *exchange, initial_cash).value();
+		exchange_sptr = hydra->addExchange(exchange_id, exchange_path_sp500).value();
+		portfolio = hydra->addPortfolio(portfolio_id, *(exchange_sptr.get()), initial_cash).value();
 	}
 };
 
@@ -240,4 +242,44 @@ TEST_F(ComplexExchangeTests, SimpleTest)
 	std::cerr << "Duration: " << duration.count() << "s" << std::endl;
 	std::cerr << "Total Return: " << total_return << std::endl;
 	std::cerr << "Epsilon: " << epsilon << std::endl;
+}
+
+
+
+TEST_F(ComplexExchangeTests, FixedAllocTest)
+{
+	hydra->build();
+	auto const exchange = hydra->getExchange("test").value();
+	Vector<std::pair<String, double>> m_allocations = {
+		{"msft", .5},
+		{"amzn", .3},
+		{"jnj",	 .2}
+	};
+	auto allocation_node = FixedAllocationNode::make(
+		std::move(m_allocations),
+		exchange,
+		0.0
+	);
+	auto strategy_node = StrategyNode::make(
+		std::move(*allocation_node),
+		*portfolio
+	);
+	auto monthly_trigger_node = StrategyMonthlyRunnerNode::pyMake(
+		exchange_sptr
+	);
+	strategy_node->setTrigger(std::move(monthly_trigger_node));
+	auto strategy = std::make_unique<Strategy>(
+		strategy_id,
+		std::move(strategy_node),
+		1.0f
+	);
+	auto res = hydra->addStrategy(std::move(strategy));
+	EXPECT_TRUE(res);
+	hydra->run();
+
+	auto strategy_ptr = res.value();
+	auto tracer = strategy_ptr->getTracer();
+	auto nlv = tracer.getNLV();
+	auto total_return = (nlv - initial_cash) / initial_cash;
+	EXPECT_DOUBLE_EQ(total_return, 14.7518f);
 }

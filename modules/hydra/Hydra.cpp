@@ -152,8 +152,16 @@ Hydra::step() noexcept
 	
 	for (int i = 0; i < m_impl->m_strategies.size(); i++)
 	{
-		m_impl->m_strategies[i]->evaluate();
-		m_impl->m_strategies[i]->step();
+		auto& strategy = m_impl->m_strategies[i];
+		// evaluate the strategy with the current target weights
+		strategy->evaluate();
+		// execute strategy logic to populate new target weights
+		strategy->step();
+		// if no action was taken, propogate asset returns to adjust weights
+		if (strategy->m_late_rebalance_call)
+		{
+			strategy->lateRebalance();
+		}
 	}
 }
 

@@ -131,7 +131,7 @@ StrategyNode::StrategyNode(
 	SharedPtr<AllocationBaseNode> allocation,
 	Portfolio& portfolio
 ) noexcept :
-	OpperationNode<void, Eigen::VectorXd&>(NodeType::STRATEGY),
+	OpperationNode<bool, Eigen::VectorXd&>(NodeType::STRATEGY),
 	m_allocation(std::move(allocation)),
 	m_portfolio(portfolio)
 {
@@ -146,15 +146,15 @@ StrategyNode::~StrategyNode() noexcept
 
 
 //============================================================================
-void
+bool
 StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
 {
 	if (m_trigger && !(*m_trigger)->evaluate())
 	{
-		return;
+		return false;
 	}
-
-	return m_allocation->evaluate(target);
+	m_allocation->evaluate(target);
+	return true;
 }
 
 
@@ -192,7 +192,7 @@ FixedAllocationNode::~FixedAllocationNode() noexcept
 //============================================================================
 FixedAllocationNode::FixedAllocationNode(
 	Vector<std::pair<size_t, double>> m_allocations,
-	SharedPtr<Exchange> exchange,
+	Exchange* exchange,
 	double epsilon
 ) noexcept :
 	AllocationBaseNode(
@@ -213,7 +213,7 @@ FixedAllocationNode::FixedAllocationNode(
 Result<SharedPtr<AllocationBaseNode>, AtlasException>
 FixedAllocationNode::make(
 	Vector<std::pair<String, double>> allocations,
-	SharedPtr<Exchange> exchange,
+	Exchange* exchange,
 	double epsilon
 ) noexcept
 {
@@ -237,7 +237,7 @@ FixedAllocationNode::make(
 SharedPtr<AllocationBaseNode>
 FixedAllocationNode::pyMake(Vector<std::pair<String, double>> m_allocations, SharedPtr<Exchange> exchange, double epsilon)
 {
-	auto res = make(std::move(m_allocations), exchange, epsilon);
+	auto res = make(std::move(m_allocations), exchange.get(), epsilon);
 	if (!res)
 	{
 		throw std::exception(res.error().what());

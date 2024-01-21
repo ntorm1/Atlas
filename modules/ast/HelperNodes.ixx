@@ -39,6 +39,7 @@ public:
 
 	virtual bool evaluate() noexcept override = 0;
 	size_t getWarmup() const noexcept override { return 0; }
+	Eigen::VectorXi const& getMask() const noexcept { return m_tradeable_mask; }
 };
 
 
@@ -50,15 +51,15 @@ private:
 
 public:
 	ATLAS_API ~StrategyMonthlyRunnerNode() noexcept = default;
-	StrategyMonthlyRunnerNode(
-		Strategy const& strategy
+	ATLAS_API StrategyMonthlyRunnerNode(
+		Exchange const& exchange
 	) noexcept;
 
 	bool evaluate() noexcept override;
 
 	ATLAS_API [[nodiscard]] static SharedPtr<TriggerNode>
 	pyMake(
-		SharedPtr<const Strategy> strategy
+		SharedPtr<Exchange> exchange
 	);
 
 };

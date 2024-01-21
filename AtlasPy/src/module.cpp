@@ -98,13 +98,18 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("setFilter", &Atlas::AST::ExchangeViewNode::setFilter)
         .def(py::init<std::shared_ptr<Atlas::Exchange>, Atlas::AST::AssetOpNodeVariant>());
 
-    py::class_<Atlas::AST::StrategyMonthlyRunnerNode, std::shared_ptr<Atlas::AST::StrategyMonthlyRunnerNode>>(m_ast, "StrategyMonthlyRunnerNode")
+    py::class_<Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::TriggerNode>>(m_ast, "TriggerNode")
+        .def("getMask", &Atlas::AST::TriggerNode::getMask, py::return_value_policy::reference_internal);
+
+    py::class_<Atlas::AST::StrategyMonthlyRunnerNode, Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::StrategyMonthlyRunnerNode>>(m_ast, "StrategyMonthlyRunnerNode")
         .def_static("make", &Atlas::AST::StrategyMonthlyRunnerNode::pyMake);
     
-    py::class_<Atlas::AST::FixedAllocationNode, std::shared_ptr<Atlas::AST::FixedAllocationNode>>(m_ast, "FixedAllocationNode")
+    py::class_<Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationBaseNode>>(m_ast, "AllocationBaseNode");
+
+    py::class_<Atlas::AST::FixedAllocationNode, Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::FixedAllocationNode>>(m_ast, "FixedAllocationNode")
         .def_static("make", &Atlas::AST::FixedAllocationNode::pyMake);
 
-    py::class_<Atlas::AST::AllocationNode, std::shared_ptr<Atlas::AST::AllocationNode>>(m_ast, "AllocationNode")
+    py::class_<Atlas::AST::AllocationNode, Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationNode>>(m_ast, "AllocationNode")
         .def(py::init<std::shared_ptr<Atlas::AST::ExchangeViewNode>, Atlas::AST::AllocationType, std::optional<double>, double>(),
             py::arg("exchange_view"),
             py::arg("type") = Atlas::AST::AllocationType::UNIFORM,
@@ -113,7 +118,8 @@ PYBIND11_MODULE(AtlasPy, m) {
         );
 
     py::class_<Atlas::AST::StrategyNode, std::shared_ptr<Atlas::AST::StrategyNode>>(m_ast, "StrategyNode")
-        .def(py::init<std::shared_ptr<Atlas::AST::AllocationNode>, std::shared_ptr<Atlas::Portfolio>>());
+        .def("setTrigger", &Atlas::AST::StrategyNode::setTrigger)
+        .def(py::init<std::shared_ptr<Atlas::AST::AllocationBaseNode>, std::shared_ptr<Atlas::Portfolio>>());
 }
 
 int main() {

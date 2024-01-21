@@ -23,17 +23,20 @@ class StrategyImpl;
 //============================================================================
 export class Strategy
 {
+	friend class AST::StrategyNode;
 	friend class Exchange;
 	friend class Hydra;
 private:
 	String m_name;
 	size_t m_id = 0;
 	bool m_step_call = false;
+	bool m_late_rebalance_call = false;
 	UniquePtr<StrategyImpl> m_impl;
 
 	void evaluate() noexcept;
 	void step() noexcept;
 	void reset() noexcept;
+	void lateRebalance() noexcept;
 	void setID(size_t id) noexcept { m_id = id; }
 
 public:
