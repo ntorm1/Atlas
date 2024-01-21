@@ -22,24 +22,49 @@ AllocationNode::~AllocationNode() noexcept
 
 
 //============================================================================
+AllocationBaseNode::AllocationBaseNode(
+	AllocationType m_type,
+	Exchange& exchange,
+	double epsilon,
+	Option<double> alloc_param
+) noexcept :
+	OpperationNode<void, Eigen::VectorXd&>(NodeType::ALLOC),
+	m_type(m_type),
+	m_alloc_param(alloc_param),
+	m_epsilon(epsilon),
+	m_exchange(exchange)
+{
+
+}
+
+
+//============================================================================
+Exchange&
+AllocationBaseNode::getExchange() noexcept
+{
+	return m_exchange;
+}
+
+
+//============================================================================
 AllocationNode::AllocationNode(
 	SharedPtr<ExchangeViewNode> exchange_view,
 	AllocationType type,
 	Option<double> alloc_param,
 	double epsilon
 ) noexcept :
-	OpperationNode<void, Eigen::VectorXd&>(NodeType::ALLOC),
-	m_exchange_view(std::move(exchange_view)),
-	m_epsilon(epsilon),
-	m_exchange(m_exchange_view->getExchange()),
-	m_type(type),
-	m_alloc_param(alloc_param)
+	AllocationBaseNode(
+		type,
+		exchange_view->getExchange(),
+		epsilon,
+		alloc_param),
+	m_exchange_view(std::move(exchange_view))
 {
 }
 
 
 //============================================================================
-Result<SharedPtr<AllocationNode>, AtlasException>
+Result<SharedPtr<AllocationBaseNode>, AtlasException>
 AllocationNode::make(
 		SharedPtr<ExchangeViewNode> exchange_view,
 		AllocationType type,
@@ -57,14 +82,6 @@ AllocationNode::make(
 	return std::make_unique<AllocationNode>(
 		std::move(exchange_view), type, alloc_param, epsilon
 	);
-}
-
-
-//============================================================================
-Exchange&
-	AllocationNode::getExchange() noexcept
-{
-	return m_exchange;
 }
 
 
@@ -103,7 +120,7 @@ AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
 
 //============================================================================
 size_t
-	AllocationNode::getWarmup() const noexcept
+AllocationNode::getWarmup() const noexcept
 {
 	return m_exchange_view->getWarmup();
 }
@@ -111,7 +128,7 @@ size_t
 
 //============================================================================
 StrategyNode::StrategyNode(
-	SharedPtr<AllocationNode> allocation,
+	SharedPtr<AllocationBaseNode> allocation,
 	Portfolio& portfolio
 ) noexcept :
 	OpperationNode<void, Eigen::VectorXd&>(NodeType::STRATEGY),
@@ -130,7 +147,7 @@ StrategyNode::~StrategyNode() noexcept
 
 //============================================================================
 void
-	StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
+StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
 {
 	if (m_trigger && !(*m_trigger)->evaluate())
 	{
@@ -143,7 +160,7 @@ void
 
 //============================================================================s
 Exchange&
-	StrategyNode::getExchange() noexcept
+StrategyNode::getExchange() noexcept
 {
 	return m_allocation->getExchange();
 }
@@ -151,10 +168,94 @@ Exchange&
 
 //============================================================================
 double
-	StrategyNode::getAllocEpsilon() const noexcept
+StrategyNode::getAllocEpsilon() const noexcept
 {
 	return m_allocation->getAllocEpsilon();
 }
+
+
+//============================================================================
+void
+StrategyNode::setTrigger(SharedPtr<TriggerNode> trigger) noexcept
+{
+	m_trigger = trigger;
+}
+
+
+//============================================================================
+FixedAllocationNode::~FixedAllocationNode() noexcept
+{
+
+}
+
+
+//============================================================================
+FixedAllocationNode::FixedAllocationNode(
+	Vector<std::pair<size_t, double>> m_allocations,
+	SharedPtr<Exchange> exchange,
+	double epsilon
+) noexcept :
+	AllocationBaseNode(
+		AllocationType::FIXED,
+		*exchange,
+		epsilon,
+		std::nullopt),
+	m_allocations(std::move(m_allocations))
+{
+	m_allocations = std::move(m_allocations);
+}
+
+
+
+
+
+//============================================================================
+Result<SharedPtr<AllocationBaseNode>, AtlasException>
+FixedAllocationNode::make(
+	Vector<std::pair<String, double>> allocations,
+	SharedPtr<Exchange> exchange,
+	double epsilon
+) noexcept
+{
+	Vector<std::pair<size_t, double>> allocations_ids;
+	for (const auto& pair : allocations)
+	{
+		auto id_opt = exchange->getAssetIndex(pair.first);
+		if (!id_opt)
+		{
+			return Err("Asset not found: " + pair.first);
+		}
+		allocations_ids.push_back(std::make_pair(*id_opt, pair.second));
+	}
+	return std::make_shared<FixedAllocationNode>(
+		std::move(allocations_ids), exchange, epsilon
+	);
+}
+
+
+//============================================================================
+SharedPtr<AllocationBaseNode>
+FixedAllocationNode::pyMake(Vector<std::pair<String, double>> m_allocations, SharedPtr<Exchange> exchange, double epsilon)
+{
+	auto res = make(std::move(m_allocations), exchange, epsilon);
+	if (!res)
+	{
+		throw std::exception(res.error().what());
+	}
+	return std::move(*res);
+}
+
+
+//============================================================================
+void
+FixedAllocationNode::evaluate(Eigen::VectorXd& target) noexcept
+{
+	for (auto& pair : m_allocations)
+	{
+		target(pair.first) = pair.second;
+	}
+}
+
 
 
 }

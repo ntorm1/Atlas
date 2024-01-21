@@ -14,6 +14,7 @@ import PortfolioModule;
 import AssetNodeModule;
 import ExchangeNodeModule;
 import StrategyNodeModule;
+import HelperNodesModule;
 
 import AtlasEnumsModule;
 import AtlasException;
@@ -40,7 +41,10 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("removeStrategy", &Atlas::Hydra::removeStrategy)
         .def("reset", &Atlas::Hydra::pyReset)
         .def("addExchange", &Atlas::Hydra::pyAddExchange)
-        .def("addStrategy", &Atlas::Hydra::pyAddStrategy)
+        .def("addStrategy", &Atlas::Hydra::pyAddStrategy,
+            py::arg("strategy"),
+			py::arg("replace_if_exists") = false
+        )
         .def("addPortfolio", &Atlas::Hydra::pyAddPortfolio)
         .def(py::init<>());
     py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")
@@ -93,6 +97,12 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::ExchangeViewNode, std::shared_ptr<Atlas::AST::ExchangeViewNode>>(m_ast, "ExchangeViewNode")
         .def("setFilter", &Atlas::AST::ExchangeViewNode::setFilter)
         .def(py::init<std::shared_ptr<Atlas::Exchange>, Atlas::AST::AssetOpNodeVariant>());
+
+    py::class_<Atlas::AST::StrategyMonthlyRunnerNode, std::shared_ptr<Atlas::AST::StrategyMonthlyRunnerNode>>(m_ast, "StrategyMonthlyRunnerNode")
+        .def_static("make", &Atlas::AST::StrategyMonthlyRunnerNode::pyMake);
+    
+    py::class_<Atlas::AST::FixedAllocationNode, std::shared_ptr<Atlas::AST::FixedAllocationNode>>(m_ast, "FixedAllocationNode")
+        .def_static("make", &Atlas::AST::FixedAllocationNode::pyMake);
 
     py::class_<Atlas::AST::AllocationNode, std::shared_ptr<Atlas::AST::AllocationNode>>(m_ast, "AllocationNode")
         .def(py::init<std::shared_ptr<Atlas::AST::ExchangeViewNode>, Atlas::AST::AllocationType, std::optional<double>, double>(),

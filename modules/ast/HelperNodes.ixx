@@ -30,7 +30,7 @@ protected:
 	size_t m_index_counter = 0;
 	Exchange const& m_exchange;
 public:
-	
+	virtual ~TriggerNode() noexcept = default;
 	TriggerNode(Exchange const& exchange
 	)  noexcept : 
 		m_exchange(exchange),
@@ -49,16 +49,17 @@ private:
 	virtual Result<bool, AtlasException> build() noexcept override;
 
 public:
+	ATLAS_API ~StrategyMonthlyRunnerNode() noexcept = default;
 	StrategyMonthlyRunnerNode(
 		Strategy const& strategy
 	) noexcept;
 
 	bool evaluate() noexcept override;
 
-	ATLAS_API [[nodiscard]] static Result<UniquePtr<TriggerNode>,AtlasException>
-	make(
-		Strategy const& strategy
-	) noexcept;
+	ATLAS_API [[nodiscard]] static SharedPtr<TriggerNode>
+	pyMake(
+		SharedPtr<const Strategy> strategy
+	);
 
 };
 

@@ -79,14 +79,14 @@ StrategyMonthlyRunnerNode::evaluate() noexcept
 
 
 //============================================================================
-Result<UniquePtr<TriggerNode>, AtlasException>
-StrategyMonthlyRunnerNode::make(Strategy const& strategy) noexcept
+SharedPtr<TriggerNode>
+StrategyMonthlyRunnerNode::pyMake(SharedPtr<const Strategy> strategy)
 {
-	auto node = std::make_unique<StrategyMonthlyRunnerNode>(strategy);
+	auto node = std::make_unique<StrategyMonthlyRunnerNode>(*strategy);
 	auto result = node->build();
 	if (!result)
 	{
-		return Err(result.error());
+		throw std::runtime_error(result.error().what());
 	}
 	return node;
 }

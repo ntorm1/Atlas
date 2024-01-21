@@ -84,8 +84,8 @@ Hydra::addStrategy(
 		return m_impl->m_strategies[idx].get();
 	}
 	strategy->setID(m_impl->m_strategies.size());
-	m_impl->m_strategies.push_back(std::move(strategy));
 	m_impl->m_strategy_map[strategy->getName()] = m_impl->m_strategies.size() - 1;
+	m_impl->m_strategies.push_back(std::move(strategy));
 	return m_impl->m_strategies.back().get();
 }
 

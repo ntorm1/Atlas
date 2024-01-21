@@ -42,7 +42,7 @@ public:
 	) const noexcept;
 	ATLAS_API Result<Strategy const*, AtlasException> addStrategy(
 		SharedPtr<Strategy> strategy,
-		bool replace_if_exists
+		bool replace_if_exists = false
 	) noexcept;
 	ATLAS_API Result<SharedPtr<Portfolio>, AtlasException> addPortfolio(
 		String name,
