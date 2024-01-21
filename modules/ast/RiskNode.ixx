@@ -6,7 +6,7 @@ export module RiskNodeModule;
 import AtlasLinAlg;
 import AtlasCore;
 import BaseNodeModule;
-
+import AtlasTimeModule;
 
 namespace Atlas
 {
@@ -15,31 +15,39 @@ namespace AST
 {
 
 
-//============================================================================
-export enum class RiskLookbackType
-{
-	DAILY = 0
-};
-
 
 //============================================================================
-export struct RiskLookback
+struct RiskLookbackDef
 {
-	RiskLookbackType type;
-	size_t count;
-};
+	size_t trigger_call_idx;
+	size_t returns_start_idx;
+	size_t returns_end_idx;
 
+	RiskLookbackDef(
+		size_t trigger_call_idx,
+		size_t returns_start_idx,
+		size_t returns_end_idx
+	) noexcept :
+		trigger_call_idx(trigger_call_idx),
+		returns_start_idx(returns_start_idx),
+		returns_end_idx(returns_end_idx)
+	{}
+};
 
 
 //============================================================================
 export class AllocationWeightNode : public OpperationNode<void, LinAlg::EigenVectorXd&>
 {
-	RiskLookback m_lookback;
+	Time::TimeOffset m_lookback;
 	SharedPtr<TriggerNode> m_trigger;
+	Vector<RiskLookbackDef> m_lookback_defs;
+
+	void buildLookbackDefs() noexcept;
+
 public:
 	virtual ~AllocationWeightNode() noexcept;
 	AllocationWeightNode(
-		RiskLookback l,
+		Time::TimeOffset l,
 		SharedPtr<TriggerNode> trigger
 	) noexcept;
 
@@ -54,7 +62,7 @@ export class InvVolWeight final : public AllocationWeightNode
 public:
 	~InvVolWeight() noexcept;
 	InvVolWeight(
-		RiskLookback l,
+		Time::TimeOffset l,
 		SharedPtr<TriggerNode> trigger
 	) noexcept;
 

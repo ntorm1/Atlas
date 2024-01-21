@@ -1,11 +1,11 @@
 module;
 #include <Eigen/Dense>
-#include <chrono>
 #include "AtlasMacros.hpp"
 module HelperNodesModule;
 
 import ExchangeModule;
 import StrategyModule;
+import AtlasTimeModule;
 
 namespace Atlas
 {
@@ -14,29 +14,14 @@ namespace AST
 
 {
 
-	
+
 //============================================================================
-static int
-getMonthFromEpoch(int64_t epoch) noexcept
+Int64
+applyDateOffset()
 {
-	std::chrono::seconds epoch_time(epoch / 1000000000);
-
-	// Convert nanoseconds to system_clock::time_point
-	std::chrono::system_clock::time_point time_point = std::chrono::time_point<std::chrono::system_clock>(epoch_time);
-
-	// Convert system_clock::time_point to std::time_t
-	std::time_t time_t_value = std::chrono::system_clock::to_time_t(time_point);
-
-	// Convert std::time_t to std::tm using gmtime_s for GMT time
-	std::tm time_info;
-	gmtime_s(&time_info, &time_t_value);
-
-	// Extract month from std::tm
-	int month_number = time_info.tm_mon + 1; // tm_mon is zero-based
-	return month_number;
+	return Int64();
 }
-
-
+	
 //============================================================================
 StrategyMonthlyRunnerNode::StrategyMonthlyRunnerNode(
 	Exchange const& exchange,
@@ -60,7 +45,7 @@ StrategyMonthlyRunnerNode::build() noexcept
 	for (size_t t = 0; t < timestamps.size(); ++t)
 	{
 		auto timestamp = timestamps[t];
-		auto month = getMonthFromEpoch(timestamp);
+		auto month = Time::getMonthFromEpoch(timestamp);
 		if (month == -1)
 		{
 			return Err("Failed to get month from epoch");
@@ -88,7 +73,7 @@ StrategyMonthlyRunnerNode::build() noexcept
 			else if (t < timestamps.size() - 1)
 			{
 				auto next_timestamp = timestamps[t + 1];
-				auto next_month = getMonthFromEpoch(next_timestamp);
+				auto next_month = Time::getMonthFromEpoch(next_timestamp);
 				if (next_month != month)
 				{
 					m_tradeable_mask[t] = 1;

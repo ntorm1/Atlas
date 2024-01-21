@@ -18,6 +18,7 @@ namespace Atlas
 namespace AST
 {
 
+static Int64 applyDateOffset();
 
 //============================================================================
 export class TriggerNode 
@@ -41,6 +42,7 @@ public:
 	virtual bool evaluate() noexcept override = 0;
 	virtual void reset() noexcept = 0;
 	size_t getWarmup() const noexcept override { return 0; }
+	Exchange const& getExchange() const noexcept { return m_exchange; }
 	Eigen::VectorXi const& getMask() const noexcept { return m_tradeable_mask; }
 };
 
@@ -68,8 +70,6 @@ public:
 	);
 
 };
-
-
 
 
 }
