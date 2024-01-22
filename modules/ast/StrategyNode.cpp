@@ -262,6 +262,7 @@ FixedAllocationNode::evaluate(Eigen::VectorXd& target) noexcept
 {
 	for (auto& pair : m_allocations)
 	{
+		assert(pair.first < static_cast<size_t>(target.size()));
 		target(pair.first) = pair.second;
 	}
 }

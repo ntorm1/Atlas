@@ -146,8 +146,6 @@ Strategy::evaluate() noexcept
 	// get the portfolio return by calculating the sum product of the market returns and the portfolio weights
 	assert(market_returns.rows() == m_impl->m_target_weights_buffer.rows());
 	assert(!market_returns.array().isNaN().any());
-
-
 	
 	// print out target weights buffer and market returns
 	double portfolio_return = market_returns.dot(m_impl->m_target_weights_buffer);
@@ -172,7 +170,12 @@ Strategy::lateRebalance() noexcept
 	m_impl->m_target_weights_buffer = returns.cwiseProduct(m_impl->m_target_weights_buffer);
 
 	// divide the target weights buffer by the sum to get the new weights
-	m_impl->m_target_weights_buffer /= m_impl->m_target_weights_buffer.sum();
+	auto sum = m_impl->m_target_weights_buffer.sum();
+	if (sum > 0.0)
+	{
+		m_impl->m_target_weights_buffer /= sum;
+	}
+	assert(!m_impl->m_target_weights_buffer.array().isNaN().any());
 }
 
 

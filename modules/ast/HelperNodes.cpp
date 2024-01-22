@@ -107,8 +107,8 @@ StrategyMonthlyRunnerNode::reset() noexcept
 bool
 StrategyMonthlyRunnerNode::evaluate() noexcept
 {
-	bool is_tradeable = static_cast<bool>(m_tradeable_mask(m_index_counter));
-	return is_tradeable;
+	assert((m_index_counter - 1) < static_cast<size_t>(m_tradeable_mask.size()));
+	return static_cast<bool>(m_tradeable_mask(m_index_counter - 1));
 }
 
 
