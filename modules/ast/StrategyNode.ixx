@@ -11,12 +11,14 @@ export module StrategyNodeModule;
 import AtlasCore;
 import BaseNodeModule;
 import StrategyBufferModule;
+import AllocationNodeModule;
 
 namespace Atlas
 {
 
 namespace AST
 {
+
 
 
 //============================================================================

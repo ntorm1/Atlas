@@ -60,7 +60,7 @@ ExchangeViewNode::ExchangeViewNode(
     Exchange& exchange,
     AssetOpNodeVariant asset_op_node
 ) noexcept :
-    OpperationNode<void, Eigen::VectorXd&>(NodeType::EXCHANGE_VIEW),
+    StrategyBufferOpNode(NodeType::EXCHANGE_VIEW, exchange, std::nullopt),
     m_asset_op_node(std::move(asset_op_node)),
     m_exchange(exchange),
     m_warmup(m_asset_op_node.warmup)

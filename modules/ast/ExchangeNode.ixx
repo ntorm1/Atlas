@@ -15,7 +15,7 @@ import AtlasCore;
 import BaseNodeModule;
 import AtlasLinAlg;
 import AssetNodeModule;
-
+import StrategyBufferModule;
 
 namespace Atlas
 {
@@ -91,7 +91,7 @@ export struct ExchangeViewFilter
 //============================================================================
 export class ExchangeViewNode
 	final
-	: public OpperationNode<void, Eigen::VectorXd&>
+	: public StrategyBufferOpNode
 {
 private:
 	Exchange& m_exchange;

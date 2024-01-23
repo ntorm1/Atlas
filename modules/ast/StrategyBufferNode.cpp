@@ -1,6 +1,8 @@
 module;
 module StrategyBufferModule;
 
+import AllocationNodeModule;
+
 namespace Atlas
 {
 
