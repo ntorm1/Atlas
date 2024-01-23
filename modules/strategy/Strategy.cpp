@@ -2,6 +2,7 @@ module;
 #define NOMINMAX
 #include <Eigen/Dense>
 #include <iostream>
+#include "AtlasMacros.hpp"
 module StrategyModule;
 
 import ExchangeModule;
@@ -27,7 +28,6 @@ public:
 	Eigen::VectorXd m_adjustment_buffer;
 	SharedPtr<AST::StrategyNode> m_ast;
 	Option<SharedPtr<CommisionManager>> m_commision_manager;
-	double m_alloc_epsilon = 0.0;
 
 	StrategyImpl(
 		Strategy* strategy,
@@ -42,7 +42,6 @@ public:
 		m_exchange.registerStrategy(strategy);
 		m_target_weights_buffer.resize(m_exchange.getAssetCount());
 		m_adjustment_buffer.resize(m_exchange.getAssetCount());
-		m_alloc_epsilon = m_ast->getAllocEpsilon();
 
 		m_target_weights_buffer.setZero();
 		m_adjustment_buffer.setZero();
@@ -131,11 +130,16 @@ Strategy::getWeightHistory() const noexcept
 
 
 //============================================================================
-CommisionManager& Strategy::initCommissionManager() noexcept
+Result<SharedPtr<CommisionManager>, AtlasException>
+Strategy::initCommissionManager() noexcept
 {
 	m_impl->m_commision_manager = CommissionManagerFactory::create(*this);
-	m_impl->m_ast->setCommissionManager(m_impl->m_commision_manager.value());
-	return *(m_impl->m_commision_manager.value());
+	auto res = m_impl->m_ast->setCommissionManager(m_impl->m_commision_manager.value());
+	if (!res)
+	{
+		return Err("failed to find allocation node");
+	}
+	return m_impl->m_commision_manager.value();
 }
 
 

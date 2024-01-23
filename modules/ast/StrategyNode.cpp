@@ -30,11 +30,10 @@ AllocationBaseNode::AllocationBaseNode(
 	double epsilon,
 	Option<double> alloc_param
 ) noexcept :
-	OpperationNode<void, Eigen::VectorXd&>(NodeType::ALLOC),
+	StrategyBufferOpNode(NodeType::ALLOC, exchange, std::nullopt),
 	m_type(m_type),
 	m_alloc_param(alloc_param),
-	m_epsilon(epsilon),
-	m_exchange(exchange)
+	m_epsilon(epsilon)
 {
 	m_weights_buffer.resize(exchange.getAssetCount());
 	m_weights_buffer.setZero();
@@ -42,16 +41,8 @@ AllocationBaseNode::AllocationBaseNode(
 
 
 //============================================================================
-Exchange&
-AllocationBaseNode::getExchange() noexcept
-{
-	return m_exchange;
-}
-
-
-//============================================================================
 void
-AllocationBaseNode::evaluateBase(Eigen::VectorXd& target) noexcept
+AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 {
 	// if we have a commission manager we need to copy the current weights buffer 
 	// into the commission manager buffer before it gets overwritten by the ast. 
@@ -64,7 +55,7 @@ AllocationBaseNode::evaluateBase(Eigen::VectorXd& target) noexcept
 		m_weights_buffer = target;
 	}
 
-	evaluate(target);
+	evaluateChild(target);
 
 	// if epsilon is set we need to check if the difference between the current
 	// weights and the new weights is less than epsilon. If it is we need to
@@ -125,7 +116,7 @@ AllocationNode::make(
 
 //============================================================================
 void
-AllocationNode::evaluate(Eigen::VectorXd& target) noexcept
+AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 {
 	// evaluate the exchange view to calculate the signal
 	m_exchange_view->evaluate(target);
@@ -166,7 +157,7 @@ AllocationNode::getWarmup() const noexcept
 
 //============================================================================
 StrategyNode::StrategyNode(
-	SharedPtr<AllocationBaseNode> allocation,
+	SharedPtr<StrategyBufferOpNode> allocation,
 	Portfolio& portfolio
 ) noexcept :
 	OpperationNode<bool, Eigen::VectorXd&>(NodeType::STRATEGY),
@@ -191,11 +182,25 @@ StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
 	{
 		return false;
 	}
-	m_allocation->evaluateBase(target);
+	m_allocation->evaluate(target);
 	if (m_alloc_weight)
 	{
 		(*m_alloc_weight)->evaluate(target);
 	}
+	return true;
+}
+
+
+//============================================================================
+bool
+StrategyNode::setCommissionManager(SharedPtr<CommisionManager> manager) noexcept
+{
+	Option<AllocationBaseNode*> node = m_allocation->getAllocationNode();
+	if (!node)
+	{
+		return false;
+	}
+	(*node)->setCommissionManager(manager);
 	return true;
 }
 
@@ -205,14 +210,6 @@ Exchange&
 StrategyNode::getExchange() noexcept
 {
 	return m_allocation->getExchange();
-}
-
-
-//============================================================================
-double
-StrategyNode::getAllocEpsilon() const noexcept
-{
-	return m_allocation->getAllocEpsilon();
 }
 
 
@@ -300,7 +297,7 @@ FixedAllocationNode::pyMake(Vector<std::pair<String, double>> m_allocations, Sha
 
 //============================================================================
 void
-FixedAllocationNode::evaluate(Eigen::VectorXd& target) noexcept
+FixedAllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 {
 	for (auto& pair : m_allocations)
 	{

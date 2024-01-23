@@ -10,47 +10,13 @@ export module StrategyNodeModule;
 
 import AtlasCore;
 import BaseNodeModule;
+import StrategyBufferModule;
 
 namespace Atlas
 {
 
 namespace AST
 {
-
-export enum class AllocationType
-{
-	UNIFORM = 0,
-	CONDITIONAL_SPLIT = 1,
-	FIXED = 2
-};
-
-
-export class AllocationBaseNode : public OpperationNode<void, Eigen::VectorXd&>
-{
-protected:
-	AllocationType m_type;
-	Exchange& m_exchange;
-	double m_epsilon;
-	Eigen::VectorXd m_weights_buffer;
-	Option<double> m_alloc_param = std::nullopt;
-	Option<SharedPtr<CommisionManager>> m_commision_manager = std::nullopt;
-public:
-	virtual ~AllocationBaseNode() noexcept = default;
-	AllocationBaseNode(
-		AllocationType m_type,
-		Exchange& exchange,
-		double epsilon,
-		Option<double> alloc_param
-	) noexcept;
-
-	[[nodiscard]] AllocationType getType() const noexcept { return m_type; }
-	[[nodiscard]] double getAllocEpsilon() const noexcept { return m_epsilon; }
-	[[nodiscard]] virtual size_t getWarmup() const noexcept = 0;
-	[[nodiscard]] Exchange& getExchange() noexcept;
-	void setCommisionManager(SharedPtr<CommisionManager> manager) noexcept { m_commision_manager = manager; }
-	void evaluateBase(Eigen::VectorXd& target) noexcept;
-	void evaluate(Eigen::VectorXd& target) noexcept override = 0;
-};
 
 
 //============================================================================
@@ -81,7 +47,7 @@ public:
 		double epsilon = 0.000f
 	);
 
-	void evaluate(Eigen::VectorXd& target) noexcept override;
+	void evaluateChild(Eigen::VectorXd& target) noexcept override;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return 0; }
 
 };
@@ -115,7 +81,7 @@ public:
 
 
 	[[nodiscard]] size_t getWarmup() const noexcept override;
-	void evaluate(Eigen::VectorXd& target) noexcept override;
+	void evaluateChild(Eigen::VectorXd& target) noexcept override;
 };
 
 
@@ -124,28 +90,28 @@ export class StrategyNode final : OpperationNode<bool, Eigen::VectorXd&>
 {
 	friend class Strategy;
 private:
-	SharedPtr<AllocationBaseNode> m_allocation;
+	SharedPtr<StrategyBufferOpNode> m_allocation;
 	Option<SharedPtr<TriggerNode>> m_trigger;
 	Option<SharedPtr<AllocationWeightNode>> m_alloc_weight;
 	Portfolio& m_portfolio;
 	size_t m_warmup;
 
 	void reset() noexcept;
-	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept { m_allocation->setCommisionManager(manager); }
+	[[nodiscard]] bool setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
 
 public:
 	ATLAS_API StrategyNode(
-		SharedPtr<AllocationBaseNode> allocation,
+		SharedPtr<StrategyBufferOpNode> allocation,
 		Portfolio& portfolio
 	) noexcept;
 
 	ATLAS_API StrategyNode(
-		SharedPtr<AllocationBaseNode> allocation,
+		SharedPtr<StrategyBufferOpNode> allocation,
 		SharedPtr<Portfolio> portfolio
 	) noexcept : StrategyNode(std::move(allocation), *portfolio) {}
 
 	ATLAS_API [[nodiscard]] static SharedPtr<StrategyNode> make(
-		SharedPtr<AllocationBaseNode> allocation,
+		SharedPtr<StrategyBufferOpNode> allocation,
 		Portfolio& portfolio
 	) noexcept
 	{
@@ -160,7 +126,6 @@ public:
 
 	[[nodiscard]] Portfolio& getPortfolio() const noexcept { return m_portfolio; }
 	[[nodiscard]] Exchange& getExchange() noexcept;
-	[[nodiscard]] double getAllocEpsilon() const noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 
 };

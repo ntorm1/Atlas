@@ -70,5 +70,6 @@ export namespace Atlas
 		class StrategyNode;
 		class TriggerNode;
 		class AllocationWeightNode;
+		class AllocationBaseNode;
 	}
 }

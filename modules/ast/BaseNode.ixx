@@ -1,6 +1,8 @@
 module;
 export module BaseNodeModule;
 
+import AtlasCore;
+
 namespace Atlas
 {
 
@@ -17,6 +19,7 @@ export enum class NodeType
 	STRATEGY = 4,
 	STRATEGY_RUNNER = 5,
 	ALLOC_WEIGHT = 6,
+	RANK_NODE = 7
 };
 
 
@@ -31,12 +34,21 @@ export enum class AssetOpType
 
 
 //============================================================================
-class ASTNode {
+export class ASTNode {
 public:
-	ASTNode(NodeType type) : _type(type) {}
+	ASTNode(
+		NodeType type,
+		Option<ASTNode*> parent = std::nullopt
+	) : _type(type), _parent(parent) {}
+	
 	virtual ~ASTNode() {}
 	virtual size_t getWarmup() const noexcept = 0;
+	
+	NodeType getType() const noexcept { return _type; }
+	Option<ASTNode*> getParent() const noexcept { return _parent; }
+
 private:
+	Option<ASTNode*> _parent = std::nullopt;
 	NodeType _type;
 };
 
@@ -55,7 +67,10 @@ public:
 export template <typename Result, typename Param = void>
 class OpperationNode : public ASTNode {
 public:
-	OpperationNode(NodeType type) : ASTNode(type) {}
+	OpperationNode(
+		NodeType type,
+		Option<ASTNode*> parent = std::nullopt
+	) : ASTNode(type, parent) {}
 	virtual ~OpperationNode() {}
 	virtual Result evaluate(Param) noexcept = 0;
 };
@@ -68,6 +83,7 @@ public:
 	virtual ~StatementNode() {}
 	virtual void evaluate() = 0;
 };
+
 
 }
 

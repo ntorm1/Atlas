@@ -96,10 +96,10 @@ export class ExchangeViewNode
 private:
 	Exchange& m_exchange;
 	AssetOpNodeVariant m_asset_op_node;
+	size_t m_view_size;
 	size_t m_warmup;
 	Option<ExchangeViewFilter> m_filter = std::nullopt;
 public:
-
 	ATLAS_API ~ExchangeViewNode() noexcept;
 	ATLAS_API ExchangeViewNode(
 		Exchange& exchange,
@@ -108,8 +108,7 @@ public:
 	ATLAS_API ExchangeViewNode(
 		SharedPtr<Exchange> exchange,
 		AssetOpNodeVariant asset_op_node
-	) noexcept:
-		ExchangeViewNode(*exchange, std::move(asset_op_node)) {}
+	) noexcept;
 
 	ATLAS_API [[nodiscard]] static UniquePtr<ExchangeViewNode> make(
 		Exchange& exchange,
@@ -126,8 +125,11 @@ public:
 		m_filter = ExchangeViewFilter(type, value);
 	}
 
+
+
 	[[nodiscard]] AssetNodeType getType() const noexcept { return m_asset_op_node.t; }
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
+	[[nodiscard]] size_t getViewSize() const noexcept { return m_view_size; }
 	[[nodiscard]] auto& getExchange() { return m_exchange; }
 	void filter(Eigen::VectorXd& v) const noexcept;
 

@@ -65,6 +65,17 @@ ExchangeViewNode::ExchangeViewNode(
     m_exchange(exchange),
     m_warmup(m_asset_op_node.warmup)
 {
+    m_view_size = m_exchange.getAssetCount();
+}
+
+
+//============================================================================
+ExchangeViewNode::ExchangeViewNode(
+    SharedPtr<Exchange> exchange,
+    AssetOpNodeVariant asset_op_node
+) noexcept :
+    ExchangeViewNode(*exchange, std::move(asset_op_node)) 
+{
 }
 
 
