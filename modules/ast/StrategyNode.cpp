@@ -36,7 +36,8 @@ AllocationBaseNode::AllocationBaseNode(
 	m_epsilon(epsilon),
 	m_exchange(exchange)
 {
-
+	m_weights_buffer.resize(exchange.getAssetCount());
+	m_weights_buffer.setZero();
 }
 
 
@@ -54,18 +55,31 @@ AllocationBaseNode::evaluateBase(Eigen::VectorXd& target) noexcept
 {
 	// if we have a commission manager we need to copy the current weights buffer 
 	// into the commission manager buffer before it gets overwritten by the ast. 
-	if (m_commision_manager)
+	// 
+	// Additionally if weight epsilon is set we need to copy the current weights
+	// so that any adjustments made are reverted back if the absolute value of the
+	// differene is less than epsilon
+	if (m_commision_manager || m_epsilon)
 	{
-		(*m_commision_manager)->bufferCopy(target);
+		m_weights_buffer = target;
 	}
 
 	evaluate(target);
+
+	// if epsilon is set we need to check if the difference between the current
+	// weights and the new weights is less than epsilon. If it is we need to
+	// revert the weights back to the original weights before calculating any commissions
+	if (m_epsilon)
+	{
+		target = ((target - m_weights_buffer).cwiseAbs().array() < m_epsilon)
+			.select(m_weights_buffer, target);
+	}
 	
 	// if we have a commission manager we need to calculate the commission caused
 	// by the current weights adjustment
 	if (m_commision_manager && (*m_commision_manager)->hasCommission())
 	{
-		(*m_commision_manager)->calculateCommission(target);
+		(*m_commision_manager)->calculateCommission(target, m_weights_buffer);
 	}
 }
 

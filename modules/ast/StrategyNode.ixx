@@ -31,6 +31,7 @@ protected:
 	AllocationType m_type;
 	Exchange& m_exchange;
 	double m_epsilon;
+	Eigen::VectorXd m_weights_buffer;
 	Option<double> m_alloc_param = std::nullopt;
 	Option<SharedPtr<CommisionManager>> m_commision_manager = std::nullopt;
 public:
