@@ -8,6 +8,8 @@ import ExchangeModule;
 
 import HelperNodesModule;
 import ExchangeNodeModule;
+import RiskNodeModule;
+import CommissionsModule;
 
 namespace Atlas
 {
@@ -43,6 +45,28 @@ Exchange&
 AllocationBaseNode::getExchange() noexcept
 {
 	return m_exchange;
+}
+
+
+//============================================================================
+void
+AllocationBaseNode::evaluateBase(Eigen::VectorXd& target) noexcept
+{
+	// if we have a commission manager we need to copy the current weights buffer 
+	// into the commission manager buffer before it gets overwritten by the ast. 
+	if (m_commision_manager)
+	{
+		(*m_commision_manager)->bufferCopy(target);
+	}
+
+	evaluate(target);
+	
+	// if we have a commission manager we need to calculate the commission caused
+	// by the current weights adjustment
+	if (m_commision_manager && (*m_commision_manager)->hasCommission())
+	{
+		(*m_commision_manager)->calculateCommission(target);
+	}
 }
 
 
@@ -153,7 +177,11 @@ StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
 	{
 		return false;
 	}
-	m_allocation->evaluate(target);
+	m_allocation->evaluateBase(target);
+	if (m_alloc_weight)
+	{
+		(*m_alloc_weight)->evaluate(target);
+	}
 	return true;
 }
 

@@ -26,6 +26,7 @@ export class Strategy
 	friend class AST::StrategyNode;
 	friend class Exchange;
 	friend class Hydra;
+	friend class CommisionManager;
 private:
 	String m_name;
 	size_t m_id = 0;
@@ -37,6 +38,7 @@ private:
 	void step() noexcept;
 	void reset() noexcept;
 	void lateRebalance() noexcept;
+	void setNlv(double nlv_new) noexcept;
 	void setID(size_t id) noexcept { m_id = id; }
 
 public:
@@ -56,7 +58,7 @@ public:
 	ATLAS_API void enableTracerHistory(TracerType t) noexcept;
 	ATLAS_API Eigen::VectorXd const& getHistory(TracerType t) const noexcept;
 	ATLAS_API Eigen::MatrixXd const& getWeightHistory() const noexcept;
-
+	ATLAS_API CommisionManager& initCommissionManager() noexcept;
 
 	Exchange const& getExchange() const noexcept;
 

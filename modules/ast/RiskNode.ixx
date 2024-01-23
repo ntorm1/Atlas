@@ -47,8 +47,8 @@ public:
 	) noexcept;
 
 	void cache() noexcept override;
+	size_t getWarmup() const noexcept override { return m_lookback_window; }
 	void evaluate(LinAlg::EigenVectorXd& target) noexcept override = 0;
-
 };
 
 

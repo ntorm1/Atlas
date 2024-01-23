@@ -57,6 +57,7 @@ export namespace Atlas
 	class Portfolio;
 	class Strategy;
 	class Tracer;
+	class CommisionManager;
 
 	namespace AST
 	{
@@ -68,5 +69,6 @@ export namespace Atlas
 		class ExchangeViewNode;
 		class StrategyNode;
 		class TriggerNode;
+		class AllocationWeightNode;
 	}
 }

@@ -8,6 +8,7 @@ import ExchangeModule;
 import TracerModule;
 import PortfolioModule;
 import StrategyNodeModule;
+import CommissionsModule;
 
 import AtlasLinAlg;
 
@@ -25,6 +26,7 @@ public:
 	Eigen::VectorXd m_target_weights_buffer;
 	Eigen::VectorXd m_adjustment_buffer;
 	SharedPtr<AST::StrategyNode> m_ast;
+	Option<SharedPtr<CommisionManager>> m_commision_manager;
 	double m_alloc_epsilon = 0.0;
 
 	StrategyImpl(
@@ -129,6 +131,15 @@ Strategy::getWeightHistory() const noexcept
 
 
 //============================================================================
+CommisionManager& Strategy::initCommissionManager() noexcept
+{
+	m_impl->m_commision_manager = CommissionManagerFactory::create(*this);
+	m_impl->m_ast->setCommissionManager(m_impl->m_commision_manager.value());
+	return *(m_impl->m_commision_manager.value());
+}
+
+
+//============================================================================
 Exchange const&
 Strategy::getExchange() const noexcept
 {
@@ -176,6 +187,14 @@ Strategy::lateRebalance() noexcept
 		m_impl->m_target_weights_buffer /= sum;
 	}
 	assert(!m_impl->m_target_weights_buffer.array().isNaN().any());
+}
+
+
+//============================================================================
+void
+Strategy::setNlv(double nlv_new) noexcept
+{
+	m_impl->m_tracer.setNLV(nlv_new);
 }
 
 

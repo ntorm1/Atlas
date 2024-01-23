@@ -191,6 +191,8 @@
     <ClCompile Include="modules\exchange\ExchangeMap.cpp" />
     <ClCompile Include="modules\exchange\ExchangeMap.ixx" />
     <ClCompile Include="modules\exchange\ExchangePrivate.ixx" />
+    <ClCompile Include="modules\hydra\Commissions.cpp" />
+    <ClCompile Include="modules\hydra\Commissions.ixx" />
     <ClCompile Include="modules\hydra\Hydra.cpp" />
     <ClCompile Include="modules\hydra\Hydra.ixx" />
     <ClCompile Include="modules\portfolio\Portfolio.cpp" />

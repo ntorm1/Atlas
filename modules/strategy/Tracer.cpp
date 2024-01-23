@@ -86,6 +86,7 @@ Tracer::getHistory(TracerType t) const noexcept
 		case TracerType::NLV:
 			return m_nlv_history;
         case TracerType::WEIGHTS:
+            assert(false);
             break; // handled differently 
 	}
 }

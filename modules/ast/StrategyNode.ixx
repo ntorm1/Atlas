@@ -31,7 +31,8 @@ protected:
 	AllocationType m_type;
 	Exchange& m_exchange;
 	double m_epsilon;
-	Option<double> m_alloc_param;
+	Option<double> m_alloc_param = std::nullopt;
+	Option<SharedPtr<CommisionManager>> m_commision_manager = std::nullopt;
 public:
 	virtual ~AllocationBaseNode() noexcept = default;
 	AllocationBaseNode(
@@ -45,7 +46,8 @@ public:
 	[[nodiscard]] double getAllocEpsilon() const noexcept { return m_epsilon; }
 	[[nodiscard]] virtual size_t getWarmup() const noexcept = 0;
 	[[nodiscard]] Exchange& getExchange() noexcept;
-
+	void setCommisionManager(SharedPtr<CommisionManager> manager) noexcept { m_commision_manager = manager; }
+	void evaluateBase(Eigen::VectorXd& target) noexcept;
 	void evaluate(Eigen::VectorXd& target) noexcept override = 0;
 };
 
@@ -123,10 +125,12 @@ export class StrategyNode final : OpperationNode<bool, Eigen::VectorXd&>
 private:
 	SharedPtr<AllocationBaseNode> m_allocation;
 	Option<SharedPtr<TriggerNode>> m_trigger;
+	Option<SharedPtr<AllocationWeightNode>> m_alloc_weight;
 	Portfolio& m_portfolio;
 	size_t m_warmup;
 
 	void reset() noexcept;
+	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept { m_allocation->setCommisionManager(manager); }
 
 public:
 	ATLAS_API StrategyNode(

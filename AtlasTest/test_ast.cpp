@@ -16,6 +16,7 @@ import AssetNodeModule;
 import ExchangeNodeModule;
 import StrategyNodeModule;
 import HelperNodesModule;
+import CommissionsModule;
 
 using namespace Atlas;
 using namespace Atlas::AST;
@@ -72,6 +73,26 @@ protected:
 	{
 		hydra = std::make_shared<Hydra>();
 		exchange_sptr = hydra->addExchange(exchange_id, exchange_path_sp500).value();
+		portfolio = hydra->addPortfolio(portfolio_id, *(exchange_sptr.get()), initial_cash).value();
+	}
+};
+
+
+class RiskCommExchangeTest : public ::testing::Test
+{
+protected:
+	std::shared_ptr<Atlas::Hydra> hydra;
+	std::shared_ptr<Atlas::Portfolio> portfolio;
+	std::shared_ptr<Atlas::Exchange> exchange_sptr;
+	std::string exchange_id = "test";
+	std::string portfolio_id = "test_p";
+	std::string strategy_id = "test_s";
+	double initial_cash = 1000000.0f;
+
+	void SetUp() override
+	{
+		hydra = std::make_shared<Hydra>();
+		exchange_sptr = hydra->addExchange(exchange_id, exchange_path_sp500_ma).value();
 		portfolio = hydra->addPortfolio(portfolio_id, *(exchange_sptr.get()), initial_cash).value();
 	}
 };
@@ -286,4 +307,42 @@ TEST_F(ComplexExchangeTests, FixedAllocTest)
 	auto total_return = (nlv - initial_cash) / initial_cash;
 	double epsilon = abs(total_return - 10.3586);
 	EXPECT_TRUE(epsilon < 0.0005);
+}
+
+
+TEST_F(RiskCommExchangeTest, FixedAllocTest)
+{
+	hydra->build();
+	auto const exchange = hydra->getExchange("test").value();
+	auto slow_ma = AssetReadNode::make("slow_ma", 0, *exchange);
+	auto fast_ma = AssetReadNode::make("fast_ma", 0, *exchange);
+	auto daily_return = AssetDifferenceNode::make(
+		std::move(*fast_ma),
+		std::move(*slow_ma)
+	);
+	auto op_variant = AssetOpNodeVariant(std::move(daily_return));
+	auto exchange_view = ExchangeViewNode::make(
+		*exchange, std::move(op_variant)
+	);
+	auto alloc = AllocationNode::make(
+		std::move(exchange_view),
+		AllocationType::CONDITIONAL_SPLIT,
+		0.0f
+	);
+	auto strategy_node = StrategyNode::make(std::move(*alloc), *portfolio);
+	auto strategy = std::make_unique<Strategy>(
+		strategy_id,
+		std::move(strategy_node),
+		1.0f
+	);
+	auto& commission_manager = strategy->initCommissionManager();
+	//commission_manager.setFixedCommission(1.0f);
+	auto res = hydra->addStrategy(std::move(strategy));
+	hydra->run();
+	auto strategy_ptr = res.value();
+	auto tracer = strategy_ptr->getTracer();
+	auto nlv = tracer.getNLV();
+	auto total_return = (nlv - initial_cash) / initial_cash;
+	double epsilon = abs(total_return - 1.1098);
+	EXPECT_TRUE(epsilon < 0.0015);
 }
