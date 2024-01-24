@@ -160,7 +160,7 @@ StrategyNode::StrategyNode(
 	SharedPtr<StrategyBufferOpNode> allocation,
 	Portfolio& portfolio
 ) noexcept :
-	OpperationNode<bool, Eigen::VectorXd&>(NodeType::STRATEGY),
+	OpperationNode<bool, Eigen::VectorXd&>(NodeType::STRATEGY, allocation.get()),
 	m_allocation(std::move(allocation)),
 	m_portfolio(portfolio)
 {
@@ -195,7 +195,18 @@ StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
 bool
 StrategyNode::setCommissionManager(SharedPtr<CommisionManager> manager) noexcept
 {
-	Option<AllocationBaseNode*> node = m_allocation->getAllocationNode();
+	// search the strategy node call chain for the allocation node so 
+	// we can attach commission manager to it. If we don't find it then
+	// that means there is no allocation node, return false to indicate error.
+	Option<AllocationBaseNode*> node = std::nullopt;
+	if (m_allocation->getType() == NodeType::ALLOC)
+	{
+		node = static_cast<AllocationNode*>(m_allocation.get());
+	}
+	else
+	{
+		node = m_allocation->getAllocationNode();
+	}
 	if (!node)
 	{
 		return false;

@@ -67,7 +67,7 @@ CommisionManager::calculatePctCommission(
 	assert(target_weights.size() == current_weights.size());
 
 	// get a count of number of weights that are different
-	return ((target_weights - current_weights)
+	return ((target_weights - current_weights).cwiseAbs()
 		* nlv * m_commission_pct.value()).sum();
 }
 

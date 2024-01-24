@@ -23,6 +23,8 @@ using namespace Atlas::AST;
 
 double asset1_close[] = {101,103,105,106};
 double asset2_close[] = {101.5,99,97,101.5,101.5,96};
+std::string asset1_name = "asset1";
+std::string asset2_name = "asset2";
 
 /*
 				  Asset1		  Asset2
@@ -40,6 +42,7 @@ class SimpleExchangeTests : public ::testing::Test
 protected:
 	std::shared_ptr<Atlas::Hydra> hydra;
 	std::shared_ptr<Atlas::Portfolio> portfolio;
+	std::shared_ptr<Atlas::Exchange> exchange_sptr;
 	std::string exchange_id = "test";
 	std::string portfolio_id = "test_p";
 	std::string strategy_id = "test_s";
@@ -50,10 +53,10 @@ protected:
 	void SetUp() override
 	{
 		hydra = std::make_shared<Hydra>();
-		auto exchange = hydra->addExchange(exchange_id, exchange_path).value();
-		asset_id_1 = exchange->getAssetIndex("asset1").value();
-		asset_id_2 = exchange->getAssetIndex("asset2").value();
-		portfolio = hydra->addPortfolio(portfolio_id, *exchange, initial_cash).value();
+		exchange_sptr = hydra->addExchange(exchange_id, exchange_path).value();
+		asset_id_1 = exchange_sptr->getAssetIndex(asset1_name).value();
+		asset_id_2 = exchange_sptr->getAssetIndex(asset2_name).value();
+		portfolio = hydra->addPortfolio(portfolio_id, *(exchange_sptr.get()), initial_cash).value();
 	}
 };
 
@@ -260,13 +263,92 @@ TEST_F(ComplexExchangeTests, SimpleTest)
 	auto total_return = (nlv - initial_cash) / initial_cash;
 	double epsilon = abs(total_return - 2.6207);
 	EXPECT_TRUE(epsilon < 0.0005);
+#ifndef _DEBUG
 	EXPECT_TRUE(duration.count() < 500.0f);
 	std::cerr << "Duration: " << duration.count() << "us" << std::endl;
 	std::cerr << "Total Return: " << total_return << std::endl;
 	std::cerr << "Epsilon: " << epsilon << std::endl;
-
+#endif
 }
 
+
+TEST_F(SimpleExchangeTests, CommissionTest)
+{
+	hydra->build();
+	auto const exchange = hydra->getExchange("test").value();
+	Vector<std::pair<String, double>> m_allocations = {
+		{asset1_name, .3},
+		{asset2_name, .7}
+	};
+	auto allocation_node = FixedAllocationNode::make(
+		std::move(m_allocations),
+		exchange,
+		0.0
+	);
+	auto strategy_node = StrategyNode::make(
+		std::move(*allocation_node),
+		*portfolio
+	);
+	auto trigger_node = PeriodicTriggerNode::pyMake(
+		exchange_sptr, 2
+	);
+	strategy_node->setTrigger(std::move(trigger_node));
+	strategy_node->setWarmupOverride(1);
+	auto strategy = std::make_unique<Strategy>(
+		strategy_id,
+		std::move(strategy_node),
+		1.0f
+	);
+	auto commission_manager_res = strategy->initCommissionManager();
+	EXPECT_TRUE(commission_manager_res);
+	auto commission_manager = commission_manager_res.value();
+	double fixed_commission = 1.0f;
+	double commission_pct = .001f;
+	commission_manager->setFixedCommission(fixed_commission);
+	commission_manager->setCommissionPct(commission_pct);
+	
+	auto res = hydra->addStrategy(std::move(strategy));
+	auto strategy_ptr = res.value();
+	auto const& tracer = strategy_ptr->getTracer();
+
+
+	EXPECT_TRUE(res);
+	hydra->step();
+	auto const& weights = strategy_ptr->getAllocationBuffer();
+	
+	// test warmup override 
+	EXPECT_DOUBLE_EQ(weights.sum(), 0.0f);
+	EXPECT_DOUBLE_EQ(tracer.getNLV(), initial_cash);
+	
+	// trigger node prevents alloc on second step so repeat first step
+	hydra->step();
+	EXPECT_DOUBLE_EQ(weights.sum(), 0.0f);
+	EXPECT_DOUBLE_EQ(tracer.getNLV(), initial_cash);
+
+	// now we are 30% in asset1 and 70% in asset2. Two trades needed
+	hydra->step();
+	double commission = 2 * fixed_commission + (commission_pct * initial_cash);
+	EXPECT_DOUBLE_EQ(weights.sum(), 1.0f);
+	EXPECT_DOUBLE_EQ(tracer.getNLV(), initial_cash - commission);
+
+	// trigger node prevents alloc
+	hydra->step();
+	Eigen::VectorXd weights2 = strategy_ptr->getAllocationBuffer();
+
+	auto nlv = tracer.getNLV();
+	hydra->step();
+	auto returns = exchange->getMarketReturns();
+	auto portfolio_return = returns.dot(weights2);
+
+	nlv = nlv * (1.0f + portfolio_return);
+
+	// fixed alloc forced rebalance, should have two fixed commissions and two pct commissions
+	// proportional to the size of the rebalance
+	Eigen::VectorXd weights_delta = (weights2 - strategy_ptr->getAllocationBuffer()).cwiseAbs();
+	commission = 2 * fixed_commission + (commission_pct * nlv * weights_delta).sum();
+	EXPECT_DOUBLE_EQ(weights.sum(), 1.0f);
+	EXPECT_DOUBLE_EQ(tracer.getNLV(), nlv - commission);
+}
 
 
 TEST_F(ComplexExchangeTests, FixedAllocTest)
@@ -287,10 +369,10 @@ TEST_F(ComplexExchangeTests, FixedAllocTest)
 		std::move(*allocation_node),
 		*portfolio
 	);
-	auto monthly_trigger_node = StrategyMonthlyRunnerNode::pyMake(
+	auto trigger_node = StrategyMonthlyRunnerNode::pyMake(
 		exchange_sptr
 	);
-	strategy_node->setTrigger(std::move(monthly_trigger_node));
+	strategy_node->setTrigger(std::move(trigger_node));
 	auto strategy = std::make_unique<Strategy>(
 		strategy_id,
 		std::move(strategy_node),

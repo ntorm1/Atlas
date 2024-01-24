@@ -104,6 +104,76 @@ StrategyMonthlyRunnerNode::reset() noexcept
 
 
 //============================================================================
+Result<bool, AtlasException>
+PeriodicTriggerNode::build() noexcept
+{
+	auto const& timestamps = m_exchange.getTimestamps();
+	m_tradeable_mask.resize(timestamps.size());
+	m_tradeable_mask.setZero();
+	for (size_t t = 0; t < timestamps.size(); ++t)
+	{
+		if (t % m_frequency == 0)
+		{
+			m_tradeable_mask[t] = 1;
+		}
+	}
+	return true;
+}
+
+
+//============================================================================
+void
+PeriodicTriggerNode::step() noexcept
+{
+	m_index_counter++;
+}
+
+
+//============================================================================
+PeriodicTriggerNode::PeriodicTriggerNode(
+	Exchange const& exchange,
+	size_t frequency
+) noexcept:
+	TriggerNode(exchange),
+	m_frequency(frequency)
+{
+}
+
+
+//============================================================================
+void
+PeriodicTriggerNode::reset() noexcept
+{
+	m_index_counter = 0;
+}
+
+
+//============================================================================
+bool
+PeriodicTriggerNode::evaluate() noexcept
+{
+	assert((m_index_counter - 1) < static_cast<size_t>(m_tradeable_mask.size()));
+	return static_cast<bool>(m_tradeable_mask(m_index_counter - 1));
+}
+
+
+//============================================================================
+SharedPtr<TriggerNode>
+PeriodicTriggerNode::pyMake(SharedPtr<Exchange> exchange, size_t frequency)
+{
+	auto node = std::make_unique<PeriodicTriggerNode>(*exchange, frequency);
+	auto result = node->build();
+	if (!result)
+	{
+		throw std::runtime_error(result.error().what());
+	}
+	return node;
+
+}
+
+
+
+//============================================================================
 bool
 StrategyMonthlyRunnerNode::evaluate() noexcept
 {

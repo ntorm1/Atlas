@@ -125,7 +125,8 @@ public:
 
 	ATLAS_API [[nodiscard]] bool evaluate(Eigen::VectorXd& target) noexcept override;
 	ATLAS_API void setTrigger(SharedPtr<TriggerNode> trigger) noexcept;
-
+	ATLAS_API void setWarmupOverride(size_t warmup) noexcept { m_warmup = warmup; }
+	
 	[[nodiscard]] Portfolio& getPortfolio() const noexcept { return m_portfolio; }
 	[[nodiscard]] Exchange& getExchange() noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }

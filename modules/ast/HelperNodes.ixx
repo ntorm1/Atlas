@@ -37,13 +37,39 @@ protected:
 
 public:
 	virtual ~TriggerNode() noexcept = default;
-	TriggerNode(Exchange const& exchange
-	) noexcept;
+	TriggerNode(Exchange const& exchange) noexcept;
 	virtual bool evaluate() noexcept override = 0;
 	virtual void reset() noexcept = 0;
 	size_t getWarmup() const noexcept override { return 0; }
 	Exchange const& getExchange() const noexcept { return m_exchange; }
 	Eigen::VectorXi const& getMask() const noexcept { return m_tradeable_mask; }
+};
+
+
+//============================================================================
+export class PeriodicTriggerNode : public TriggerNode
+{
+private:
+	size_t m_frequency;
+	Result<bool, AtlasException> build() noexcept;
+	void step() noexcept;
+
+public:
+	ATLAS_API ~PeriodicTriggerNode() noexcept = default;
+	ATLAS_API PeriodicTriggerNode(
+		Exchange const& exchange,
+		size_t frequency
+	) noexcept;
+
+	void reset() noexcept override;
+	bool evaluate() noexcept override;
+
+	ATLAS_API [[nodiscard]] static SharedPtr<TriggerNode>
+	pyMake(
+		SharedPtr<Exchange> exchange,
+		size_t frequency
+	);
+
 };
 
 
