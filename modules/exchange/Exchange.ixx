@@ -11,6 +11,7 @@ export module ExchangeModule;
 import AtlasCore;
 import AtlasLinAlg;
 
+
 namespace Atlas
 {
 
@@ -38,6 +39,7 @@ private:
 	void step(Int64 global_time) noexcept;
 	void registerTrigger(AST::TriggerNode* trigger) noexcept;
 
+	Option<size_t> getCloseIndex() const noexcept;
 	EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;
 
 public:
@@ -46,6 +48,16 @@ public:
 		String source,
 		size_t id
 	) noexcept;
+
+
+	// == THROWS == //
+	Exchange(
+		Vector<String> const& columns,
+		Vector<Int64> const& timestamps,
+		Vector<Vector<double>> const& data,
+		size_t id
+	) noexcept;
+
 	ATLAS_API ~Exchange();
 	Exchange(const Exchange&) = delete;
 	Exchange(Exchange&&) = delete;

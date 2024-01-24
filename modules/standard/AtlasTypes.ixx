@@ -9,6 +9,7 @@ import <memory>;
 import <optional>;
 import <unordered_map>;
 import <expected>;
+import <set>;
 export namespace Atlas
 {
 
@@ -33,6 +34,9 @@ export namespace Atlas
 
 	template <typename T>
 	using Err = std::unexpected<T>;
+
+	template <typename T>
+	using Set = std::set<T>;
 
 	using String = std::string;
 	using StringRef = std::string_view;

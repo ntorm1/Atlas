@@ -196,6 +196,7 @@
     <ClCompile Include="modules\exchange\ExchangeMap.cpp" />
     <ClCompile Include="modules\exchange\ExchangeMap.ixx" />
     <ClCompile Include="modules\exchange\ExchangePrivate.ixx" />
+    <ClCompile Include="modules\exchange\ExchangePyIO.cpp" />
     <ClCompile Include="modules\hydra\Commissions.cpp" />
     <ClCompile Include="modules\hydra\Commissions.ixx" />
     <ClCompile Include="modules\hydra\Hydra.cpp" />

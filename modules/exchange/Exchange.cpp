@@ -78,24 +78,7 @@ Exchange::validate() noexcept
 		
 	}
 
-	// get all headers in lowercase
-	Option<size_t> close_index = std::nullopt;
-	for (auto const& [key, value] : m_impl->headers)
-	{
-		auto toLower = [](String const& str) -> String {
-			String lower_string;
-			lower_string.resize(str.size());
-			for (size_t i = 0; i < str.size(); i++)
-			{
-				lower_string[i] = std::tolower(str[i]);
-			}
-			return lower_string;
-		};
-		if (toLower(key) == "close")
-		{
-			close_index = value;
-		}
-	}
+	Option<size_t> close_index = getCloseIndex();
 	EXPECT_FALSE(
 		!close_index.has_value(),
 		"Exchange does not have a close column"
@@ -174,6 +157,10 @@ Exchange::build() noexcept
 					double prev_close = m_impl->data(asset_id, (exchange_index - 1) * m_impl->headers.size() + m_impl->close_index);
 					double curr_close = m_impl->data(asset_id, exchange_index * m_impl->headers.size() + m_impl->close_index);
 					double ret = (curr_close - prev_close) / prev_close;
+					if (ret != ret)
+					{
+						ret = 0.0;
+					}
 					m_impl->returns(asset_id, exchange_index) = ret;
 				}
 				asset_index++;
@@ -233,6 +220,31 @@ void
 Exchange::registerTrigger(AST::TriggerNode* trigger) noexcept
 {
 	m_impl->registered_triggers.push_back(trigger);
+}
+
+
+//============================================================================
+Option<size_t>
+Exchange::getCloseIndex() const noexcept
+{
+	Option<size_t> close_index = std::nullopt;
+	for (auto const& [key, value] : m_impl->headers)
+	{
+		auto toLower = [](String const& str) -> String {
+			String lower_string;
+			lower_string.resize(str.size());
+			for (size_t i = 0; i < str.size(); i++)
+			{
+				lower_string[i] = std::tolower(str[i]);
+			}
+			return lower_string;
+			};
+		if (toLower(key) == "close")
+		{
+			close_index = value;
+		}
+	}
+	return close_index;
 }
 
 
