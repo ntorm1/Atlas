@@ -148,6 +148,33 @@ AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 
 
 //============================================================================
+PyNodeWrapper<AllocationBaseNode> AllocationNode::pyMake(
+	PyNodeWrapper<ExchangeViewNode> exchange_view,
+	AllocationType type,
+	Option<double> alloc_param,
+	double epsilon)
+{
+	if (!exchange_view.has_node())
+	{
+		throw std::runtime_error("exchange view was taken");
+	}
+	auto node = AllocationNode::make(
+		std::move(exchange_view.take()),
+		type,
+		alloc_param,
+		epsilon
+	);
+	if (node.has_value())
+	{
+		return PyNodeWrapper<AllocationBaseNode>(std::move(node.value()));
+	}
+	else
+	{
+		throw std::runtime_error(node.error().what());
+	}
+}
+
+//============================================================================
 size_t
 AllocationNode::getWarmup() const noexcept
 {
@@ -171,6 +198,23 @@ StrategyNode::StrategyNode(
 //============================================================================
 StrategyNode::~StrategyNode() noexcept
 {
+}
+
+
+//============================================================================
+PyNodeWrapper<StrategyNode> StrategyNode::pyMake(
+	PyNodeWrapper<AllocationBaseNode> allocation,
+	Portfolio& portfolio)
+{
+	if (!allocation.has_node())
+	{
+		throw std::runtime_error("allocation was taken");
+	}
+	auto node = StrategyNode::make(
+		std::move(allocation.take()),
+		portfolio
+	);
+	return PyNodeWrapper<StrategyNode>(std::move(node));
 }
 
 
@@ -277,7 +321,7 @@ FixedAllocationNode::make(
 
 
 //============================================================================
-UniquePtr<AllocationBaseNode>
+PyNodeWrapper<AllocationBaseNode>
 FixedAllocationNode::pyMake(
 	Vector<std::pair<String, double>> m_allocations,
 	SharedPtr<Exchange> exchange,
@@ -289,7 +333,8 @@ FixedAllocationNode::pyMake(
 	{
 		throw std::exception(res.error().what());
 	}
-	return std::move(*res);
+	auto node = std::move(*res);
+	return PyNodeWrapper<AllocationBaseNode>(std::move(node));
 }
 
 

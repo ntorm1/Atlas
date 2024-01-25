@@ -12,6 +12,7 @@ import AtlasCore;
 import BaseNodeModule;
 import StrategyBufferModule;
 import AllocationNodeModule;
+import PyNodeWrapperModule;
 
 namespace Atlas
 {
@@ -29,13 +30,18 @@ private:
 	Vector<std::pair<size_t, double>> m_allocations;
 
 public:
+	//============================================================================
 	ATLAS_API ~FixedAllocationNode() noexcept;
+
+	//============================================================================
 	ATLAS_API FixedAllocationNode(
 		Vector<std::pair<size_t, double>> m_allocations,
 		Exchange* exchange,
 		double epsilon = 0.000f
 	) noexcept;
 
+
+	//============================================================================
 	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationBaseNode>, AtlasException>
 	make(
 			Vector<std::pair<String, double>> m_allocations,
@@ -43,7 +49,9 @@ public:
 			double epsilon = 0.000f
 	) noexcept;
 
-	ATLAS_API static UniquePtr<AllocationBaseNode> pyMake(
+
+	//============================================================================
+	ATLAS_API static PyNodeWrapper<AllocationBaseNode> pyMake(
 		Vector<std::pair<String, double>> m_allocations,
 		SharedPtr<Exchange> exchange,
 		double epsilon = 0.000f
@@ -62,10 +70,12 @@ export class AllocationNode
 	: public AllocationBaseNode
 {
 private:
-	SharedPtr<ExchangeViewNode> m_exchange_view;
+	UniquePtr<ExchangeViewNode> m_exchange_view;
 
 public:
 	ATLAS_API ~AllocationNode() noexcept;
+	
+	//============================================================================
 	ATLAS_API AllocationNode(
 		UniquePtr<ExchangeViewNode> exchange_view,
 		AllocationType type = AllocationType::UNIFORM,
@@ -73,6 +83,8 @@ public:
 		double epsilon = 0.000f
 	) noexcept;
 
+
+	//============================================================================
 	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationBaseNode>, AtlasException>
 	make(
 		UniquePtr<ExchangeViewNode> exchange_view,
@@ -80,6 +92,16 @@ public:
 		Option<double> alloc_param = std::nullopt,
 		double epsilon = 0.000f
 	) noexcept;
+
+
+	//============================================================================
+	ATLAS_API static PyNodeWrapper<AllocationBaseNode>
+	pyMake(
+		PyNodeWrapper<ExchangeViewNode> exchange_view,
+		AllocationType type = AllocationType::UNIFORM,
+		Option<double> alloc_param = std::nullopt,
+		double epsilon = 0.000f
+	);
 
 
 	[[nodiscard]] size_t getWarmup() const noexcept override;
@@ -102,16 +124,25 @@ private:
 	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
 
 public:
+	//============================================================================
+	ATLAS_API ~StrategyNode() noexcept;
+
+
+	//============================================================================
 	ATLAS_API StrategyNode(
 		UniquePtr<AllocationBaseNode> allocation,
 		Portfolio& portfolio
 	) noexcept;
 
+
+	//============================================================================
 	ATLAS_API StrategyNode(
 		UniquePtr<AllocationBaseNode> allocation,
 		SharedPtr<Portfolio> portfolio
 	) noexcept : StrategyNode(std::move(allocation), *portfolio) {}
 
+
+	//============================================================================
 	ATLAS_API [[nodiscard]] static UniquePtr<StrategyNode> make(
 		UniquePtr<AllocationBaseNode> allocation,
 		Portfolio& portfolio
@@ -121,7 +152,14 @@ public:
 			std::move(allocation), portfolio
 		);
 	}
-	ATLAS_API ~StrategyNode() noexcept;
+
+	//============================================================================
+	ATLAS_API [[nodiscard]] static PyNodeWrapper<StrategyNode> pyMake(
+		PyNodeWrapper<AllocationBaseNode> allocation,
+		Portfolio& portfolio
+	);
+
+
 
 	ATLAS_API [[nodiscard]] bool evaluate(Eigen::VectorXd& target) noexcept override;
 	ATLAS_API void setTrigger(SharedPtr<TriggerNode> trigger) noexcept;

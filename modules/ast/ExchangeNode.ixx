@@ -16,6 +16,7 @@ import BaseNodeModule;
 import AtlasLinAlg;
 import AssetNodeModule;
 import StrategyBufferModule;
+import PyNodeWrapperModule;
 
 namespace Atlas
 {
@@ -53,13 +54,28 @@ public:
 		UniquePtr<AssetQuotientNode>,
 		UniquePtr<AssetSumNode>,
 		UniquePtr<AssetDifferenceNode>>;
+
+	using py_node_variant = std::variant <
+		PyNodeWrapper<AssetReadNode>,
+		PyNodeWrapper<AssetProductNode>,
+		PyNodeWrapper<AssetQuotientNode>,
+		PyNodeWrapper<AssetSumNode>,
+		PyNodeWrapper<AssetDifferenceNode>>;
+
+	AssetOpNodeVariant(
+		node_variant node,
+		size_t warmup,
+		AssetNodeType t
+	) noexcept:
+		value(std::move(node)), warmup(warmup), t(t) {}
 	AssetOpNodeVariant() = delete;
-	ATLAS_API ~AssetOpNodeVariant() noexcept;
 	AssetOpNodeVariant(const AssetOpNodeVariant&) = default;
 	AssetOpNodeVariant(AssetOpNodeVariant&&) = default;
 	AssetOpNodeVariant& operator=(const AssetOpNodeVariant&) = default;
 	AssetOpNodeVariant& operator=(AssetOpNodeVariant&&) = default;
 	ATLAS_API AssetOpNodeVariant(node_variant node) noexcept;
+	ATLAS_API static AssetOpNodeVariant pyMake(py_node_variant node) noexcept;
+	ATLAS_API ~AssetOpNodeVariant() noexcept;
 };
 
 
@@ -101,15 +117,22 @@ private:
 	Option<ExchangeViewFilter> m_filter = std::nullopt;
 public:
 	ATLAS_API ~ExchangeViewNode() noexcept;
+
+	//============================================================================
 	ATLAS_API ExchangeViewNode(
 		Exchange& exchange,
 		AssetOpNodeVariant asset_op_node
 	) noexcept;
+
+
+	//============================================================================
 	ATLAS_API ExchangeViewNode(
 		SharedPtr<Exchange> exchange,
 		AssetOpNodeVariant asset_op_node
 	) noexcept;
 
+
+	//============================================================================
 	ATLAS_API [[nodiscard]] static UniquePtr<ExchangeViewNode> make(
 		Exchange& exchange,
 		AssetOpNodeVariant asset_op_node
@@ -118,8 +141,22 @@ public:
 		return std::make_unique<ExchangeViewNode>(
 			exchange, std::move(asset_op_node)
 		);
-
 	}
+
+
+	//============================================================================
+	ATLAS_API [[nodiscard]] static PyNodeWrapper<ExchangeViewNode> pyMake(
+		Exchange& exchange,
+		AssetOpNodeVariant asset_op_node
+	) noexcept
+	{
+		auto node = std::make_unique<ExchangeViewNode>(
+			exchange, std::move(asset_op_node)
+		);
+		return PyNodeWrapper<ExchangeViewNode>(std::move(node));
+	}
+
+	//============================================================================
 	ATLAS_API void setFilter(ExchangeViewFilterType type, double value) noexcept
 	{
 		m_filter = ExchangeViewFilter(type, value);

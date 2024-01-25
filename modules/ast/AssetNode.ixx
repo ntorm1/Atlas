@@ -77,6 +77,8 @@ private:
 public:
 	virtual ~AssetOpNode() noexcept = default;
 
+
+	//============================================================================
 	AssetOpNode(
 		UniquePtr<AssetReadNode> asset_read_left,
 		UniquePtr<AssetReadNode> asset_read_right
@@ -104,6 +106,8 @@ public:
 		}
 	}
 
+
+	//============================================================================
 	ATLAS_API static Result<UniquePtr<AssetOpNode>, AtlasException>
 		make(
 			UniquePtr<AssetReadNode> asset_read_left,
@@ -116,11 +120,32 @@ public:
 		);
 	}
 
+
+	//============================================================================
+	ATLAS_API static PyNodeWrapper<AssetOpNode> pyMake(
+		PyNodeWrapper<AssetReadNode> asset_read_left,
+		PyNodeWrapper<AssetReadNode> asset_read_right
+	)
+	{
+		if (!asset_read_left.has_node() || !asset_read_right.has_node())
+		{
+			throw std::runtime_error("AssetOpNode::pyMake: asset_read_left or asset_read_right was taken");
+		}
+		return PyNodeWrapper<AssetOpNode<NodeCwiseBinOp>>(
+			std::move(asset_read_left.take()),
+			std::move(asset_read_right.take())
+		);
+	}
+
+
+	//============================================================================
 	[[nodiscard]] size_t getWarmup() const noexcept override
 	{
 		return warmup;
 	}
 
+
+	//============================================================================
 	[[nodiscard]] size_t getNullCount() const noexcept
 	{
 		return std::max(
@@ -128,6 +153,7 @@ public:
 			m_asset_read_right->getNullCount()
 		);
 	}
+
 
 	//============================================================================
 	[[nodiscard]] LinAlg::EigenCwiseBinOp<NodeCwiseBinOp>
@@ -181,6 +207,20 @@ ATLAS_API static UniquePtr<Asset##NAME##Node> make( \
 	return std::make_unique<Asset##NAME##Node>( \
 		std::move(asset_read_left), \
 		std::move(asset_read_right) \
+	); \
+} \
+ATLAS_API static UniquePtr<Asset##NAME##Node> pyMake( \
+	PyNodeWrapper<AssetReadNode> asset_read_left, \
+	PyNodeWrapper<AssetReadNode> asset_read_right \
+) \
+{ \
+	if (!asset_read_left.has_node() || !asset_read_right.has_node()) \
+	{ \
+		throw std::runtime_error("Asset"#NAME"Node::pyMake: asset_read_left or asset_read_right was taken"); \
+	} \
+	return std::make_unique<Asset##NAME##Node>( \
+		std::move(asset_read_left.take()), \
+		std::move(asset_read_right.take()) \
 	); \
 } \
 };

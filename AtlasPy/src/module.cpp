@@ -78,43 +78,43 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("CONDITIONAL_SPLIT", Atlas::AST::AllocationType::CONDITIONAL_SPLIT)
         .export_values();
 
-    py::class_<Atlas::AST::AssetReadNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNode")
+    py::class_<Atlas::AST::AssetReadNode>(m_ast, "AssetReadNode")
         .def_static("make", &Atlas::AST::AssetReadNode::pyMake);
     
-    py::class_<Atlas::AST::AssetProductNode, std::shared_ptr<Atlas::AST::AssetProductNode>>(m_ast, "AssetProductNode")
+    py::class_<Atlas::AST::AssetProductNode>(m_ast, "AssetProductNode")
         .def(py::init<std::shared_ptr<Atlas::AST::AssetReadNode>, std::shared_ptr<Atlas::AST::AssetReadNode>>());
 
-    py::class_<Atlas::AST::AssetQuotientNode, std::shared_ptr<Atlas::AST::AssetQuotientNode>>(m_ast, "AssetQuotientNode")
+    py::class_<Atlas::AST::AssetQuotientNode>(m_ast, "AssetQuotientNode")
         .def(py::init<std::shared_ptr<Atlas::AST::AssetReadNode>, std::shared_ptr<Atlas::AST::AssetReadNode>>());
 
-    py::class_<Atlas::AST::AssetSumNode, std::shared_ptr<Atlas::AST::AssetSumNode>>(m_ast, "AssetSumNode")
+    py::class_<Atlas::AST::AssetSumNode>(m_ast, "AssetSumNode")
         .def(py::init<std::shared_ptr<Atlas::AST::AssetReadNode>, std::shared_ptr<Atlas::AST::AssetReadNode>>());
 
-    py::class_<Atlas::AST::AssetDifferenceNode, std::shared_ptr<Atlas::AST::AssetDifferenceNode>>(m_ast, "AssetDifferenceNode")
+    py::class_<Atlas::AST::AssetDifferenceNode>(m_ast, "AssetDifferenceNode")
         .def(py::init<std::shared_ptr<Atlas::AST::AssetReadNode>, std::shared_ptr<Atlas::AST::AssetReadNode>>());
 
     py::class_<Atlas::AST::AssetOpNodeVariant>(m_ast, "AssetOpNodeVariant")
         .def(py::init<Atlas::AST::AssetOpNodeVariant::node_variant>());
 
-    py::class_<Atlas::AST::ExchangeViewNode, std::shared_ptr<Atlas::AST::ExchangeViewNode>>(m_ast, "ExchangeViewNode")
+    py::class_<Atlas::AST::ExchangeViewNode>(m_ast, "ExchangeViewNode")
         .def("setFilter", &Atlas::AST::ExchangeViewNode::setFilter)
         .def(py::init<std::shared_ptr<Atlas::Exchange>, Atlas::AST::AssetOpNodeVariant>());
 
-    py::class_<Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::TriggerNode>>(m_ast, "TriggerNode")
+    py::class_<Atlas::AST::TriggerNode>(m_ast, "TriggerNode")
         .def("getMask", &Atlas::AST::TriggerNode::getMask, py::return_value_policy::reference_internal);
 
-    py::class_<Atlas::AST::StrategyMonthlyRunnerNode, Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::StrategyMonthlyRunnerNode>>(m_ast, "StrategyMonthlyRunnerNode")
+    py::class_<Atlas::AST::StrategyMonthlyRunnerNode, Atlas::AST::TriggerNode>(m_ast, "StrategyMonthlyRunnerNode")
         .def_static("make", &Atlas::AST::StrategyMonthlyRunnerNode::pyMake,
             py::arg("exchange"),
             py::arg("eom_trigger") = false
         );
     
-    py::class_<Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationBaseNode>>(m_ast, "AllocationBaseNode");
+    py::class_<Atlas::AST::AllocationBaseNode>(m_ast, "AllocationBaseNode");
 
-    py::class_<Atlas::AST::FixedAllocationNode, Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::FixedAllocationNode>>(m_ast, "FixedAllocationNode")
+    py::class_<Atlas::AST::FixedAllocationNode, Atlas::AST::AllocationBaseNode>(m_ast, "FixedAllocationNode")
         .def_static("make", &Atlas::AST::FixedAllocationNode::pyMake);
 
-    py::class_<Atlas::AST::AllocationNode, Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationNode>>(m_ast, "AllocationNode")
+    py::class_<Atlas::AST::AllocationNode, Atlas::AST::AllocationBaseNode>(m_ast, "AllocationNode")
         .def(py::init<std::shared_ptr<Atlas::AST::ExchangeViewNode>, Atlas::AST::AllocationType, std::optional<double>, double>(),
             py::arg("exchange_view"),
             py::arg("type") = Atlas::AST::AllocationType::UNIFORM,
@@ -122,7 +122,7 @@ PYBIND11_MODULE(AtlasPy, m) {
             py::arg("epsilon") = 0.000f
         );
 
-    py::class_<Atlas::AST::StrategyNode, std::shared_ptr<Atlas::AST::StrategyNode>>(m_ast, "StrategyNode")
+    py::class_<Atlas::AST::StrategyNode>(m_ast, "StrategyNode")
         .def("setTrigger", &Atlas::AST::StrategyNode::setTrigger)
         .def(py::init<std::shared_ptr<Atlas::AST::AllocationBaseNode>, std::shared_ptr<Atlas::Portfolio>>());
 }

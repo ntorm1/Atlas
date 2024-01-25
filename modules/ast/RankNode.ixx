@@ -25,7 +25,6 @@ export enum class EVRankType : uint8_t
 {
 	NLargest,	/// return the N largest
 	NSmallest,	/// return the N smallest
-	NExtreme	/// return the N/2 smallest and largest
 };
 
 
@@ -33,13 +32,16 @@ export enum class EVRankType : uint8_t
 export class EVRankNode final : public StrategyBufferOpNode
 {
 private:
-	size_t m_count;
+	size_t m_N;
 	EVRankType m_type;
-	SharedPtr<ExchangeViewNode> m_ev;
-	Vector<std::pair<size_t, double>> m_views;
+	UniquePtr<ExchangeViewNode> m_ev;
+	Vector<std::pair<size_t, double>> m_view;
+
+	void sort() noexcept;
+
 public:
 	ATLAS_API EVRankNode(
-		SharedPtr<ExchangeViewNode> ev,
+		UniquePtr<ExchangeViewNode> ev,
 		EVRankType type,
 		size_t count
 	) noexcept;

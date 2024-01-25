@@ -20,6 +20,19 @@ public:
 		: m_node(std::move(node))
 	{
 	}
+
+	bool has_node() const
+	{
+		return m_node != nullptr;
+	}
+
+	UniquePtr<T> take()
+	{
+		auto node = std::move(m_node);
+		m_node = nullptr;
+		return node;
+	}
+
 };
 
 
