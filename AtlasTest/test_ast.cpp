@@ -15,6 +15,7 @@ import TracerModule;
 import AssetNodeModule;
 import ExchangeNodeModule;
 import StrategyNodeModule;
+import AllocationNodeModule;
 import HelperNodesModule;
 import CommissionsModule;
 
