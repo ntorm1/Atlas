@@ -19,7 +19,8 @@ export enum class NodeType
 	STRATEGY = 4,
 	STRATEGY_RUNNER = 5,
 	ALLOC_WEIGHT = 6,
-	RANK_NODE = 7
+	RANK_NODE = 7,
+	TRADE_LIMIT = 8
 };
 
 
@@ -64,7 +65,7 @@ public:
 
 
 //============================================================================
-export template <typename Result, typename Param = void>
+export template <typename Result, typename... Params>
 class OpperationNode : public ASTNode {
 public:
 	OpperationNode(
@@ -72,7 +73,7 @@ public:
 		Option<ASTNode*> parent = std::nullopt
 	) : ASTNode(type, parent) {}
 	virtual ~OpperationNode() {}
-	virtual Result evaluate(Param) noexcept = 0;
+	virtual Result evaluate(Params...) noexcept = 0;
 };
 
 

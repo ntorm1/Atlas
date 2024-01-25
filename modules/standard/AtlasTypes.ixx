@@ -73,6 +73,7 @@ export namespace Atlas
 		class ExchangeViewNode;
 		class StrategyNode;
 		class TriggerNode;
+		class TradeLimitNode;
 		class AllocationWeightNode;
 		class AllocationBaseNode;
 	}

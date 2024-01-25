@@ -6,8 +6,9 @@ module;
 module AllocationNodeModule;
 
 import ExchangeModule;
-import ExchangeNodeModule;
 import CommissionsModule;
+import ExchangeNodeModule;
+import TradeNodeModule;
 
 
 namespace Atlas
@@ -15,6 +16,25 @@ namespace Atlas
 
 namespace AST
 {
+
+
+//============================================================================
+struct AllocationBaseNodeImpl
+{
+	AllocationType m_type;
+	double m_epsilon;
+	Eigen::VectorXd m_weights_buffer;
+	Option<double> m_alloc_param = std::nullopt;
+	Option<SharedPtr<CommisionManager>> m_commision_manager = std::nullopt;
+	Option<UniquePtr<TradeLimitNode>> m_trade_limit = std::nullopt;
+};
+
+
+//============================================================================
+AllocationBaseNode::~AllocationBaseNode() noexcept
+{
+}
+
 
 //============================================================================
 AllocationNode::~AllocationNode() noexcept
@@ -29,13 +49,54 @@ AllocationBaseNode::AllocationBaseNode(
 	double epsilon,
 	Option<double> alloc_param
 ) noexcept :
-	StrategyBufferOpNode(NodeType::ALLOC, exchange, std::nullopt),
-	m_type(m_type),
-	m_alloc_param(alloc_param),
-	m_epsilon(epsilon)
+	StrategyBufferOpNode(NodeType::ALLOC, exchange, std::nullopt)
 {
-	m_weights_buffer.resize(exchange.getAssetCount());
-	m_weights_buffer.setZero();
+
+	m_impl = std::make_unique<AllocationBaseNodeImpl>();
+	m_impl->m_type = m_type;
+	m_impl->m_weights_buffer.resize(exchange.getAssetCount());
+	m_impl->m_weights_buffer.setZero();
+	m_impl->m_epsilon = epsilon;
+	m_impl->m_alloc_param = alloc_param;
+}
+
+
+//============================================================================
+AllocationType AllocationBaseNode::getType() const noexcept
+{
+	return m_impl->m_type;
+
+}
+
+
+//============================================================================
+double
+AllocationBaseNode::getAllocEpsilon() const noexcept
+{
+	return m_impl->m_epsilon;
+}
+
+
+//============================================================================
+size_t
+AllocationBaseNode::getAssetCount() const noexcept
+{
+	return m_exchange.getAssetCount();
+}
+
+//============================================================================
+void
+AllocationBaseNode::setTradeLimit(TradeLimitType t, double limit) noexcept
+{
+	//m_trade_limit = std::make_unique<TradeLimitNode>(this, t, limit);
+}
+
+
+//============================================================================
+void
+AllocationBaseNode::setCommissionManager(SharedPtr<CommisionManager> manager) noexcept
+{
+	m_impl->m_commision_manager = manager;
 }
 
 
@@ -43,15 +104,19 @@ AllocationBaseNode::AllocationBaseNode(
 void
 AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 {
-	// if we have a commission manager we need to copy the current weights buffer 
+	// if we have a commission manager or trade watcher we need to copy the current weights buffer 
 	// into the commission manager buffer before it gets overwritten by the ast. 
 	// 
 	// Additionally if weight epsilon is set we need to copy the current weights
 	// so that any adjustments made are reverted back if the absolute value of the
 	// differene is less than epsilon
-	if (m_commision_manager || m_epsilon)
+	if (
+		m_impl->m_commision_manager||
+		m_impl->m_epsilon ||
+		m_impl->m_trade_limit
+		)
 	{
-		m_weights_buffer = target;
+		m_impl->m_weights_buffer = target;
 	}
 
 	evaluateChild(target);
@@ -59,17 +124,17 @@ AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 	// if epsilon is set we need to check if the difference between the current
 	// weights and the new weights is less than epsilon. If it is we need to
 	// revert the weights back to the original weights before calculating any commissions
-	if (m_epsilon)
+	if (m_impl->m_epsilon)
 	{
-		target = ((target - m_weights_buffer).cwiseAbs().array() < m_epsilon)
-			.select(m_weights_buffer, target);
+		target = ((target - m_impl->m_weights_buffer).cwiseAbs().array() < m_impl->m_epsilon)
+			.select(m_impl->m_weights_buffer, target);
 	}
 
 	// if we have a commission manager we need to calculate the commission caused
 	// by the current weights adjustment
-	if (m_commision_manager && (*m_commision_manager)->hasCommission())
+	if (m_impl->m_commision_manager && (*m_impl->m_commision_manager)->hasCommission())
 	{
-		(*m_commision_manager)->calculateCommission(target, m_weights_buffer);
+		(*m_impl->m_commision_manager)->calculateCommission(target, m_impl->m_weights_buffer);
 	}
 }
 
@@ -115,7 +180,7 @@ Result<UniquePtr<AllocationBaseNode>, AtlasException>
 
 //============================================================================
 void
-	AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
+AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 {
 	// evaluate the exchange view to calculate the signal
 	m_exchange_view->evaluate(target);
@@ -130,14 +195,14 @@ void
 		c = 0.0;
 	}
 
-	switch (m_type) {
+	switch (m_impl->m_type) {
 	case AllocationType::UNIFORM: {
 		target = target.unaryExpr([c](double x) { return x == x ? c : 0.0; });
 		break;
 	}
 	case AllocationType::CONDITIONAL_SPLIT: {
-		target = (target.array() < *m_alloc_param)
-			.select(-c, (target.array() > *m_alloc_param)
+		target = (target.array() < *m_impl->m_alloc_param)
+			.select(-c, (target.array() > *m_impl->m_alloc_param)
 				.select(c, target));
 		target = target.unaryExpr([](double x) { return x == x ? x : 0.0; });
 		break;

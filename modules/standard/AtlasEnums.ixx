@@ -8,4 +8,12 @@ export namespace Atlas
 		NLV,
 		WEIGHTS
 	};
+
+	//============================================================================
+	export enum class TradeLimitType
+	{
+		STOP_LOSS = 0,
+		TAKE_PROFIT = 1,
+	};
+
 }

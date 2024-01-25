@@ -72,7 +72,7 @@ public:
 	size_t getNullCount(int row_offset) const noexcept;
 
 	// ======= PUBLIC API ======= //
-	ATLAS_API EigenConstColView<double> getMarketReturns() const noexcept;
+	ATLAS_API EigenConstColView<double> getMarketReturns(int row_offset = 0) const noexcept;
 	ATLAS_API String const& getName() const noexcept {return m_name;}
 	ATLAS_API Option<size_t> getAssetIndex(String const& asset) const noexcept;
 	ATLAS_API size_t getAssetCount() const noexcept;

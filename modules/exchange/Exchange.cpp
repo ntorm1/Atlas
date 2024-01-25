@@ -287,11 +287,11 @@ Exchange::currentIdx() const noexcept
 
 //============================================================================
 EigenConstColView<double>
-Exchange::getMarketReturns() const noexcept
+Exchange::getMarketReturns(int offset) const noexcept
 {
 	assert(m_impl->current_index > 0);
-	assert(m_impl->current_index <= static_cast<size_t>(m_impl->returns.cols()));
-	return m_impl->returns.col(m_impl->current_index - 1);
+	assert(m_impl->current_index - 1 + offset < static_cast<size_t>(m_impl->returns.cols()));
+	return m_impl->returns.col(m_impl->current_index - 1 + offset);
 }
 
 

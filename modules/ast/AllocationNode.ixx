@@ -5,10 +5,11 @@ module;
 #else
 #define ATLAS_API  __declspec(dllimport)
 #endif
-#include <Eigen/Dense>
 export module AllocationNodeModule;
 
 import AtlasCore;
+import AtlasEnumsModule;
+import AtlasLinAlg;
 import BaseNodeModule;
 import StrategyBufferModule;
 import PyNodeWrapperModule;
@@ -29,17 +30,15 @@ export enum class AllocationType
 };
 
 
+struct AllocationBaseNodeImpl;
+
 //============================================================================
 export class AllocationBaseNode : public StrategyBufferOpNode
 {
 protected:
-	AllocationType m_type;
-	double m_epsilon;
-	Eigen::VectorXd m_weights_buffer;
-	Option<double> m_alloc_param = std::nullopt;
-	Option<SharedPtr<CommisionManager>> m_commision_manager = std::nullopt;
+	UniquePtr<AllocationBaseNodeImpl> m_impl;
 public:
-	virtual ~AllocationBaseNode() noexcept = default;
+	virtual ~AllocationBaseNode() noexcept;
 	AllocationBaseNode(
 		AllocationType m_type,
 		Exchange& exchange,
@@ -47,12 +46,14 @@ public:
 		Option<double> alloc_param
 	) noexcept;
 
-	[[nodiscard]] AllocationType getType() const noexcept { return m_type; }
-	[[nodiscard]] double getAllocEpsilon() const noexcept { return m_epsilon; }
+	[[nodiscard]] AllocationType getType() const noexcept;
+	[[nodiscard]] double getAllocEpsilon() const noexcept;
 	[[nodiscard]] virtual size_t getWarmup() const noexcept = 0;
-	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept { m_commision_manager = manager; }
-	void evaluate(Eigen::VectorXd& target) noexcept override;
-	virtual void evaluateChild(Eigen::VectorXd& target) noexcept = 0;
+	[[nodiscard]] size_t getAssetCount() const noexcept;
+	void setTradeLimit(TradeLimitType t, double limit) noexcept;
+	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
+	void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
+	virtual void evaluateChild(LinAlg::EigenVectorXd& target) noexcept = 0;
 };
 
 
@@ -91,7 +92,7 @@ public:
 		double epsilon = 0.000f
 	);
 
-	void evaluateChild(Eigen::VectorXd& target) noexcept override;
+	void evaluateChild(LinAlg::EigenVectorXd& target) noexcept override;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return 0; }
 
 };
@@ -138,7 +139,7 @@ public:
 
 
 	[[nodiscard]] size_t getWarmup() const noexcept override;
-	void evaluateChild(Eigen::VectorXd& target) noexcept override;
+	void evaluateChild(LinAlg::EigenVectorXd& target) noexcept override;
 };
 
 

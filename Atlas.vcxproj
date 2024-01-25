@@ -192,6 +192,8 @@
     <ClCompile Include="modules\ast\BaseNode.ixx" />
     <ClCompile Include="modules\ast\ExchangeNode.ixx" />
     <ClCompile Include="modules\ast\ExchangNode.cpp" />
+    <ClCompile Include="modules\ast\TradeNode.cpp" />
+    <ClCompile Include="modules\ast\TradeNode.ixx" />
     <ClCompile Include="modules\exchange\Exchange.cpp" />
     <ClCompile Include="modules\exchange\Exchange.ixx" />
     <ClCompile Include="modules\exchange\ExchangeIO.cpp" />
