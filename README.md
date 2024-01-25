@@ -14,7 +14,7 @@ Install requires visual studio and vcpkg manager and the following packages inst
 2. H5CPP
 3. Pybind11
 To build simply open the Visual Studio Solution and build AtlasPy. The output of which is a .pyd extension that can be directly imported into Python
-
+Note Pybind11 support currently needs changes to change to unique ptrs.
 
 ## Getting Started
 Currently the only support data form is .h5 files. Here is a dummy example of what the format should look like. Provided you have a dataframe df that looks like this

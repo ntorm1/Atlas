@@ -1,8 +1,8 @@
 module;
-#include <Eigen/Dense>
 export module StrategyBufferModule;
 
 import AtlasCore;
+import AtlasLinAlg;
 import BaseNodeModule;
 
 namespace Atlas
@@ -14,7 +14,7 @@ namespace AST
 
 //============================================================================
 export class StrategyBufferOpNode
-	: public OpperationNode<void, Eigen::VectorXd&> {
+	: public OpperationNode<void, LinAlg::EigenVectorXd&> {
 protected:
 	Exchange& m_exchange;
 
@@ -23,7 +23,7 @@ protected:
 		Exchange& exchange,
 		Option<ASTNode*> parent
 	) :
-		OpperationNode<void, Eigen::VectorXd&>(t, parent),
+		OpperationNode<void, LinAlg::EigenVectorXd&>(t, parent),
 		m_exchange(exchange)
 	{
 

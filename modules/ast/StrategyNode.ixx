@@ -5,10 +5,10 @@ module;
 #else
 #define ATLAS_API  __declspec(dllimport)
 #endif
-#include <Eigen/Dense>
 export module StrategyNodeModule;
 
 import AtlasCore;
+import AtlasLinAlg;
 import BaseNodeModule;
 import StrategyBufferModule;
 import AllocationNodeModule;
@@ -22,7 +22,7 @@ namespace AST
 
 
 //============================================================================
-export class StrategyNode final : OpperationNode<bool, Eigen::VectorXd&>
+export class StrategyNode final : OpperationNode<bool, LinAlg::EigenVectorXd&>
 {
 	friend class Strategy;
 private:
@@ -73,7 +73,7 @@ public:
 
 
 
-	ATLAS_API [[nodiscard]] bool evaluate(Eigen::VectorXd& target) noexcept override;
+	ATLAS_API [[nodiscard]] bool evaluate(LinAlg::EigenVectorXd& target) noexcept override;
 	ATLAS_API void setTrigger(SharedPtr<TriggerNode> trigger) noexcept;
 	ATLAS_API void setWarmupOverride(size_t warmup) noexcept { m_warmup = warmup; }
 	
