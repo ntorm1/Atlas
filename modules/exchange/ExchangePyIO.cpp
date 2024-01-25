@@ -1,4 +1,7 @@
 module;
+#include <stdexcept>
+#include <cassert>
+#include <algorithm>
 #include "AtlasMacros.hpp"
 module ExchangeModule;
 
@@ -10,14 +13,14 @@ namespace Atlas
 //==============================================================================
 struct PyColDef
 {
-	String asset_id;
-	String column_name;
-	size_t column_index;
+	String _asset_id;
+	String _column_name;
+	size_t _matrix_index;
 
-	PyColDef(String const& asset_id, String const& column_name, size_t column_index)
-		: asset_id(asset_id)
-		, column_name(column_name)
-		, column_index(column_index)
+	PyColDef(String const& asset_id, String const& column_name, size_t matrix_index)
+		: _asset_id(asset_id)
+		, _column_name(column_name)
+		, _matrix_index(matrix_index)
 	{
 	}
 };
@@ -25,15 +28,15 @@ struct PyColDef
 
 //==============================================================================
 Exchange::Exchange(
-	Vector<String> const& columns,
+	Vector<String> const& py_columns,
 	Vector<Int64> const& py_timestamps,
 	Vector<Vector<double>> const& data,
 	size_t id)
 {
 	// check that each column has exactly one space in the name
-	Set<String> py_asset_names;
-	Vector<PyColDef> py_columns;
-	for (auto const& column : columns)
+	HashMap<String, size_t> py_asset_names;
+	Vector<PyColDef> py_column_defs;
+	for (auto const& column : py_columns)
 	{
 		if (std::count(column.begin(), column.end(), ' ') != 1)
 		{
@@ -41,55 +44,59 @@ Exchange::Exchange(
 		}
 		
 		// get the asset name as the first word
-		py_asset_names.push_back(column.substr(0, column.find(' ')));
+		String asset_name = column.substr(0, column.find(' '));
+		if (py_asset_names.find(asset_name) == py_asset_names.end())
+		{
+			py_asset_names[asset_name] = py_asset_names.size();
+		}
 
 		// the column name is the second word
 		String column_name = column.substr(column.find(' ') + 1);
 
-		// add the column to py_columns
-		PyColDef py_col_def(py_asset_names.back(), column_name, py_columns.size());
-		py_columns.push_back(py_col_def);
+		// add the column to py_column_defs
+		PyColDef py_col_def(asset_name, column_name, py_column_defs.size());
+		py_column_defs.push_back(py_col_def);
 	}
 
 	// get the column count, ensure that the division has no remainder
-	if (py_columns[0].size() % py_asset_names.size() != 0) 
+	if (py_column_defs.size() % py_asset_names.size() != 0)
 	{
-		throw runtime_error("Column count not a multiple of asset count");
+		throw std::runtime_error("Column count not a multiple of asset count");
 	}
-	size_t column_count = py_columns.size() / py_asset_names.size();
+	size_t column_count = py_column_defs.size() / py_asset_names.size();
 
-	// sort py_columns by name
+	// sort py_column_defs by name
 	std::sort(
-		py_columns.begin(),
-		py_columns.end(),
-		[](auto const& a, auto const& b) { return a.asset_id < b.asset_id; }
+		py_column_defs.begin(),
+		py_column_defs.end(),
+		[](auto const& a, auto const& b) { return a._asset_id < b._asset_id; }
 	);
 
 	// check that each asset has the same columns 
 	size_t i = 0;
-	for (auto const& asset_id : py_asset_names)
+	for (auto const& [asset_id,asset_index] :py_asset_names)
 	{
-		// find the first column in py_columns that matches the asset name
+		// find the first column in py_column_defs that matches the asset name
 		auto it = std::find_if(
-			py_columns.begin(),
-			py_columns.end(),
-			[&asset_id](auto const& py_col) { return py_col.asset_id == asset_id; }
+			py_column_defs.begin(),
+			py_column_defs.end(),
+			[&asset_id](auto const& py_col) { return py_col._asset_id == asset_id; }
 		);
-		assert(it)
+		assert(it != py_column_defs.end());
 
 		// get distance from the first column to the first column of the next asset
-		size_t distance = std::distance(it, py_columns.end());
+		size_t distance = std::distance(it, py_column_defs.end());
 		for (size_t j = distance; j < column_count; ++j)
 		{
-			auto const& column = py_columns[distance + j];
-			if (column.column_name != py_columns[j].column_name)
+			auto const& column = py_column_defs[distance + j];
+			if (column._column_name != py_column_defs[j]._column_name)
 			{
-				throw runtime_error("Asset " + asset_id + " does not have the same columns as the other assets");
+				throw std::runtime_error("Asset " + asset_id + " does not have the same columns as the other assets");
 			}
 
 			if (i == 0)
 			{
-				m_impl->headers[column.column_name] = j;
+				m_impl->headers[column._column_name] = j;
 			}
 		}
 		++i;
@@ -100,7 +107,7 @@ Exchange::Exchange(
 	Option<size_t> close_index = getCloseIndex();
 	if (!close_index.has_value())
 	{
-		throw runtime_error("No close column found");
+		throw std::runtime_error("No close column found");
 	}
 	m_impl->close_index = close_index.value();
 
@@ -116,5 +123,17 @@ Exchange::Exchange(
 	);
 
 	// copy data from python to c++
+	for (auto const& py_col : py_column_defs)
+	{
+		auto const& column = py_columns[py_col._matrix_index];
+		size_t asset_index = py_asset_names[py_col._asset_id];
+		size_t column_index = m_impl->headers[py_col._column_name];
+		for (size_t i = 0; i < py_timestamps.size(); ++i)
+		{
+			size_t data_column_index = i * column_index;
+			m_impl->data(asset_index, data_column_index) = column[i];
+		}
+	}
+}
 
 }

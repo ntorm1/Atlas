@@ -56,7 +56,7 @@ public:
 		Vector<Int64> const& timestamps,
 		Vector<Vector<double>> const& data,
 		size_t id
-	) noexcept;
+	);
 
 	ATLAS_API ~Exchange();
 	Exchange(const Exchange&) = delete;
