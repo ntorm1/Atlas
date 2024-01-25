@@ -36,14 +36,14 @@ public:
 		double epsilon = 0.000f
 	) noexcept;
 
-	ATLAS_API [[nodiscard]] static Result<SharedPtr<AllocationBaseNode>, AtlasException>
+	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationBaseNode>, AtlasException>
 	make(
 			Vector<std::pair<String, double>> m_allocations,
 			Exchange* exchange,
 			double epsilon = 0.000f
 	) noexcept;
 
-	ATLAS_API static SharedPtr<AllocationBaseNode> pyMake(
+	ATLAS_API static UniquePtr<AllocationBaseNode> pyMake(
 		Vector<std::pair<String, double>> m_allocations,
 		SharedPtr<Exchange> exchange,
 		double epsilon = 0.000f
@@ -67,15 +67,15 @@ private:
 public:
 	ATLAS_API ~AllocationNode() noexcept;
 	ATLAS_API AllocationNode(
-		SharedPtr<ExchangeViewNode> exchange_view,
+		UniquePtr<ExchangeViewNode> exchange_view,
 		AllocationType type = AllocationType::UNIFORM,
 		Option<double> alloc_param = std::nullopt,
 		double epsilon = 0.000f
 	) noexcept;
 
-	ATLAS_API [[nodiscard]] static Result<SharedPtr<AllocationBaseNode>, AtlasException>
+	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationBaseNode>, AtlasException>
 	make(
-		SharedPtr<ExchangeViewNode> exchange_view,
+		UniquePtr<ExchangeViewNode> exchange_view,
 		AllocationType type = AllocationType::UNIFORM,
 		Option<double> alloc_param = std::nullopt,
 		double epsilon = 0.000f
@@ -92,28 +92,28 @@ export class StrategyNode final : OpperationNode<bool, Eigen::VectorXd&>
 {
 	friend class Strategy;
 private:
-	SharedPtr<StrategyBufferOpNode> m_allocation;
+	UniquePtr<AllocationBaseNode> m_allocation;
+	Option<UniquePtr<AllocationWeightNode>> m_alloc_weight;
 	Option<SharedPtr<TriggerNode>> m_trigger;
-	Option<SharedPtr<AllocationWeightNode>> m_alloc_weight;
 	Portfolio& m_portfolio;
 	size_t m_warmup;
 
 	void reset() noexcept;
-	[[nodiscard]] bool setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
+	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
 
 public:
 	ATLAS_API StrategyNode(
-		SharedPtr<StrategyBufferOpNode> allocation,
+		UniquePtr<AllocationBaseNode> allocation,
 		Portfolio& portfolio
 	) noexcept;
 
 	ATLAS_API StrategyNode(
-		SharedPtr<StrategyBufferOpNode> allocation,
+		UniquePtr<AllocationBaseNode> allocation,
 		SharedPtr<Portfolio> portfolio
 	) noexcept : StrategyNode(std::move(allocation), *portfolio) {}
 
-	ATLAS_API [[nodiscard]] static SharedPtr<StrategyNode> make(
-		SharedPtr<StrategyBufferOpNode> allocation,
+	ATLAS_API [[nodiscard]] static UniquePtr<StrategyNode> make(
+		UniquePtr<AllocationBaseNode> allocation,
 		Portfolio& portfolio
 	) noexcept
 	{

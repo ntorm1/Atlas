@@ -20,24 +20,24 @@ AssetOpNodeVariant::AssetOpNodeVariant(node_variant node)
     warmup(0),
     t(AssetNodeType::AssetReadNode)
 {
-    if (std::holds_alternative<SharedPtr<AssetReadNode>>(value)) {
-        warmup = std::get<SharedPtr<AssetReadNode>>(value)->getWarmup();
+    if (std::holds_alternative<UniquePtr<AssetReadNode>>(value)) {
+        warmup = std::get<UniquePtr<AssetReadNode>>(value)->getWarmup();
         t = AssetNodeType::AssetReadNode;
     }
-    else if (std::holds_alternative<SharedPtr<AssetProductNode>>(value)) {
-        warmup = std::get<SharedPtr<AssetProductNode>>(value)->getWarmup();
+    else if (std::holds_alternative<UniquePtr<AssetProductNode>>(value)) {
+        warmup = std::get<UniquePtr<AssetProductNode>>(value)->getWarmup();
         t = AssetNodeType::AssetProductNode;
     }
-    else if (std::holds_alternative<SharedPtr<AssetQuotientNode>>(value)) {
-        warmup = std::get<SharedPtr<AssetQuotientNode>>(value)->getWarmup();
+    else if (std::holds_alternative<UniquePtr<AssetQuotientNode>>(value)) {
+        warmup = std::get<UniquePtr<AssetQuotientNode>>(value)->getWarmup();
         t = AssetNodeType::AssetQuotientNode;
     }
-    else if (std::holds_alternative<SharedPtr<AssetSumNode>>(value)) {
-        warmup = std::get<SharedPtr<AssetSumNode>>(value)->getWarmup();
+    else if (std::holds_alternative<UniquePtr<AssetSumNode>>(value)) {
+        warmup = std::get<UniquePtr<AssetSumNode>>(value)->getWarmup();
         t = AssetNodeType::AssetSumNode;
     }
-    else if (std::holds_alternative<SharedPtr<AssetDifferenceNode>>(value)) {
-        warmup = std::get<SharedPtr<AssetDifferenceNode>>(value)->getWarmup();
+    else if (std::holds_alternative<UniquePtr<AssetDifferenceNode>>(value)) {
+        warmup = std::get<UniquePtr<AssetDifferenceNode>>(value)->getWarmup();
         t = AssetNodeType::AssetDifferenceNode;
     }
 }
@@ -104,19 +104,19 @@ void
 {
     switch (m_asset_op_node.t) {
     case AssetNodeType::AssetReadNode:
-        view = std::get<SharedPtr<AssetReadNode>>(m_asset_op_node.value)->evaluate();
+        view = std::get<UniquePtr<AssetReadNode>>(m_asset_op_node.value)->evaluate();
         break;
     case AssetNodeType::AssetProductNode:
-        view = std::get<SharedPtr<AssetProductNode>>(m_asset_op_node.value)->evaluate();
+        view = std::get<UniquePtr<AssetProductNode>>(m_asset_op_node.value)->evaluate();
         break;
     case AssetNodeType::AssetQuotientNode:
-        view = std::get<SharedPtr<AssetQuotientNode>>(m_asset_op_node.value)->evaluate();
+        view = std::get<UniquePtr<AssetQuotientNode>>(m_asset_op_node.value)->evaluate();
         break;
     case AssetNodeType::AssetSumNode:
-        view = std::get<SharedPtr<AssetSumNode>>(m_asset_op_node.value)->evaluate();
+        view = std::get<UniquePtr<AssetSumNode>>(m_asset_op_node.value)->evaluate();
         break;
     case AssetNodeType::AssetDifferenceNode:
-        view = std::get<SharedPtr<AssetDifferenceNode>>(m_asset_op_node.value)->evaluate();
+        view = std::get<UniquePtr<AssetDifferenceNode>>(m_asset_op_node.value)->evaluate();
         break;
     }
     if (m_filter.has_value()) {

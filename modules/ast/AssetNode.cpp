@@ -27,7 +27,7 @@ LinAlg::EigenConstColView<double>
 
 
 //============================================================================
-SharedPtr<AssetReadNode>
+PyNodeWrapper<AssetReadNode>
 AssetReadNode::pyMake(String const& column, int row_offset, SharedPtr<Exchange> exchange)
 {
 	auto node = make(column, row_offset, *exchange);
@@ -35,7 +35,7 @@ AssetReadNode::pyMake(String const& column, int row_offset, SharedPtr<Exchange> 
 	{
 		throw std::exception(node.error().what());
 	}
-	return std::move(*node);
+	return PyNodeWrapper<AssetReadNode>(std::move(*node));
 }
 
 

@@ -77,7 +77,7 @@ AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 
 //============================================================================
 AllocationNode::AllocationNode(
-	SharedPtr<ExchangeViewNode> exchange_view,
+	UniquePtr<ExchangeViewNode> exchange_view,
 	AllocationType type,
 	Option<double> alloc_param,
 	double epsilon
@@ -93,9 +93,9 @@ AllocationNode::AllocationNode(
 
 
 //============================================================================
-Result<SharedPtr<AllocationBaseNode>, AtlasException>
+Result<UniquePtr<AllocationBaseNode>, AtlasException>
 AllocationNode::make(
-		SharedPtr<ExchangeViewNode> exchange_view,
+		UniquePtr<ExchangeViewNode> exchange_view,
 		AllocationType type,
 		Option<double> alloc_param,
 		double epsilon
@@ -157,7 +157,7 @@ AllocationNode::getWarmup() const noexcept
 
 //============================================================================
 StrategyNode::StrategyNode(
-	SharedPtr<StrategyBufferOpNode> allocation,
+	UniquePtr<AllocationBaseNode> allocation,
 	Portfolio& portfolio
 ) noexcept :
 	OpperationNode<bool, Eigen::VectorXd&>(NodeType::STRATEGY, allocation.get()),
@@ -192,27 +192,13 @@ StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
 
 
 //============================================================================
-bool
+void
 StrategyNode::setCommissionManager(SharedPtr<CommisionManager> manager) noexcept
 {
 	// search the strategy node call chain for the allocation node so 
 	// we can attach commission manager to it. If we don't find it then
 	// that means there is no allocation node, return false to indicate error.
-	Option<AllocationBaseNode*> node = std::nullopt;
-	if (m_allocation->getType() == NodeType::ALLOC)
-	{
-		node = static_cast<AllocationNode*>(m_allocation.get());
-	}
-	else
-	{
-		node = m_allocation->getAllocationNode();
-	}
-	if (!node)
-	{
-		return false;
-	}
-	(*node)->setCommissionManager(manager);
-	return true;
+	m_allocation->setCommissionManager(manager);
 }
 
 
@@ -266,11 +252,8 @@ FixedAllocationNode::FixedAllocationNode(
 }
 
 
-
-
-
 //============================================================================
-Result<SharedPtr<AllocationBaseNode>, AtlasException>
+Result<UniquePtr<AllocationBaseNode>, AtlasException>
 FixedAllocationNode::make(
 	Vector<std::pair<String, double>> allocations,
 	Exchange* exchange,
@@ -287,15 +270,19 @@ FixedAllocationNode::make(
 		}
 		allocations_ids.push_back(std::make_pair(*id_opt, pair.second));
 	}
-	return std::make_shared<FixedAllocationNode>(
+	return std::make_unique<FixedAllocationNode>(
 		std::move(allocations_ids), exchange, epsilon
 	);
 }
 
 
 //============================================================================
-SharedPtr<AllocationBaseNode>
-FixedAllocationNode::pyMake(Vector<std::pair<String, double>> m_allocations, SharedPtr<Exchange> exchange, double epsilon)
+UniquePtr<AllocationBaseNode>
+FixedAllocationNode::pyMake(
+	Vector<std::pair<String, double>> m_allocations,
+	SharedPtr<Exchange> exchange,
+	double epsilon
+)
 {
 	auto res = make(std::move(m_allocations), exchange.get(), epsilon);
 	if (!res)

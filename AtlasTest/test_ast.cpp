@@ -299,9 +299,7 @@ TEST_F(SimpleExchangeTests, CommissionTest)
 		std::move(strategy_node),
 		1.0f
 	);
-	auto commission_manager_res = strategy->initCommissionManager();
-	EXPECT_TRUE(commission_manager_res);
-	auto commission_manager = commission_manager_res.value();
+	auto commission_manager = strategy->initCommissionManager();
 	double fixed_commission = 1.0f;
 	double commission_pct = .001f;
 	commission_manager->setFixedCommission(fixed_commission);

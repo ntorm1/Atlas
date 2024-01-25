@@ -58,7 +58,7 @@ public:
 	ATLAS_API void enableTracerHistory(TracerType t) noexcept;
 	ATLAS_API Eigen::VectorXd const& getHistory(TracerType t) const noexcept;
 	ATLAS_API Eigen::MatrixXd const& getWeightHistory() const noexcept;
-	ATLAS_API Result<SharedPtr<CommisionManager>,AtlasException> initCommissionManager() noexcept;
+	ATLAS_API SharedPtr<CommisionManager> initCommissionManager() noexcept;
 
 	Exchange const& getExchange() const noexcept;
 

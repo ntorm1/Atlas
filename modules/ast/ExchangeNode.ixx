@@ -37,22 +37,22 @@ export enum class AssetNodeType {
 export class AssetOpNodeVariant {
 public:
 	std::variant<
-		SharedPtr<AssetReadNode>,
-		SharedPtr<AssetProductNode>,
-		SharedPtr<AssetQuotientNode>,
-		SharedPtr<AssetSumNode>,
-		SharedPtr<AssetDifferenceNode>
+		UniquePtr<AssetReadNode>,
+		UniquePtr<AssetProductNode>,
+		UniquePtr<AssetQuotientNode>,
+		UniquePtr<AssetSumNode>,
+		UniquePtr<AssetDifferenceNode>
 	> value;
 	size_t warmup;
 	AssetNodeType  t;
 
 public:
 	using node_variant = std::variant <
-		SharedPtr<AssetReadNode>,
-		SharedPtr<AssetProductNode>,
-		SharedPtr<AssetQuotientNode>,
-		SharedPtr<AssetSumNode>,
-		SharedPtr<AssetDifferenceNode>>;
+		UniquePtr<AssetReadNode>,
+		UniquePtr<AssetProductNode>,
+		UniquePtr<AssetQuotientNode>,
+		UniquePtr<AssetSumNode>,
+		UniquePtr<AssetDifferenceNode>>;
 	AssetOpNodeVariant() = delete;
 	ATLAS_API ~AssetOpNodeVariant() noexcept;
 	AssetOpNodeVariant(const AssetOpNodeVariant&) = default;

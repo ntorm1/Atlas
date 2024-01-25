@@ -12,6 +12,7 @@ export module AssetNodeModule;
 import AtlasCore;
 import BaseNodeModule;
 import AtlasLinAlg;
+import PyNodeWrapperModule;
 
 namespace Atlas
 {
@@ -41,7 +42,7 @@ public:
 	ATLAS_API AssetReadNode(size_t column, int row_offset, SharedPtr<Exchange> exchange) noexcept :
 		AssetReadNode(column, row_offset, *exchange) {}
 
-	ATLAS_API static SharedPtr<AssetReadNode> pyMake(
+	ATLAS_API static PyNodeWrapper<AssetReadNode> pyMake(
 		String const& column,
 		int row_offset,
 		SharedPtr<Exchange> exchange
@@ -68,8 +69,8 @@ export template <typename NodeCwiseBinOp>
 	:public ExpressionNode<LinAlg::EigenCwiseBinOp<NodeCwiseBinOp>>
 {
 private:
-	SharedPtr<AssetReadNode> m_asset_read_left;
-	SharedPtr<AssetReadNode> m_asset_read_right;
+	UniquePtr<AssetReadNode> m_asset_read_left;
+	UniquePtr<AssetReadNode> m_asset_read_right;
 	AssetOpType m_op_type;
 	size_t warmup;
 
@@ -77,8 +78,8 @@ public:
 	virtual ~AssetOpNode() noexcept = default;
 
 	AssetOpNode(
-		SharedPtr<AssetReadNode> asset_read_left,
-		SharedPtr<AssetReadNode> asset_read_right
+		UniquePtr<AssetReadNode> asset_read_left,
+		UniquePtr<AssetReadNode> asset_read_right
 	) noexcept :
 		ExpressionNode<LinAlg::EigenCwiseBinOp<NodeCwiseBinOp>>(NodeType::ASSET_OP),
 		m_asset_read_left(std::move(asset_read_left)),
@@ -103,10 +104,10 @@ public:
 		}
 	}
 
-	ATLAS_API static Result<SharedPtr<AssetOpNode>, AtlasException>
+	ATLAS_API static Result<UniquePtr<AssetOpNode>, AtlasException>
 		make(
-			SharedPtr<AssetReadNode> asset_read_left,
-			SharedPtr<AssetReadNode> asset_read_right
+			UniquePtr<AssetReadNode> asset_read_left,
+			UniquePtr<AssetReadNode> asset_read_right
 		) noexcept
 	{
 		return std::make_unique<AssetOpNode<NodeCwiseBinOp>>(
@@ -164,17 +165,17 @@ export class Asset##NAME##Node : public AssetOpNode<LinAlg::OP_TYPE>          \
 {                                                                      \
 public:                                                                \
 Asset##NAME##Node(                                                \
-    SharedPtr<AssetReadNode> asset_read_left,                     \
-    SharedPtr<AssetReadNode> asset_read_right                    \
+    UniquePtr<AssetReadNode> asset_read_left,                     \
+    UniquePtr<AssetReadNode> asset_read_right                    \
     ) noexcept :                               \
     AssetOpNode<LinAlg::OP_TYPE>(                                 \
         std::move(asset_read_left),                               \
         std::move(asset_read_right)                              \
         )                                                   \
 {}                                                                 \
-ATLAS_API static SharedPtr<Asset##NAME##Node> make( \
-	SharedPtr<AssetReadNode> asset_read_left, \
-	SharedPtr<AssetReadNode> asset_read_right \
+ATLAS_API static UniquePtr<Asset##NAME##Node> make( \
+	UniquePtr<AssetReadNode> asset_read_left, \
+	UniquePtr<AssetReadNode> asset_read_right \
 ) noexcept \
 { \
 	return std::make_unique<Asset##NAME##Node>( \

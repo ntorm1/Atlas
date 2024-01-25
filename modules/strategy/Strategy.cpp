@@ -130,15 +130,11 @@ Strategy::getWeightHistory() const noexcept
 
 
 //============================================================================
-Result<SharedPtr<CommisionManager>, AtlasException>
+SharedPtr<CommisionManager>
 Strategy::initCommissionManager() noexcept
 {
 	m_impl->m_commision_manager = CommissionManagerFactory::create(*this);
-	auto res = m_impl->m_ast->setCommissionManager(m_impl->m_commision_manager.value());
-	if (!res)
-	{
-		return Err("failed to find allocation node");
-	}
+	m_impl->m_ast->setCommissionManager(m_impl->m_commision_manager.value());
 	return m_impl->m_commision_manager.value();
 }
 
