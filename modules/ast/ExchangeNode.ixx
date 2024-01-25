@@ -6,14 +6,13 @@ module;
 #else
 #define ATLAS_API  __declspec(dllimport)
 #endif
-#include <Eigen/Dense>
 export module ExchangeNodeModule;
 
 import <variant>;
 
 import AtlasCore;
-import BaseNodeModule;
 import AtlasLinAlg;
+import BaseNodeModule;
 import AssetNodeModule;
 import StrategyBufferModule;
 import PyNodeWrapperModule;
@@ -168,9 +167,9 @@ public:
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	[[nodiscard]] size_t getViewSize() const noexcept { return m_view_size; }
 	[[nodiscard]] auto& getExchange() { return m_exchange; }
-	void filter(Eigen::VectorXd& v) const noexcept;
-
-	ATLAS_API  void evaluate(Eigen::VectorXd&) noexcept override;
+	
+	void filter(LinAlg::EigenVectorXd& v) const noexcept;
+	ATLAS_API  void evaluate(LinAlg::EigenVectorXd&) noexcept override;
 };
 
 
