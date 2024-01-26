@@ -1,5 +1,3 @@
-
-
 module;
 #pragma once
 #ifdef ATLAS_EXPORTS
@@ -26,11 +24,12 @@ struct TradeLimitNodeImpl;
 
 //============================================================================
 export class TradeLimitNode final 
-	: public OpperationNode<void, LinAlg::EigenVectorXd const&>
+	: public OpperationNode<void, LinAlg::EigenVectorXd&,LinAlg::EigenVectorXd&>
 {
 private:
+	Exchange const& m_exchange;
 	UniquePtr<TradeLimitNodeImpl> m_impl;
-
+	bool m_is_first_step = true;
 public:
 	ATLAS_API ~TradeLimitNode() noexcept;
 	ATLAS_API TradeLimitNode(
@@ -39,7 +38,10 @@ public:
 		double limit
 	) noexcept;
 
-	void evaluate(LinAlg::EigenVectorXd const& x) noexcept override;
+	void evaluate(
+		LinAlg::EigenVectorXd& current_weights,
+		LinAlg::EigenVectorXd& previous_weights
+	)noexcept override;
 	size_t getWarmup() const noexcept override {return 0; }
 };
 

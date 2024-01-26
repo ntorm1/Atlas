@@ -130,6 +130,12 @@ AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 			.select(m_impl->m_weights_buffer, target);
 	}
 
+	// if we have stop loss or take profit we need to check if the trade limits have been exceeded
+	if (m_impl->m_trade_limit)
+	{
+		(*m_impl->m_trade_limit)->evaluate(target, m_impl->m_weights_buffer);
+	}
+
 	// if we have a commission manager we need to calculate the commission caused
 	// by the current weights adjustment
 	if (m_impl->m_commision_manager && (*m_impl->m_commision_manager)->hasCommission())
