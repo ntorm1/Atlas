@@ -96,6 +96,7 @@ StrategyNode::reset() noexcept
 	{
 		(*m_trigger)->reset();
 	}
+	m_allocation->reset();
 }
 
 //============================================================================

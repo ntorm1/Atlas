@@ -31,6 +31,15 @@ struct AllocationBaseNodeImpl
 
 
 //============================================================================
+void AllocationBaseNode::reset() noexcept
+{
+	if (m_impl->m_trade_limit)
+	{
+		(*m_impl->m_trade_limit)->reset();
+	}
+}
+
+//============================================================================
 AllocationBaseNode::~AllocationBaseNode() noexcept
 {
 }

@@ -35,8 +35,12 @@ struct AllocationBaseNodeImpl;
 //============================================================================
 export class AllocationBaseNode : public StrategyBufferOpNode
 {
+	friend class StrategyNode;
 protected:
 	UniquePtr<AllocationBaseNodeImpl> m_impl;
+	
+	void reset() noexcept;
+
 public:
 	virtual ~AllocationBaseNode() noexcept;
 	AllocationBaseNode(
