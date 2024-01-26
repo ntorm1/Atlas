@@ -88,7 +88,7 @@ AllocationBaseNode::getAssetCount() const noexcept
 void
 AllocationBaseNode::setTradeLimit(TradeLimitType t, double limit) noexcept
 {
-	//m_trade_limit = std::make_unique<TradeLimitNode>(this, t, limit);
+	m_impl->m_trade_limit = std::make_unique<TradeLimitNode>(this, t, limit);
 }
 
 
@@ -97,6 +97,21 @@ void
 AllocationBaseNode::setCommissionManager(SharedPtr<CommisionManager> manager) noexcept
 {
 	m_impl->m_commision_manager = manager;
+}
+
+
+//============================================================================
+Option<TradeLimitNode*>
+AllocationBaseNode::getTradeLimitNode() const noexcept
+{
+	if (m_impl->m_trade_limit)
+	{
+		return m_impl->m_trade_limit->get();
+	}
+	else
+	{
+		return std::nullopt;
+	}
 }
 
 

@@ -26,10 +26,15 @@ struct TradeLimitNodeImpl;
 export class TradeLimitNode final 
 	: public OpperationNode<void, LinAlg::EigenVectorXd&,LinAlg::EigenVectorXd&>
 {
+	friend class AllocationBaseNode;
+
 private:
 	Exchange const& m_exchange;
 	UniquePtr<TradeLimitNodeImpl> m_impl;
 	bool m_is_first_step = true;
+
+	void reset() noexcept;
+
 public:
 	ATLAS_API ~TradeLimitNode() noexcept;
 	ATLAS_API TradeLimitNode(
@@ -43,6 +48,8 @@ public:
 		LinAlg::EigenVectorXd& previous_weights
 	)noexcept override;
 	size_t getWarmup() const noexcept override {return 0; }
+
+	ATLAS_API LinAlg::EigenVectorXd const& getPnl() const noexcept;
 };
 
 

@@ -16,6 +16,7 @@ import AssetNodeModule;
 import ExchangeNodeModule;
 import StrategyNodeModule;
 import AllocationNodeModule;
+import TradeNodeModule;
 import HelperNodesModule;
 import CommissionsModule;
 
@@ -229,6 +230,38 @@ TEST_F(SimpleExchangeTests, AllocSplitTest)
 	EXPECT_DOUBLE_EQ(tracer.getNLV(), nlv);
 }
 
+
+TEST_F(SimpleExchangeTests, StopLossTest)
+{
+	auto const exchange = hydra->getExchange("test").value();
+	auto read_close = AssetReadNode::make("close", 0, *exchange);
+	auto read_variant = AssetOpNodeVariant(std::move(*read_close));
+	auto exchange_view = ExchangeViewNode::make(*exchange, std::move(read_variant));
+	auto alloc = AllocationNode::make(std::move(exchange_view)).value();
+	alloc->setTradeLimit(TradeLimitType::STOP_LOSS, .05f);
+	auto sl_node = alloc->getTradeLimitNode().value();
+	auto strategy_node = StrategyNode::make(std::move(alloc), *portfolio);
+	auto strategy = std::make_unique<Strategy>(
+		strategy_id,
+		std::move(strategy_node),
+		1.0f
+	);
+	hydra->build();
+	auto res = hydra->addStrategy(std::move(strategy));
+	hydra->step();
+
+	auto const& pnl = sl_node->getPnl();
+	EXPECT_DOUBLE_EQ(pnl(asset_id_2), 1.0f);
+	EXPECT_DOUBLE_EQ(pnl(asset_id_1), 0.0f);
+
+	hydra->step();
+	EXPECT_DOUBLE_EQ(pnl(asset_id_2), 0.97536945812807885);
+	EXPECT_DOUBLE_EQ(pnl(asset_id_1), 1.0f);
+
+	hydra->step();
+	//EXPECT_DOUBLE_EQ(pnl(asset_id_2), 1);
+	//EXPECT_DOUBLE_EQ(pnl(asset_id_1), 103.0f/101.0f);
+}
 
 TEST_F(ComplexExchangeTests, SimpleTest)
 {

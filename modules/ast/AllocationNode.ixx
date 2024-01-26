@@ -50,10 +50,12 @@ public:
 	[[nodiscard]] double getAllocEpsilon() const noexcept;
 	[[nodiscard]] virtual size_t getWarmup() const noexcept = 0;
 	[[nodiscard]] size_t getAssetCount() const noexcept;
-	void setTradeLimit(TradeLimitType t, double limit) noexcept;
 	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
 	void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
 	virtual void evaluateChild(LinAlg::EigenVectorXd& target) noexcept = 0;
+
+	ATLAS_API void setTradeLimit(TradeLimitType t, double limit) noexcept;
+	ATLAS_API Option<TradeLimitNode*> getTradeLimitNode() const noexcept;
 };
 
 

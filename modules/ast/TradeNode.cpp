@@ -1,4 +1,8 @@
 module;
+#ifdef _DEBUG
+#include <iostream>
+#endif // _DEBUG
+
 #include <Eigen/Dense>
 module TradeNodeModule;
 
@@ -10,7 +14,6 @@ namespace Atlas
 
 namespace AST
 {
-
 
 //============================================================================
 struct TradeLimitNodeImpl
@@ -25,6 +28,15 @@ struct TradeLimitNodeImpl
 	{
 	}
 };
+
+
+//============================================================================
+void
+TradeLimitNode::reset() noexcept
+{
+	m_is_first_step = true;
+	m_impl->m_pnl.setZero();
+}
 
 //============================================================================
 TradeLimitNode::~TradeLimitNode() noexcept
@@ -69,49 +81,67 @@ void TradeLimitNode::evaluate(
 	// in the first step we can't have pnl as allocation node is evaluated after the 
 	// portfolio is priced. And it would cause index error trying to get the previous steps
 	// returns as we see below.
+
 	if (m_is_first_step)
 	{
-		return;
+		m_is_first_step = false;
+	}
+	else
+	{
+		// Trade limit node evaluate is called before the allocation node updates.
+		// Therefore, current_weights hold the weights that were used for the most 
+		// recent evaluation. So we need to update the trade pnl vector to adjust the pnl
+		// Stat by pulling in the previous market returns using index offset and making a mutable copy of the view
+		Eigen::VectorXd previous_returns = m_exchange.getMarketReturns();
+		previous_returns.array() += 1.0;
+
+		// multiply 1 + returns to get the new price using the m_pnl buffer
+		m_impl->m_pnl = m_impl->m_pnl.cwiseProduct(previous_returns);
+
+		// switch on the trade type to zero out weights as required. For stop loss
+		// we zero out the weights when the pnl is less than the limit. For take profit
+		// we zero out the weights when the pnl is greater than the limit. Add an additional
+		// comparison to 0.0 to prevent the new weights from being zeroed out beforehand
+		switch (m_impl->m_trade_type)
+		{
+		case TradeLimitType::STOP_LOSS:
+			current_weights = current_weights.array().cwiseProduct(
+				((m_impl->m_pnl.array() > m_impl->m_limit) || (m_impl->m_pnl.array() == 0.0)).cast<double>()
+			);
+			break;
+		case TradeLimitType::TAKE_PROFIT:
+			current_weights = current_weights.array().cwiseProduct(
+				((m_impl->m_pnl.array() < m_impl->m_limit) || (m_impl->m_pnl.array() == 0.0)).cast<double>()
+			);
+			break;
+		}
 	}
 
 	// init the pnl trade vector to 1 where the trade pct switched sign or 
 	// went from 0 to non-zero
-	m_impl->m_pnl = m_impl->m_pnl.select(
-		(current_weights.array() != 0) && ((previous_weights.array() == 0)
+	m_impl->m_pnl = (
+		(current_weights.array() * previous_weights.array() < 0.0f)
 		||
-		(current_weights.array() * previous_weights.array() < 0)), 1.0f).cast<double>();
+		(previous_weights.array() == 0) && (current_weights.array() != 0)
+		)
+		.select(1.0f, m_impl->m_pnl);
 
 	// update closed trade. If the current weight is 0 and the previous weight is not 0
 	// then zero out the pnl vector
-	m_impl->m_pnl = m_impl->m_pnl.select(
-		(current_weights.array() == 0) && (previous_weights.array() != 0), 0.0f).cast<double>();
+	m_impl->m_pnl = (
+		(current_weights.array() == 0)
+		&& 
+		(previous_weights.array() != 0)
+		)
+		.select(0.0f, m_impl->m_pnl);
+}
 
-	// Trade limit node evaluate is called before the allocation node updates.
-	// Therefore, current_weights hold the weights that were used for the most 
-	// recent evaluation. So we need to update the trade pnl vector to adjust the pnl
-	// Stat by pulling in the previous market returns using index offset and making a mutable copy of the view
-	Eigen::VectorXd previous_returns = m_exchange.getMarketReturns(-1);
-	previous_returns.array() += 1.0;
-
-	// multiply 1 + returns to get the new price using the m_pnl buffer
-	m_impl->m_pnl = m_impl->m_pnl.cwiseProduct(previous_returns);
-
-	// switch on the trade type to zero out weights as required. For stop loss
-	// we zero out the weights when the pnl is less than the limit. For take profit
-	// we zero out the weights when the pnl is greater than the limit.
-	switch (m_impl->m_trade_type)
-	{
-	case TradeLimitType::STOP_LOSS:
-		current_weights = current_weights.array().cwiseProduct(
-			(m_impl->m_pnl.array() < m_impl->m_limit).cast<double>()
-		);		
-		break;
-	case TradeLimitType::TAKE_PROFIT:
-		current_weights = current_weights.array().cwiseProduct(
-			(m_impl->m_pnl.array() > m_impl->m_limit).cast<double>()
-		);	
-		break;
-	}
+	
+//============================================================================
+LinAlg::EigenVectorXd const&
+TradeLimitNode::getPnl() const noexcept
+{
+	return m_impl->m_pnl;
 }
 
 }
