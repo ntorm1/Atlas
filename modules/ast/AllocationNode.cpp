@@ -146,6 +146,7 @@ AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 	}
 
 	// if we have stop loss or take profit we need to check if the trade limits have been exceeded
+	// by passing in the previous weights to compute the pnl, then adjust target weights accordingly
 	if (m_impl->m_trade_limit)
 	{
 		(*m_impl->m_trade_limit)->evaluate(target, m_impl->m_weights_buffer);
