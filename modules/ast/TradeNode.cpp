@@ -81,10 +81,15 @@ void TradeLimitNode::evaluate(
 		||
 		(current_weights.array() * previous_weights.array() < 0)), 1.0f).cast<double>();
 
+	// update closed trade. If the current weight is 0 and the previous weight is not 0
+	// then zero out the pnl vector
+	m_impl->m_pnl = m_impl->m_pnl.select(
+		(current_weights.array() == 0) && (previous_weights.array() != 0), 0.0f).cast<double>();
+
 	// Trade limit node evaluate is called before the allocation node updates.
 	// Therefore, current_weights hold the weights that were used for the most 
 	// recent evaluation. So we need to update the trade pnl vector to adjust the pnl
-	// Stat by pulling in the previous market returns using index offset.
+	// Stat by pulling in the previous market returns using index offset and making a mutable copy of the view
 	Eigen::VectorXd previous_returns = m_exchange.getMarketReturns(-1);
 	previous_returns.array() += 1.0;
 
