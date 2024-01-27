@@ -44,6 +44,11 @@ public:
 	ExchangeMap& operator=(const ExchangeMap&) = delete;
 	ExchangeMap& operator=(ExchangeMap&&) = delete;
 
+	HashMap<String, size_t> const& getExchangeIds() const noexcept;
+	Result<Exchange const*, AtlasException> getExchangeConst(
+		String const& name
+	) const noexcept;
+
 
 };
 

@@ -161,5 +161,11 @@
     <ClCompile Include="modules\ast\TradeNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\standard\AtlasSerialize.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\standard\AtlasSerialize.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

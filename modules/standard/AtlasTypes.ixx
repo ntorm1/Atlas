@@ -10,6 +10,8 @@ import <optional>;
 import <unordered_map>;
 import <expected>;
 import <set>;
+
+
 export namespace Atlas
 {
 
@@ -62,6 +64,7 @@ export namespace Atlas
 	class Strategy;
 	class Tracer;
 	class CommisionManager;
+	class Hydra;
 
 	namespace AST
 	{

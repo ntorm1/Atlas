@@ -64,7 +64,7 @@ public:
 	Exchange& operator=(Exchange&&) = delete;
 
 	void registerStrategy(Strategy* strategy) noexcept;
-	auto const& get_name() const noexcept{return m_name;}
+	auto const& getSource() const noexcept{return m_source;}
 	size_t currentIdx() const noexcept;
 	EigenBlockView<double> getMarketReturnsBlock(size_t start_idex, size_t end_idx) const noexcept;
 	Option<size_t> getColumnIndex(String const& column) const noexcept;

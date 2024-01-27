@@ -52,3 +52,11 @@
 		return std::unexpected<Atlas::AtlasException>(CONCAT(val, _opt).error()); \
 	} \
 	auto val = std::move(CONCAT(val, _opt).value());
+
+
+#define ATLAS_ASSIGN_OR_RETURN(val, function) \
+	auto CONCAT(val, _opt) = function; \
+    if (!CONCAT(val, _opt)) { \
+		return std::unexpected<Atlas::AtlasException>(CONCAT(val, _opt).error()); \
+	} \
+	auto val = std::move(CONCAT(val, _opt).value());

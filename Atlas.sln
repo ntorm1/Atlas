@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AtlasPerf", "AtlasPerf\Atla
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AtlasPy", "AtlasPy\AtlasPy.vcxproj", "{70528BAA-2EE2-4DA6-B9C3-D6A5D9AF0539}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AtlasX", "AtlasX\AtlasX.vcxproj", "{976DE5CB-C235-47BB-ABE9-7155B6A23F74}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +53,14 @@ Global
 		{70528BAA-2EE2-4DA6-B9C3-D6A5D9AF0539}.Release|x64.Build.0 = Release|x64
 		{70528BAA-2EE2-4DA6-B9C3-D6A5D9AF0539}.Release|x86.ActiveCfg = Release|Win32
 		{70528BAA-2EE2-4DA6-B9C3-D6A5D9AF0539}.Release|x86.Build.0 = Release|Win32
+		{976DE5CB-C235-47BB-ABE9-7155B6A23F74}.Debug|x64.ActiveCfg = Debug|x64
+		{976DE5CB-C235-47BB-ABE9-7155B6A23F74}.Debug|x64.Build.0 = Debug|x64
+		{976DE5CB-C235-47BB-ABE9-7155B6A23F74}.Debug|x86.ActiveCfg = Debug|x64
+		{976DE5CB-C235-47BB-ABE9-7155B6A23F74}.Debug|x86.Build.0 = Debug|x64
+		{976DE5CB-C235-47BB-ABE9-7155B6A23F74}.Release|x64.ActiveCfg = Release|x64
+		{976DE5CB-C235-47BB-ABE9-7155B6A23F74}.Release|x64.Build.0 = Release|x64
+		{976DE5CB-C235-47BB-ABE9-7155B6A23F74}.Release|x86.ActiveCfg = Release|x64
+		{976DE5CB-C235-47BB-ABE9-7155B6A23F74}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

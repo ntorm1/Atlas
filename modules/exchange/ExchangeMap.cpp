@@ -65,6 +65,22 @@ ExchangeMap::~ExchangeMap() noexcept
 
 
 //============================================================================
+HashMap<String, size_t>
+const& ExchangeMap::getExchangeIds() const noexcept
+{
+	return m_impl->exchange_id_map;
+}
+
+
+//============================================================================
+Result<Exchange const*, AtlasException>
+ExchangeMap::getExchangeConst(String const& name) const noexcept
+{
+	return getExchange(name);
+}
+
+
+//============================================================================
 Result<SharedPtr<Exchange>, AtlasException>
 ExchangeMap::addExchange(String name, String source) noexcept
 {
@@ -80,7 +96,7 @@ ExchangeMap::addExchange(String name, String source) noexcept
 	EXPECT_TRUE(res, exchange->init());
 	EXPECT_TRUE(res_val, exchange->validate());
 	EXPECT_TRUE(res_build, exchange->build());
-	SAFE_MAP_INSERT(m_impl->exchange_id_map, exchange->get_name(), m_impl->exchanges.size());
+	SAFE_MAP_INSERT(m_impl->exchange_id_map, exchange->getName(), m_impl->exchanges.size());
 	m_impl->exchanges.push_back(std::move(exchange));
 	return m_impl->exchanges.back();
 }

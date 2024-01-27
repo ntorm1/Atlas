@@ -210,6 +210,8 @@
     <ClCompile Include="modules\standard\AtlasCore.ixx" />
     <ClCompile Include="modules\standard\AtlasEnums.ixx" />
     <ClCompile Include="modules\standard\AtlasLinAlg.ixx" />
+    <ClCompile Include="modules\standard\AtlasSerialize.cpp" />
+    <ClCompile Include="modules\standard\AtlasSerialize.ixx" />
     <ClCompile Include="modules\standard\AtlasTime.cpp" />
     <ClCompile Include="modules\standard\AtlasTime.ixx" />
     <ClCompile Include="modules\standard\AtlasTypes.ixx" />
