@@ -40,7 +40,6 @@ bld/
 .venv/
 build/
 AtlasBlog/
-AtlasX/
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/

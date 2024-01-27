@@ -33,8 +33,6 @@ public:
 	ATLAS_API ~Hydra() noexcept;
 
 
-	// ======= Private API ======= //
-	ExchangeMap const& getExchangeMap() const noexcept;
 
 
 	// ======= PUBLIC API ======= //
@@ -61,6 +59,9 @@ public:
 		Exchange& exchange,
 		double initial_cash
 	) noexcept;
+
+	//============================================================================
+	ATLAS_API ExchangeMap const& getExchangeMap() const noexcept;
 
 	//============================================================================
 	ATLAS_API Result<bool, AtlasException> build();

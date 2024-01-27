@@ -30,13 +30,15 @@ Result<rapidjson::Value, AtlasException>
 serialize_hydra(
 	rapidjson::Document::AllocatorType& allocator,
 	Hydra const& hydra,
-	Option<std::string> out_path) noexcept
+	Option<std::string> out_path
+) noexcept
 {
 	rapidjson::Value j(rapidjson::kObjectType);
 	auto exchange_map_json = serialize_exchange_map(allocator, hydra.getExchangeMap());
 	//auto master_portfolio_json = serialize_portfolio(allocator, *(hydra.get_portfolio("master").value()));
 	j.AddMember("exchanges", std::move(exchange_map_json), allocator);
 	//j.AddMember("master_portfolio", std::move(master_portfolio_json), allocator);
+
 
 	if (out_path)
 	{
@@ -80,17 +82,14 @@ deserialize_hydra(String const& path) noexcept
 	{
 		return std::unexpected(AtlasException("Failed to parse json file: " + path));
 	}
+	if (!doc.HasMember("hydra_config"))
+	{
+		return std::unexpected(AtlasException("Json file does not have hydra_config key"));
+	}
+
 
 	UniquePtr<Hydra> hydra = std::make_unique<Hydra>();
 	ATLAS_ASSIGN_OR_RETURN(res, deserialize_exchange_map(doc, hydra.get()));
-
-	// read in portfolio json
-	if (!doc.HasMember("master_portfolio"))
-	{
-		return std::unexpected(AtlasException("Json file does not have master portfolio"));
-	}
-	auto const& master_portfolio_json = doc["master_portfolio"];
-	//ATLAS_ASSIGN_OR_RETURN(res_p, deserialize_portfolio(master_portfolio_json, hydra.get(), std::nullopt));
 	return std::move(hydra);
 }
 
@@ -122,11 +121,13 @@ deserialize_exchange_map(
 	Hydra* hydra
 ) noexcept
 {
-	if (!json.HasMember("exchanges"))
+	// get hydra_config value from document
+	auto& hydra_config = json["hydra_config"];
+	if (!hydra_config.HasMember("exchanges"))
 	{
 		return std::unexpected(AtlasException("Json file does not have exchanges"));
 	}
-	auto& exchanges = json["exchanges"];
+	auto& exchanges = hydra_config["exchanges"];
 	if (!exchanges.IsObject())
 	{
 		return std::unexpected(AtlasException("Json file does not have exchanges: "));

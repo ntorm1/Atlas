@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+***************************************************************************************************
+ Copyright (C) 2023 The Qt Company Ltd.
+ SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+***************************************************************************************************
+-->
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{976DE5CB-C235-47BB-ABE9-7155B6A23F74}</ProjectGuid>
+    <Keyword>QtVS_v304</Keyword>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0.22000.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.22000.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
+    <QtInstall>6.5.1</QtInstall>
+    <QtModules>core;gui;widgets</QtModules>
+    <QtBuildConfig>debug</QtBuildConfig>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
+    <QtInstall>6.5.1</QtInstall>
+    <QtModules>core;gui;widgets</QtModules>
+    <QtBuildConfig>release</QtBuildConfig>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Users\natha\OneDrive\Desktop\C++\Atlas\AtlasX\Qt-Advanced-Docking-System\src</ExternalIncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Users\natha\OneDrive\Desktop\C++\Atlas\AtlasX\Qt-Advanced-Docking-System\src</ExternalIncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>$(Qt_DEFINES_);%(PreprocessorDefinitions);ADS_STATIC</PreprocessorDefinitions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>;ADS_STATIC</PreprocessorDefinitions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ClCompile>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <QtRcc Include="AtlasX.qrc" />
+    <QtRcc Include="Qt-Advanced-Docking-System\src\ads.qrc" />
+    <QtUic Include="AtlasX.ui" />
+    <QtMoc Include="include\AtlasX.h" />
+    <ClCompile Include="src\AtlasXExchangeManager.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\ads_globals.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\AutoHideDockContainer.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\AutoHideSideBar.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\AutoHideTab.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockAreaTabBar.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockAreaTitleBar.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockAreaWidget.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockComponentsFactory.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockContainerWidget.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockFocusController.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockingStateReader.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockManager.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockOverlay.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockSplitter.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockWidget.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\DockWidgetTab.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\ElidingLabel.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\FloatingDockContainer.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\FloatingDragPreview.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\IconProvider.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\PushButton.cpp" />
+    <ClCompile Include="Qt-Advanced-Docking-System\src\ResizeHandle.cpp" />
+    <ClCompile Include="src\AtlasX.cpp" />
+    <ClCompile Include="src\AtlasXImpl.cpp" />
+    <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Qt-Advanced-Docking-System\src\qtadvanceddockingConfig.cmake" />
+    <None Include="styles\vs_light.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Qt-Advanced-Docking-System\src\ads_globals.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Qt-Advanced-Docking-System\src\AutoHideDockContainer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Qt-Advanced-Docking-System\src\AutoHideSideBar.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Qt-Advanced-Docking-System\src\AutoHideTab.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Qt-Advanced-Docking-System\src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockAreaTabBar.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockAreaTitleBar.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockAreaTitleBar_p.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockAreaWidget.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\AtlasXImpl.h" />
+    <ClInclude Include="include\AtlasXTypes.h" />
+    <QtMoc Include="include\AtlasXExchangeManager.h" />
+    <ClInclude Include="Qt-Advanced-Docking-System\src\DockComponentsFactory.h" />
+    <ClInclude Include="Qt-Advanced-Docking-System\src\DockingStateReader.h" />
+    <ClInclude Include="Qt-Advanced-Docking-System\src\IconProvider.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\ResizeHandle.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\PushButton.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\FloatingDragPreview.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\FloatingDockContainer.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\ElidingLabel.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockWidgetTab.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockWidget.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockSplitter.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockOverlay.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockManager.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockFocusController.h" />
+    <QtMoc Include="Qt-Advanced-Docking-System\src\DockContainerWidget.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Atlas.vcxproj">
+      <Project>{7db7a647-330d-45a7-b9f8-949d8b433076}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
