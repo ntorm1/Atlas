@@ -74,6 +74,7 @@ public:
 	ATLAS_API EigenConstColView<double> getMarketReturns(int row_offset = 0) const noexcept;
 	ATLAS_API String const& getName() const noexcept {return m_name;}
 	ATLAS_API Option<size_t> getAssetIndex(String const& asset) const noexcept;
+	ATLAS_API HashMap<String, size_t> const& getAssetMap() const noexcept;
 	ATLAS_API size_t getAssetCount() const noexcept;
 	ATLAS_API Vector<Int64> const& getTimestamps() const noexcept;
 };

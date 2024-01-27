@@ -1,5 +1,6 @@
 
 #include "../include/AtlasXExchangeManager.h"
+#include "../include/AtlasXExchangeWidget.h"
 #include "../include/AtlasXImpl.h"
 
 #include <qtoolbar.h>
@@ -28,7 +29,6 @@ struct AtlasXExchangeManagerImpl
 {
     Vector<String> exchange_ids;
 };
-
 
 
 //============================================================================
@@ -98,7 +98,7 @@ AtlasXExchangeManager::buildSignals()
 		this,
 		SIGNAL(exchangeSelected(SharedPtr<Atlas::Exchange>, String)),
 		this,
-		SLOT(onSelectExchange(SharedPtr<Atlas::Exchange>, String))
+		SLOT(onExchangeSelected(SharedPtr<Atlas::Exchange>, String))
 	);
 }
 
@@ -116,6 +116,12 @@ AtlasXExchangeManager::onExchangeSelected(
     SharedPtr<Atlas::Exchange> exchange, 
     String exchange_id)
 {
+    auto widget = new AtlasXExchange(
+        this,
+        m_app,
+        exchange
+    );
+    setCentralWidget(widget);
 }
 
 
@@ -225,10 +231,19 @@ void AtlasXExchangeManager::selectExchange()
 	if (dialog.exec() == QDialog::Accepted) {
 		// Retrieve values from the dialog
 		QString exchangeName = combo->currentText();
-		auto exchange = combo->currentData().value<SharedPtr<Atlas::Exchange>>();
+		auto exchange = m_app->getExchange(exchangeName.toStdString());
+		if (!exchange) {
+			QMessageBox::critical(
+				&dialog,
+				tr("Error"),
+				tr("Failed to select exchange: %1").arg(exchange.error().what())
+			);
+			dialog.reject();
+			return;
+		}
 		qDebug() << "Exchange selected: " << exchangeName;
         emit exchangeSelected(
-			exchange,
+			*exchange,
 			exchangeName.toStdString()
 		);
 		dialog.accept();

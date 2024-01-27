@@ -115,6 +115,9 @@
     <ClCompile Include="src\AtlasXImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\AtlasXExchangeWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="styles\vs_light.css" />
@@ -183,6 +186,9 @@
     </QtMoc>
     <QtMoc Include="include\AtlasXExchangeManager.h">
       <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="include\AtlasXExchangeWidget.h">
+      <Filter>Source Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

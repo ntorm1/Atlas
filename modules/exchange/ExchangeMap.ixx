@@ -31,7 +31,7 @@ private:
 		String source
 	) noexcept;
 
-	Result<Exchange*, AtlasException> getExchange(
+	Result<SharedPtr<Exchange>, AtlasException> getExchange(
 		String const& name
 	) const noexcept;
 
@@ -45,7 +45,7 @@ public:
 	ExchangeMap& operator=(ExchangeMap&&) = delete;
 
 	ATLAS_API HashMap<String, size_t> const& getExchangeIds() const noexcept;
-	Result<Exchange const*, AtlasException> getExchangeConst(
+	Result<SharedPtr<const Exchange>, AtlasException> getExchangeConst(
 		String const& name
 	) const noexcept;
 

@@ -62,7 +62,7 @@ Hydra::addExchange(String name, String source) noexcept
 
 
 //============================================================================
-Result<Exchange*, AtlasException>
+Result<SharedPtr<Exchange>, AtlasException>
 Hydra::getExchange(String const& name) const noexcept
 {
 	return m_impl->m_exchange_map.getExchange(name);

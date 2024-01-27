@@ -43,7 +43,7 @@ public:
 	) noexcept;
 
 	//============================================================================
-	ATLAS_API Result<Exchange*, AtlasException> getExchange(
+	ATLAS_API Result<SharedPtr<Exchange>, AtlasException> getExchange(
 		String const& name
 	) const noexcept;
 

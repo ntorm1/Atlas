@@ -10,6 +10,7 @@
 import HydraModule;
 import AtlasSerializeModule;
 import ExchangeMapModule;
+import ExchangeModule;
 
 namespace AtlasX
 {
@@ -35,6 +36,14 @@ Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException>
 AtlasXAppImpl::addExchange(String name, String source) noexcept
 {
 	return hydra->addExchange(name, source);
+}
+
+
+//============================================================================
+Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException>
+AtlasXAppImpl::getExchange(String name) noexcept
+{
+	return hydra->getExchange(name);
 }
 
 
@@ -96,6 +105,14 @@ AtlasXAppImpl::getExchangeIds() noexcept
 {
 	auto const& exchange_map = hydra->getExchangeMap();
 	return exchange_map.getExchangeIds();
+}
+
+
+//============================================================================
+HashMap<String, size_t>
+AtlasXAppImpl::getAssetMap(SharedPtr<Atlas::Exchange> e) noexcept
+{
+	return e->getAssetMap();
 }
 
 }

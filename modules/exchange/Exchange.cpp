@@ -344,6 +344,13 @@ Exchange::getAssetIndex(String const& asset) const noexcept
 	return m_impl->asset_id_map[asset];
 }
 
+
+//============================================================================
+HashMap<String, size_t> const& Exchange::getAssetMap() const noexcept
+{
+	return m_impl->asset_id_map;
+}
+
 //============================================================================
 size_t
 Exchange::getAssetCount() const noexcept

@@ -107,6 +107,7 @@
     <QtRcc Include="Qt-Advanced-Docking-System\src\ads.qrc" />
     <QtUic Include="AtlasX.ui" />
     <QtMoc Include="include\AtlasX.h" />
+    <QtMoc Include="include\AtlasXExchangeWidget.h" />
     <ClCompile Include="src\AtlasXExchangeManager.cpp" />
     <ClCompile Include="Qt-Advanced-Docking-System\src\ads_globals.cpp" />
     <ClCompile Include="Qt-Advanced-Docking-System\src\AutoHideDockContainer.cpp" />
@@ -131,6 +132,7 @@
     <ClCompile Include="Qt-Advanced-Docking-System\src\PushButton.cpp" />
     <ClCompile Include="Qt-Advanced-Docking-System\src\ResizeHandle.cpp" />
     <ClCompile Include="src\AtlasX.cpp" />
+    <ClCompile Include="src\AtlasXExchangeWidget.cpp" />
     <ClCompile Include="src\AtlasXImpl.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>

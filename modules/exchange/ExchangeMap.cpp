@@ -73,7 +73,7 @@ const& ExchangeMap::getExchangeIds() const noexcept
 
 
 //============================================================================
-Result<Exchange const*, AtlasException>
+Result<SharedPtr<const Exchange>, AtlasException>
 ExchangeMap::getExchangeConst(String const& name) const noexcept
 {
 	return getExchange(name);
@@ -103,12 +103,12 @@ ExchangeMap::addExchange(String name, String source) noexcept
 
 
 //============================================================================
-Result<Exchange*, AtlasException>
+Result<SharedPtr<Exchange>, AtlasException>
 ExchangeMap::getExchange(String const& name) const noexcept
 {
 	if (m_impl->exchange_id_map.contains(name))
 	{
-		return m_impl->exchanges[m_impl->exchange_id_map[name]].get();
+		return m_impl->exchanges[m_impl->exchange_id_map[name]];
 	}
 	return std::unexpected<AtlasException>("Exchange not found");
 }

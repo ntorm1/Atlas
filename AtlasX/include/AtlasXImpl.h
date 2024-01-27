@@ -30,6 +30,11 @@ public:
 	) noexcept;
 
 	//============================================================================
+	Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException> getExchange(
+		String name
+	) noexcept;
+
+	//============================================================================
 	Result<bool, Atlas::AtlasException> deserialize(
 		String path
 	) noexcept;
@@ -41,6 +46,9 @@ public:
 
 	//============================================================================
 	HashMap<String, size_t> getExchangeIds() noexcept;
+
+	//============================================================================
+	HashMap<String, size_t> getAssetMap(SharedPtr<Atlas::Exchange> e) noexcept;
 };
 
 
