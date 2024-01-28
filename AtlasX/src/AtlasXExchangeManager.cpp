@@ -119,9 +119,32 @@ AtlasXExchangeManager::onExchangeSelected(
     auto widget = new AtlasXExchange(
         this,
         m_app,
-        exchange
+        exchange,
+        exchange_id
     );
+    connectExchange(widget);
     setCentralWidget(widget);
+}
+
+
+//============================================================================
+void
+AtlasXExchangeManager::connectExchange(AtlasXExchange* exchange_widget)
+{
+    connect(
+        this,
+        &AtlasXExchangeManager::hydraStep,
+        exchange_widget,
+        &AtlasXExchange::onHydraStep
+    );
+}
+
+
+//============================================================================
+void
+AtlasXExchangeManager::onHydraStep()
+{
+    emit hydraStep();
 }
 
 

@@ -12,6 +12,7 @@ namespace Time
 
 
 
+//============================================================================
 static std::tm nsEpochToTm(int64_t ns_epoch) noexcept
 {
 	std::chrono::seconds epoch_time(ns_epoch / 1000000000);
@@ -62,7 +63,33 @@ applyTimeOffset(Int64 timestamp, TimeOffset offset)
 
 
 //============================================================================
-int getMonthFromEpoch(int64_t ns_epoch) noexcept
+String
+convertNanosecondsToTime(Int64 nanoseconds)
+{
+	// Convert nanoseconds to seconds
+	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::nanoseconds(nanoseconds));
+
+	// Create a time_point using the epoch time
+	std::chrono::system_clock::time_point timePoint(std::chrono::seconds(seconds.count()));
+
+	// Convert time_point to time_t
+	std::time_t time = std::chrono::system_clock::to_time_t(timePoint);
+
+	// Convert time_t to std::tm using localtime_s
+	std::tm tmStruct;
+	localtime_s(&tmStruct, &time);
+
+	// Format the time as a string
+	std::ostringstream oss;
+	oss << std::put_time(&tmStruct, "%Y-%m-%d %H:%M:%S");
+
+	return oss.str();
+}
+
+
+//============================================================================
+int
+getMonthFromEpoch(int64_t ns_epoch) noexcept
 {
 	std::tm time_info = nsEpochToTm(ns_epoch);
 	int month_number = time_info.tm_mon + 1; // tm_mon is zero-based

@@ -64,6 +64,11 @@ public:
 	ATLAS_API ExchangeMap const& getExchangeMap() const noexcept;
 
 	//============================================================================
+	ATLAS_API Option<String> getParentExchangeName(
+		String const& asset_name
+	) const noexcept;
+
+	//============================================================================
 	ATLAS_API Result<bool, AtlasException> build();
 
 	//============================================================================
@@ -74,6 +79,18 @@ public:
 
 	//============================================================================
 	ATLAS_API void run() noexcept;
+
+	//============================================================================
+	ATLAS_API Int64 currentGlobalTime() const noexcept;
+
+	//============================================================================
+	ATLAS_API Int64 nextGlobalTime() const noexcept;
+
+	//============================================================================
+	ATLAS_API size_t getCurrentIdx() const noexcept;
+
+	//============================================================================
+	ATLAS_API Vector<Int64> const& getTimestamps() const noexcept;
 
 	//============================================================================
 	ATLAS_API Result<bool, AtlasException> reset() noexcept;

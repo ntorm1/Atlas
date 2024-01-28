@@ -286,6 +286,15 @@ Exchange::currentIdx() const noexcept
 
 
 //============================================================================
+EigenConstRowView<double>
+Exchange::getAssetSlice(size_t asset_index) const noexcept
+{
+	assert(asset_index < static_cast<size_t>(m_impl->data.rows()));
+	return m_impl->data.row(asset_index);
+}
+
+
+//============================================================================
 EigenConstColView<double>
 Exchange::getMarketReturns(int offset) const noexcept
 {
@@ -346,9 +355,18 @@ Exchange::getAssetIndex(String const& asset) const noexcept
 
 
 //============================================================================
-HashMap<String, size_t> const& Exchange::getAssetMap() const noexcept
+HashMap<String, size_t> const&
+Exchange::getAssetMap() const noexcept
 {
 	return m_impl->asset_id_map;
+}
+
+
+//============================================================================
+HashMap<String, size_t> const&
+Exchange::getHeaders() const noexcept
+{
+	return m_impl->headers;
 }
 
 //============================================================================

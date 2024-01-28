@@ -19,11 +19,17 @@ int main(int argc, char *argv[])
     a.setApplicationName("AtlasX");
     a.setQuitOnLastWindowClosed(true);
     
-    QFile StyleSheetFile("./styles/vs_light.css");
-    StyleSheetFile.open(QIODevice::ReadOnly);
-    QTextStream StyleSheetStream(&StyleSheetFile);
-    a.setStyleSheet(StyleSheetStream.readAll());
-    StyleSheetFile.close();
+
+    QFile f("./styles/QDarkStyleSheet/qdarkstyle/dark/darkstyle.qss");
+    if (!f.exists()) {
+        printf("Unable to set stylesheet, file not found\n");
+        return 1;
+    }
+    else {
+        f.open(QFile::ReadOnly | QFile::Text);
+        QTextStream ts(&f);
+        qApp->setStyleSheet(ts.readAll());
+    }
     
     AtlasXApp w;
     w.show();

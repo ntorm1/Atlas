@@ -1,3 +1,10 @@
+module;
+#pragma once
+#ifdef ATLAS_EXPORTS
+#define ATLAS_API __declspec(dllexport)
+#else
+#define ATLAS_API  __declspec(dllimport)
+#endif
 export module AtlasTimeModule;
 
 
@@ -29,7 +36,8 @@ export struct TimeOffset
 
 
 export Int64 applyTimeOffset(Int64 t, TimeOffset o);
-export int getMonthFromEpoch(int64_t epoch) noexcept;
+export int getMonthFromEpoch(Int64 epoch) noexcept;
+export ATLAS_API String convertNanosecondsToTime(Int64 nanoseconds);
 
 }
 

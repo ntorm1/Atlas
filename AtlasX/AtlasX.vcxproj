@@ -37,13 +37,13 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>6.5.1</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtInstall>6.5.3</QtInstall>
+    <QtModules>core;gui;widgets;charts</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>6.5.1</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtInstall>6.5.3</QtInstall>
+    <QtModules>core;gui;widgets;charts</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -61,21 +61,25 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Users\natha\OneDrive\Desktop\C++\Atlas\AtlasX\Qt-Advanced-Docking-System\src</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)AtlasX\external\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\Qt-Advanced-Docking-System\src</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Users\natha\OneDrive\Desktop\C++\Atlas\AtlasX\Qt-Advanced-Docking-System\src</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)AtlasX\external\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\Qt-Advanced-Docking-System\src</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PreprocessorDefinitions>$(Qt_DEFINES_);%(PreprocessorDefinitions);ADS_STATIC</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <DisableSpecificWarnings>5050</DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PreprocessorDefinitions>;ADS_STATIC</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <DisableSpecificWarnings>5050</DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -108,6 +112,7 @@
     <QtUic Include="AtlasX.ui" />
     <QtMoc Include="include\AtlasX.h" />
     <QtMoc Include="include\AtlasXExchangeWidget.h" />
+    <ClCompile Include="src\AtlasXAssetWidget.cpp" />
     <ClCompile Include="src\AtlasXExchangeManager.cpp" />
     <ClCompile Include="Qt-Advanced-Docking-System\src\ads_globals.cpp" />
     <ClCompile Include="Qt-Advanced-Docking-System\src\AutoHideDockContainer.cpp" />
@@ -168,6 +173,9 @@
     <QtMoc Include="Qt-Advanced-Docking-System\src\DockAreaWidget.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="external\include\rangelimitedvalueaxis.h" />
+    <ClInclude Include="include\AtlasXHelpers.h" />
+    <QtMoc Include="include\AtlasXAssetWidget.h" />
     <ClInclude Include="include\AtlasXImpl.h" />
     <ClInclude Include="include\AtlasXTypes.h" />
     <QtMoc Include="include\AtlasXExchangeManager.h" />

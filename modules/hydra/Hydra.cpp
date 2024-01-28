@@ -44,6 +44,14 @@ Hydra::getExchangeMap() const noexcept
 
 
 //============================================================================
+Option<String>
+Hydra::getParentExchangeName(String const& asset_name) const noexcept
+{
+	return m_impl->m_exchange_map.getParentExchangeName(asset_name);
+}
+
+
+//============================================================================
 Result<SharedPtr<Exchange>, AtlasException>
 Hydra::addExchange(String name, String source) noexcept
 {
@@ -124,8 +132,15 @@ Result<bool, AtlasException>
 Hydra::build()
 {
 	m_impl->m_exchange_map.build();
+	
+	if (m_impl->m_exchange_map.getTimestamps().size() == 0)
+	{
+		return Err("No timestamps found");
+	}
+	
 	m_state = HydraState::BUILT;
 	return true;
+
 }
 
 
@@ -191,6 +206,63 @@ Hydra::run() noexcept
 		step();
 	}
 	m_state = HydraState::FINISHED;
+}
+
+
+//============================================================================
+Int64
+Hydra::currentGlobalTime() const noexcept
+{
+	auto idx = m_impl->m_exchange_map.getCurrentIdx();
+	if (idx == 0)
+	{
+		return 0;
+	}
+	auto const& timestamps = m_impl->m_exchange_map.getTimestamps();
+	if (idx >= timestamps.size())
+	{
+		return 0;
+	}
+	return timestamps[idx - 1];
+}
+
+
+//============================================================================
+Int64
+Hydra::nextGlobalTime() const noexcept
+{
+	auto idx = m_impl->m_exchange_map.getCurrentIdx();
+	if (idx == 0)
+	{
+		return 0;
+	}
+	auto const& timestamps = m_impl->m_exchange_map.getTimestamps();
+	if (idx >= timestamps.size())
+	{
+		return 0;
+	}
+	return timestamps[idx];
+}
+
+
+//============================================================================
+size_t
+Hydra::getCurrentIdx() const noexcept
+{
+	auto idx = m_impl->m_exchange_map.getCurrentIdx();
+	if (idx == 0)
+	{
+		return 0;
+	}
+	return idx - 1;
+}
+
+
+//============================================================================
+Vector<Int64> const&
+Hydra::getTimestamps() const noexcept
+{
+	return m_impl->m_exchange_map.getTimestamps();
 }
 
 

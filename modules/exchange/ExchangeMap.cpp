@@ -23,6 +23,7 @@ struct ExchangeMapImpl
 void
 ExchangeMap::build() noexcept
 {
+	m_impl->timestamps.clear();
 	for (auto const& exchange: m_impl->exchanges)
 	{
 		auto exchange_timestamps = exchange->getTimestamps();
@@ -81,6 +82,21 @@ ExchangeMap::getExchangeConst(String const& name) const noexcept
 
 
 //============================================================================
+Option<String>
+ExchangeMap::getParentExchangeName(String const& asset_name) const noexcept
+{
+	for (auto const& exchange: m_impl->exchanges)
+	{
+		if (exchange->getAssetMap().count(asset_name))
+		{
+			return exchange->getName();
+		}
+	}
+	return std::nullopt;
+}
+
+
+//============================================================================
 Result<SharedPtr<Exchange>, AtlasException>
 ExchangeMap::addExchange(String name, String source) noexcept
 {
@@ -111,6 +127,14 @@ ExchangeMap::getExchange(String const& name) const noexcept
 		return m_impl->exchanges[m_impl->exchange_id_map[name]];
 	}
 	return std::unexpected<AtlasException>("Exchange not found");
+}
+
+
+//============================================================================
+size_t
+ExchangeMap::getCurrentIdx() const noexcept
+{
+	return m_impl->current_index;
 }
 
 

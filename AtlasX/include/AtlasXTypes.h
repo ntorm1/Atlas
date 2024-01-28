@@ -53,6 +53,7 @@ namespace AtlasX
 	class AtlasXAppImpl;
 	class AtlasXExchangeManager;
 	class AtlasXExchange;
+	class AtlasXAsset;
 }
 
 namespace Atlas

@@ -14,6 +14,9 @@ export template <typename T>
 using EigenConstColView = Eigen::Block<Eigen::Matrix<T, -1, -1, 0, -1, -1>, -1, 1, true>;
 
 export template <typename T>
+using EigenConstRowView = Eigen::Block<Eigen::Matrix<T, -1, -1, 0, -1, -1>, 1, -1, false>;
+
+export template <typename T>
 using EigenBlockView = Eigen::Block<Eigen::Matrix<T, -1, -1, 0, -1, -1>, -1, -1, true>;
 
 export using EigenCwiseProductOp = Eigen::internal::scalar_product_op<double, double>;

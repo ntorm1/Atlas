@@ -24,6 +24,7 @@ class AtlasXApp : public QMainWindow
 
 signals:
     void hydraRestore();
+    void hydraStep();
 
 private:
     Ui::AtlasXClass* ui;
@@ -33,9 +34,15 @@ private:
 
     void initStyle();
     void initSignals() noexcept;
+    void initStateBar() noexcept;
     void initToolBar() noexcept;
     void initEnvironment() noexcept;
     void saveEnvironment() noexcept;
+    void updateStateBar() noexcept;
+
+    void step() noexcept;
+    void run() noexcept;
+    void build() noexcept;
 
 public:
     AtlasXApp(QWidget* parent = nullptr);
