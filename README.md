@@ -1,18 +1,20 @@
 # Atlas
 ## About
-Atlas is a high performance Algorthmic Trading Backtesting library written in C++23 with a Python wrapper build using pybind11. It is split into four parts
+Atlas is a high performance Algorthmic Trading Backtesting library written in C++23 with a Python wrapper build using pybind11. It is split into five parts
 
 1. Atlas (core c++ runtime build is Visual Studio Project)
 2. AtlasTest (c++ test suite)
 3. AtlasPy (pybind11 wrapper)
 3. AtlasPerf (dummy c++ project)
+4. AtlasX (GUI based on Qt)
 
 
 ## Building
 Install requires visual studio and vcpkg manager and the following packages installed:
 1. Eigen
 2. H5CPP
-3. Pybind11
+3. Pybind11 (AtlasPy)
+4. Qt (AtlasX)
 To build simply open the Visual Studio Solution and build AtlasPy. The output of which is a .pyd extension that can be directly imported into Python
 Note Pybind11 support currently needs changes to change to unique ptrs.
 
