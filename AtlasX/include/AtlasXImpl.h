@@ -37,29 +37,29 @@ public:
 	SharedPtr<Atlas::Hydra> getHydra() noexcept { return hydra; }
 
 	//============================================================================
-	void run() noexcept;
+	[[nodiscard]] Result<bool, Atlas::AtlasException> run() noexcept;
 
 	//============================================================================
-	Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException> addExchange(
+	[[nodiscard]]  Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException> addExchange(
 		String name,
 		String source
 	) noexcept;
 
 	//============================================================================
-	Result<SharedPtr<Atlas::Portfolio>, Atlas::AtlasException> addPortfolio(
+	[[nodiscard]]  Result<SharedPtr<Atlas::Portfolio>, Atlas::AtlasException> addPortfolio(
 		String name,
 		SharedPtr<Atlas::Exchange> exchange,
 		double intial_cash
 	) noexcept;
 
 	//============================================================================
-	Result<SharedPtr<Atlas::Portfolio>, Atlas::AtlasException> getPortfolio(
+	[[nodiscard]] Result<SharedPtr<Atlas::Portfolio>, Atlas::AtlasException> getPortfolio(
 		String name
 	) noexcept;
 
 
 	//============================================================================
-	Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException> getExchange(
+	[[nodiscard]] Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException> getExchange(
 		String name
 	) noexcept;
 
@@ -67,24 +67,31 @@ public:
 	HashMap<String, size_t> getPortfolioIdxMap() const noexcept;
 
 	//============================================================================
-	Result<bool, Atlas::AtlasException> deserialize(
+	[[nodiscard]] Result<bool, Atlas::AtlasException> deserialize(
 		String path
 	) noexcept;
 
 	//============================================================================
-	Result<bool, Atlas::AtlasException> serialize(
+	[[nodiscard]] Result<bool, Atlas::AtlasException> serialize(
 		String path
 	) noexcept;
 
 	//============================================================================
-	Result<bool, Atlas::AtlasException> build() noexcept;
+	[[nodiscard]] Result<bool, Atlas::AtlasException> build() noexcept;
 
 	//============================================================================
-	Result<Atlas::LinAlg::EigenConstRowView<double>, Atlas::AtlasException>
+	[[nodiscard]] Result<bool, Atlas::AtlasException> reset() noexcept;
+
+	//============================================================================
+	[[nodiscard]] Result<Atlas::LinAlg::EigenConstRowView<double>, Atlas::AtlasException>
 	getAssetSlice(String const& asset_name) const noexcept;
 
 	//============================================================================
 	HashMap<String, size_t> getExchangeIds() noexcept;
+
+
+	//============================================================================
+	size_t* getCurrentIdxPtr() const noexcept;
 
 	//============================================================================
 	HashMap<String, size_t> const& getExchangeHeaders(SharedPtr<Atlas::Exchange> exchange) noexcept;
@@ -111,7 +118,7 @@ public:
 	String convertNanosecondsToTime(Int64 nanoseconds);
 
 	//============================================================================
-	Option<String> getStrategyParentExchange(
+	[[nodiscard]] Option<String> getStrategyParentExchange(
 		String const& strategy_name
 	) const noexcept;
 
@@ -121,7 +128,7 @@ public:
 	) const noexcept;
 
 	//============================================================================
-	Option<String> getParentExchangeName(
+	[[nodiscard]] Option<String> getParentExchangeName(
 		String const& asset_name
 	) const noexcept;
 

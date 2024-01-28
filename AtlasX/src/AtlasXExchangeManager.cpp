@@ -137,6 +137,12 @@ AtlasXExchangeManager::connectExchange(AtlasXExchange* exchange_widget)
         exchange_widget,
         &AtlasXExchange::onHydraStep
     );
+    connect(
+		this,
+		&AtlasXExchangeManager::hydraReset,
+		exchange_widget,
+		&AtlasXExchange::onHydraReset
+	);
 }
 
 
@@ -145,6 +151,11 @@ void
 AtlasXExchangeManager::onHydraStep()
 {
     emit hydraStep();
+}
+
+void AtlasXExchangeManager::onHydraReset()
+{
+    emit hydraReset();
 }
 
 

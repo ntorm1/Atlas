@@ -29,8 +29,8 @@ signals:
 		String exchange_id
 	);
 
-	//============================================================================
 	void hydraStep();
+	void hydraReset();
 
 private slots:
 	//============================================================================
@@ -48,6 +48,7 @@ private slots:
 public slots:
 	void onHydraRestore();
 	void onHydraStep();
+	void onHydraReset();
 
 private:
 	AtlasXAppImpl* m_app = nullptr;

@@ -166,6 +166,18 @@ AtlasXAsset::onHydraStep()
 }
 
 
+//============================================================================'
+void
+AtlasXAsset::onHydraReset()
+{
+	auto model = impl->table_view->model();
+	for (int i = 0; i < model->rowCount(); ++i)
+	{
+		auto q_idx = model->index(i, 0);
+		model->setData(q_idx, QVariant(), Qt::BackgroundRole);
+	}
+}
+
 //============================================================================
 void
 AtlasXAsset::initPlot() noexcept

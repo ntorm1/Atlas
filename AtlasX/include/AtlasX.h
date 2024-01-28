@@ -25,6 +25,12 @@ class AtlasXApp : public QMainWindow
 signals:
     void hydraRestore();
     void hydraStep();
+    void hydraReset();
+    void hydraRun();
+    void updateProgressBar(int value);
+
+private slots:
+    void onUpdateProgressBar(int value) noexcept;
 
 private:
     Ui::AtlasXClass* ui;
@@ -44,6 +50,7 @@ private:
     void step() noexcept;
     void run() noexcept;
     void build() noexcept;
+    void reset() noexcept;
 
 public:
     AtlasXApp(QWidget* parent = nullptr);

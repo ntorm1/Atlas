@@ -20,6 +20,7 @@ class AtlasXAsset : public QWidget
 
 public slots:
 	void onHydraStep();
+	void onHydraReset();
 
 private slots:
 	void showHeaderContextMenu(QPoint pos) noexcept;

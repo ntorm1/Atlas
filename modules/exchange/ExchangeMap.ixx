@@ -41,6 +41,9 @@ private:
 	//============================================================================
 	size_t getCurrentIdx() const noexcept;
 
+	//============================================================================
+	size_t* getCurrentIdxPtr() const noexcept;
+
 public:
 	ExchangeMap() noexcept;
 	ATLAS_API ~ExchangeMap() noexcept;

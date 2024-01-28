@@ -40,10 +40,10 @@ AtlasXAppImpl::step() noexcept
 
 
 //============================================================================
-void
+Result<bool, Atlas::AtlasException>
 AtlasXAppImpl::run() noexcept
 {
-	hydra->run();
+	return hydra->run();
 }
 
 
@@ -152,6 +152,14 @@ AtlasXAppImpl::build() noexcept
 
 
 //============================================================================
+Result<bool, Atlas::AtlasException>
+AtlasXAppImpl::reset() noexcept
+{
+	return hydra->reset();
+}
+
+
+//============================================================================
 Result<Atlas::LinAlg::EigenConstRowView<double>, Atlas::AtlasException>
 AtlasXAppImpl::getAssetSlice(String const& asset_name) const noexcept
 {
@@ -174,6 +182,13 @@ AtlasXAppImpl::getExchangeIds() noexcept
 	return exchange_map.getExchangeIds();
 }
 
+
+//============================================================================
+size_t*
+AtlasXAppImpl::getCurrentIdxPtr() const noexcept
+{
+	return hydra->getCurrentIdxPtr();
+}
 
 //============================================================================
 HashMap<String, size_t> const&

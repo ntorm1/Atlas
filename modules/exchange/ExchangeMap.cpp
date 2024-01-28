@@ -139,6 +139,14 @@ ExchangeMap::getCurrentIdx() const noexcept
 
 
 //============================================================================
+size_t*
+ExchangeMap::getCurrentIdxPtr() const noexcept
+{
+	return &m_impl->current_index;
+}
+
+
+//============================================================================
 void
 ExchangeMap::step() noexcept
 {

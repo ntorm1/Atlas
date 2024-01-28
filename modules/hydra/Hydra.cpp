@@ -203,21 +203,34 @@ Hydra::step() noexcept
 
 
 //============================================================================
-void
+Result<bool, AtlasException>
 Hydra::run() noexcept
 {
-	assert(m_state == HydraState::BUILT || m_state == HydraState::FINISHED);
+	// validate that the hydra has been built
+	if (m_state == HydraState::INIT)
+	{
+		return Err("Hydra must be in build or finished state to run");
+	}
+	// if called directly after a run, reset the hydra
 	if (m_state == HydraState::FINISHED)
 	{
 		auto res = reset();
 		assert(res);
 	}
 	size_t steps = m_impl->m_exchange_map.getTimestamps().size();
+
+	// if there are no timestamps, return false
+	if (steps == 0)
+	{
+		return Err("No timestamps found");
+	}
+
 	for (size_t i = 0; i < steps; ++i)
 	{
 		step();
 	}
 	m_state = HydraState::FINISHED;
+	return true;
 }
 
 
@@ -267,6 +280,14 @@ Hydra::getCurrentIdx() const noexcept
 		return 0;
 	}
 	return idx - 1;
+}
+
+
+//============================================================================
+size_t*
+Hydra::getCurrentIdxPtr() const noexcept
+{
+	return m_impl->m_exchange_map.getCurrentIdxPtr();
 }
 
 

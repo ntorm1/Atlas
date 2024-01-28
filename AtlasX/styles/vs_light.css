@@ -1,23 +1,22 @@
 /*
  * Visual Studio like light theme
  */
- 
+
 /*****************************************************************************
  * CDockManager
  *****************************************************************************/
-ads--CDockManager 
-{
-	background: palette(window);
-} 
- 
- 
+ads--CDockManager {
+    background: palette(window);
+}
+
+
 
 /*****************************************************************************
  * CDockContainerWidget
- *****************************************************************************/ 
+ *****************************************************************************/
 ads--CDockContainerWidget {
-	background: palette(window);
-	padding: 2px;
+    background: palette(window);
+    padding: 2px;
 }
 
 
@@ -25,59 +24,57 @@ ads--CDockContainerWidget {
  * CDockAreaWidget
  *****************************************************************************/
 ads--CDockAreaWidget {
-	background: palette(window);
-	/*border: 1px solid palette(dark);*/
+    background: palette(window);
+    /*border: 1px solid palette(dark);*/
 }
 
 
 ads--CDockAreaTitleBar {
-	background: transparent;
-	border-bottom: 2px solid rgb(204, 204, 204);
-	padding-bottom: 0px;
+    background: transparent;
+    border-bottom: 2px solid rgb(204, 204, 204);
+    padding-bottom: 0px;
 }
 
 
 ads--CTitleBarButton {
-	padding: 0px 0px;
-	background: transparent;
-	border: none;
+    padding: 0px 0px;
+    background: transparent;
+    border: none;
 }
 
-	/* Hover state */
-	ads--CTitleBarButton:hover {
-		background: rgba(255, 255, 255, 0.1); /* Use a darker shade for the hover background */
-	}
+    /* Hover state */
+    ads--CTitleBarButton:hover {
+        background: rgba(255, 255, 255, 0.1); /* Use a darker shade for the hover background */
+    }
 
-	/* Pressed state */
-	ads--CTitleBarButton:pressed {
-		background: rgba(255, 255, 255, 0.2); /* Use an even darker shade for the pressed background */
-	}
+    /* Pressed state */
+    ads--CTitleBarButton:pressed {
+        background: rgba(255, 255, 255, 0.2); /* Use an even darker shade for the pressed background */
+    }
 
 QScrollArea#dockWidgetScrollArea {
-	padding: 0px;
-	border: none;
+    padding: 0px;
+    border: none;
 }
 
 #tabsMenuButton::menu-indicator {
-	image: none;
+    image: none;
 }
 
 
 #dockAreaCloseButton {
-	qproperty-icon: url(:/ads/images/close-button.svg),
-		url(:/ads/images/close-button-disabled.svg) disabled;
-	qproperty-iconSize: 16px;
+    qproperty-icon: url(:/ads/images/close-button.svg), url(:/ads/images/close-button-disabled.svg) disabled;
+    qproperty-iconSize: 16px;
 }
 
 #detachGroupButton {
-	qproperty-icon: url(:/ads/images/detach-button.svg),
-		url(:/ads/images/detach-button-disabled.svg) disabled;
-	qproperty-iconSize: 16px;	
+    qproperty-icon: url(:/ads/images/detach-button.svg), url(:/ads/images/detach-button-disabled.svg) disabled;
+    qproperty-iconSize: 16px;
 }
 
 
 ads--CDockAreaWidget[focused="true"] ads--CDockAreaTitleBar {
-	border-bottom: 2px solid palette(highlight);
+    border-bottom: 2px solid palette(highlight);
 }
 
 
@@ -85,76 +82,75 @@ ads--CDockAreaWidget[focused="true"] ads--CDockAreaTitleBar {
  * CDockWidgetTab
  *****************************************************************************/
 ads--CDockWidgetTab {
-	background: palette(window);
-	border: none;
-	padding: 0 0px;
-	qproperty-iconSize: 16px 16px;/* this is optional in case you would like to change icon size*/
+    background: palette(window);
+    border: none;
+    padding: 0 0px;
+    qproperty-iconSize: 16px 16px; /* this is optional in case you would like to change icon size*/
 }
 
-ads--CDockWidgetTab[activeTab="true"] {
-	background: rgb(204, 204, 204);
-}
+    ads--CDockWidgetTab[activeTab="true"] {
+        background: rgb(204, 204, 204);
+    }
 
-ads--CDockWidgetTab QLabel {
-	color: palette(foreground);
-}
+    ads--CDockWidgetTab QLabel {
+        color: palette(foreground);
+    }
 
-ads--CDockWidgetTab[activeTab="true"] QLabel {
-	color: palette(foreground);
-}
+    ads--CDockWidgetTab[activeTab="true"] QLabel {
+        color: palette(foreground);
+    }
 
 
 #tabCloseButton {
-	margin-top: 2px;
-	background: none;
-	border: none;
-	padding: 0px -2px;
-	qproperty-icon: url(:/ads/images/close-button.svg),
-		url(:/ads/images/close-button-disabled.svg) disabled;
-	qproperty-iconSize: 16px;
+    margin-top: 2px;
+    background: none;
+    border: none;
+    padding: 0px -2px;
+    qproperty-icon: url(:/ads/images/close-button.svg), url(:/ads/images/close-button-disabled.svg) disabled;
+    qproperty-iconSize: 16px;
 }
 
-	/* Hover state for #tabCloseButton */
-	#tabCloseButton:hover {
-		/* border: 1px solid rgba(255, 255, 255, 0.32); */ /* Uncomment this line if you want to keep the border */
-		background: rgba(255, 255, 255, 0.24); /* Use a darker shade for the hover background */
-	}
+    /* Hover state for #tabCloseButton */
+    #tabCloseButton:hover {
+        /* border: 1px solid rgba(255, 255, 255, 0.32); */ /* Uncomment this line if you want to keep the border */
+        background: rgba(255, 255, 255, 0.24); /* Use a darker shade for the hover background */
+    }
 
-	/* Pressed state for #tabCloseButton */
-	#tabCloseButton:pressed {
-		background: rgba(255, 255, 255, 0.48); /* Use an even darker shade for the pressed background */
-	}
+    /* Pressed state for #tabCloseButton */
+    #tabCloseButton:pressed {
+        background: rgba(255, 255, 255, 0.48); /* Use an even darker shade for the pressed background */
+    }
 
 /* Focus related styling for ads--CDockWidgetTab */
 ads--CDockWidgetTab[focused="true"] {
-	background: rgba(0, 0, 0, 24); /* Dark background color */
-	border-color: rgba(0, 0, 0, 24); /* Dark border color */
+    background: rgba(0, 0, 0, 24); /* Dark background color */
+    border-color: rgba(0, 0, 0, 24); /* Dark border color */
 }
 
-	ads--CDockWidgetTab[focused="true"] > #tabCloseButton {
-		qproperty-icon: url(:/ads/images/close-button-focused-dark.svg); /* Dark close button icon */
-	}
+    ads--CDockWidgetTab[focused="true"] > #tabCloseButton {
+        qproperty-icon: url(:/ads/images/close-button-focused-dark.svg); /* Dark close button icon */
+    }
 
-		ads--CDockWidgetTab[focused="true"] > #tabCloseButton:hover {
-			background: rgba(0, 0, 0, 0.48); /* Dark hover background for the close button */
-		}
+        ads--CDockWidgetTab[focused="true"] > #tabCloseButton:hover {
+            background: rgba(0, 0, 0, 0.48); /* Dark hover background for the close button */
+        }
 
-		ads--CDockWidgetTab[focused="true"] > #tabCloseButton:pressed {
-			background: rgba(0, 0, 0, 0.92); /* Dark pressed background for the close button */
-		}
+        ads--CDockWidgetTab[focused="true"] > #tabCloseButton:pressed {
+            background: rgba(0, 0, 0, 0.92); /* Dark pressed background for the close button */
+        }
 
-	ads--CDockWidgetTab[focused="true"] QLabel {
-		color: rgba(255, 255, 255, 0.8); /* Light text color */
-	}
+    ads--CDockWidgetTab[focused="true"] QLabel {
+        color: rgba(255, 255, 255, 0.8); /* Light text color */
+    }
 
 
 /*****************************************************************************
  * CDockWidget
  *****************************************************************************/
 ads--CDockWidget {
-	background: palette(light);
-	border: 1px solid rgb(204, 204, 204);
-	border-top: none;
+    background: palette(light);
+    border: 1px solid rgb(204, 204, 204);
+    border-top: none;
 }
 
 
@@ -164,131 +160,130 @@ ads--CDockWidget {
  * Styling of auto hide functionality
  *
  *****************************************************************************/
- 
- 
+
+
 /*****************************************************************************
  * CAutoHideTab
  *****************************************************************************/
 ads--CAutoHideTab {
-	qproperty-iconSize: 16px 16px;/* this is optional in case you would like to change icon size*/
-	background: none;
-	border: none;
-	padding-left: 2px;
-	padding-right: 0px;
-	text-align: center;
-	min-height: 20px;
-	padding-bottom: 2px;
+    qproperty-iconSize: 16px 16px; /* this is optional in case you would like to change icon size*/
+    background: none;
+    border: none;
+    padding-left: 2px;
+    padding-right: 0px;
+    text-align: center;
+    min-height: 20px;
+    padding-bottom: 2px;
 }
 
 
-ads--CAutoHideTab:hover
-{
-	color: palette(highlight);
-}
+    ads--CAutoHideTab:hover {
+        color: palette(highlight);
+    }
 
 
-ads--CAutoHideTab[iconOnly="false"][sideBarLocation="0"],
-ads--CAutoHideTab[iconOnly="false"][sideBarLocation="2"]  {
-	border-top: 6px solid rgba(0, 0, 0, 48);
-}
+    ads--CAutoHideTab[iconOnly="false"][sideBarLocation="0"],
+    ads--CAutoHideTab[iconOnly="false"][sideBarLocation="2"] {
+        border-top: 6px solid rgba(0, 0, 0, 48);
+    }
 
 
-ads--CAutoHideTab[iconOnly="false"][sideBarLocation="1"],
-ads--CAutoHideTab[iconOnly="false"][sideBarLocation="3"] {
-	border-bottom: 6px solid rgba(0, 0, 0, 48);
-}
+    ads--CAutoHideTab[iconOnly="false"][sideBarLocation="1"],
+    ads--CAutoHideTab[iconOnly="false"][sideBarLocation="3"] {
+        border-bottom: 6px solid rgba(0, 0, 0, 48);
+    }
 
 
 
-ads--CAutoHideTab:hover[iconOnly="false"][sideBarLocation="0"],
-ads--CAutoHideTab:hover[iconOnly="false"][sideBarLocation="2"],
-ads--CAutoHideTab[iconOnly="false"][sideBarLocation="0"][activeTab="true"],
-ads--CAutoHideTab[iconOnly="false"][sideBarLocation="2"][activeTab="true"]  {
-	border-top: 6px solid palette(highlight);
-}
+    ads--CAutoHideTab:hover[iconOnly="false"][sideBarLocation="0"],
+    ads--CAutoHideTab:hover[iconOnly="false"][sideBarLocation="2"],
+    ads--CAutoHideTab[iconOnly="false"][sideBarLocation="0"][activeTab="true"],
+    ads--CAutoHideTab[iconOnly="false"][sideBarLocation="2"][activeTab="true"] {
+        border-top: 6px solid palette(highlight);
+    }
 
 
-ads--CAutoHideTab:hover[iconOnly="false"][sideBarLocation="1"],
-ads--CAutoHideTab:hover[iconOnly="false"][sideBarLocation="3"],
-ads--CAutoHideTab[iconOnly="false"][sideBarLocation="1"][activeTab="true"],
-ads--CAutoHideTab[iconOnly="false"][sideBarLocation="3"][activeTab="true"] {
-	border-bottom: 6px solid palette(highlight);
-}
+    ads--CAutoHideTab:hover[iconOnly="false"][sideBarLocation="1"],
+    ads--CAutoHideTab:hover[iconOnly="false"][sideBarLocation="3"],
+    ads--CAutoHideTab[iconOnly="false"][sideBarLocation="1"][activeTab="true"],
+    ads--CAutoHideTab[iconOnly="false"][sideBarLocation="3"][activeTab="true"] {
+        border-bottom: 6px solid palette(highlight);
+    }
 
 
-/**
+    /**
  * Auto hide tabs with icon only
  */
-ads--CAutoHideTab[iconOnly="true"][sideBarLocation="0"] {
-	border-top: 6px solid rgba(0, 0, 0, 48);
-}
+    ads--CAutoHideTab[iconOnly="true"][sideBarLocation="0"] {
+        border-top: 6px solid rgba(0, 0, 0, 48);
+    }
 
-ads--CAutoHideTab[iconOnly="true"][sideBarLocation="1"] {
-	border-left: 6px solid rgba(0, 0, 0, 48);
-}
+    ads--CAutoHideTab[iconOnly="true"][sideBarLocation="1"] {
+        border-left: 6px solid rgba(0, 0, 0, 48);
+    }
 
-ads--CAutoHideTab[iconOnly="true"][sideBarLocation="2"] {
-	border-right: 6px solid rgba(0, 0, 0, 48);
-}
+    ads--CAutoHideTab[iconOnly="true"][sideBarLocation="2"] {
+        border-right: 6px solid rgba(0, 0, 0, 48);
+    }
 
-ads--CAutoHideTab[iconOnly="true"][sideBarLocation="3"] {
-	border-bottom: 6px solid rgba(0, 0, 0, 48);
-}
+    ads--CAutoHideTab[iconOnly="true"][sideBarLocation="3"] {
+        border-bottom: 6px solid rgba(0, 0, 0, 48);
+    }
 
 
-/**
+    /**
  * Auto hide tabs with icon only hover
  */
-ads--CAutoHideTab:hover[iconOnly="true"][sideBarLocation="0"],
-ads--CAutoHideTab[iconOnly="true"][sideBarLocation="0"][activeTab="true"] {
-	border-top: 6px solid palette(highlight);
-}
+    ads--CAutoHideTab:hover[iconOnly="true"][sideBarLocation="0"],
+    ads--CAutoHideTab[iconOnly="true"][sideBarLocation="0"][activeTab="true"] {
+        border-top: 6px solid palette(highlight);
+    }
 
-ads--CAutoHideTab:hover[iconOnly="true"][sideBarLocation="1"],
-ads--CAutoHideTab[iconOnly="true"][sideBarLocation="1"][activeTab="true"] {
-	border-left: 6px solid palette(highlight);
-}
+    ads--CAutoHideTab:hover[iconOnly="true"][sideBarLocation="1"],
+    ads--CAutoHideTab[iconOnly="true"][sideBarLocation="1"][activeTab="true"] {
+        border-left: 6px solid palette(highlight);
+    }
 
-ads--CAutoHideTab:hover[iconOnly="true"][sideBarLocation="2"],
-ads--CAutoHideTab[iconOnly="true"][sideBarLocation="2"][activeTab="true"] {
-	border-right: 6px solid palette(highlight);
-}
+    ads--CAutoHideTab:hover[iconOnly="true"][sideBarLocation="2"],
+    ads--CAutoHideTab[iconOnly="true"][sideBarLocation="2"][activeTab="true"] {
+        border-right: 6px solid palette(highlight);
+    }
 
-ads--CAutoHideTab:hover[iconOnly="true"][sideBarLocation="3"],
-ads--CAutoHideTab[iconOnly="true"][sideBarLocation="3"][activeTab="true"] {
-	border-bottom: 6px solid palette(highlight);
-}
+    ads--CAutoHideTab:hover[iconOnly="true"][sideBarLocation="3"],
+    ads--CAutoHideTab[iconOnly="true"][sideBarLocation="3"][activeTab="true"] {
+        border-bottom: 6px solid palette(highlight);
+    }
 
 
 
 /*****************************************************************************
  * CAutoHideSideBar
  *****************************************************************************/
-ads--CAutoHideSideBar{
-	background: palette(window);
-	border: none;
-	qproperty-spacing: 12;
+ads--CAutoHideSideBar {
+    background: palette(window);
+    border: none;
+    qproperty-spacing: 12;
 }
 
 #sideTabsContainerWidget {
-	background: transparent;
+    background: transparent;
 }
 
 
 ads--CAutoHideSideBar[sideBarLocation="0"] {
-	border-bottom: 1px solid palette(dark);
+    border-bottom: 1px solid palette(dark);
 }
 
 ads--CAutoHideSideBar[sideBarLocation="1"] {
-	border-right: 1px solid palette(dark);
+    border-right: 1px solid palette(dark);
 }
 
 ads--CAutoHideSideBar[sideBarLocation="2"] {
-	border-left: 1px solid palette(dark);
+    border-left: 1px solid palette(dark);
 }
 
 ads--CAutoHideSideBar[sideBarLocation="3"] {
-	border-top: 1px solid palette(dark);
+    border-top: 1px solid palette(dark);
 }
 
 
@@ -296,31 +291,31 @@ ads--CAutoHideSideBar[sideBarLocation="3"] {
  * CAutoHideDockContainer
  *****************************************************************************/
 ads--CAutoHideDockContainer {
-	background: palette(window);
+    background: palette(window);
 }
 
 
-ads--CAutoHideDockContainer ads--CDockAreaTitleBar {
-	background: palette(highlight);
-	padding: 0px;
-	border: none;
-}
+    ads--CAutoHideDockContainer ads--CDockAreaTitleBar {
+        background: palette(highlight);
+        padding: 0px;
+        border: none;
+    }
 
 
-/*
+    /*
  * This is required because the ads--CDockAreaWidget[focused="true"] will 
  * overwrite the ads--CAutoHideDockContainer ads--CDockAreaTitleBar rule
  */
-ads--CAutoHideDockContainer ads--CDockAreaWidget[focused="true"] ads--CDockAreaTitleBar {
-	background: palette(highlight);
-	padding: 0px;
-	border: none;
-}
+    ads--CAutoHideDockContainer ads--CDockAreaWidget[focused="true"] ads--CDockAreaTitleBar {
+        background: palette(highlight);
+        padding: 0px;
+        border: none;
+    }
 
 
 #autoHideTitleLabel {
-	padding-left: 4px;
-	color: palette(light);
+    padding-left: 4px;
+    color: palette(light);
 }
 
 
@@ -328,27 +323,27 @@ ads--CAutoHideDockContainer ads--CDockAreaWidget[focused="true"] ads--CDockAreaT
  * CAutoHideDockContainer titlebar buttons
  *****************************************************************************/
 #dockAreaAutoHideButton {
-	qproperty-icon: url(:/ads/images/vs-pin-button.svg);
-	qproperty-iconSize: 16px;
+    qproperty-icon: url(:/ads/images/vs-pin-button.svg);
+    qproperty-iconSize: 16px;
 }
 
 ads--CAutoHideDockContainer #dockAreaAutoHideButton {
-	qproperty-icon: url(:/ads/images/vs-pin-button-pinned-focused.svg);
-	qproperty-iconSize: 16px;
+    qproperty-icon: url(:/ads/images/vs-pin-button-pinned-focused.svg);
+    qproperty-iconSize: 16px;
 }
 
 
-ads--CAutoHideDockContainer #dockAreaCloseButton{
-	qproperty-icon: url(:/ads/images/close-button-focused.svg)
+ads--CAutoHideDockContainer #dockAreaCloseButton {
+    qproperty-icon: url(:/ads/images/close-button-focused.svg)
 }
 
 
 ads--CAutoHideDockContainer ads--CTitleBarButton:hover {
-	background: rgba(255, 255, 255, 48);
+    background: rgba(255, 255, 255, 48);
 }
 
 ads--CAutoHideDockContainer ads--CTitleBarButton:pressed {
-	background: rgba(255, 255, 255, 96);
+    background: rgba(255, 255, 255, 96);
 }
 
 /*****************************************************************************
@@ -360,22 +355,22 @@ ads--CAutoHideDockContainer ads--CTitleBarButton:pressed {
  * CResizeHandle
  *****************************************************************************/
 ads--CResizeHandle {
-	background: palette(window);
+    background: palette(window);
 }
 
 
 ads--CAutoHideDockContainer[sideBarLocation="0"] ads--CResizeHandle {
-	border-top: 1px solid palette(dark);
+    border-top: 1px solid palette(dark);
 }
 
 ads--CAutoHideDockContainer[sideBarLocation="1"] ads--CResizeHandle {
-	border-left: 1px solid palette(dark);
+    border-left: 1px solid palette(dark);
 }
 
 ads--CAutoHideDockContainer[sideBarLocation="2"] ads--CResizeHandle {
-	border-right: 1px solid palette(dark);
+    border-right: 1px solid palette(dark);
 }
 
 ads--CAutoHideDockContainer[sideBarLocation="3"] ads--CResizeHandle {
-	border-top: 1px solid palette(dark);
+    border-top: 1px solid palette(dark);
 }

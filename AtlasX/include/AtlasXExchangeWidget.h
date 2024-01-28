@@ -20,9 +20,11 @@ class AtlasXExchange : public QWidget
 
 signals:
 	void hydraStep();
+	void hydraReset();
 
 public slots:
 	void onHydraStep();
+	void onHydraReset();
 
 private:
 	AtlasXExchangeImpl* m_impl;

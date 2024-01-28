@@ -81,7 +81,7 @@ public:
 	ATLAS_API void step() noexcept;
 
 	//============================================================================
-	ATLAS_API void run() noexcept;
+	ATLAS_API [[nodiscard]] Result<bool,AtlasException> run() noexcept;
 
 	//============================================================================
 	ATLAS_API Int64 currentGlobalTime() const noexcept;
@@ -91,6 +91,9 @@ public:
 
 	//============================================================================
 	ATLAS_API size_t getCurrentIdx() const noexcept;
+
+	//============================================================================
+	ATLAS_API size_t* getCurrentIdxPtr() const noexcept;
 
 	//============================================================================
 	ATLAS_API Vector<Int64> const& getTimestamps() const noexcept;

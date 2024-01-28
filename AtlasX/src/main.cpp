@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     a.setQuitOnLastWindowClosed(true);
     
 
-    //QFile f("./styles/QDarkStyleSheet/qdarkstyle/dark/darkstyle.qss");
+    //QFile f("./styles/QDarkStyleSheet/qdarkstyle/light/lightstyle.qss");
     QFile f("./styles/vs_light.css");
     if (!f.exists()) {
         printf("Unable to set stylesheet, file not found\n");

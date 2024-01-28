@@ -170,13 +170,6 @@ AtlasXStrategyManager::onHydraStep()
 	{
 		return;
 	}
-	if (!m_impl->nlv_series)
-	{
-		m_impl->nlv_series = new QLineSeries();
-		m_impl->chart_view->chart()->addSeries(m_impl->nlv_series);
-		m_impl->nlv_series->attachAxis(m_impl->axisX);
-		m_impl->nlv_series->attachAxis(m_impl->axisY);
-	}
 
 	auto idx = m_impl->app->getCurrentIdx();
 	assert(idx < static_cast<size_t>(nlv_history.size()));
@@ -205,6 +198,51 @@ AtlasXStrategyManager::onHydraStep()
 //============================================================================
 AtlasXStrategyManager::~AtlasXStrategyManager() noexcept
 {
+}
+
+
+//============================================================================
+void
+AtlasXStrategyManager::onHydraRun()
+{
+	if (!m_impl->strategy_temp.has_value())
+	{
+		return;
+	}
+
+	auto const& strategy_name = m_impl->strategy_temp.value()->strategy_name;
+	m_impl->chart_view->chart()->removeAllSeries();
+	m_impl->nlv_series = new QLineSeries();
+	m_impl->nlv_series->setName(QString::fromStdString(strategy_name));
+
+
+
+	auto const& nlv_history = m_impl->app->getStrategyNLV(strategy_name);
+	for (size_t i = 0; i < nlv_history.size(); ++i)
+	{
+		m_impl->nlv_series->append(m_impl->chart_timestamps_ms[i], nlv_history[i]);
+	}
+	m_impl->chart_view->chart()->axisX()->setRange(
+		QDateTime::fromMSecsSinceEpoch(m_impl->chart_timestamps_ms.front()),
+		QDateTime::fromMSecsSinceEpoch(m_impl->chart_timestamps_ms.back())
+	);
+	m_impl->nlv_min = *std::min_element(nlv_history.begin(), nlv_history.end());
+	m_impl->nlv_max = *std::max_element(nlv_history.begin(), nlv_history.end());
+	m_impl->chart_view->chart()->axisY()->setRange(
+		.95*m_impl->nlv_min,
+		1.05*m_impl->nlv_max
+	);
+	m_impl->chart_view->chart()->addSeries(m_impl->nlv_series);
+	m_impl->nlv_series->attachAxis(m_impl->axisX);
+	m_impl->nlv_series->attachAxis(m_impl->axisY);
+}
+
+
+//============================================================================
+void
+AtlasXStrategyManager::onHydraReset()
+{
+	m_impl->chart_view->chart()->removeAllSeries();
 }
 
 
@@ -542,6 +580,11 @@ AtlasXStrategyManager::initPlot() noexcept
 		{
 			m_impl->chart_timestamps_ms.push_back(timestamps[i] / 1000000);
 		}
+
+		m_impl->nlv_series = new QLineSeries();
+		m_impl->chart_view->chart()->addSeries(m_impl->nlv_series);
+		m_impl->nlv_series->attachAxis(m_impl->axisX);
+		m_impl->nlv_series->attachAxis(m_impl->axisY);
 	}
 }
 

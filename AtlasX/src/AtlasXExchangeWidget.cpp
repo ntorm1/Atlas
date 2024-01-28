@@ -162,6 +162,12 @@ AtlasXExchange::connectAsset(AtlasXAsset* asset_widget) noexcept
 		asset_widget,
 		&AtlasXAsset::onHydraStep
 	);
+	connect(
+		this, 
+		&AtlasXExchange::hydraReset,
+		asset_widget,
+		&AtlasXAsset::onHydraReset
+	);
 }
 
 
@@ -172,12 +178,19 @@ AtlasXExchange::onHydraStep()
 	emit hydraStep();
 }
 
+void AtlasXExchange::onHydraReset()
+{
+	emit hydraReset();
+}
+
 
 //============================================================================
 AtlasXExchange::~AtlasXExchange()
 {
 	delete m_impl;
 }
+
+
 
 
 }

@@ -12,6 +12,9 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QProgressBar>
+#include <QFuture>
+#include <QtConcurrent/QtConcurrent>
+#include <QFutureWatcher>
 #include <qmessagebox.h>
 
 #include "DockManager.h"
@@ -137,7 +140,9 @@ AtlasXApp::AtlasXApp(QWidget* parent
 void
 AtlasXApp::initSignals() noexcept
 {
-    // connect hydraRestore signal to the exchange manager
+    connect(this, &AtlasXApp::updateProgressBar, this, &AtlasXApp::onUpdateProgressBar);
+
+    // exchange manager
     connect(
         this,
         &AtlasXApp::hydraRestore,
@@ -150,13 +155,30 @@ AtlasXApp::initSignals() noexcept
         m_impl->exchange_manager,
         &AtlasXExchangeManager::onHydraStep
     );
-
-    // connect hydraRestore signal to the strategy manager
+    connect(
+        this,
+        &AtlasXApp::hydraReset,
+        m_impl->exchange_manager,
+        &AtlasXExchangeManager::onHydraReset
+    );
+    // strategy manager
     connect(
         this,
         &AtlasXApp::hydraStep,
         m_impl->strategy_manager,
         &AtlasXStrategyManager::onHydraStep
+    );
+    connect(
+		this,
+		&AtlasXApp::hydraRun,
+		m_impl->strategy_manager,
+		&AtlasXStrategyManager::onHydraRun
+	);
+    connect(
+        this,
+        &AtlasXApp::hydraReset,
+        m_impl->strategy_manager,
+        &AtlasXStrategyManager::onHydraReset
     );
 }
 
@@ -229,6 +251,13 @@ AtlasXApp::initToolBar() noexcept
     connect(a, &QAction::triggered, this, &AtlasXApp::run);
     tool_bar->addAction(a);
 
+    a = new QAction("Reset", tool_bar);
+    a->setProperty("Floating", true);
+    a->setToolTip("Reset simulation");
+    a->setIcon(svgIcon("./styles/icons/reset.png"));
+    connect(a, &QAction::triggered, this, &AtlasXApp::reset);
+    tool_bar->addAction(a);
+
     addToolBar(Qt::LeftToolBarArea, tool_bar);
 }
 
@@ -279,6 +308,26 @@ AtlasXApp::updateStateBar() noexcept
 
 	m_state->sim_time_label->setText(("Current Time: " + current_time).c_str());
 	m_state->sim_time_next_label->setText(("Next Time: " + next_time).c_str());
+
+    size_t* currentIdx = m_impl->getCurrentIdxPtr();
+    size_t sim_length = m_impl->getTimestamps().size();
+    if ((*currentIdx + 1) == sim_length)
+	{
+		m_state->state_label->setText("Status: FINISHED");
+        m_state->progress_bar->setValue(100);
+        return;
+	}
+    float fraction = static_cast<float>(*currentIdx + 1) / static_cast<float>(sim_length);
+    int percent = static_cast<int>(fraction * 100.0f);
+	m_state->progress_bar->setValue(percent);
+}
+
+
+//============================================================================
+void
+AtlasXApp::onUpdateProgressBar(int value) noexcept
+{
+    m_state->progress_bar->setValue(value);
 }
 
 
@@ -302,12 +351,6 @@ AtlasXApp::step() noexcept
         return;
     }
     m_impl->step();
-    m_state->state_label->setText("Status: RUNING");
-
-    // update progress bar with relative progress
-    auto fraction = static_cast<float>(current_idx+1) / static_cast<float>(sim_length);
-    auto percent = static_cast<int>(fraction * 100.0f);
-    m_state->progress_bar->setValue(percent);
     updateStateBar();
     emit hydraStep();
 }
@@ -317,7 +360,31 @@ AtlasXApp::step() noexcept
 void
 AtlasXApp::run() noexcept
 {
-    m_impl->run();
+    QEventLoop eventLoop;
+    QFuture<std::variant<long long, std::string>> future = QtConcurrent::run([this, &eventLoop]() -> std::variant<long long, std::string> {
+        auto startTime = std::chrono::high_resolution_clock::now();
+        auto res = m_impl->run();
+        auto endTime = std::chrono::high_resolution_clock::now();
+        if (!res) {
+			const auto& error = res.error();
+			return error.what();
+		}
+        auto durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+        return durationMs;
+     });
+    long long durationMs;
+    std::variant<long long, std::string> res = future.result();
+    if (std::holds_alternative<std::string>(res))
+    {
+        const QString errorMsg = QString::fromStdString(std::get<std::string>(res));
+        qCritical() << "FAILED TO RUN HYDRA: " << errorMsg;
+        QMessageBox::critical(this, "Error", "Failed to run hydra: " + errorMsg);
+        return;
+    }
+    durationMs = std::get<long long>(res);
+	qDebug() << "HYDRA RUN COMPLETE: " << durationMs << "ms";
+    emit hydraRun();
+    updateStateBar();
 }
 
 
@@ -335,6 +402,25 @@ AtlasXApp::build() noexcept
 	}
     m_state->state_label->setText("Status: BUILT");
     updateStateBar();
+}
+
+
+//============================================================================
+void
+AtlasXApp::reset() noexcept
+{
+    auto res = m_impl->reset();
+    if (!res) {
+    const auto& error = res.error();
+		const QString errorMsg = QString::fromStdString(error.what());
+		qCritical() << "FAILED TO RESET HYDRA: " << errorMsg;
+		QMessageBox::critical(this, "Error", "Failed to reset hydra: " + errorMsg);
+		return;
+	}
+    emit hydraReset();
+	m_state->state_label->setText("Status: INIT");
+    m_state->progress_bar->setValue(0);
+	updateStateBar();
 }
 
 

@@ -16,6 +16,8 @@ class AtlasXStrategyManager : public QMainWindow
 
 public slots:
 	void onHydraStep();
+	void onHydraRun();
+	void onHydraReset();
 
 private:
 	AtlasXStrategyManagerImpl* m_impl;
