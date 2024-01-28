@@ -31,7 +31,6 @@ namespace AtlasX
 struct AtlasXAppState
 {
     String exe_path;
-    fs::path env_path;
 
     QLabel* state_label = nullptr;
     QLabel* sim_time_label = nullptr;
@@ -91,7 +90,7 @@ AtlasXApp::AtlasXApp(QWidget* parent
         Qt::LeftToRight, Qt::AlignCenter, frameSize(),
         QGuiApplication::primaryScreen()->availableGeometry()
     ));
-
+    setEnvironment();
 
     CDockManager::setConfigFlag(CDockManager::OpaqueSplitterResize, true);
     CDockManager::setConfigFlag(CDockManager::AllTabsHaveCloseButton, true);
@@ -123,13 +122,11 @@ AtlasXApp::AtlasXApp(QWidget* parent
         DockArea
    );
 
-
     initStyle();
     initToolBar();
     initStateBar();
     initSignals();
     initEnvironment();
-    m_impl->env_path = m_state->env_path.string();
 }
 
 
@@ -338,7 +335,7 @@ AtlasXApp::saveEnvironment() noexcept
 {
 	qDebug() << "SAVE ENVIRONMENT";
 
-	auto hydra_config_path = m_state->env_path / "hydra_config.json";
+	auto hydra_config_path = fs::path(m_impl->env_path) / "hydra_config.json";
 	auto res = m_impl->serialize(hydra_config_path.string());
     if (!res) {
         const auto& error = res.error();
@@ -351,10 +348,10 @@ AtlasXApp::saveEnvironment() noexcept
 }
 
 
-//============================================================================
 void
-AtlasXApp::initEnvironment() noexcept
+AtlasXApp::setEnvironment() noexcept
 {
+	qDebug() << "SET ENVIRONMENT";
     String env_name = "default";
     qDebug() << "INIT ENVIRONMENT";
 
@@ -368,14 +365,23 @@ AtlasXApp::initEnvironment() noexcept
     }
 
     // Create folder for the actual env being created
-    m_state->env_path = env_parent_path / env_name;
-    if (!fs::exists(m_state->env_path))
+    m_impl->env_path = (env_parent_path / env_name).string();
+    m_impl->env_name = env_name;
+}
+
+
+//============================================================================
+void
+AtlasXApp::initEnvironment() noexcept
+{
+    auto path = fs::path(m_impl->env_path);
+    if (!fs::exists(path))
     {
-        fs::create_directory(m_state->env_path);
+        fs::create_directory(path);
     }
 
     // load in the hydra config file if it exists
-    auto hydra_config_path = m_state->env_path / "hydra_config.json";
+    auto hydra_config_path = path / "hydra_config.json";
     if (fs::exists(hydra_config_path))
 	{
 		qDebug() << "LOADING HYDRA CONFIG";
@@ -387,7 +393,7 @@ AtlasXApp::initEnvironment() noexcept
         }
 	}
     emit hydraRestore();
-    qDebug() << "LOADING ENV: " + env_name + " COMPLETE";
+    qDebug() << "LOADING ENV: COMPLETE";
 }
 
 

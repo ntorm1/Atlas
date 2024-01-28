@@ -38,6 +38,7 @@ private:
     void initToolBar() noexcept;
     void initEnvironment() noexcept;
     void saveEnvironment() noexcept;
+    void setEnvironment() noexcept;
     void updateStateBar() noexcept;
 
     void step() noexcept;

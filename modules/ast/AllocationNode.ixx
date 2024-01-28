@@ -83,7 +83,7 @@ public:
 
 
 	//============================================================================
-	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationBaseNode>, AtlasException>
+	ATLAS_API [[nodiscard]] static Result<UniquePtr<FixedAllocationNode>, AtlasException>
 		make(
 			Vector<std::pair<String, double>> m_allocations,
 			Exchange* exchange,
@@ -92,7 +92,7 @@ public:
 
 
 	//============================================================================
-	ATLAS_API static PyNodeWrapper<AllocationBaseNode> pyMake(
+	ATLAS_API static PyNodeWrapper<FixedAllocationNode> pyMake(
 		Vector<std::pair<String, double>> m_allocations,
 		SharedPtr<Exchange> exchange,
 		double epsilon = 0.000f
@@ -125,7 +125,7 @@ public:
 
 
 	//============================================================================
-	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationBaseNode>, AtlasException>
+	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationNode>, AtlasException>
 		make(
 			UniquePtr<ExchangeViewNode> exchange_view,
 			AllocationType type = AllocationType::UNIFORM,
@@ -135,7 +135,7 @@ public:
 
 
 	//============================================================================
-	ATLAS_API static PyNodeWrapper<AllocationBaseNode>
+	ATLAS_API static PyNodeWrapper<AllocationNode>
 		pyMake(
 			PyNodeWrapper<ExchangeViewNode> exchange_view,
 			AllocationType type = AllocationType::UNIFORM,

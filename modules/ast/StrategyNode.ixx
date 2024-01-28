@@ -67,7 +67,7 @@ public:
 
 	//============================================================================
 	ATLAS_API [[nodiscard]] static PyNodeWrapper<StrategyNode> pyMake(
-		PyNodeWrapper<AllocationBaseNode> allocation,
+		PyNodeWrapper<AllocationNode> allocation,
 		Portfolio& portfolio
 	);
 

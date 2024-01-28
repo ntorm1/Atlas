@@ -58,6 +58,7 @@ struct AtlasXStrategyManagerImpl
 	AtlasXStrategyManager* self;
 	AtlasXAppImpl* app;
 	py::scoped_interpreter guard{};
+	HashMap<String , py::module_> modules;
 	Option<UniquePtr<AtlasXStrategyTemp>> strategy_temp = std::nullopt;
 	UniquePtr<QScintillaEditor> editor = nullptr;
 
@@ -115,11 +116,9 @@ AtlasXStrategyManager::AtlasXStrategyManager(
 	);
 	tool_bar->addAction(a);
 
-
-
-
 	addToolBar(Qt::LeftToolBarArea, tool_bar);
 	buildUI();
+	initInterpreter();
 }
 
 
@@ -217,7 +216,7 @@ AtlasXStrategyManager::openStrategy() noexcept
 void
 AtlasXStrategyManager::compileStrategy() noexcept
 {
-	m_impl->editor->maybeSave();
+	m_impl->editor->forceSave();
 	if (!m_impl->strategy_temp.has_value()) {
 		QMessageBox::critical(this, tr("No Strategy"), tr("No strategy loaded"));
 		return;
@@ -228,15 +227,21 @@ AtlasXStrategyManager::compileStrategy() noexcept
 		String const& py_path = m_impl->strategy_temp.value()->path;
 		fs::path py_dir = fs::path(py_path).parent_path();
 		appendIfNotInSysPath(py_dir.string());
-		py::module_ module = py::module::import((m_impl->strategy_temp.value()->strategy_name).c_str());
 
-		// get all available module attributes as string vec
-		py::list attributes = module.attr("__dir__")();
-		std::vector<String> attribute_names;
-		for (auto const& attribute : attributes) {
-			attribute_names.push_back(attribute.cast<String>());
+		String const& strategy_name= m_impl->strategy_temp.value()->strategy_name;
+		if (m_impl->modules.contains(strategy_name))
+		{
+			qDebug() << "Reloading module: " << strategy_name.c_str();
+			auto& module = m_impl->modules[strategy_name];
+			module.reload();
 		}
-
+		else 
+		{
+			qDebug() << "Importing module: " << strategy_name.c_str();
+			m_impl->modules[strategy_name] = py::module::import((m_impl->strategy_temp.value()->strategy_name).c_str());
+		}
+		auto& module = m_impl->modules[strategy_name];
+			
 		// get full path of module
 		module_path = module.attr("__file__").cast<String>();
 
@@ -321,6 +326,30 @@ AtlasXStrategyManager::selectStrategy() noexcept
 			0.0
 		);
 	}
+}
+
+
+//============================================================================
+void
+AtlasXStrategyManager::initInterpreter() noexcept
+{
+	auto const& env_path_str = m_impl->app->getEnvPath();
+	fs::path env_path(env_path_str);
+
+	// go up two directories to get to the root of the project exe
+	fs::path root_path = env_path.parent_path().parent_path();
+
+	// make sure AtlasPy.pyd is in the root directory
+	fs::path atlas_pyd = root_path / "AtlasPy.pyd";
+	if (!fs::exists(atlas_pyd)) {
+		String err = "AtlasPy.pyd is missing from the root directory\n";
+		err += "Expected in directory: " + root_path.string() + "\n";
+		QMessageBox::critical(this, tr("Missing AtlasPy.pyd"), tr(err.c_str()));
+		return;
+	}
+	
+	// add the root path containing the python module to the interpreter path
+	appendIfNotInSysPath(root_path.string());
 }
 
 

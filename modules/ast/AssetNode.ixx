@@ -209,7 +209,7 @@ ATLAS_API static UniquePtr<Asset##NAME##Node> make( \
 		std::move(asset_read_right) \
 	); \
 } \
-ATLAS_API static UniquePtr<Asset##NAME##Node> pyMake( \
+ATLAS_API static PyNodeWrapper<Asset##NAME##Node> pyMake( \
 	PyNodeWrapper<AssetReadNode> asset_read_left, \
 	PyNodeWrapper<AssetReadNode> asset_read_right \
 ) \
@@ -218,9 +218,9 @@ ATLAS_API static UniquePtr<Asset##NAME##Node> pyMake( \
 	{ \
 		throw std::runtime_error("Asset"#NAME"Node::pyMake: asset_read_left or asset_read_right was taken"); \
 	} \
-	return std::make_unique<Asset##NAME##Node>( \
-		std::move(asset_read_left.take()), \
-		std::move(asset_read_right.take()) \
+	auto node = make(std::move(asset_read_left.take()), std::move(asset_read_right.take())); \
+	return PyNodeWrapper<Asset##NAME##Node>( \
+		std::move(node) \
 	); \
 } \
 };

@@ -36,7 +36,7 @@ export enum class AssetNodeType {
 // Define AssetOpNodeVariant using std::variant
 export class AssetOpNodeVariant {
 public:
-	std::variant<
+	mutable std::variant<
 		UniquePtr<AssetReadNode>,
 		UniquePtr<AssetProductNode>,
 		UniquePtr<AssetQuotientNode>,
@@ -67,8 +67,10 @@ public:
 		AssetNodeType t
 	) noexcept:
 		value(std::move(node)), warmup(warmup), t(t) {}
+
+	ATLAS_API AssetOpNodeVariant(const AssetOpNodeVariant& other);
+
 	AssetOpNodeVariant() = delete;
-	AssetOpNodeVariant(const AssetOpNodeVariant&) = default;
 	AssetOpNodeVariant(AssetOpNodeVariant&&) = default;
 	AssetOpNodeVariant& operator=(const AssetOpNodeVariant&) = default;
 	AssetOpNodeVariant& operator=(AssetOpNodeVariant&&) = default;
@@ -146,12 +148,14 @@ public:
 	//============================================================================
 	ATLAS_API [[nodiscard]] static PyNodeWrapper<ExchangeViewNode> pyMake(
 		Exchange& exchange,
-		AssetOpNodeVariant asset_op_node
+		AssetOpNodeVariant asset_op_node,
+		ExchangeViewFilter filter
 	) noexcept
 	{
 		auto node = std::make_unique<ExchangeViewNode>(
 			exchange, std::move(asset_op_node)
 		);
+		node->setFilter(filter.type, filter.value);
 		return PyNodeWrapper<ExchangeViewNode>(std::move(node));
 	}
 

@@ -11,6 +11,7 @@ export module StrategyModule;
 
 import AtlasCore;
 import AtlasEnumsModule;
+import PyNodeWrapperModule;
 
 namespace Atlas
 {
@@ -45,6 +46,11 @@ public:
 	ATLAS_API Strategy(
 		String name,
 		SharedPtr<AST::StrategyNode> ast,
+		double portfolio_weight
+	) noexcept;
+	ATLAS_API Strategy(
+		String name,
+		AST::PyNodeWrapper<AST::StrategyNode> ast,
 		double portfolio_weight
 	) noexcept;
 

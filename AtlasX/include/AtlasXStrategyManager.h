@@ -21,6 +21,7 @@ private:
 	void openStrategy() noexcept;
 	void compileStrategy() noexcept;
 	void selectStrategy() noexcept;
+	void initInterpreter() noexcept;
 	void appendIfNotInSysPath(String const& p) noexcept;
 	void buildUI() noexcept;
 

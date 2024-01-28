@@ -69,6 +69,7 @@ public:
     QScintillaEditor();
     void loadFile(const QString& fileName);
     bool maybeSave();
+    bool forceSave();
 
 protected:
     void closeEvent(QCloseEvent* event);

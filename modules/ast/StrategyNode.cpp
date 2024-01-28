@@ -37,7 +37,7 @@ StrategyNode::~StrategyNode() noexcept
 
 //============================================================================
 PyNodeWrapper<StrategyNode> StrategyNode::pyMake(
-	PyNodeWrapper<AllocationBaseNode> allocation,
+	PyNodeWrapper<AllocationNode> allocation,
 	Portfolio& portfolio)
 {
 	if (!allocation.has_node())
@@ -132,7 +132,7 @@ FixedAllocationNode::FixedAllocationNode(
 
 
 //============================================================================
-Result<UniquePtr<AllocationBaseNode>, AtlasException>
+Result<UniquePtr<FixedAllocationNode>, AtlasException>
 FixedAllocationNode::make(
 	Vector<std::pair<String, double>> allocations,
 	Exchange* exchange,
@@ -156,7 +156,7 @@ FixedAllocationNode::make(
 
 
 //============================================================================
-PyNodeWrapper<AllocationBaseNode>
+PyNodeWrapper<FixedAllocationNode>
 FixedAllocationNode::pyMake(
 	Vector<std::pair<String, double>> m_allocations,
 	SharedPtr<Exchange> exchange,
@@ -169,7 +169,7 @@ FixedAllocationNode::pyMake(
 		throw std::exception(res.error().what());
 	}
 	auto node = std::move(*res);
-	return PyNodeWrapper<AllocationBaseNode>(std::move(node));
+	return PyNodeWrapper<FixedAllocationNode>(std::move(node));
 }
 
 

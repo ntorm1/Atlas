@@ -12,6 +12,34 @@ namespace Atlas
 namespace AST
 
 {
+AssetOpNodeVariant::AssetOpNodeVariant(
+    const AssetOpNodeVariant& other
+):
+    warmup(other.warmup),
+    t(other.t)
+{
+    switch (t)
+    {
+    case AssetNodeType::AssetReadNode:
+        value = std::move(std::get<0>(other.value));
+        break;
+    case AssetNodeType::AssetProductNode:
+        value = std::move(std::get<1>(other.value));
+        break;
+    case AssetNodeType::AssetQuotientNode:
+        value = std::move(std::get<2>(other.value));
+        break;
+    case AssetNodeType::AssetSumNode:
+        value = std::move(std::get<3>(other.value));
+        break;
+    case AssetNodeType::AssetDifferenceNode:
+        value = std::move(std::get<4>(other.value));
+        break;
+    default:
+        assert(false);
+    }
+}
+
 
 //============================================================================
 AssetOpNodeVariant::AssetOpNodeVariant(node_variant node)

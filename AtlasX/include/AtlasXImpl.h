@@ -16,6 +16,7 @@ struct AtlasXAppImpl
 private:
 	SharedPtr<Atlas::Hydra> hydra;
 	String env_path = "";
+	String env_name = "";
 	HashMap<String, QStringList> timestamp_cache;
 	AtlasXExchangeManager* exchange_manager;
 

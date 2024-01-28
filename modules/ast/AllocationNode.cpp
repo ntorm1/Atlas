@@ -188,8 +188,8 @@ AllocationNode::AllocationNode(
 
 
 //============================================================================
-Result<UniquePtr<AllocationBaseNode>, AtlasException>
-	AllocationNode::make(
+Result<UniquePtr<AllocationNode>, AtlasException>
+AllocationNode::make(
 		UniquePtr<ExchangeViewNode> exchange_view,
 		AllocationType type,
 		Option<double> alloc_param,
@@ -243,7 +243,7 @@ AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 
 
 //============================================================================
-PyNodeWrapper<AllocationBaseNode> AllocationNode::pyMake(
+PyNodeWrapper<AllocationNode> AllocationNode::pyMake(
 	PyNodeWrapper<ExchangeViewNode> exchange_view,
 	AllocationType type,
 	Option<double> alloc_param,
@@ -261,7 +261,7 @@ PyNodeWrapper<AllocationBaseNode> AllocationNode::pyMake(
 	);
 	if (node.has_value())
 	{
-		return PyNodeWrapper<AllocationBaseNode>(std::move(node.value()));
+		return PyNodeWrapper<AllocationNode>(std::move(node.value()));
 	}
 	else
 	{
