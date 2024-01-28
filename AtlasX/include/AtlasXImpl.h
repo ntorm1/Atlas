@@ -1,7 +1,9 @@
 #pragma once
+
 #include <QStringList>
 
 #include "../include/AtlasXTypes.h"
+
 
 
 import AtlasException;
@@ -19,6 +21,7 @@ private:
 	String env_name = "";
 	HashMap<String, QStringList> timestamp_cache;
 	AtlasXExchangeManager* exchange_manager;
+	AtlasXStrategyManager* strategy_manager;
 
 public:
 	AtlasXAppImpl();
@@ -29,7 +32,10 @@ public:
 
 	//============================================================================
 	void step() noexcept;
-	
+
+	//============================================================================
+	SharedPtr<Atlas::Hydra> getHydra() noexcept { return hydra; }
+
 	//============================================================================
 	void run() noexcept;
 
@@ -40,9 +46,25 @@ public:
 	) noexcept;
 
 	//============================================================================
+	Result<SharedPtr<Atlas::Portfolio>, Atlas::AtlasException> addPortfolio(
+		String name,
+		SharedPtr<Atlas::Exchange> exchange,
+		double intial_cash
+	) noexcept;
+
+	//============================================================================
+	Result<SharedPtr<Atlas::Portfolio>, Atlas::AtlasException> getPortfolio(
+		String name
+	) noexcept;
+
+
+	//============================================================================
 	Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException> getExchange(
 		String name
 	) noexcept;
+
+	//============================================================================
+	HashMap<String, size_t> getPortfolioIdxMap() const noexcept;
 
 	//============================================================================
 	Result<bool, Atlas::AtlasException> deserialize(
@@ -72,7 +94,6 @@ public:
 
 	//============================================================================
 	Vector<Int64> const& getTimestamps() noexcept;
-
 	
 	//============================================================================
 	QStringList const& getTimestampsStr(SharedPtr<Atlas::Exchange> exchange) noexcept;
@@ -88,6 +109,16 @@ public:
 
 	//============================================================================
 	String convertNanosecondsToTime(Int64 nanoseconds);
+
+	//============================================================================
+	Option<String> getStrategyParentExchange(
+		String const& strategy_name
+	) const noexcept;
+
+	//============================================================================
+	Atlas::LinAlg::EigenVectorXd const& getStrategyNLV(
+		String const& strategy_name
+	) const noexcept;
 
 	//============================================================================
 	Option<String> getParentExchangeName(

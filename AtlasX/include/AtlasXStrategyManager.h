@@ -14,6 +14,9 @@ class AtlasXStrategyManager : public QMainWindow
 {
 	Q_OBJECT
 
+public slots:
+	void onHydraStep();
+
 private:
 	AtlasXStrategyManagerImpl* m_impl;
 
@@ -23,7 +26,9 @@ private:
 	void selectStrategy() noexcept;
 	void initInterpreter() noexcept;
 	void appendIfNotInSysPath(String const& p) noexcept;
-	void buildUI() noexcept;
+	void initUI() noexcept;
+	void initPlot() noexcept;
+	void updateStrategyState(bool is_built) noexcept;
 
 	String strategyIdToPath(String const& id) noexcept;
 

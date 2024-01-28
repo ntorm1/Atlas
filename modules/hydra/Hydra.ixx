@@ -54,6 +54,9 @@ public:
 	) noexcept;
 
 	//============================================================================
+	ATLAS_API Option<SharedPtr<Strategy>> getStrategy(String const& strategy_name) noexcept;
+
+	//============================================================================
 	ATLAS_API Result<SharedPtr<Portfolio>, AtlasException> addPortfolio(
 		String name,
 		Exchange& exchange,
@@ -95,6 +98,9 @@ public:
 	//============================================================================
 	ATLAS_API Result<bool, AtlasException> reset() noexcept;
 
+
+	ATLAS_API HashMap<String, size_t> getPortfolioIdxMap() const noexcept;
+
 	// ======= PYTHON API ======= //
 	//============================================================================
 	ATLAS_API SharedPtr<Exchange> pyAddExchange(
@@ -114,6 +120,16 @@ public:
 		SharedPtr<Strategy> strategy,
 		bool replace_if_exists = false
 	);
+
+	//============================================================================
+	ATLAS_API SharedPtr<Exchange> pyGetExchange(
+		String const& name
+	) const;
+
+	//============================================================================
+	ATLAS_API SharedPtr<Portfolio> pyGetPortfolio(
+		String const& name
+	) const;
 
 	//============================================================================
 	ATLAS_API void pyBuild();

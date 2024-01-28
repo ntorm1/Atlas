@@ -43,11 +43,13 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("removeStrategy", &Atlas::Hydra::removeStrategy)
         .def("reset", &Atlas::Hydra::pyReset)
         .def("addExchange", &Atlas::Hydra::pyAddExchange)
+        .def("getExchange", &Atlas::Hydra::pyGetExchange)
         .def("addStrategy", &Atlas::Hydra::pyAddStrategy,
             py::arg("strategy"),
 			py::arg("replace_if_exists") = false
         )
         .def("addPortfolio", &Atlas::Hydra::pyAddPortfolio)
+        .def("getPortfolio", &Atlas::Hydra::pyGetPortfolio)
         .def(py::init<>());
     py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")
         .def(

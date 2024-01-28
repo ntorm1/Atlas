@@ -4,7 +4,7 @@
 #include "../include/AtlasXImpl.h"
 #include "../include/AtlasXExchangeManager.h"
 #include "../include/AtlasXStrategyManager.h"
-
+#include "../include/AtlasXPortfolioManager.h"
 
 #include <QLabel>
 #include <QFile>
@@ -100,10 +100,7 @@ AtlasXApp::AtlasXApp(QWidget* parent
 
     m_DockManager = new ads::CDockManager(this);
 
-    auto exchange_manager_dock = AtlasXExchangeManager::make(
-        this,
-        m_impl
-    );
+    auto exchange_manager_dock = AtlasXExchangeManager::make(this,m_impl);
     m_impl->exchange_manager = static_cast<AtlasXExchangeManager*>(exchange_manager_dock->widget());
     exchange_manager_dock->setFeature(ads::CDockWidget::DockWidgetClosable, false);
     auto DockArea = m_DockManager->addDockWidget(
@@ -112,15 +109,20 @@ AtlasXApp::AtlasXApp(QWidget* parent
     );
 
 
-    auto strategy_manager_dock = AtlasXStrategyManager::make(
-        this,
-        m_impl
-    );
+    auto strategy_manager_dock = AtlasXStrategyManager::make(this,m_impl);
+    m_impl->strategy_manager = static_cast<AtlasXStrategyManager*>(strategy_manager_dock->widget());
     strategy_manager_dock->setFeature(ads::CDockWidget::DockWidgetClosable, false);
     DockArea = m_DockManager->addDockWidgetTabToArea(
 		strategy_manager_dock,
         DockArea
    );
+
+    auto portfolio_manager_dock = AtlasXPortfolioManager::make(this, m_impl);
+    portfolio_manager_dock->setFeature(ads::CDockWidget::DockWidgetClosable, false);
+    DockArea = m_DockManager->addDockWidgetTabToArea(
+        portfolio_manager_dock,
+        DockArea
+    );
 
     initStyle();
     initToolBar();
@@ -147,6 +149,14 @@ AtlasXApp::initSignals() noexcept
         &AtlasXApp::hydraStep,
         m_impl->exchange_manager,
         &AtlasXExchangeManager::onHydraStep
+    );
+
+    // connect hydraRestore signal to the strategy manager
+    connect(
+        this,
+        &AtlasXApp::hydraStep,
+        m_impl->strategy_manager,
+        &AtlasXStrategyManager::onHydraStep
     );
 }
 

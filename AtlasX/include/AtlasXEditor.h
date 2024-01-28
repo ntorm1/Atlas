@@ -48,7 +48,6 @@
 ** $QT_END_LICENSE$
 ****************************************************************************/
 
-#pragma once
 
 #include <QMainWindow>
 #include <qtextedit.h>

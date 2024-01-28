@@ -31,6 +31,7 @@ public:
 
 	ATLAS_API ~Portfolio() noexcept;
 	double getInitialCash() const noexcept;
+	String const& getExchangeName() const noexcept;
 	auto const& getName() const noexcept { return m_name; }
 	auto const& getId() const noexcept { return m_id; }
 };

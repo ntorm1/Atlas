@@ -1,6 +1,7 @@
 module;
 module PortfolioModule;
 
+import ExchangeModule;
 
 namespace Atlas
 {
@@ -9,11 +10,12 @@ class PortfolioImpl
 {
 public:
 	double initial_cash;
+	Exchange& exchange;
 	PortfolioImpl(
 		Exchange& exchange,
 		double cash
 	) noexcept
-		: initial_cash(cash)
+		: initial_cash(cash), exchange(exchange)
 	{
 
 	}
@@ -44,6 +46,14 @@ double
 Portfolio::getInitialCash() const noexcept
 {
 	return m_impl->initial_cash;
+}
+
+
+//============================================================================
+String const&
+Portfolio::getExchangeName() const noexcept
+{
+	return m_impl->exchange.getName();
 }
 
 

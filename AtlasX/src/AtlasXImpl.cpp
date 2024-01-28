@@ -1,8 +1,5 @@
 #include <fstream>
 
-#include "../include/AtlasXImpl.h"
-
-
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include "../include/AtlasXImpl.h"
@@ -13,6 +10,7 @@ import AtlasSerializeModule;
 import AtlasTimeModule;
 import ExchangeMapModule;
 import ExchangeModule;
+import StrategyModule;
 
 namespace AtlasX
 {
@@ -58,10 +56,38 @@ AtlasXAppImpl::addExchange(String name, String source) noexcept
 
 
 //============================================================================
+Result<SharedPtr<Atlas::Portfolio>, Atlas::AtlasException>
+AtlasXAppImpl::addPortfolio(String name, SharedPtr<Atlas::Exchange> exchange, double intial_cash) noexcept
+{
+	return hydra->addPortfolio(name, *exchange, intial_cash);
+}
+
+
+//============================================================================
+Result<SharedPtr<Atlas::Portfolio>, Atlas::AtlasException>
+AtlasXAppImpl::getPortfolio(String name) noexcept
+{
+	try {
+		return hydra->pyGetPortfolio(name);
+	}
+	catch (...) {
+		return std::unexpected<Atlas::AtlasException>("portfolio does not exsist");
+	}
+}
+
+//============================================================================
 Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException>
 AtlasXAppImpl::getExchange(String name) noexcept
 {
 	return hydra->getExchange(name);
+}
+
+
+//============================================================================
+HashMap<String, size_t>
+AtlasXAppImpl::getPortfolioIdxMap() const noexcept
+{
+	return hydra->getPortfolioIdxMap();
 }
 
 
@@ -224,6 +250,28 @@ String
 AtlasXAppImpl::convertNanosecondsToTime(Int64 nanoseconds)
 {
 	return Atlas::Time::convertNanosecondsToTime(nanoseconds);
+}
+
+//============================================================================
+Option<String>
+AtlasXAppImpl::getStrategyParentExchange(String const& strategy_name) const noexcept
+{
+	auto strategy = hydra->getStrategy(strategy_name);
+	if (!strategy)
+	{
+		return std::nullopt;
+	}
+	return (*strategy)->getExchange().getName();
+}
+
+
+//============================================================================
+Atlas::LinAlg::EigenVectorXd const&
+AtlasXAppImpl::getStrategyNLV(String const& strategy_name) const noexcept
+{
+	auto strategy = hydra->getStrategy(strategy_name);
+	assert(strategy);
+	return (*strategy)->getHistory(Atlas::TracerType::NLV);
 }
 
 

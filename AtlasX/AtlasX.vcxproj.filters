@@ -127,6 +127,12 @@
     <ClCompile Include="src\AtlasXEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\AtlasXPy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AtlasXPortfolioManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="styles\vs_light.css" />
@@ -208,6 +214,9 @@
     <QtMoc Include="include\AtlasXEditor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="include\AtlasXPortfolioManager.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Qt-Advanced-Docking-System\src\CMakeLists.txt" />
@@ -232,6 +241,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="external\include\rangelimitedvalueaxis.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AtlasXPy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

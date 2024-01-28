@@ -1,12 +1,12 @@
 
 #include <filesystem>
 #include <fstream>
-#include <pybind11/embed.h>
 
 #include "../include/AtlasXStrategyManager.h"
 #include "../include/AtlasXExchangeWidget.h"
 #include "../include/AtlasXEditor.h"
 #include "../include/AtlasXImpl.h"
+#include "../include/AtlasXPy.h"
 
 #include <qtoolbar.h>
 #include <qmenubar.h>
@@ -23,6 +23,10 @@
 #include <QComboBox>
 #include <QListWidgetItem>
 #include <QSplitter>
+#include <QChartView>
+#include <QDateTimeAxis>
+#include <QValueAxis>
+#include <QLineSeries>
 
 namespace fs = std::filesystem;
 namespace py = pybind11;
@@ -35,16 +39,22 @@ namespace AtlasX
 struct AtlasXStrategyTemp
 {
 	String strategy_name;
+	String exchange_name;
+	String portfolio_name;
 	String path = "";
 	double portfolio_alloc;
 
 	AtlasXStrategyTemp(
 		const String& _strategy_name,
+		const String& _exchange_name,
+		const String& _portfolio_name,
 		const String& _path,
 		double _portfolio_alloc
 	) noexcept :
 		strategy_name(_strategy_name),
 		portfolio_alloc(_portfolio_alloc),
+		portfolio_name(_portfolio_name),
+		exchange_name(_exchange_name),
 		path(_path)
 	{
 	}
@@ -59,8 +69,20 @@ struct AtlasXStrategyManagerImpl
 	AtlasXAppImpl* app;
 	py::scoped_interpreter guard{};
 	HashMap<String , py::module_> modules;
+	QLabel* strategy_status = nullptr;
 	Option<UniquePtr<AtlasXStrategyTemp>> strategy_temp = std::nullopt;
 	UniquePtr<QScintillaEditor> editor = nullptr;
+	UniquePtr<QChartView> chart_view = nullptr;
+	bool is_built = false;
+
+
+	Vector<Int64> chart_timestamps_ms;
+	QDateTimeAxis* axisX = nullptr;
+	QValueAxis* axisY = nullptr;
+	QLineSeries* nlv_series = nullptr;
+	double nlv_min = 1e13;
+	double nlv_max = 0.0;
+
 
 	AtlasXStrategyManagerImpl(
 		AtlasXStrategyManager* self,
@@ -116,9 +138,67 @@ AtlasXStrategyManager::AtlasXStrategyManager(
 	);
 	tool_bar->addAction(a);
 
-	addToolBar(Qt::LeftToolBarArea, tool_bar);
-	buildUI();
+	QWidget* spacerWidget = new QWidget(tool_bar);
+	spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	tool_bar->addWidget(spacerWidget);
+	
+	// add an unlickable icon to the toolbar
+	icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/puzzle_part.png"));
+	m_impl->strategy_status = new QLabel(this);
+	m_impl->strategy_status->setPixmap(icon.pixmap(28, 28));
+	tool_bar->addWidget(m_impl->strategy_status);
+
+
+	addToolBar(Qt::RightToolBarArea, tool_bar);
+	initUI();
 	initInterpreter();
+}
+
+
+//============================================================================
+void
+AtlasXStrategyManager::onHydraStep()
+{
+	if (!m_impl->strategy_temp.has_value()) 
+	{
+		return;
+	}
+	auto const& strategy_name = m_impl->strategy_temp.value()->strategy_name;
+	auto const& nlv_history = m_impl->app->getStrategyNLV(strategy_name);
+
+	if (!nlv_history.size())
+	{
+		return;
+	}
+	if (!m_impl->nlv_series)
+	{
+		m_impl->nlv_series = new QLineSeries();
+		m_impl->chart_view->chart()->addSeries(m_impl->nlv_series);
+		m_impl->nlv_series->attachAxis(m_impl->axisX);
+		m_impl->nlv_series->attachAxis(m_impl->axisY);
+	}
+
+	auto idx = m_impl->app->getCurrentIdx();
+	assert(idx < static_cast<size_t>(nlv_history.size()));
+	auto nlv = nlv_history[idx];
+	m_impl->nlv_series->append(m_impl->chart_timestamps_ms[idx], nlv);
+	m_impl->chart_view->chart()->axisX()->setRange(
+		QDateTime::fromMSecsSinceEpoch(m_impl->chart_timestamps_ms.front()),
+		QDateTime::fromMSecsSinceEpoch(m_impl->chart_timestamps_ms[idx])
+	);
+
+	if (nlv < m_impl->nlv_min)
+	{
+		m_impl->nlv_min = nlv;
+	}
+	if (nlv > m_impl->nlv_max)
+	{
+		m_impl->nlv_max = nlv;
+	}
+	m_impl->chart_view->chart()->axisY()->setRange(
+		.95*m_impl->nlv_min,
+		1.05*m_impl->nlv_max
+	);
 }
 
 
@@ -140,6 +220,18 @@ AtlasXStrategyManager::newStrategy() noexcept
 	QLabel* name_label = new QLabel(tr("Strategy Name:"), this);
 	QLineEdit* name_line_edit = new QLineEdit(&dialog);
 
+	QLabel* name_label_exchange = new QLabel(tr("Exchange Name:"), this);
+	QComboBox* name_combo_box_exchange = new QComboBox(&dialog);
+	for (auto const& [name, id] : m_impl->app->getExchangeIds()) {
+		name_combo_box_exchange->addItem(QString::fromStdString(name));
+	}
+
+	QLabel* name_label_portfolio = new QLabel(tr("Portfolio Name:"), this);
+	QComboBox* name_combo_box_portfolio = new QComboBox(&dialog);
+	for (auto const& [name, id] : m_impl->app->getPortfolioIdxMap()) {
+		name_combo_box_portfolio->addItem(QString::fromStdString(name));
+	}
+
 	QLabel* portfolio_alloc_label = new QLabel(tr("Portfolio Allocation:"), this);
 	QDoubleValidator* portfolio_alloc_validator = new QDoubleValidator(0.0, 1.0, 2, this);
 	QLineEdit* portfolio_alloc_line_edit = new QLineEdit(&dialog);
@@ -148,7 +240,9 @@ AtlasXStrategyManager::newStrategy() noexcept
 	// Create layout for the dialog
 	QFormLayout* formLayout = new QFormLayout(&dialog);
 	formLayout->addRow(name_label, name_line_edit);
+	formLayout->addRow(name_label_exchange, name_combo_box_exchange);
 	formLayout->addRow(portfolio_alloc_label, portfolio_alloc_line_edit);
+	formLayout->addRow(name_label_portfolio, name_combo_box_portfolio);
 
 	// Add buttons to the dialog
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
@@ -163,6 +257,8 @@ AtlasXStrategyManager::newStrategy() noexcept
 		// Retrieve values from the dialog
 		QString strategy_name = name_line_edit->text();
 		QString portfolio_alloc_str = portfolio_alloc_line_edit->text();
+		QString exchange_name = name_combo_box_exchange->currentText();
+		QString portfolio_name = name_combo_box_portfolio->currentText();
 		double portfolio_alloc = portfolio_alloc_str.toDouble();
 
 		if (portfolio_alloc == 0.0f || portfolio_alloc > 1) {
@@ -175,6 +271,8 @@ AtlasXStrategyManager::newStrategy() noexcept
 
 		m_impl->strategy_temp = std::make_unique<AtlasXStrategyTemp>(
 			strategy_name.toStdString(),
+			exchange_name.toStdString(),
+			portfolio_name.toStdString(),
 			strategyIdToPath(strategy_name.toStdString()),
 			portfolio_alloc
 		);
@@ -200,9 +298,19 @@ AtlasXStrategyManager::openStrategy() noexcept
 	fs::path strategy_py = strategy_dir / (m_impl->strategy_temp.value()->strategy_name + ".py");
 	if (!fs::exists(strategy_py))
 	{
+		String alloc = std::to_string(m_impl->strategy_temp.value()->portfolio_alloc);
 		std::ofstream strategy_file(strategy_py);
-		strategy_file << "def build():\n";
-		strategy_file << "    pass\n";
+		strategy_file << "from AtlasPy.core import Strategy\n";
+		strategy_file << "from AtlasPy.ast import *\n";
+		strategy_file << "\n\n";
+		strategy_file << "strategy_id = \"" << m_impl->strategy_temp.value()->strategy_name << "\"\n";
+		strategy_file << "exchange_id = \"" << m_impl->strategy_temp.value()->exchange_name << "\"\n";
+		strategy_file << "portfolio_id = \"" << m_impl->strategy_temp.value()->portfolio_name << "\"\n";
+		strategy_file << "alloc = " << alloc << "\n\n";
+		strategy_file << "def build(hydra):\n";
+		strategy_file << "\texchange = hydra.getExchange(exchange_id)\n";
+		strategy_file << "\tportfolio = hydra.getPortfolio(portfolio_id)\n\n\n";
+		strategy_file << "\tstrategy = hydra.addStrategy(Strategy(strategy_id, strategy_node, alloc))\n";
 		strategy_file.close();
 	}
 	QString strategy_path = QString::fromStdString(strategy_py.string());
@@ -246,20 +354,26 @@ AtlasXStrategyManager::compileStrategy() noexcept
 		module_path = module.attr("__file__").cast<String>();
 
 		// Call the 'main' function and get the result
-		py::object result = module.attr("build")(323);
-
-		// Convert the result to an integer
-		int c = result.cast<int>();
-
-		String message = "Test c = " + std::to_string(c);
-		QMessageBox::information(this, tr("Test"), QString::fromStdString(message));
+		auto res = buildStrategy(
+			m_impl->app,
+			module
+		);
+		if (!res.has_value()) {
+			QMessageBox::critical(this, tr("Error"), QString::fromStdString(res.error().what()));
+			updateStrategyState(false);
+			return;
+		}
 	}
 	catch (py::error_already_set const& e) {
 		String err = "Error compiling strategy: " + std::string(e.what()) + "\n";
 		err += "Python Module path: " + module_path + "\n";
 		err += "From Python: \n";
 		QMessageBox::critical(this, tr("Python Error"), QString::fromStdString(e.what()));
+		updateStrategyState(false);
+		return;
 	}
+	updateStrategyState(true);
+	initPlot();
 }
 
 
@@ -322,6 +436,8 @@ AtlasXStrategyManager::selectStrategy() noexcept
 		// init the strategy temp
 		m_impl->strategy_temp = std::make_unique<AtlasXStrategyTemp>(
 			strategy_name.toStdString(),
+			"",
+			"",
 			strategy_path.string(),
 			0.0
 		);
@@ -369,10 +485,90 @@ AtlasXStrategyManager::appendIfNotInSysPath(String const& p) noexcept
 
 //============================================================================
 void
-AtlasXStrategyManager::buildUI() noexcept
+AtlasXStrategyManager::initUI() noexcept
 {
+	auto splitter = new QSplitter(Qt::Horizontal, this);
+	splitter->setContentsMargins(0, 0, 0, 0);
+
+	initPlot();
 	m_impl->editor = std::make_unique<QScintillaEditor>();
-	setCentralWidget(m_impl->editor.get());
+	
+	splitter->addWidget(m_impl->chart_view.get());
+	splitter->addWidget(m_impl->editor.get());
+	setCentralWidget(splitter);
+}
+
+
+//============================================================================
+void
+AtlasXStrategyManager::initPlot() noexcept
+{
+	// Create a chart view and set the chart
+	if (!m_impl->chart_view)
+	{
+		m_impl->chart_view = std::make_unique<QChartView>(this);
+		m_impl->chart_view->setRenderHint(QPainter::Antialiasing);
+	}
+	else
+	{
+		m_impl->chart_view->chart()->removeAllSeries();
+		m_impl->chart_view->chart()->removeAxis(m_impl->axisX);
+		m_impl->chart_view->chart()->removeAxis(m_impl->axisY);
+	}
+	
+	auto chart = m_impl->chart_view->chart();
+
+	if (m_impl->strategy_temp)
+	{
+		String const& strategy_name = m_impl->strategy_temp.value()->strategy_name;
+		String const& exchange_name = m_impl->strategy_temp.value()->exchange_name;
+		chart->setTitle(QString::fromStdString(strategy_name));
+
+		auto exchange = m_impl->app->getExchange(exchange_name);
+		assert(exchange);
+		auto const& timestamps = m_impl->app->getTimestamps(*exchange);
+		m_impl->axisX = new QDateTimeAxis;
+		m_impl->axisX->setFormat("yyyy-MM-dd HH:mm:ss");
+		m_impl->axisX->setTitleText("Date");
+		m_impl->axisX->setMax(QDateTime::fromMSecsSinceEpoch(timestamps.back() / 1000000));
+		m_impl->axisX->setMin(QDateTime::fromMSecsSinceEpoch(timestamps.front() / 1000000));
+		chart->addAxis(m_impl->axisX, Qt::AlignBottom);
+
+		// Create a value axis for the Y-axis
+		m_impl->axisY = new QValueAxis;
+		chart->addAxis(m_impl->axisY, Qt::AlignLeft);
+
+		for (size_t i = 0; i < timestamps.size(); ++i)
+		{
+			m_impl->chart_timestamps_ms.push_back(timestamps[i] / 1000000);
+		}
+	}
+}
+
+
+//============================================================================
+void
+AtlasXStrategyManager::updateStrategyState(bool is_built_update) noexcept
+{
+	if (is_built_update && !m_impl->is_built) {
+		auto icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/puzzle_full.png"));
+		m_impl->strategy_status->setPixmap(icon.pixmap(28, 28));
+		m_impl->strategy_status->setPixmap(QPixmap("./styles/icons/puzzle_full.png"));
+	}
+	else if (!is_built_update && m_impl->is_built) {
+		auto icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/puzzle_part.png"));
+		m_impl->strategy_status->setPixmap(icon.pixmap(28, 28));
+		m_impl->strategy_status->setPixmap(QPixmap("./styles/icons/puzzle_part.png"));
+	}
+
+	if (is_built_update)
+	{
+		auto parent_exchange_name = m_impl->app->getStrategyParentExchange(
+			m_impl->strategy_temp.value()->strategy_name
+		);
+		assert(parent_exchange_name.has_value());
+		m_impl->strategy_temp.value()->exchange_name = parent_exchange_name.value();
+	}
 }
 
 

@@ -100,9 +100,21 @@ Hydra::addStrategy(
 		return m_impl->m_strategies[idx].get();
 	}
 	strategy->setID(m_impl->m_strategies.size());
-	m_impl->m_strategy_map[strategy->getName()] = m_impl->m_strategies.size() - 1;
+	m_impl->m_strategy_map[strategy->getName()] = m_impl->m_strategies.size();
 	m_impl->m_strategies.push_back(std::move(strategy));
 	return m_impl->m_strategies.back().get();
+}
+
+
+//============================================================================
+Option<SharedPtr<Strategy>>
+Hydra::getStrategy(String const& strategy_name) noexcept
+{
+	if (!m_impl->m_strategy_map.contains(strategy_name))
+	{
+		return std::nullopt;
+	}
+	return m_impl->m_strategies[m_impl->m_strategy_map[strategy_name]];
 }
 
 
@@ -285,6 +297,14 @@ Hydra::reset() noexcept
 
 
 //============================================================================
+HashMap<String, size_t>
+Hydra::getPortfolioIdxMap() const noexcept
+{
+	return m_impl->m_portfolio_map;
+}
+
+
+//============================================================================
 SharedPtr<Exchange>
 Hydra::pyAddExchange(String name, String source)
 {
@@ -322,6 +342,32 @@ Hydra::pyAddStrategy(
 		throw std::exception(res.error().what());
 	}
 	return m_impl->m_strategies.back();
+}
+
+
+//============================================================================
+SharedPtr<Exchange>
+Hydra::pyGetExchange(String const& name) const
+{
+	auto res = getExchange(name);
+	if (!res)
+	{
+		throw std::exception(res.error().what());
+	}
+	return *res;
+}
+
+
+//============================================================================
+SharedPtr<Portfolio>
+Hydra::pyGetPortfolio(String const& name) const
+{
+	if (!m_impl->m_portfolio_map.contains(name))
+	{
+		String msg = "Portfolio with name " + name + " does not exist";
+		throw std::exception(msg.c_str());
+	}
+	return m_impl->m_portfolios[m_impl->m_portfolio_map[name]];
 }
 
 

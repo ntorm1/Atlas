@@ -100,7 +100,7 @@ AtlasXAsset::initUI() noexcept
 	right_widget->setLayout(asset_internal_layout);
 
 	// Add widgets to the splitter
-	splitter->addWidget(left_widget);
+	//splitter->addWidget(left_widget);
 	splitter->addWidget(right_widget);
 
 	// Add the splitter to the main layout
@@ -155,7 +155,7 @@ AtlasXAsset::showHeaderContextMenu(QPoint pos) noexcept
 void
 AtlasXAsset::onHydraStep()
 {
-	auto idx = impl->app->getCurrentIdx();
+	auto idx = impl->app->getCurrentIdx();// TODO should be exchange specific
 	auto model = impl->table_view->model();
 	auto q_idx = model->index(idx, 0);
 	auto q_idx_prev = model->index(idx - 1, 0);

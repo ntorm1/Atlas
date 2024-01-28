@@ -152,6 +152,8 @@
     <ClCompile Include="src\AtlasX.cpp" />
     <ClCompile Include="src\AtlasXExchangeWidget.cpp" />
     <ClCompile Include="src\AtlasXImpl.cpp" />
+    <ClCompile Include="src\AtlasXPortfolioManager.cpp" />
+    <ClCompile Include="src\AtlasXPy.cpp" />
     <ClCompile Include="src\AtlasXStrategyManager.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
@@ -193,6 +195,8 @@
     <QtMoc Include="include\AtlasXAssetWidget.h" />
     <ClInclude Include="include\AtlasXImpl.h" />
     <QtMoc Include="include\AtlasXStrategyManager.h" />
+    <QtMoc Include="include\AtlasXPortfolioManager.h" />
+    <ClInclude Include="include\AtlasXPy.h" />
     <ClInclude Include="include\AtlasXTypes.h" />
     <QtMoc Include="include\AtlasXExchangeManager.h" />
     <ClInclude Include="Qt-Advanced-Docking-System\src\DockComponentsFactory.h" />
