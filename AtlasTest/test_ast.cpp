@@ -316,7 +316,7 @@ TEST_F(SimpleExchangeTests, CommissionTest)
 	};
 	auto allocation_node = FixedAllocationNode::make(
 		std::move(m_allocations),
-		exchange,
+		exchange.get(),
 		0.0
 	);
 	auto strategy_node = StrategyNode::make(
@@ -394,7 +394,7 @@ TEST_F(ComplexExchangeTests, FixedAllocTest)
 	};
 	auto allocation_node = FixedAllocationNode::make(
 		std::move(m_allocations),
-		exchange,
+		exchange.get(),
 		0.0
 	);
 	auto strategy_node = StrategyNode::make(

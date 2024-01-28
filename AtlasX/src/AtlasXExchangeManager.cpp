@@ -57,7 +57,7 @@ AtlasXExchangeManager::AtlasXExchangeManager(
     // add a select exchange tool button
     const QIcon select_Exchange_icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/select.png"));
     auto select_exchange_action = new QAction(select_Exchange_icon, tr("&Select Exchange"), this);
-    select_exchange_action->setStatusTip(tr("Create a new exchange"));
+    select_exchange_action->setStatusTip(tr("Select and exsisting exchange"));
     connect(
         select_exchange_action, &QAction::triggered,
         this, &AtlasXExchangeManager::selectExchange

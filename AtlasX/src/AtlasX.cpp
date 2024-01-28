@@ -2,6 +2,9 @@
 
 #include "../include/AtlasX.h"
 #include "../include/AtlasXImpl.h"
+#include "../include/AtlasXExchangeManager.h"
+#include "../include/AtlasXStrategyManager.h"
+
 
 #include <QLabel>
 #include <QFile>
@@ -89,12 +92,15 @@ AtlasXApp::AtlasXApp(QWidget* parent
         QGuiApplication::primaryScreen()->availableGeometry()
     ));
 
-    m_DockManager = new ads::CDockManager(this);
 
     CDockManager::setConfigFlag(CDockManager::OpaqueSplitterResize, true);
     CDockManager::setConfigFlag(CDockManager::AllTabsHaveCloseButton, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
     CDockManager::setConfigFlag(CDockManager::DragPreviewHasWindowFrame, false);
+    CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
+
+    m_DockManager = new ads::CDockManager(this);
+
     auto exchange_manager_dock = AtlasXExchangeManager::make(
         this,
         m_impl
@@ -106,11 +112,24 @@ AtlasXApp::AtlasXApp(QWidget* parent
         exchange_manager_dock
     );
 
+
+    auto strategy_manager_dock = AtlasXStrategyManager::make(
+        this,
+        m_impl
+    );
+    strategy_manager_dock->setFeature(ads::CDockWidget::DockWidgetClosable, false);
+    DockArea = m_DockManager->addDockWidgetTabToArea(
+		strategy_manager_dock,
+        DockArea
+   );
+
+
     initStyle();
     initToolBar();
     initStateBar();
     initSignals();
     initEnvironment();
+    m_impl->env_path = m_state->env_path.string();
 }
 
 
@@ -140,7 +159,7 @@ void
 AtlasXApp::initStyle()
 {
     qDebug() << "INIT STYLE APPLY";
-    QFile file("./styles/QDarkStyleSheet/qdarkstyle/dark/darkstyle.qss");
+    QFile file("./styles/vs_light.css");
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QTextStream stream(&file);
@@ -233,8 +252,11 @@ AtlasXApp::initStateBar() noexcept
 
 
     tool_bar->addWidget(m_state->state_label);
+    tool_bar->addSeparator();
     tool_bar->addWidget(m_state->sim_time_label);
+    tool_bar->addSeparator();
     tool_bar->addWidget(m_state->sim_time_next_label);
+    tool_bar->addSeparator();
     tool_bar->addWidget(m_state->progress_bar);
     tool_bar->setMinimumHeight(30);  // Adjust the height as needed
     addToolBar(Qt::BottomToolBarArea, tool_bar);

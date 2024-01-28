@@ -61,10 +61,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <ExternalIncludePath>$(SolutionDir)AtlasX\external\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\Qt-Advanced-Docking-System\src</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)AtlasX\external\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\Qt-Advanced-Docking-System\src;C:\Python312\include</ExternalIncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)AtlasX\external\QScintilla\src\debug;C:\Python312\libs</LibraryPath>
+    <ReferencePath>$(VC_ReferencesPath_x64);</ReferencePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\external\QScintilla\src</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <ExternalIncludePath>$(SolutionDir)AtlasX\external\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\Qt-Advanced-Docking-System\src</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)AtlasX\external\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\Qt-Advanced-Docking-System\src;C:\Python312\include</ExternalIncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)AtlasX\external\QScintilla\src\release;C:\Python312\libs</LibraryPath>
+    <ReferencePath>$(VC_ReferencesPath_x64);</ReferencePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\external\QScintilla\src</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -73,6 +79,9 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <DisableSpecificWarnings>5050</DisableSpecificWarnings>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>%(AdditionalDependencies);$(Qt_LIBS_);qscintilla2_qt6d.lib;python312.lib</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -81,6 +90,9 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <DisableSpecificWarnings>5050</DisableSpecificWarnings>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);python312.lib</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
@@ -113,6 +125,7 @@
     <QtMoc Include="include\AtlasX.h" />
     <QtMoc Include="include\AtlasXExchangeWidget.h" />
     <ClCompile Include="src\AtlasXAssetWidget.cpp" />
+    <ClCompile Include="src\AtlasXEditor.cpp" />
     <ClCompile Include="src\AtlasXExchangeManager.cpp" />
     <ClCompile Include="Qt-Advanced-Docking-System\src\ads_globals.cpp" />
     <ClCompile Include="Qt-Advanced-Docking-System\src\AutoHideDockContainer.cpp" />
@@ -139,6 +152,7 @@
     <ClCompile Include="src\AtlasX.cpp" />
     <ClCompile Include="src\AtlasXExchangeWidget.cpp" />
     <ClCompile Include="src\AtlasXImpl.cpp" />
+    <ClCompile Include="src\AtlasXStrategyManager.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,9 +188,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\include\rangelimitedvalueaxis.h" />
+    <QtMoc Include="include\AtlasXEditor.h" />
     <ClInclude Include="include\AtlasXHelpers.h" />
     <QtMoc Include="include\AtlasXAssetWidget.h" />
     <ClInclude Include="include\AtlasXImpl.h" />
+    <QtMoc Include="include\AtlasXStrategyManager.h" />
     <ClInclude Include="include\AtlasXTypes.h" />
     <QtMoc Include="include\AtlasXExchangeManager.h" />
     <ClInclude Include="Qt-Advanced-Docking-System\src\DockComponentsFactory.h" />

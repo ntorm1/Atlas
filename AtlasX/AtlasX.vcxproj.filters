@@ -121,6 +121,12 @@
     <ClCompile Include="src\AtlasXExchangeWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\AtlasXStrategyManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AtlasXEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="styles\vs_light.css" />
@@ -194,6 +200,12 @@
       <Filter>Source Files</Filter>
     </QtMoc>
     <QtMoc Include="include\AtlasXAssetWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="include\AtlasXStrategyManager.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="include\AtlasXEditor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

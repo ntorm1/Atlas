@@ -1,0 +1,3 @@
+[submodule "AtlasX/external/QScintilla"]
+	path = AtlasX/external/QScintilla
+	url = https://github.com/ntorm1/QScintilla.git

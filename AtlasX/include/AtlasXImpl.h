@@ -1,8 +1,7 @@
 #pragma once
-
+#include <QStringList>
 
 #include "../include/AtlasXTypes.h"
-#include "../include/AtlasXExchangeManager.h"
 
 
 import AtlasException;
@@ -16,6 +15,7 @@ struct AtlasXAppImpl
 	friend class AtlasXApp;
 private:
 	SharedPtr<Atlas::Hydra> hydra;
+	String env_path = "";
 	HashMap<String, QStringList> timestamp_cache;
 	AtlasXExchangeManager* exchange_manager;
 
@@ -23,6 +23,8 @@ public:
 	AtlasXAppImpl();
 	~AtlasXAppImpl();
 
+	//============================================================================
+	String const& getEnvPath() const noexcept { return env_path; }
 
 	//============================================================================
 	void step() noexcept;

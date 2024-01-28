@@ -43,13 +43,15 @@ ads--CTitleBarButton {
 	border: none;
 }
 
-ads--CTitleBarButton:hover {
-	background: rgba(0, 0, 0, 24);
-}
+	/* Hover state */
+	ads--CTitleBarButton:hover {
+		background: rgba(255, 255, 255, 0.1); /* Use a darker shade for the hover background */
+	}
 
-ads--CTitleBarButton:pressed {
-	background: rgba(0, 0, 0, 48);
-}
+	/* Pressed state */
+	ads--CTitleBarButton:pressed {
+		background: rgba(255, 255, 255, 0.2); /* Use an even darker shade for the pressed background */
+	}
 
 QScrollArea#dockWidgetScrollArea {
 	padding: 0px;
@@ -112,37 +114,38 @@ ads--CDockWidgetTab[activeTab="true"] QLabel {
 	qproperty-iconSize: 16px;
 }
 
-#tabCloseButton:hover {
-	/*border: 1px solid rgba(0, 0, 0, 32);*/
-	background: rgba(0, 0, 0, 24);
-}
+	/* Hover state for #tabCloseButton */
+	#tabCloseButton:hover {
+		/* border: 1px solid rgba(255, 255, 255, 0.32); */ /* Uncomment this line if you want to keep the border */
+		background: rgba(255, 255, 255, 0.24); /* Use a darker shade for the hover background */
+	}
 
-#tabCloseButton:pressed {
-	background: rgba(0, 0, 0, 48);
-}
+	/* Pressed state for #tabCloseButton */
+	#tabCloseButton:pressed {
+		background: rgba(255, 255, 255, 0.48); /* Use an even darker shade for the pressed background */
+	}
 
-
-/* Focus related styling */
+/* Focus related styling for ads--CDockWidgetTab */
 ads--CDockWidgetTab[focused="true"] {
-	background: palette(dark);
-	border-color: palette(dark);
+	background: rgba(0, 0, 0, 24); /* Dark background color */
+	border-color: rgba(0, 0, 0, 24); /* Dark border color */
 }
 
-ads--CDockWidgetTab[focused="true"] > #tabCloseButton {
-	qproperty-icon: url(:/ads/images/close-button-focused.svg)
-}
+	ads--CDockWidgetTab[focused="true"] > #tabCloseButton {
+		qproperty-icon: url(:/ads/images/close-button-focused-dark.svg); /* Dark close button icon */
+	}
 
-ads--CDockWidgetTab[focused="true"]>#tabCloseButton:hover {
-	background: rgba(255, 255, 255, 48);
-}
+		ads--CDockWidgetTab[focused="true"] > #tabCloseButton:hover {
+			background: rgba(0, 0, 0, 0.48); /* Dark hover background for the close button */
+		}
 
-ads--CDockWidgetTab[focused="true"]>#tabCloseButton:pressed {
-	background: rgba(255, 255, 255, 92);
-}
+		ads--CDockWidgetTab[focused="true"] > #tabCloseButton:pressed {
+			background: rgba(0, 0, 0, 0.92); /* Dark pressed background for the close button */
+		}
 
-ads--CDockWidgetTab[focused="true"] QLabel {
-	color: palette(light);
-}
+	ads--CDockWidgetTab[focused="true"] QLabel {
+		color: rgba(255, 255, 255, 0.8); /* Light text color */
+	}
 
 
 /*****************************************************************************
