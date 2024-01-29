@@ -53,6 +53,22 @@ comparePairs(const std::pair<size_t, double>& a, const std::pair<size_t, double>
 
 
 //============================================================================
+static bool
+comparePairsReverse(const std::pair<size_t, double>& a, const std::pair<size_t, double>& b)
+{
+    if (std::isnan(a.second))
+    {
+        return true;
+    }
+    if (std::isnan(b.second))
+    {
+        return false;
+    }
+    return a.second > b.second;
+}
+
+
+//============================================================================
 void
 EVRankNode::sort() noexcept
 {
@@ -72,7 +88,7 @@ EVRankNode::sort() noexcept
             m_view.begin(),
             m_view.begin() + m_N,
             m_view.end(),
-            &comparePairs
+            &comparePairsReverse
         );
         break;
     case EVRankType::NEXTREME:
@@ -89,7 +105,7 @@ EVRankNode::sort() noexcept
             m_view.begin() + m_N,
             m_view.end(),
             m_view.end(),
-            &comparePairs
+            &comparePairsReverse
         );
         break;
     }
