@@ -252,6 +252,8 @@ AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 	}
 
 	switch (m_impl->m_type) {
+	case AllocationType::NLARGEST:
+	case AllocationType::NSMALLEST:
 	case AllocationType::UNIFORM: {
 		target = target.unaryExpr([c](double x) { return x == x ? c : 0.0; });
 		break;
@@ -263,14 +265,10 @@ AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 		target = target.unaryExpr([](double x) { return x == x ? x : 0.0; });
 		break;
 	}
-	case AllocationType::NEXTREME: {
-		// set first n largest elements to -1/n, and the rest to 1/n
-		// where n is the number of assets to allocate using n extreme values. target
-		// index is guarenteed to have at least 2n elements
-		target.head(*n_alloc_param).array() = -c;
-		target.tail(*n_alloc_param).array() = c;
+	case AllocationType::NEXTREME:
+		assert(false); // not implemented
 	}
-	}
+	
 }
 
 

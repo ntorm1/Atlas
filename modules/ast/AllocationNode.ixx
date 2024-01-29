@@ -27,7 +27,9 @@ export enum class AllocationType
 	UNIFORM = 0,
 	CONDITIONAL_SPLIT = 1,
 	FIXED = 2,
-	NEXTREME = 3,
+	NLARGEST = 3,
+	NSMALLEST = 4,
+	NEXTREME = 5
 };
 
 
