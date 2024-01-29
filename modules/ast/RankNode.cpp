@@ -117,10 +117,23 @@ EVRankNode::evaluate(Eigen::VectorXd& target) noexcept
 	// target vector that looks like: 
 	// [Nan, largest_element, Nan, second_largest_element, Nan, Nan]
 	sort();
-	for (size_t i = m_N; i < m_view.size(); ++i)
-	{
-		target[m_view[i].first] = std::numeric_limits<double>::quiet_NaN();
-	}
+
+    switch (m_type) {
+        case EVRankType::NSmallest:
+        case EVRankType::NLargest:
+            for (size_t i = 0; i < m_N; ++i)
+            {
+				target[m_view[i].first] = std::numeric_limits<double>::quiet_NaN();
+			}
+			break;
+        case EVRankType::NEXTREME:
+            // from index N to len(target) - N, set to Nan
+            for (size_t i = m_N; i < m_view.size() - m_N; ++i)
+            {
+                target[m_view[i].first] = std::numeric_limits<double>::quiet_NaN();
+            }
+            break;
+    }
 }
 
 }
