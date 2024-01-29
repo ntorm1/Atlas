@@ -120,7 +120,7 @@ EVRankNode::evaluate(Eigen::VectorXd& target) noexcept
     switch (m_type) {
         case EVRankType::NSmallest:
         case EVRankType::NLargest:
-            for (size_t i = 0; i < m_N; ++i)
+            for (size_t i = m_N; i < m_view.size(); ++i)
             {
 				target[m_view[i].first] = std::numeric_limits<double>::quiet_NaN();
 			}
