@@ -59,8 +59,7 @@ sys.path.append(atlas_path)
 
 from AtlasPy import TracerType
 from AtlasPy.core import Hydra, Portfolio, Strategy
-from AtlasPy.ast import AssetReadNode, AssetDifferenceNode, \
-      ExchangeViewNode, AllocationNode, StrategyNode, AssetOpNodeVariant, ExchangeViewFilterType
+from AtlasPy.ast *
 ```
 
 Define the runtime
@@ -80,17 +79,18 @@ hydra.build()
 Define the strategy. The below strategy will go long all assets if their fast moving average is above their slow, and short vice versa.
 
 ```python
-read_fast = AssetReadNode.make("ma_fast", 0, exchange)
-read_slow = AssetReadNode.make("ma_slow", 0, exchange)
-spread = AssetDifferenceNode(read_fast, read_slow)
-op_variant = AssetOpNodeVariant(spread)
+read_fast = AssetReadNodeWrapper.make("ma_fast", 0, exchange)
+read_slow = AssetReadNodeWrapper.make("ma_slow", 0, exchange)
+spread = AssetDifferenceNodeWrapper.make(read_fast, read_slow)
+op_variant = AssetOpNodeVariant.make(spread)
 
-exchange_view = ExchangeViewNode(exchange, op_variant)
-exchange_view.setFilter(ExchangeViewFilterType.GREATER_THAN, 0.0)
-allocation = AllocationNode(exchange_view)
-strategy_node = StrategyNode(allocation, portfolio)
-strategy = hydra.addStrategy(Strategy(strategy_id, strategy_node, 1.0))
+filter = ExchangeViewFilter(ExchangeViewFilterType.GREATER_THAN, 0.0)
+exchange_view = ExchangeViewNode(exchange, op_variant, filter)
+allocation = AllocationNodeWrapper.make(exchange_view)
+strategy_node = StrategyNodeWrapper.make(allocation, portfolio)
+strategy = hydra.addStrategy(Strategy(strategy_id, strategy_node, alloc), True)
 strategy.enableTracerHistory(TracerType.WEIGHTS)
+strategy.enableTracerHistory(TracerType.NLV)
 ```
 
 Now we can execute and get the total return, we compare our results to VectorBT to ensure accuracy here. 

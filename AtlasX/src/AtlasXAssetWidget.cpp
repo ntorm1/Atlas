@@ -305,7 +305,7 @@ AtlasXAsset::initData() noexcept
 	model->setHorizontalHeaderLabels(mapToQStringList(impl->headers));
 	model->setVerticalHeaderLabels(timestamps);
 
-	for (size_t i = 0; i < 30; ++i)
+	for (size_t i = 0; i < 100; ++i)
 	{
 		for (size_t j = 0; j < cols; ++j)
 		{
