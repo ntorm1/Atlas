@@ -203,9 +203,34 @@ AllocationNode::make(
 		return Err("Allocation type requires a parameter");
 	}
 
-	return std::make_unique<AllocationNode>(
+	auto node = std::make_unique<AllocationNode>(
 		std::move(exchange_view), type, alloc_param, epsilon
 	);
+
+	if (type == AllocationType::NEXTREME)
+	{
+		if (!alloc_param)
+		{
+			return Err("Allocation type NEXTREME requires a parameter");
+		}
+		// attempt to cast the alloc_param to a size_t to use as the number of assets to allocate
+		// ussing n extreme values
+		try
+		{
+			node->setNAllocParam(static_cast<size_t>(*alloc_param));
+		}
+		catch (std::exception&)
+		{
+			return Err("Allocation type NEXTREME requires a size_t parameter");
+		}
+		// n*2 must be less than the number of assets in the exchange
+		size_t asset_count = exchange_view->getExchange().getAssetCount();
+		if (node->getNAllocParam() * 2 >= asset_count)
+		{
+			return Err("Allocation type NEXTREME requires a parameter less than half the number of assets in the exchange");
+		}
+	}
+	return std::move(node);
 }
 
 
@@ -237,6 +262,13 @@ AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 				.select(c, target));
 		target = target.unaryExpr([](double x) { return x == x ? x : 0.0; });
 		break;
+	}
+	case AllocationType::NEXTREME: {
+		// set first n largest elements to -1/n, and the rest to 1/n
+		// where n is the number of assets to allocate using n extreme values. target
+		// index is guarenteed to have at least 2n elements
+		target.head(*n_alloc_param).array() = -c;
+		target.tail(*n_alloc_param).array() = c;
 	}
 	}
 }

@@ -26,7 +26,8 @@ export enum class AllocationType
 {
 	UNIFORM = 0,
 	CONDITIONAL_SPLIT = 1,
-	FIXED = 2
+	FIXED = 2,
+	NEXTREME = 3,
 };
 
 
@@ -110,10 +111,13 @@ final
 	: public AllocationBaseNode
 {
 private:
+	Option<size_t> n_alloc_param = std::nullopt;
 	UniquePtr<ExchangeViewNode> m_exchange_view;
-
 public:
 	ATLAS_API ~AllocationNode() noexcept;
+
+	void setNAllocParam(size_t n) noexcept { n_alloc_param = n; }
+	[[nodiscard]] size_t getNAllocParam() const noexcept { return n_alloc_param.value(); }
 
 	//============================================================================
 	ATLAS_API AllocationNode(
@@ -123,20 +127,18 @@ public:
 		double epsilon = 0.000f
 	) noexcept;
 
-
 	//============================================================================
 	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationNode>, AtlasException>
-		make(
+	make(
 			UniquePtr<ExchangeViewNode> exchange_view,
 			AllocationType type = AllocationType::UNIFORM,
 			Option<double> alloc_param = std::nullopt,
 			double epsilon = 0.000f
 		) noexcept;
 
-
 	//============================================================================
 	ATLAS_API static PyNodeWrapper<AllocationNode>
-		pyMake(
+	pyMake(
 			PyNodeWrapper<ExchangeViewNode> exchange_view,
 			AllocationType type = AllocationType::UNIFORM,
 			Option<double> alloc_param = std::nullopt,

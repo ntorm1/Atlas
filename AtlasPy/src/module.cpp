@@ -111,6 +111,7 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def_static("make", &Atlas::AST::FixedAllocationNode::pyMake);
 
     py::class_<Atlas::AST::PyNodeWrapper<Atlas::AST::AllocationNode>>(m_ast, "AllocationNodeWrapper")
+        .def("unwrap", &Atlas::AST::PyNodeWrapper<Atlas::AST::AllocationNode>::pyUnwrap, py::return_value_policy::reference)
         .def_static("make", &Atlas::AST::AllocationNode::pyMake,
             py::arg("exchange_view"),
             py::arg("type") = Atlas::AST::AllocationType::UNIFORM,

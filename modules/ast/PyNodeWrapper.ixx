@@ -65,6 +65,12 @@ public:
 		return m_node != nullptr;
 	}
 
+	T* peek() const
+	{
+		assert(has_node());
+		return m_node.get();
+	}
+
 	UniquePtr<T> take()
 	{
 		assert(has_node());

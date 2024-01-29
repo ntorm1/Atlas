@@ -45,7 +45,7 @@ private:
 public:
 	ATLAS_API Strategy(
 		String name,
-		SharedPtr<AST::StrategyNode> ast,
+		UniquePtr<AST::StrategyNode> ast,
 		double portfolio_weight
 	) noexcept;
 	ATLAS_API Strategy(
