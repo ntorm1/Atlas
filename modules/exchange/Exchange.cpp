@@ -7,6 +7,7 @@ import ExchangePrivateModule;
 import StrategyModule;
 import AtlasUtilsModule;
 import HelperNodesModule;
+import RiskNodeModule;
 
 namespace Atlas
 {
@@ -206,11 +207,9 @@ Exchange::step(Int64 global_time) noexcept
 		strategy->m_step_call = true;
 	}
 
-	for (auto& trigger : m_impl->registered_triggers)
-	{
-		trigger->step();
-	}
-	
+	std::for_each(m_impl->registered_triggers.begin(), m_impl->registered_triggers.end(), [](auto& trigger) { trigger->step(); });
+	std::for_each(m_impl->covariance_nodes.begin(), m_impl->covariance_nodes.end(), [](auto& node_pair) { node_pair.second->evaluate(); });
+
 	m_impl->current_index++;
 }
 
@@ -284,6 +283,23 @@ Exchange::currentIdx() const noexcept
 	return (m_impl->current_index - 1);
 }
 
+
+//============================================================================
+SharedPtr<AST::CovarianceNode>
+Exchange::getCovarianceNode(
+	String const& id,
+	SharedPtr<AST::TriggerNode> trigger,
+	size_t lookback) noexcept
+{
+	if (m_impl->covariance_nodes.count(id) > 0)
+	{
+		return m_impl->covariance_nodes[id];
+	}
+
+	auto node = AST::CovarianceNode::make(*this, trigger, lookback);
+	m_impl->covariance_nodes[id] = node;
+	return node;
+}
 
 //============================================================================
 EigenConstRowView<double>

@@ -12,15 +12,16 @@ namespace AST
 //============================================================================
 export enum class NodeType
 {
-	ASSET_READ = 0,
-	ASSET_OP = 1,
-	EXCHANGE_VIEW = 2,
 	ALLOC = 3,
+	ALLOC_WEIGHT = 6,
+	ASSET_OP = 1,
+	ASSET_READ = 0,
+	COVARIANCE = 9,
+	EXCHANGE_VIEW = 2,
+	RANK_NODE = 7,
 	STRATEGY = 4,
 	STRATEGY_RUNNER = 5,
-	ALLOC_WEIGHT = 6,
-	RANK_NODE = 7,
-	TRADE_LIMIT = 8
+	TRADE_LIMIT = 8,
 };
 
 
@@ -82,7 +83,7 @@ export class StatementNode : public ASTNode {
 public:
 	StatementNode(NodeType type) : ASTNode(type) {}
 	virtual ~StatementNode() {}
-	virtual void evaluate() = 0;
+	virtual void evaluate() noexcept = 0;
 };
 
 

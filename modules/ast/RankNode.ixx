@@ -37,6 +37,7 @@ private:
 	EVRankType m_type;
 	UniquePtr<ExchangeViewNode> m_ev;
 	Vector<std::pair<size_t, double>> m_view;
+	bool m_rank_in_place = false;
 
 	void sort() noexcept;
 
@@ -44,7 +45,8 @@ public:
 	ATLAS_API EVRankNode(
 		UniquePtr<ExchangeViewNode> ev,
 		EVRankType type,
-		size_t count
+		size_t count,
+		bool rank_in_place = false
 	) noexcept;
 	ATLAS_API ~EVRankNode() noexcept;
 

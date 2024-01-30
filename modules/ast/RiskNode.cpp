@@ -12,6 +12,50 @@ namespace Atlas
 namespace AST
 {
 
+
+//============================================================================
+CovarianceNode::CovarianceNode(
+	Exchange& exchange,
+	SharedPtr<TriggerNode> trigger,
+	size_t lookback_window
+) noexcept :
+	StatementNode(NodeType::COVARIANCE),
+	m_trigger(trigger),
+	m_exchange(exchange),
+	m_lookback_window(lookback_window)
+{
+	size_t row_count = exchange.getAssetCount();
+	m_covariance.resize(row_count, row_count);
+	m_covariance.setZero();
+}
+
+
+//============================================================================
+CovarianceNode::~CovarianceNode() noexcept
+{
+
+}
+
+
+//============================================================================
+void
+CovarianceNode::evaluate() noexcept
+{
+	if (!m_trigger->evaluate())
+	{
+		return;
+	}
+	size_t start_idx = m_exchange.currentIdx() - m_lookback_window;
+	auto const& returns_block = m_exchange.getMarketReturnsBlock(
+		start_idx,
+		m_exchange.currentIdx()
+	);
+	assert(returns_block.rows() == m_covariance.rows());
+	m_centered_returns = returns_block.rowwise() - returns_block.colwise().mean();
+	m_covariance = (m_centered_returns.adjoint() * m_centered_returns) / double(returns_block.rows() - 1);
+}
+
+
 //============================================================================
 AllocationWeightNode::~AllocationWeightNode() noexcept
 {

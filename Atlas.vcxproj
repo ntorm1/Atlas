@@ -171,6 +171,7 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\AtlasMacros.hpp" />
+    <ClInclude Include="include\unordered_dense.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />

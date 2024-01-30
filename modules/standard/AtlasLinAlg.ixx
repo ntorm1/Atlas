@@ -9,6 +9,7 @@ namespace LinAlg
 {
 
 export using EigenVectorXd = Eigen::VectorXd;
+export using EigenMatrixXd = Eigen::MatrixXd;
 
 export template <typename T>
 using EigenConstColView = Eigen::Block<Eigen::Matrix<T, -1, -1, 0, -1, -1>, -1, 1, true>;

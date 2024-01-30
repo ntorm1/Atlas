@@ -1,9 +1,13 @@
 module;
 #pragma once
 #include <Eigen/Dense>
+#include "unordered_dense.h"
 export module ExchangePrivateModule;
 
 import AtlasCore;
+
+template<typename K, typename V>
+using FastMap = ankerl::unordered_dense::map<K, V>;
 
 namespace Atlas
 {
@@ -36,6 +40,7 @@ export struct ExchangeImpl
 	Vector<Asset> assets;
 	Vector<Int64> timestamps;
 	Vector<AST::TriggerNode*> registered_triggers;
+	FastMap<String,SharedPtr<AST::CovarianceNode>> covariance_nodes;
 	Vector<Strategy*> registered_strategies;
 	Int64 current_timestamp = 0;
 	Eigen::MatrixXd data;
