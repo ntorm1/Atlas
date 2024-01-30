@@ -18,13 +18,14 @@ namespace AST
 
 //============================================================================
 StrategyNode::StrategyNode(
-	UniquePtr<AllocationBaseNode> allocation,
+	SharedPtr<AllocationBaseNode> allocation,
 	Portfolio& portfolio
 ) noexcept :
 	OpperationNode<bool, Eigen::VectorXd&>(NodeType::STRATEGY, allocation.get()),
 	m_allocation(std::move(allocation)),
 	m_portfolio(portfolio)
 {
+	assert(m_allocation.use_count() <= 2); // pybind11::shared_ptr and this
 	m_warmup = m_allocation->getWarmup();
 }
 
@@ -115,7 +116,7 @@ FixedAllocationNode::FixedAllocationNode(
 
 
 //============================================================================
-Result<UniquePtr<FixedAllocationNode>, AtlasException>
+Result<SharedPtr<FixedAllocationNode>, AtlasException>
 FixedAllocationNode::make(
 	Vector<std::pair<String, double>> allocations,
 	Exchange* exchange,

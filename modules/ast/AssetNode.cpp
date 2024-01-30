@@ -27,7 +27,7 @@ LinAlg::EigenConstColView<double>
 
 
 //============================================================================
-Result<UniquePtr<AssetReadNode>, AtlasException>
+Result<SharedPtr<AssetReadNode>, AtlasException>
 	AssetReadNode::make(
 		String const& column,
 		int row_offset,

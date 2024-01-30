@@ -36,22 +36,22 @@ export enum class AssetNodeType {
 export class AssetOpNodeVariant {
 public:
 	mutable std::variant<
-		UniquePtr<AssetReadNode>,
-		UniquePtr<AssetProductNode>,
-		UniquePtr<AssetQuotientNode>,
-		UniquePtr<AssetSumNode>,
-		UniquePtr<AssetDifferenceNode>
+		SharedPtr<AssetReadNode>,
+		SharedPtr<AssetProductNode>,
+		SharedPtr<AssetQuotientNode>,
+		SharedPtr<AssetSumNode>,
+		SharedPtr<AssetDifferenceNode>
 	> value;
 	size_t warmup;
 	AssetNodeType  t;
 
 public:
 	using node_variant = std::variant <
-		UniquePtr<AssetReadNode>,
-		UniquePtr<AssetProductNode>,
-		UniquePtr<AssetQuotientNode>,
-		UniquePtr<AssetSumNode>,
-		UniquePtr<AssetDifferenceNode>>;
+		SharedPtr<AssetReadNode>,
+		SharedPtr<AssetProductNode>,
+		SharedPtr<AssetQuotientNode>,
+		SharedPtr<AssetSumNode>,
+		SharedPtr<AssetDifferenceNode>>;
 
 	AssetOpNodeVariant(
 		node_variant node,
@@ -125,12 +125,12 @@ public:
 
 
 	//============================================================================
-	ATLAS_API [[nodiscard]] static UniquePtr<ExchangeViewNode> make(
+	ATLAS_API [[nodiscard]] static SharedPtr<ExchangeViewNode> make(
 		Exchange& exchange,
 		AssetOpNodeVariant asset_op_node
 	) noexcept
 	{
-		return std::make_unique<ExchangeViewNode>(
+		return std::make_shared<ExchangeViewNode>(
 			exchange, std::move(asset_op_node)
 		);
 	}

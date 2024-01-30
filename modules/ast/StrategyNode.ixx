@@ -5,6 +5,7 @@ module;
 #else
 #define ATLAS_API  __declspec(dllimport)
 #endif
+#include <stdexcept>
 export module StrategyNodeModule;
 
 import AtlasCore;
@@ -25,8 +26,8 @@ export class StrategyNode final : OpperationNode<bool, LinAlg::EigenVectorXd&>
 {
 	friend class Strategy;
 private:
-	UniquePtr<AllocationBaseNode> m_allocation;
-	Option<UniquePtr<AllocationWeightNode>> m_alloc_weight;
+	SharedPtr<AllocationBaseNode> m_allocation;
+	Option<SharedPtr<AllocationWeightNode>> m_alloc_weight;
 	Option<SharedPtr<TriggerNode>> m_trigger;
 	Portfolio& m_portfolio;
 	size_t m_warmup;
@@ -41,25 +42,30 @@ public:
 
 	//============================================================================
 	ATLAS_API StrategyNode(
-		UniquePtr<AllocationBaseNode> allocation,
+		SharedPtr<AllocationBaseNode> allocation,
 		Portfolio& portfolio
 	) noexcept;
 
 
 	//============================================================================
 	ATLAS_API StrategyNode(
-		UniquePtr<AllocationBaseNode> allocation,
+		SharedPtr<AllocationBaseNode> allocation,
 		SharedPtr<Portfolio> portfolio
 	) noexcept : StrategyNode(std::move(allocation), *portfolio) {}
 
 
 	//============================================================================
-	ATLAS_API [[nodiscard]] static UniquePtr<StrategyNode> make(
-		UniquePtr<AllocationBaseNode> allocation,
+	ATLAS_API [[nodiscard]] static SharedPtr<StrategyNode> make(
+		SharedPtr<AllocationBaseNode> allocation,
 		Portfolio& portfolio
-	) noexcept
+	)
 	{
-		return std::make_unique<StrategyNode>(
+		if (allocation.use_count() != 1)
+		{
+			throw std::runtime_error("Allocation node is already in use");
+		}
+
+		return std::make_shared<StrategyNode>(
 			std::move(allocation), portfolio
 		);
 	}

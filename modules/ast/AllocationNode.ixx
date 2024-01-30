@@ -85,7 +85,7 @@ public:
 
 
 	//============================================================================
-	ATLAS_API [[nodiscard]] static Result<UniquePtr<FixedAllocationNode>, AtlasException>
+	ATLAS_API [[nodiscard]] static Result<SharedPtr<FixedAllocationNode>, AtlasException>
 		make(
 			Vector<std::pair<String, double>> m_allocations,
 			Exchange* exchange,
@@ -106,7 +106,7 @@ final
 {
 private:
 	Option<size_t> n_alloc_param = std::nullopt;
-	UniquePtr<ExchangeViewNode> m_exchange_view;
+	SharedPtr<ExchangeViewNode> m_exchange_view;
 public:
 	ATLAS_API ~AllocationNode() noexcept;
 
@@ -115,16 +115,16 @@ public:
 
 	//============================================================================
 	ATLAS_API AllocationNode(
-		UniquePtr<ExchangeViewNode> exchange_view,
+		SharedPtr<ExchangeViewNode> exchange_view,
 		AllocationType type = AllocationType::UNIFORM,
 		Option<double> alloc_param = std::nullopt,
 		double epsilon = 0.000f
 	) noexcept;
 
 	//============================================================================
-	ATLAS_API [[nodiscard]] static Result<UniquePtr<AllocationNode>, AtlasException>
+	ATLAS_API [[nodiscard]] static Result<SharedPtr<AllocationNode>, AtlasException>
 	make(
-			UniquePtr<ExchangeViewNode> exchange_view,
+			SharedPtr<ExchangeViewNode> exchange_view,
 			AllocationType type = AllocationType::UNIFORM,
 			Option<double> alloc_param = std::nullopt,
 			double epsilon = 0.000f

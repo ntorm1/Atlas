@@ -172,7 +172,7 @@ AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 
 //============================================================================
 AllocationNode::AllocationNode(
-	UniquePtr<ExchangeViewNode> exchange_view,
+	SharedPtr<ExchangeViewNode> exchange_view,
 	AllocationType type,
 	Option<double> alloc_param,
 	double epsilon
@@ -188,9 +188,9 @@ AllocationNode::AllocationNode(
 
 
 //============================================================================
-Result<UniquePtr<AllocationNode>, AtlasException>
+Result<SharedPtr<AllocationNode>, AtlasException>
 AllocationNode::make(
-		UniquePtr<ExchangeViewNode> exchange_view,
+	SharedPtr<ExchangeViewNode> exchange_view,
 		AllocationType type,
 		Option<double> alloc_param,
 		double epsilon

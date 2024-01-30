@@ -161,7 +161,7 @@ PeriodicTriggerNode::evaluate() noexcept
 SharedPtr<TriggerNode>
 PeriodicTriggerNode::make(SharedPtr<Exchange> exchange, size_t frequency)
 {
-	auto node = std::make_unique<PeriodicTriggerNode>(*exchange, frequency);
+	auto node = std::make_shared<PeriodicTriggerNode>(*exchange, frequency);
 	auto result = node->build();
 	if (!result)
 	{
