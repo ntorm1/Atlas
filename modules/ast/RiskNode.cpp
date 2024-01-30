@@ -45,6 +45,10 @@ CovarianceNode::evaluate() noexcept
 	{
 		return;
 	}
+	if (m_exchange.currentIdx() < m_lookback_window)
+	{
+		return;
+	}
 	size_t start_idx = m_exchange.currentIdx() - m_lookback_window;
 	auto const& returns_block = m_exchange.getMarketReturnsBlock(
 		start_idx,
@@ -52,7 +56,9 @@ CovarianceNode::evaluate() noexcept
 	);
 	assert(returns_block.rows() == m_covariance.rows());
 	m_centered_returns = returns_block.rowwise() - returns_block.colwise().mean();
+	assert(m_centered_returns.rows() == returns_block.rows());
 	m_covariance = (m_centered_returns.adjoint() * m_centered_returns) / double(returns_block.rows() - 1);
+	assert(m_covariance.rows() == returns_block.cols());
 }
 
 
@@ -81,36 +87,12 @@ InvVolWeight::~InvVolWeight() noexcept
 
 //============================================================================
 InvVolWeight::InvVolWeight(
-	size_t window,
-	SharedPtr<TriggerNode> trigger
+	SharedPtr<CovarianceNode> covariance
 ) noexcept :
-	AllocationWeightNode(trigger),
-	m_lookback_window(window)
+	AllocationWeightNode(covariance->getTrigger()),
+	m_lookback_window(covariance->getWarmup()),
+	m_covariance(std::move(covariance))
 {
-	m_vol.resize(m_exchange.getAssetCount());
-	m_vol.setZero();
-}
-
-
-//============================================================================
-void
-InvVolWeight::cache() noexcept
-{ 
-	// pull out the block of returns data we need using the lookback defs
-	// to determine the start and end indices. Lookback returns block has #rows 
-	// equal to the number of assets, with columnds for timestamps.
-	size_t exchange_idx = m_exchange.currentIdx();
-	assert(exchange_idx > m_lookback_window);
-	size_t start_idx = exchange_idx - m_lookback_window;
-	auto returns_block = m_exchange.getMarketReturnsBlock(
-		start_idx,
-		exchange_idx
-	);
-	for (size_t i = 0; i < m_exchange.getAssetCount(); ++i)
-	{
-		auto ys = returns_block.row(i);
-		m_vol[i] =  (ys.array() - ys.mean()).square().sum() / (ys.size() - 1);
-	}
 }
 
 
@@ -118,13 +100,11 @@ InvVolWeight::cache() noexcept
 void
 InvVolWeight::evaluate(LinAlg::EigenVectorXd& target) noexcept
 {
-	if (m_trigger->evaluate())
-	{
-		cache();
-	}
-	assert(m_vol.size() == target.size());
-	target = target.cwiseQuotient(m_vol);
-	target /= target.sum();
+	auto const& covariance = m_covariance->getCovariance();
+	assert(covariance.rows() == covariance.cols());
+	auto vol = covariance.diagonal().array().sqrt();
+	target = (target.array() / vol.array()).matrix();
+	target = (target.array() / target.sum()).matrix();
 }
 
 

@@ -5,7 +5,6 @@
 #include "helper.h"
 #include <Eigen/Dense>
 
-#pragma warning(suppress:5050)
 import HydraModule;
 import ExchangeModule;
 import PortfolioModule;

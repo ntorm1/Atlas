@@ -208,9 +208,8 @@ Exchange::step(Int64 global_time) noexcept
 	}
 
 	std::for_each(m_impl->registered_triggers.begin(), m_impl->registered_triggers.end(), [](auto& trigger) { trigger->step(); });
+	m_impl->current_index++; // cov node valls currentIdx on first step
 	std::for_each(m_impl->covariance_nodes.begin(), m_impl->covariance_nodes.end(), [](auto& node_pair) { node_pair.second->evaluate(); });
-
-	m_impl->current_index++;
 }
 
 

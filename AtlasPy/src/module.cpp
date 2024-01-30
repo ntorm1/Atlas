@@ -14,6 +14,7 @@ import PortfolioModule;
 import AssetNodeModule;
 import ExchangeNodeModule;
 import StrategyNodeModule;
+import RiskNodeModule;
 import AllocationNodeModule;
 import HelperNodesModule;
 
@@ -39,6 +40,7 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::Hydra, std::shared_ptr<Atlas::Hydra>>(m_core, "Hydra")
         .def("build", &Atlas::Hydra::pyBuild)
         .def("run", &Atlas::Hydra::run)
+        .def("step", &Atlas::Hydra::step)
         .def("removeStrategy", &Atlas::Hydra::removeStrategy)
         .def("reset", &Atlas::Hydra::pyReset)
         .def("addExchange", &Atlas::Hydra::pyAddExchange)
@@ -50,19 +52,20 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("addPortfolio", &Atlas::Hydra::pyAddPortfolio)
         .def("getPortfolio", &Atlas::Hydra::pyGetPortfolio)
         .def(py::init<>());
+
+    py::class_<Atlas::AST::CovarianceNode, std::shared_ptr<Atlas::AST::CovarianceNode>>(m_ast, "CovarianceNodeWrapper")
+        .def("getCovarianceMatrix", &Atlas::AST::CovarianceNode::getCovariance, py::return_value_policy::reference_internal);
+
     py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")
-        .def(
-            "getName",
-            &Atlas::Exchange::getName,
-            "get unique id of the exchange"
-        );
+        .def("getTimestamps", &Atlas::Exchange::getTimestamps)
+        .def("getCovarianceNode", &Atlas::Exchange::getCovarianceNode)
+        .def("getAssetMap", &Atlas::Exchange::getAssetMap)
+        .def("getName",&Atlas::Exchange::getName,"get unique id of the exchange");
 
     py::enum_<Atlas::TracerType>(m, "TracerType")
         .value("NLV", Atlas::TracerType::NLV)
         .value("WEIGHTS", Atlas::TracerType::WEIGHTS)
         .export_values();
-
-
 
     // ======= AST API ======= //
     py::enum_<Atlas::AST::ExchangeViewFilterType>(m_ast, "ExchangeViewFilterType")
@@ -124,7 +127,6 @@ PYBIND11_MODULE(AtlasPy, m) {
             py::arg("allocation"),
             py::arg("portfolio")
         );
-    //.def("setTrigger", &Atlas::AST::StrategyNode::setTrigger)
 
     py::class_<Atlas::Strategy, std::shared_ptr<Atlas::Strategy>>(m_core, "Strategy")
         .def("getNLV", &Atlas::Strategy::getNLV)

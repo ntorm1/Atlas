@@ -37,7 +37,7 @@ public:
 	~CovarianceNode() noexcept;
 
 	//============================================================================
-	template<typename ...Arg> std::shared_ptr<CovarianceNode>
+	template<typename ...Arg> SharedPtr<CovarianceNode>
 	static make(Arg&&...arg) {
 		struct EnableMakeShared : public CovarianceNode {
 			EnableMakeShared(Arg&&...arg) :CovarianceNode(std::forward<Arg>(arg)...) {}
@@ -87,7 +87,7 @@ public:
 export class InvVolWeight final : public AllocationWeightNode
 {
 private:
-	LinAlg::EigenVectorXd m_vol;
+	SharedPtr<CovarianceNode> m_covariance;
 	size_t m_lookback_window = 0;
 public:
 	//============================================================================
@@ -95,12 +95,8 @@ public:
 
 	//============================================================================
 	InvVolWeight(
-		size_t lookback_window,
-		SharedPtr<TriggerNode> trigger
+		SharedPtr<CovarianceNode> covariance
 	) noexcept;
-
-	//============================================================================
-	void cache() noexcept override;
 	
 	//============================================================================
 	size_t getWarmup() const noexcept override { return m_lookback_window; }
