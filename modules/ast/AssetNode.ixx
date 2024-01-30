@@ -12,7 +12,6 @@ export module AssetNodeModule;
 import AtlasCore;
 import BaseNodeModule;
 import AtlasLinAlg;
-import PyNodeWrapperModule;
 
 namespace Atlas
 {
@@ -42,11 +41,6 @@ public:
 	ATLAS_API AssetReadNode(size_t column, int row_offset, SharedPtr<Exchange> exchange) noexcept :
 		AssetReadNode(column, row_offset, *exchange) {}
 
-	ATLAS_API static PyNodeWrapper<AssetReadNode> pyMake(
-		String const& column,
-		int row_offset,
-		SharedPtr<Exchange> exchange
-	);
 
 	ATLAS_API static Result<UniquePtr<AssetReadNode>, AtlasException>
 		make(
@@ -122,23 +116,6 @@ public:
 
 
 	//============================================================================
-	ATLAS_API static PyNodeWrapper<AssetOpNode> pyMake(
-		PyNodeWrapper<AssetReadNode> asset_read_left,
-		PyNodeWrapper<AssetReadNode> asset_read_right
-	)
-	{
-		if (!asset_read_left.has_node() || !asset_read_right.has_node())
-		{
-			throw std::runtime_error("AssetOpNode::pyMake: asset_read_left or asset_read_right was taken");
-		}
-		return PyNodeWrapper<AssetOpNode<NodeCwiseBinOp>>(
-			std::move(asset_read_left.take()),
-			std::move(asset_read_right.take())
-		);
-	}
-
-
-	//============================================================================
 	[[nodiscard]] size_t getWarmup() const noexcept override
 	{
 		return warmup;
@@ -207,20 +184,6 @@ ATLAS_API static UniquePtr<Asset##NAME##Node> make( \
 	return std::make_unique<Asset##NAME##Node>( \
 		std::move(asset_read_left), \
 		std::move(asset_read_right) \
-	); \
-} \
-ATLAS_API static PyNodeWrapper<Asset##NAME##Node> pyMake( \
-	PyNodeWrapper<AssetReadNode> asset_read_left, \
-	PyNodeWrapper<AssetReadNode> asset_read_right \
-) \
-{ \
-	if (!asset_read_left.has_node() || !asset_read_right.has_node()) \
-	{ \
-		throw std::runtime_error("Asset"#NAME"Node::pyMake: asset_read_left or asset_read_right was taken"); \
-	} \
-	auto node = make(std::move(asset_read_left.take()), std::move(asset_read_right.take())); \
-	return PyNodeWrapper<Asset##NAME##Node>( \
-		std::move(node) \
 	); \
 } \
 };

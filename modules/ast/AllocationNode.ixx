@@ -12,7 +12,6 @@ import AtlasEnumsModule;
 import AtlasLinAlg;
 import BaseNodeModule;
 import StrategyBufferModule;
-import PyNodeWrapperModule;
 
 namespace Atlas
 {
@@ -94,13 +93,6 @@ public:
 		) noexcept;
 
 
-	//============================================================================
-	ATLAS_API static PyNodeWrapper<FixedAllocationNode> pyMake(
-		Vector<std::pair<String, double>> m_allocations,
-		SharedPtr<Exchange> exchange,
-		double epsilon = 0.000f
-	);
-
 	void evaluateChild(LinAlg::EigenVectorXd& target) noexcept override;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return 0; }
 
@@ -137,15 +129,6 @@ public:
 			Option<double> alloc_param = std::nullopt,
 			double epsilon = 0.000f
 		) noexcept;
-
-	//============================================================================
-	ATLAS_API static PyNodeWrapper<AllocationNode>
-	pyMake(
-			PyNodeWrapper<ExchangeViewNode> exchange_view,
-			AllocationType type = AllocationType::UNIFORM,
-			Option<double> alloc_param = std::nullopt,
-			double epsilon = 0.000f
-		);
 
 
 	[[nodiscard]] size_t getWarmup() const noexcept override;

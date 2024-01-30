@@ -149,9 +149,6 @@
     <ClCompile Include="modules\exchange\ExchangePyIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ast\PyNodeWrapper.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ast\AllocationNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -270,34 +270,7 @@ AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 	}
 	
 }
-
-
-//============================================================================
-PyNodeWrapper<AllocationNode> AllocationNode::pyMake(
-	PyNodeWrapper<ExchangeViewNode> exchange_view,
-	AllocationType type,
-	Option<double> alloc_param,
-	double epsilon)
-{
-	if (!exchange_view.has_node())
-	{
-		throw std::runtime_error("exchange view was taken");
-	}
-	auto node = AllocationNode::make(
-		std::move(exchange_view.take()),
-		type,
-		alloc_param,
-		epsilon
-	);
-	if (node.has_value())
-	{
-		return PyNodeWrapper<AllocationNode>(std::move(node.value()));
-	}
-	else
-	{
-		throw std::runtime_error(node.error().what());
-	}
-}
+	
 
 //============================================================================
 size_t

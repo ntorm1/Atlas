@@ -73,7 +73,7 @@ void
 EVRankNode::sort() noexcept
 {
     switch (m_type) {
-    case EVRankType::NSmallest:
+    case EVRankType::NSMALLEST:
         // do a partial sort to find the smallest N elements
         std::partial_sort(
             m_view.begin(),
@@ -82,7 +82,7 @@ EVRankNode::sort() noexcept
             &comparePairs
         );
         break;
-    case EVRankType::NLargest:
+    case EVRankType::NLARGEST:
         // do a partial sort to find the largest N elements
         std::partial_sort(
             m_view.begin(),
@@ -134,15 +134,24 @@ EVRankNode::evaluate(Eigen::VectorXd& target) noexcept
 	// [Nan, largest_element, Nan, second_largest_element, Nan, Nan]
 	sort();
     switch (m_type) {
-        case EVRankType::NSmallest:
-        case EVRankType::NLargest:
+        case EVRankType::NSMALLEST:
+        case EVRankType::NLARGEST:
             for (size_t i = m_N; i < m_view.size(); ++i)
             {
 				target[m_view[i].first] = std::numeric_limits<double>::quiet_NaN();
 			}
 			break;
         case EVRankType::NEXTREME:
-            assert(false); // not implemented
+            // the first N elements are the smallest, the last N are the largest. But 
+            // we have to allow the allocation node to distinguish between the two so we eat the signal
+            for (size_t i = 0; i < m_N; ++i)
+            {
+                target[m_view[i].first] = -1.0f;
+            }
+            for (size_t i = m_N; i < m_view.size(); ++i)
+            {
+				target[m_view[i].first] = 1.0f;
+			}
     }
 }
 

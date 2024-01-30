@@ -323,7 +323,7 @@ TEST_F(SimpleExchangeTests, CommissionTest)
 		std::move(*allocation_node),
 		*portfolio
 	);
-	auto trigger_node = PeriodicTriggerNode::pyMake(
+	auto trigger_node = PeriodicTriggerNode::make(
 		exchange_sptr, 2
 	);
 	strategy_node->setTrigger(std::move(trigger_node));
@@ -401,7 +401,7 @@ TEST_F(ComplexExchangeTests, FixedAllocTest)
 		std::move(*allocation_node),
 		*portfolio
 	);
-	auto trigger_node = StrategyMonthlyRunnerNode::pyMake(
+	auto trigger_node = StrategyMonthlyRunnerNode::make(
 		exchange_sptr
 	);
 	strategy_node->setTrigger(std::move(trigger_node));

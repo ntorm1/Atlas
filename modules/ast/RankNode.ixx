@@ -23,8 +23,8 @@ namespace AST
 //============================================================================
 export enum class EVRankType : uint8_t
 {
-	NLargest,	/// return the N largest
-	NSmallest,	/// return the N smallest
+	NLARGEST,	/// return the N largest
+	NSMALLEST,	/// return the N smallest
 	NEXTREME 	/// return the N largest and smallest
 };
 

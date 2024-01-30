@@ -36,23 +36,6 @@ StrategyNode::~StrategyNode() noexcept
 
 
 //============================================================================
-PyNodeWrapper<StrategyNode> StrategyNode::pyMake(
-	PyNodeWrapper<AllocationNode> allocation,
-	Portfolio& portfolio)
-{
-	if (!allocation.has_node())
-	{
-		throw std::runtime_error("allocation was taken");
-	}
-	auto node = StrategyNode::make(
-		std::move(allocation.take()),
-		portfolio
-	);
-	return PyNodeWrapper<StrategyNode>(std::move(node));
-}
-
-
-//============================================================================
 bool
 StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
 {
@@ -152,24 +135,6 @@ FixedAllocationNode::make(
 	return std::make_unique<FixedAllocationNode>(
 		std::move(allocations_ids), exchange, epsilon
 	);
-}
-
-
-//============================================================================
-PyNodeWrapper<FixedAllocationNode>
-FixedAllocationNode::pyMake(
-	Vector<std::pair<String, double>> m_allocations,
-	SharedPtr<Exchange> exchange,
-	double epsilon
-)
-{
-	auto res = make(std::move(m_allocations), exchange.get(), epsilon);
-	if (!res)
-	{
-		throw std::exception(res.error().what());
-	}
-	auto node = std::move(*res);
-	return PyNodeWrapper<FixedAllocationNode>(std::move(node));
 }
 
 

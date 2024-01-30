@@ -159,7 +159,7 @@ PeriodicTriggerNode::evaluate() noexcept
 
 //============================================================================
 SharedPtr<TriggerNode>
-PeriodicTriggerNode::pyMake(SharedPtr<Exchange> exchange, size_t frequency)
+PeriodicTriggerNode::make(SharedPtr<Exchange> exchange, size_t frequency)
 {
 	auto node = std::make_unique<PeriodicTriggerNode>(*exchange, frequency);
 	auto result = node->build();
@@ -184,7 +184,7 @@ StrategyMonthlyRunnerNode::evaluate() noexcept
 
 //============================================================================
 SharedPtr<TriggerNode>
-StrategyMonthlyRunnerNode::pyMake(
+StrategyMonthlyRunnerNode::make(
 	SharedPtr<Exchange> exchange,
 	bool eom_trigger
 )

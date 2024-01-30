@@ -65,7 +65,7 @@ public:
 	bool evaluate() noexcept override;
 
 	ATLAS_API [[nodiscard]] static SharedPtr<TriggerNode>
-	pyMake(
+	make(
 		SharedPtr<Exchange> exchange,
 		size_t frequency
 	);
@@ -92,7 +92,7 @@ public:
 	bool evaluate() noexcept override;
 
 	ATLAS_API [[nodiscard]] static SharedPtr<TriggerNode>
-	pyMake(
+	make(
 		SharedPtr<Exchange> exchange,
 		bool eom_trigger = false
 	);

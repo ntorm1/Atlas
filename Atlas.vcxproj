@@ -178,7 +178,6 @@
     <ClCompile Include="modules\ast\AllocationNode.ixx" />
     <ClCompile Include="modules\ast\HelperNodes.cpp" />
     <ClCompile Include="modules\ast\HelperNodes.ixx" />
-    <ClCompile Include="modules\ast\PyNodeWrapper.ixx" />
     <ClCompile Include="modules\ast\RankNode.cpp" />
     <ClCompile Include="modules\ast\RankNode.ixx" />
     <ClCompile Include="modules\ast\RiskNode.cpp" />

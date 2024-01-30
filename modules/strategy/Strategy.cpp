@@ -26,12 +26,12 @@ public:
 	Tracer m_tracer;
 	Eigen::VectorXd m_target_weights_buffer;
 	Eigen::VectorXd m_adjustment_buffer;
-	UniquePtr<AST::StrategyNode> m_ast;
+	SharedPtr<AST::StrategyNode> m_ast;
 	Option<SharedPtr<CommisionManager>> m_commision_manager;
 
 	StrategyImpl(
 		Strategy* strategy,
-		UniquePtr<AST::StrategyNode> ast,
+		SharedPtr<AST::StrategyNode> ast,
 		double cash
 	) noexcept :
 		m_portfolio(ast->getPortfolio()),
@@ -52,7 +52,7 @@ public:
 //============================================================================
 Strategy::Strategy(
 	String name,
-	UniquePtr<AST::StrategyNode> ast,
+	SharedPtr<AST::StrategyNode> ast,
 	double portfolio_weight
 ) noexcept
 {
@@ -60,24 +60,6 @@ Strategy::Strategy(
 	m_impl = std::make_unique<StrategyImpl>(
 		this,
 		std::move(ast),
-		portfolio_weight * init_cash
-	);
-	m_name = std::move(name);
-}
-
-
-//============================================================================
-Strategy::Strategy(
-	String name, 
-	AST::PyNodeWrapper<AST::StrategyNode> ast,
-	double portfolio_weight
-) noexcept 
-{
-	auto node = ast.take();
-	double init_cash = node->getPortfolio().getInitialCash();
-	m_impl = std::make_unique<StrategyImpl>(
-		this,
-		std::move(node),
 		portfolio_weight * init_cash
 	);
 	m_name = std::move(name);

@@ -72,46 +72,6 @@ AssetOpNodeVariant::AssetOpNodeVariant(node_variant node)
 
 
 //============================================================================
-AssetOpNodeVariant AssetOpNodeVariant::pyMake(py_node_variant py_node) noexcept
-{
-    size_t warmup = 0;
-    AssetNodeType t = AssetNodeType::AssetReadNode;
-    node_variant node_variant;
-    if (std::holds_alternative<PyNodeWrapper<AssetReadNode>>(py_node)) {
-        auto node = std::get<PyNodeWrapper<AssetReadNode>>(py_node).take();
-        warmup = node->getWarmup();
-        t = AssetNodeType::AssetReadNode;
-        node_variant = std::move(node);
-    }
-    else if (std::holds_alternative<PyNodeWrapper<AssetProductNode>>(py_node)) {
-		auto node = std::get<PyNodeWrapper<AssetProductNode>>(py_node).take();
-		warmup = node->getWarmup();
-		t = AssetNodeType::AssetProductNode;
-        node_variant = std::move(node);
-	}
-	else if (std::holds_alternative<PyNodeWrapper<AssetQuotientNode>>(py_node)) {
-		auto node = std::get<PyNodeWrapper<AssetQuotientNode>>(py_node).take();
-		warmup = node->getWarmup();
-		t = AssetNodeType::AssetQuotientNode;
-        node_variant = std::move(node);
-	}
-	else if (std::holds_alternative<PyNodeWrapper<AssetSumNode>>(py_node)) {
-		auto node = std::get<PyNodeWrapper<AssetSumNode>>(py_node).take();
-		warmup = node->getWarmup();
-		t = AssetNodeType::AssetSumNode;
-        node_variant = std::move(node);
-	}
-	else if (std::holds_alternative<PyNodeWrapper<AssetDifferenceNode>>(py_node)) {
-		auto node = std::get<PyNodeWrapper<AssetDifferenceNode>>(py_node).take();
-		warmup = node->getWarmup();
-		t = AssetNodeType::AssetDifferenceNode;
-        node_variant = std::move(node);
-	}
-    return AssetOpNodeVariant(std::move(node_variant), warmup, t);
-}
-
-
-//============================================================================
 AssetOpNodeVariant::~AssetOpNodeVariant() noexcept
 {
 }

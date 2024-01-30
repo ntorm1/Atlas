@@ -12,7 +12,6 @@ import AtlasLinAlg;
 import BaseNodeModule;
 import StrategyBufferModule;
 import AllocationNodeModule;
-import PyNodeWrapperModule;
 
 namespace Atlas
 {
@@ -64,13 +63,6 @@ public:
 			std::move(allocation), portfolio
 		);
 	}
-
-	//============================================================================
-	ATLAS_API [[nodiscard]] static PyNodeWrapper<StrategyNode> pyMake(
-		PyNodeWrapper<AllocationNode> allocation,
-		Portfolio& portfolio
-	);
-
 
 
 	ATLAS_API [[nodiscard]] bool evaluate(LinAlg::EigenVectorXd& target) noexcept override;
