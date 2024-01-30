@@ -12,7 +12,7 @@ namespace AST
 
 //============================================================================
 EVRankNode::EVRankNode(
-	UniquePtr<ExchangeViewNode> ev,
+    SharedPtr<ExchangeViewNode> ev,
 	EVRankType type,
 	size_t count,
     bool rank_in_place
@@ -111,6 +111,14 @@ EVRankNode::sort() noexcept
         );
         break;
     }
+}
+
+
+//============================================================================
+size_t
+EVRankNode::getWarmup() const noexcept
+{
+    return m_ev->getWarmup();
 }
 
 //============================================================================

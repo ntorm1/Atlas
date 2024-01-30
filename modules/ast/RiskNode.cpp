@@ -58,7 +58,8 @@ CovarianceNode::evaluate() noexcept
 	m_centered_returns = returns_block.rowwise() - returns_block.colwise().mean();
 	assert(m_centered_returns.rows() == returns_block.rows());
 	m_covariance = (m_centered_returns.adjoint() * m_centered_returns) / double(returns_block.rows() - 1);
-	assert(m_covariance.rows() == returns_block.cols());
+	assert(m_covariance.rows() == returns_block.rows());
+	assert(m_covariance.cols() == returns_block.rows());
 }
 
 

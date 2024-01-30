@@ -35,7 +35,7 @@ export class EVRankNode final : public StrategyBufferOpNode
 private:
 	size_t m_N;
 	EVRankType m_type;
-	UniquePtr<ExchangeViewNode> m_ev;
+	SharedPtr<ExchangeViewNode> m_ev;
 	Vector<std::pair<size_t, double>> m_view;
 	bool m_rank_in_place = false;
 
@@ -43,14 +43,14 @@ private:
 
 public:
 	ATLAS_API EVRankNode(
-		UniquePtr<ExchangeViewNode> ev,
+		SharedPtr<ExchangeViewNode> ev,
 		EVRankType type,
 		size_t count,
 		bool rank_in_place = false
 	) noexcept;
 	ATLAS_API ~EVRankNode() noexcept;
 
-	size_t getWarmup() const noexcept override {return 0;}
+	size_t getWarmup() const noexcept override;
 	void evaluate(Eigen::VectorXd& target) noexcept override;
 };
 
