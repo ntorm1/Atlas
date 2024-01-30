@@ -235,6 +235,22 @@ AllocationNode::make(
 
 
 //============================================================================
+SharedPtr<AllocationNode>
+AllocationNode::pyMake(SharedPtr<ExchangeViewNode> exchange_view, AllocationType type, Option<double> alloc_param, double epsilon)
+{
+	auto result = AllocationNode::make(exchange_view, type, alloc_param, epsilon);
+	if (result)
+	{
+		return *result;
+	}
+	else
+	{
+		throw std::runtime_error(result.error().what());
+	}
+}
+
+
+//============================================================================
 void
 AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 {

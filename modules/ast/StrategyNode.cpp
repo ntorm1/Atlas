@@ -25,7 +25,6 @@ StrategyNode::StrategyNode(
 	m_allocation(std::move(allocation)),
 	m_portfolio(portfolio)
 {
-	assert(m_allocation.use_count() <= 2); // pybind11::shared_ptr and this
 	m_warmup = m_allocation->getWarmup();
 }
 
@@ -137,6 +136,22 @@ FixedAllocationNode::make(
 		std::move(allocations_ids), exchange, epsilon
 	);
 }
+
+
+//============================================================================
+SharedPtr<FixedAllocationNode>
+FixedAllocationNode::pyMake(Vector<std::pair<String, double>> m_allocations, Exchange* exchange, double epsilon)
+{
+	auto result = make(std::move(m_allocations), exchange, epsilon);
+	if (result)
+	{
+		return std::move(*result);
+	}
+	else
+	{
+		throw std::runtime_error(result.error().what());
+	}
+	}
 
 
 //============================================================================

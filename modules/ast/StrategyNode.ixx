@@ -6,6 +6,7 @@ module;
 #define ATLAS_API  __declspec(dllimport)
 #endif
 #include <stdexcept>
+#include <string>
 export module StrategyNodeModule;
 
 import AtlasCore;
@@ -60,9 +61,10 @@ public:
 		Portfolio& portfolio
 	)
 	{
-		if (allocation.use_count() != 1)
+		if (allocation.use_count() > 3) // pybind11 instance + this
 		{
-			throw std::runtime_error("Allocation node is already in use");
+			auto use_count = allocation.use_count();
+			throw std::runtime_error("Allocation node use count expected < 2, found " + std::to_string(use_count));
 		}
 
 		return std::make_shared<StrategyNode>(

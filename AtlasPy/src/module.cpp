@@ -16,7 +16,6 @@ import ExchangeNodeModule;
 import StrategyNodeModule;
 import AllocationNodeModule;
 import HelperNodesModule;
-import PyNodeWrapperModule;
 
 import AtlasEnumsModule;
 import AtlasException;
@@ -78,52 +77,41 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def_static("make", &Atlas::AST::AssetReadNode::pyMake);
 
     py::class_<Atlas::AST::AssetProductNode, std::shared_ptr<Atlas::AST::AssetProductNode>>(m_ast, "AssetProductNodeWrapper")
-        .def_static("make", &Atlas::AST::AssetProductNode::pyMake);
+        .def_static("make", &Atlas::AST::AssetProductNode::make);
 
     py::class_<Atlas::AST::AssetQuotientNode, std::shared_ptr<Atlas::AST::AssetQuotientNode>>(m_ast, "AssetQuotientNodeWrapper")
-        .def_static("make", &Atlas::AST::AssetQuotientNode::pyMake);
+        .def_static("make", &Atlas::AST::AssetQuotientNode::make);
 
     py::class_<Atlas::AST::AssetDifferenceNode, std::shared_ptr<Atlas::AST::AssetDifferenceNode>>(m_ast, "AssetDifferenceNodeWrapper")
-        .def_static("make", &Atlas::AST::AssetDifferenceNode::pyMake);
+        .def_static("make", &Atlas::AST::AssetDifferenceNode::make);
 
     py::class_<Atlas::AST::AssetSumNode, std::shared_ptr<Atlas::AST::AssetSumNode>>(m_ast, "AssetSumNodeWrapper")
-        .def_static("make", &Atlas::AST::AssetSumNode::pyMake);
+        .def_static("make", &Atlas::AST::AssetSumNode::make);
 
-    py::class_<Atlas::AST::AssetOpNodeVariant, std::shared_ptr<Atlas::AST::AssetOpNodeVariant>>(m_ast, "AssetOpNodeVariant")
-        .def_static("make", &Atlas::AST::AssetOpNodeVariant::pyMake);
+    py::class_<Atlas::AST::AssetOpNodeVariant>(m_ast, "AssetOpNodeVariant")
+        .def(py::init<Atlas::AST::AssetOpNodeVariant::node_variant>());
 
     py::class_<Atlas::AST::ExchangeViewFilter, std::shared_ptr<Atlas::AST::ExchangeViewFilter>>(m_ast, "ExchangeViewFilter")
         .def(py::init<Atlas::AST::ExchangeViewFilterType, double>());
 
     py::class_<Atlas::AST::ExchangeViewNode, std::shared_ptr<Atlas::AST::ExchangeViewNode>>(m_ast, "ExchangeViewNodeWrapper")
-        .def_static("make", &Atlas::AST::ExchangeViewNode::pyMake);
+        .def_static("make", &Atlas::AST::ExchangeViewNode::make);
 
-    py::class_<Atlas::AST::TriggerNode>(m_ast, "TriggerNode")
-        .def("getMask", &Atlas::AST::TriggerNode::getMask, py::return_value_policy::reference_internal);
-
-    py::class_<Atlas::AST::StrategyMonthlyRunnerNode, Atlas::AST::TriggerNode>(m_ast, "StrategyMonthlyRunnerNode")
-        .def_static("make", &Atlas::AST::StrategyMonthlyRunnerNode::pyMake,
-            py::arg("exchange"),
-            py::arg("eom_trigger") = false
-        );
-    
     py::class_<Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::TriggerNode>>(m_ast, "TriggerNode")
         .def("getMask", &Atlas::AST::TriggerNode::getMask, py::return_value_policy::reference_internal);
 
     py::class_<Atlas::AST::StrategyMonthlyRunnerNode, Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::StrategyMonthlyRunnerNode>>(m_ast, "StrategyMonthlyRunnerNode")
-        .def_static("make", &Atlas::AST::StrategyMonthlyRunnerNode::pyMake,
+        .def_static("make", &Atlas::AST::StrategyMonthlyRunnerNode::make,
             py::arg("exchange"),
             py::arg("eom_trigger") = false
         );
 
-    py::class_<Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationBaseNode>>(m_ast, "AllocationBaseNode")
-        .def("baseFunction", &Atlas::AST::AllocationBaseNode::baseFunction);
+    py::class_<Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationBaseNode>>(m_ast, "AllocationBaseNode");
 
     py::class_<Atlas::AST::FixedAllocationNode, Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::FixedAllocationNode>>(m_ast, "FixedAllocationNodeWrapper")
         .def_static("make", &Atlas::AST::FixedAllocationNode::pyMake);
 
     py::class_<Atlas::AST::AllocationNode, Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationNode>>(m_ast, "AllocationNodeWrapper")
-        .def("unwrap", &Atlas::AST::AllocationNode::pyUnwrap, py::return_value_policy::reference)
         .def_static("make", &Atlas::AST::AllocationNode::pyMake,
             py::arg("exchange_view"),
             py::arg("type") = Atlas::AST::AllocationType::UNIFORM,
@@ -132,7 +120,7 @@ PYBIND11_MODULE(AtlasPy, m) {
         );
 
     py::class_<Atlas::AST::StrategyNode, std::shared_ptr<Atlas::AST::StrategyNode>>(m_ast, "StrategyNodeWrapper")
-        .def_static("make", &Atlas::AST::StrategyNode::pyMake,
+        .def_static("make", &Atlas::AST::StrategyNode::make,
             py::arg("allocation"),
             py::arg("portfolio")
         );
@@ -144,7 +132,7 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("enableTracerHistory", &Atlas::Strategy::enableTracerHistory)
         .def("getHistory", &Atlas::Strategy::getHistory, py::return_value_policy::reference_internal)
         .def("getWeightHistory", &Atlas::Strategy::getWeightHistory, py::return_value_policy::reference_internal)
-        .def(py::init<std::string, Atlas::AST::AllocationNode, Atlas::AST::PortfolioNode>());
+        .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyNode>, double>());
 
 }
 

@@ -142,7 +142,7 @@ TEST_F(SimpleExchangeTests, ExchangeViewTest)
 		std::move(*read_close_previous)
 	);
 	auto op_variant = AssetOpNodeVariant(std::move(daily_return));
-	auto exchange_view = ExchangeViewNode::make(*exchange, std::move(op_variant));
+	auto exchange_view = ExchangeViewNode::make(exchange, std::move(op_variant));
 	hydra->build();
 	hydra->step();
 	hydra->step();
@@ -158,7 +158,7 @@ TEST_F(SimpleExchangeTests, AllocTest)
 	auto const exchange = hydra->getExchange("test").value();
 	auto read_close = AssetReadNode::make("close", 0, *exchange);
 	auto read_variant = AssetOpNodeVariant(std::move(*read_close));
-	auto exchange_view = ExchangeViewNode::make(*exchange, std::move(read_variant));
+	auto exchange_view = ExchangeViewNode::make(exchange, std::move(read_variant));
 	auto alloc = AllocationNode::make(std::move(exchange_view));
 	auto strategy_node = StrategyNode::make(std::move(*alloc), *portfolio);
 	auto strategy = std::make_unique<Strategy>(
@@ -194,7 +194,7 @@ TEST_F(SimpleExchangeTests, AllocSplitTest)
 		std::move(*read_close_previous)
 	);
 	auto op_variant = AssetOpNodeVariant(std::move(daily_return));
-	auto exchange_view = ExchangeViewNode::make(*exchange, std::move(op_variant));
+	auto exchange_view = ExchangeViewNode::make(exchange, std::move(op_variant));
 	auto alloc = AllocationNode::make(
 		std::move(exchange_view),
 		AllocationType::CONDITIONAL_SPLIT,
@@ -236,7 +236,7 @@ TEST_F(SimpleExchangeTests, StopLossTest)
 	auto const exchange = hydra->getExchange("test").value();
 	auto read_close = AssetReadNode::make("close", 0, *exchange);
 	auto read_variant = AssetOpNodeVariant(std::move(*read_close));
-	auto exchange_view = ExchangeViewNode::make(*exchange, std::move(read_variant));
+	auto exchange_view = ExchangeViewNode::make(exchange, std::move(read_variant));
 	auto alloc = AllocationNode::make(std::move(exchange_view)).value();
 	alloc->setTradeLimit(TradeLimitType::STOP_LOSS, .05f);
 	auto sl_node = alloc->getTradeLimitNode().value();
@@ -276,7 +276,7 @@ TEST_F(ComplexExchangeTests, SimpleTest)
 	);
 	auto op_variant = AssetOpNodeVariant(std::move(daily_return));
 	auto exchange_view = ExchangeViewNode::make(
-		*exchange, std::move(op_variant)
+		exchange, std::move(op_variant)
 	);
 	exchange_view->setFilter(ExchangeViewFilterType::GREATER_THAN, 0.0f);
 	auto alloc = AllocationNode::make(std::move(exchange_view));
@@ -435,7 +435,7 @@ TEST_F(RiskCommExchangeTest, FixedAllocTest)
 	);
 	auto op_variant = AssetOpNodeVariant(std::move(daily_return));
 	auto exchange_view = ExchangeViewNode::make(
-		*exchange, std::move(op_variant)
+		exchange, std::move(op_variant)
 	);
 	auto alloc = AllocationNode::make(
 		std::move(exchange_view),

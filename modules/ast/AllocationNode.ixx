@@ -86,11 +86,19 @@ public:
 
 	//============================================================================
 	ATLAS_API [[nodiscard]] static Result<SharedPtr<FixedAllocationNode>, AtlasException>
-		make(
+	make(
 			Vector<std::pair<String, double>> m_allocations,
 			Exchange* exchange,
 			double epsilon = 0.000f
-		) noexcept;
+	) noexcept;
+
+	//============================================================================
+	ATLAS_API [[nodiscard]] static SharedPtr<FixedAllocationNode>
+	pyMake(
+		Vector<std::pair<String, double>> m_allocations,
+		Exchange* exchange,
+		double epsilon = 0.000f
+	);
 
 
 	void evaluateChild(LinAlg::EigenVectorXd& target) noexcept override;
@@ -128,7 +136,16 @@ public:
 			AllocationType type = AllocationType::UNIFORM,
 			Option<double> alloc_param = std::nullopt,
 			double epsilon = 0.000f
-		) noexcept;
+	) noexcept;
+
+	//============================================================================
+	ATLAS_API [[nodiscard]] static SharedPtr<AllocationNode>
+	pyMake(
+			SharedPtr<ExchangeViewNode> exchange_view,
+			AllocationType type = AllocationType::UNIFORM,
+			Option<double> alloc_param = std::nullopt,
+			double epsilon = 0.000f
+	);
 
 
 	[[nodiscard]] size_t getWarmup() const noexcept override;

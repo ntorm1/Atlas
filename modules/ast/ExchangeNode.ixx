@@ -126,13 +126,16 @@ public:
 
 	//============================================================================
 	ATLAS_API [[nodiscard]] static SharedPtr<ExchangeViewNode> make(
-		Exchange& exchange,
-		AssetOpNodeVariant asset_op_node
+		SharedPtr<Exchange> exchange,
+		AssetOpNodeVariant asset_op_node,
+		Option<ExchangeViewFilter> filter = std::nullopt
 	) noexcept
 	{
-		return std::make_shared<ExchangeViewNode>(
+		auto node = std::make_shared<ExchangeViewNode>(
 			exchange, std::move(asset_op_node)
 		);
+		node->setFilter(filter);
+		return node;
 	}
 
 
@@ -140,6 +143,12 @@ public:
 	ATLAS_API void setFilter(ExchangeViewFilterType type, double value) noexcept
 	{
 		m_filter = ExchangeViewFilter(type, value);
+	}
+
+	//============================================================================
+	ATLAS_API void setFilter(Option<ExchangeViewFilter> filter) noexcept
+	{
+		m_filter = filter;
 	}
 
 

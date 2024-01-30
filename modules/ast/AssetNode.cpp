@@ -44,6 +44,22 @@ Result<SharedPtr<AssetReadNode>, AtlasException>
 	);
 }
 
+
+//============================================================================
+SharedPtr<AssetReadNode>
+AssetReadNode::pyMake(String const& column, int row_offset, Exchange const& m_exchange)
+{
+	auto result = make(column, row_offset, m_exchange);
+	if (result)
+	{
+		return std::move(*result);
+	}
+	else
+	{
+		throw std::runtime_error(result.error().what());
+	}
+}
+
 }
 
 }

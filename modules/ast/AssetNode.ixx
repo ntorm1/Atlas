@@ -48,6 +48,13 @@ public:
 			int row_offset,
 			Exchange const& m_exchange
 		) noexcept;
+
+	ATLAS_API static SharedPtr<AssetReadNode>
+	pyMake(
+			String const& column,
+			int row_offset,
+			Exchange const& m_exchange
+	);
 	
 	[[nodiscard]] int getRowOffset() const noexcept { return m_row_offset; }
 	[[nodiscard]] size_t getNullCount() const noexcept { return m_null_count; }
@@ -103,7 +110,7 @@ public:
 
 	//============================================================================
 	ATLAS_API static Result<SharedPtr<AssetOpNode>, AtlasException>
-		make(
+	make(
 			SharedPtr<AssetReadNode> asset_read_left,
 			SharedPtr<AssetReadNode> asset_read_right
 		) noexcept
@@ -112,6 +119,21 @@ public:
 			std::move(asset_read_left),
 			std::move(asset_read_right)
 		);
+	}
+
+	//============================================================================
+	ATLAS_API static SharedPtr<AssetOpNode>
+	pyMake(
+			SharedPtr<AssetReadNode> asset_read_left,
+			SharedPtr<AssetReadNode> asset_read_right
+		) noexcept
+	{
+		auto res = make(std::move(asset_read_left), std::move(asset_read_right));
+		if (res.hasError())
+		{
+			throw AtlasException(res.error());
+		}
+		return std::move(res.value());
 	}
 
 
