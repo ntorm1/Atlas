@@ -158,6 +158,7 @@ PYBIND11_MODULE(AtlasPy, m) {
 
 
     py::class_<Atlas::AST::StrategyNode, std::shared_ptr<Atlas::AST::StrategyNode>>(m_ast, "StrategyNode")
+        .def("setTrigger", &Atlas::AST::StrategyNode::setTrigger)
         .def_static("make", &Atlas::AST::StrategyNode::make,
             py::arg("allocation"),
             py::arg("portfolio")
@@ -167,6 +168,7 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getNLV", &Atlas::Strategy::getNLV)
         .def("getName", &Atlas::Strategy::getName)
         .def("enableTracerHistory", &Atlas::Strategy::enableTracerHistory)
+        .def("getAllocationBuffer", &Atlas::Strategy::getAllocationBuffer, py::return_value_policy::reference_internal)
         .def("getHistory", &Atlas::Strategy::getHistory, py::return_value_policy::reference_internal)
         .def("getWeightHistory", &Atlas::Strategy::getWeightHistory, py::return_value_policy::reference_internal)
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyNode>, double>());

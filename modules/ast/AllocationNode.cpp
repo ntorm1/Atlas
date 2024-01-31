@@ -162,6 +162,7 @@ AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 		m_impl->m_weights_buffer = target;
 	}
 
+	// generate new target weights using derived class implementation
 	evaluateChild(target);
 
 	// if we have a weight scale node we need to evaluate it over the generated weights

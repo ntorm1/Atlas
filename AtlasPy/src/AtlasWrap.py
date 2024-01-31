@@ -16,8 +16,8 @@ exchange_path_sp500_ma = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/tes
 
 
 class RiskTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(self):
+
+    def setUp(self) -> None:
         self.data = pd.read_csv("data.csv")
         self.data["Date"] = pd.to_datetime(self.data["Date"])
         self.data.set_index("Date", inplace=True)
@@ -25,27 +25,27 @@ class RiskTest(unittest.TestCase):
         self.exchange = self.hydra.addExchange("test", exchange_path_sp500_ma)
         self.portfolio = self.hydra.addPortfolio("test_p", self.exchange, 100.0)
         self.strategy_id = "test_s"
+
     def testInit(self):
         self.assertEqual(self.exchange.getName(),"test")
+
+    # helper function to run to a specific date
+    def runTo(self, date):
+        timestamps = self.exchange.getTimestamps()
+        timestamps = pd.to_datetime(timestamps, unit="ns")
+        index = self.data.index.get_loc(date)
+        for i in range(index):
+            self.hydra.step()
 
     def testCovariance(self):
         monthly_trigger_node = StrategyMonthlyRunnerNode.make(self.exchange)
         covariance_node = self.exchange.getCovarianceNode("30_PERIOD_COV", monthly_trigger_node, 30)
-        timestamps = self.exchange.getTimestamps()
-        timestamps = pd.to_datetime(timestamps, unit="ns")
-
         
         # data starts 2010-01-04, and the first day of february will not 
         # have 20 days of data to calculate covariance, so the first trigger date
         # will be 2010-03-01
-        index = 0 
-        for i in range(len(timestamps)):
-            if timestamps[i].year == 2010 and timestamps[i].month == 3:
-                index= i
-                break
         self.hydra.build()
-        for i in range(0,index):
-            self.hydra.step()
+        self.runTo("2010-03-01")
 
         cov_matrix = covariance_node.getCovarianceMatrix()
         cov_sum = cov_matrix.sum()
@@ -67,7 +67,6 @@ class RiskTest(unittest.TestCase):
 
     def testRankNode(self):
         monthly_trigger_node = StrategyMonthlyRunnerNode.make(self.exchange)
-        covariance_node = self.exchange.getCovarianceNode("30_PERIOD_COV", monthly_trigger_node, 30)
         
         asset_read_node = AssetReadNode.make("close", 0, self.exchange)
         asser_read_previouse_node = AssetReadNode.make("close", -1, self.exchange)
@@ -89,14 +88,24 @@ class RiskTest(unittest.TestCase):
             0.0
         )
         
-        # use inverse vol to target the weights equally, and target 10% vol
-        allocation.setWeightScale(InvVolWeight(covariance_node, 0.1))
-
         # build final strategy and insert into hydra
         strategy_node = StrategyNode.make(allocation, self.portfolio)
+        strategy_node.setTrigger(monthly_trigger_node)
+        self.hydra.build()
         strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0))
         
-        self.hydra.build()
+        self.runTo("2010-02-01")
+
+        allocation = strategy.getAllocationBuffer()
+        self.assertTrue(np.allclose(allocation, np.zeros_like(allocation)))
+
+        self.hydra.step()
+        allocation = strategy.getAllocationBuffer()
+        print(allocation)
+
+        self.hydra.step()
+        allocation = strategy.getAllocationBuffer()
+        print(allocation)
 
 
 if __name__ == "__main__":

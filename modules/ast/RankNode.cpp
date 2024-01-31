@@ -172,10 +172,14 @@ EVRankNode::evaluate(Eigen::VectorXd& target) noexcept
             {
                 target[m_view[i].first] = -1.0f;
             }
-            for (size_t i = m_N; i < m_view.size(); ++i)
+            for (size_t i = m_view.size() - m_N; i < m_view.size(); ++i)
             {
 				target[m_view[i].first] = 1.0f;
 			}
+            for (size_t i = m_N; i < m_view.size() - m_N; ++i)
+            {
+                target[m_view[i].first] = std::numeric_limits<double>::quiet_NaN();
+            }
     }
 }
 

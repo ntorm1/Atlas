@@ -25,7 +25,6 @@ public:
 	Portfolio& m_portfolio;
 	Tracer m_tracer;
 	Eigen::VectorXd m_target_weights_buffer;
-	Eigen::VectorXd m_adjustment_buffer;
 	SharedPtr<AST::StrategyNode> m_ast;
 	Option<SharedPtr<CommisionManager>> m_commision_manager;
 
@@ -41,10 +40,7 @@ public:
 	{
 		m_exchange.registerStrategy(strategy);
 		m_target_weights_buffer.resize(m_exchange.getAssetCount());
-		m_adjustment_buffer.resize(m_exchange.getAssetCount());
-
 		m_target_weights_buffer.setZero();
-		m_adjustment_buffer.setZero();
 	}
 };
 
@@ -232,7 +228,6 @@ Strategy::reset() noexcept
 {
 	m_impl->m_tracer.reset();
 	m_impl->m_target_weights_buffer.setZero();
-	m_impl->m_adjustment_buffer.setZero();
 	m_impl->m_ast->reset();
 	m_step_call = false;
 }
