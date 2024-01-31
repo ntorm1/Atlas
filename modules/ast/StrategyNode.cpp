@@ -82,6 +82,32 @@ StrategyNode::reset() noexcept
 	m_allocation->reset();
 }
 
+
+//============================================================================
+SharedPtr<StrategyNode> StrategyNode::make(
+	SharedPtr<AllocationBaseNode> allocation,
+	Portfolio& portfolio
+)
+{
+	// when we make a strategy node we need to make sure that the allocation node
+	// has not been used on the side by another strategy node. To do this we check
+	// the use count of the allocation node and subtract the internal ref count,
+	// i.e. if a alloc node has a weight scaler node that increments the shared 
+	// pointer use count but is valid. If the use count is greater than 3 then
+	// there is an extra copy of the shared pointer somewhere on python side.
+	long long use_count = allocation.use_count();
+	use_count -= allocation->internalRefCount();
+	if (use_count > 3) // pybind11 instance + this
+	{
+		throw std::runtime_error("Py Allocation node use count expected < 3, found " + std::to_string(use_count));
+	}
+
+	return std::make_shared<StrategyNode>(
+		std::move(allocation), portfolio
+	);
+}
+
+
 //============================================================================
 void
 StrategyNode::setTrigger(SharedPtr<TriggerNode> trigger) noexcept

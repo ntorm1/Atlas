@@ -4,6 +4,7 @@ module RiskNodeModule;
 
 import HelperNodesModule;
 import ExchangeModule;
+import AllocationNodeModule;
 
 
 namespace Atlas
@@ -68,12 +69,28 @@ AllocationWeightNode::~AllocationWeightNode() noexcept
 
 //============================================================================
 AllocationWeightNode::AllocationWeightNode(
-	SharedPtr<TriggerNode> trigger
+	SharedPtr<AllocationBaseNode> allocation,
+	SharedPtr<CovarianceNode> covariance,
+	Option<double> vol_target
 ) noexcept :
-	OpperationNode<void, LinAlg::EigenVectorXd&>(NodeType::ALLOC_WEIGHT),
-	m_trigger(trigger),
-	m_exchange(trigger->getExchange())
+	StrategyBufferOpNode(NodeType::ALLOC_WEIGHT, covariance->getExchange(), allocation.get()),
+	m_allocation(allocation),
+	m_covariance(covariance),
+	m_vol_target(vol_target)
 {
+}
+
+
+//============================================================================
+void
+AllocationWeightNode::targetVol(LinAlg::EigenVectorXd& target) const noexcept
+{
+	auto const& covariance = m_covariance->getCovariance();
+	assert(covariance.rows() == covariance.cols());
+	assert(m_vol_target);
+	auto current_vol = (target.transpose() * covariance * target);
+	double vol_scale = m_vol_target.value() / current_vol;
+	target *= vol_scale;
 }
 
 
@@ -85,24 +102,37 @@ InvVolWeight::~InvVolWeight() noexcept
 
 //============================================================================
 InvVolWeight::InvVolWeight(
-	SharedPtr<CovarianceNode> covariance
+	SharedPtr<AllocationBaseNode> allocation,
+	SharedPtr<CovarianceNode> covariance,
+	Option<double> vol_target
 ) noexcept :
-	AllocationWeightNode(covariance->getTrigger()),
-	m_lookback_window(covariance->getWarmup()),
-	m_covariance(std::move(covariance))
+	AllocationWeightNode(std::move(allocation),std::move(covariance), vol_target)
 {
 }
 
 
 //============================================================================
 void
-InvVolWeight::evaluate(LinAlg::EigenVectorXd& target) noexcept
+AllocationWeightNode::evaluate(LinAlg::EigenVectorXd& target) noexcept
+{
+	m_allocation->evaluate(target);
+	evaluateChild(target);
+}
+
+
+//============================================================================
+void
+InvVolWeight::evaluateChild(LinAlg::EigenVectorXd& target) noexcept
 {
 	auto const& covariance = m_covariance->getCovariance();
 	assert(covariance.rows() == covariance.cols());
 	auto vol = covariance.diagonal().array().sqrt();
 	target = (target.array() / vol.array()).matrix();
 	target = (target.array() / target.sum()).matrix();
+	if (m_vol_target)
+	{
+		targetVol(target);
+	}
 }
 
 

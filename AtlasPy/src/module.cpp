@@ -6,21 +6,25 @@
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
 
-import HydraModule;
-import ExchangeModule;
-import StrategyModule;
 import PortfolioModule;
 
-import AssetNodeModule;
-import ExchangeNodeModule;
-import StrategyNodeModule;
-import RiskNodeModule;
 import AllocationNodeModule;
-import HelperNodesModule;
-
+import AssetNodeModule;
 import AtlasEnumsModule;
 import AtlasException;
 import AtlasCore;
+import CommissionsModule;
+import ExchangeModule;
+import HelperNodesModule;
+import HydraModule;
+import RankNodeModule;
+import ExchangeNodeModule;
+import StrategyModule;
+import StrategyNodeModule;
+import StrategyBufferModule;
+import RiskNodeModule;
+
+
 
 namespace py = pybind11;
 
@@ -54,8 +58,11 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getPortfolio", &Atlas::Hydra::pyGetPortfolio)
         .def(py::init<>());
 
-    py::class_<Atlas::AST::CovarianceNode, std::shared_ptr<Atlas::AST::CovarianceNode>>(m_ast, "CovarianceNodeWrapper")
+    py::class_<Atlas::AST::CovarianceNode, std::shared_ptr<Atlas::AST::CovarianceNode>>(m_ast, "CovarianceNode")
         .def("getCovarianceMatrix", &Atlas::AST::CovarianceNode::getCovariance, py::return_value_policy::reference_internal);
+
+    //py::class_<Atlas::CommisionManager, std::shared_ptr<Atlas::CommisionManager>>(m, "CommisionManager");
+
 
     py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")
         .def("getTimestamps", &Atlas::Exchange::getTimestamps)
@@ -76,20 +83,26 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("UNIFORM", Atlas::AST::AllocationType::UNIFORM)
         .value("CONDITIONAL_SPLIT", Atlas::AST::AllocationType::CONDITIONAL_SPLIT)
         .export_values();
+    py::enum_<Atlas::AST::EVRankType>(m_ast, "EVRankType")
+        .value("NLARGEST", Atlas::AST::EVRankType::NLARGEST)
+        .value("NSMALLEST", Atlas::AST::EVRankType::NSMALLEST)
+        .value("NEXTREME", Atlas::AST::EVRankType::NEXTREME)
+        .export_values();
 
-    py::class_<Atlas::AST::AssetReadNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNodeWrapper")
+
+    py::class_<Atlas::AST::AssetReadNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNode")
         .def_static("make", &Atlas::AST::AssetReadNode::pyMake);
 
-    py::class_<Atlas::AST::AssetProductNode, std::shared_ptr<Atlas::AST::AssetProductNode>>(m_ast, "AssetProductNodeWrapper")
+    py::class_<Atlas::AST::AssetProductNode, std::shared_ptr<Atlas::AST::AssetProductNode>>(m_ast, "AssetProductNode")
         .def_static("make", &Atlas::AST::AssetProductNode::make);
 
-    py::class_<Atlas::AST::AssetQuotientNode, std::shared_ptr<Atlas::AST::AssetQuotientNode>>(m_ast, "AssetQuotientNodeWrapper")
+    py::class_<Atlas::AST::AssetQuotientNode, std::shared_ptr<Atlas::AST::AssetQuotientNode>>(m_ast, "AssetQuotientNode")
         .def_static("make", &Atlas::AST::AssetQuotientNode::make);
 
-    py::class_<Atlas::AST::AssetDifferenceNode, std::shared_ptr<Atlas::AST::AssetDifferenceNode>>(m_ast, "AssetDifferenceNodeWrapper")
+    py::class_<Atlas::AST::AssetDifferenceNode, std::shared_ptr<Atlas::AST::AssetDifferenceNode>>(m_ast, "AssetDifferenceNode")
         .def_static("make", &Atlas::AST::AssetDifferenceNode::make);
 
-    py::class_<Atlas::AST::AssetSumNode, std::shared_ptr<Atlas::AST::AssetSumNode>>(m_ast, "AssetSumNodeWrapper")
+    py::class_<Atlas::AST::AssetSumNode, std::shared_ptr<Atlas::AST::AssetSumNode>>(m_ast, "AssetSumNode")
         .def_static("make", &Atlas::AST::AssetSumNode::make);
 
     py::class_<Atlas::AST::AssetOpNodeVariant>(m_ast, "AssetOpNodeVariant")
@@ -98,8 +111,21 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::ExchangeViewFilter, std::shared_ptr<Atlas::AST::ExchangeViewFilter>>(m_ast, "ExchangeViewFilter")
         .def(py::init<Atlas::AST::ExchangeViewFilterType, double>());
 
-    py::class_<Atlas::AST::ExchangeViewNode, std::shared_ptr<Atlas::AST::ExchangeViewNode>>(m_ast, "ExchangeViewNodeWrapper")
-        .def_static("make", &Atlas::AST::ExchangeViewNode::make);
+    py::class_<Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode");
+
+    py::class_<Atlas::AST::ExchangeViewNode, Atlas::AST::StrategyBufferOpNode,  std::shared_ptr<Atlas::AST::ExchangeViewNode>>(m_ast, "ExchangeViewNode")
+        .def_static("make", &Atlas::AST::ExchangeViewNode::make,
+            py::arg("exchange"),
+            py::arg("asset_op_node"),
+            py::arg("filter") = std::nullopt);
+
+    py::class_<Atlas::AST::EVRankNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::EVRankNode>>(m_ast, "EVRankNode")
+        .def_static("make", &Atlas::AST::EVRankNode::make,
+            py::arg("ev"),
+            py::arg("type"),
+            py::arg("count"),
+            py::arg("rank_in_place") = false);
+
 
     py::class_<Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::TriggerNode>>(m_ast, "TriggerNode")
         .def("getMask", &Atlas::AST::TriggerNode::getMask, py::return_value_policy::reference_internal);
@@ -110,12 +136,14 @@ PYBIND11_MODULE(AtlasPy, m) {
             py::arg("eom_trigger") = false
         );
 
-    py::class_<Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationBaseNode>>(m_ast, "AllocationBaseNode");
+    py::class_<Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationBaseNode>>(m_ast, "AllocationBaseNode")
+        //.def("setCommissionManager", &Atlas::AST::AllocationBaseNode::AllocationBaseNode)
+        .def("setWeightScale", &Atlas::AST::AllocationBaseNode::setWeightScale);
 
-    py::class_<Atlas::AST::FixedAllocationNode, Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::FixedAllocationNode>>(m_ast, "FixedAllocationNodeWrapper")
+    py::class_<Atlas::AST::FixedAllocationNode, Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::FixedAllocationNode>>(m_ast, "FixedAllocationNode")
         .def_static("make", &Atlas::AST::FixedAllocationNode::pyMake);
 
-    py::class_<Atlas::AST::AllocationNode, Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationNode>>(m_ast, "AllocationNodeWrapper")
+    py::class_<Atlas::AST::AllocationNode, Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationNode>>(m_ast, "AllocationNode")
         .def_static("make", &Atlas::AST::AllocationNode::pyMake,
             py::arg("exchange_view"),
             py::arg("type") = Atlas::AST::AllocationType::UNIFORM,
@@ -123,7 +151,13 @@ PYBIND11_MODULE(AtlasPy, m) {
             py::arg("epsilon") = 0.000f
         );
 
-    py::class_<Atlas::AST::StrategyNode, std::shared_ptr<Atlas::AST::StrategyNode>>(m_ast, "StrategyNodeWrapper")
+    py::class_<Atlas::AST::AllocationWeightNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AllocationWeightNode>>(m_ast, "AllocationWeightNode");
+
+    py::class_<Atlas::AST::InvVolWeight, Atlas::AST::AllocationWeightNode, std::shared_ptr<Atlas::AST::InvVolWeight>>(m_ast, "InvVolWeight")
+        .def(py::init< std::shared_ptr<Atlas::AST::AllocationBaseNode>, std::shared_ptr<Atlas::AST::CovarianceNode>, std::optional<double>>());
+
+
+    py::class_<Atlas::AST::StrategyNode, std::shared_ptr<Atlas::AST::StrategyNode>>(m_ast, "StrategyNode")
         .def_static("make", &Atlas::AST::StrategyNode::make,
             py::arg("allocation"),
             py::arg("portfolio")

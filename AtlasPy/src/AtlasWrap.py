@@ -24,12 +24,13 @@ class RiskTest(unittest.TestCase):
         self.hydra = Hydra()
         self.exchange = self.hydra.addExchange("test", exchange_path_sp500_ma)
         self.portfolio = self.hydra.addPortfolio("test_p", self.exchange, 100.0)
+        self.strategy_id = "test_s"
     def testInit(self):
         self.assertEqual(self.exchange.getName(),"test")
 
     def testCovariance(self):
         monthly_trigger_node = StrategyMonthlyRunnerNode.make(self.exchange)
-        covariance_node = self.exchange.getCovarianceNode("20_PERIOD_COV", monthly_trigger_node, 30)
+        covariance_node = self.exchange.getCovarianceNode("30_PERIOD_COV", monthly_trigger_node, 30)
         timestamps = self.exchange.getTimestamps()
         timestamps = pd.to_datetime(timestamps, unit="ns")
 
@@ -63,8 +64,39 @@ class RiskTest(unittest.TestCase):
 
         # assert all values are within 1e-6
         self.assertTrue(np.allclose(cov_matrix, matrix_subset, atol=1e-8))
+
+    def testRankNode(self):
+        monthly_trigger_node = StrategyMonthlyRunnerNode.make(self.exchange)
+        covariance_node = self.exchange.getCovarianceNode("30_PERIOD_COV", monthly_trigger_node, 30)
         
+        asset_read_node = AssetReadNode.make("close", 0, self.exchange)
+        asser_read_previouse_node = AssetReadNode.make("close", -1, self.exchange)
+        spread = AssetDifferenceNode.make(asset_read_node, asser_read_previouse_node)
+        op_variant = AssetOpNodeVariant(spread)
+        exchange_view = ExchangeViewNode.make(self.exchange, op_variant)
+
+        # rank assets by 1 period return, flag the bottom 2 and top 2
+        rank_node = EVRankNode.make(
+            exchange_view,
+            EVRankType.NEXTREME,
+            2
+        )
         
+        # short the bottom 2 assets, long the top 2
+        allocation = AllocationNode.make(
+            rank_node,
+            AllocationType.CONDITIONAL_SPLIT,
+            0.0
+        )
+        
+        # use inverse vol to target the weights equally, and target 10% vol
+        allocation.setWeightScale(InvVolWeight(allocation, covariance_node, 0.1))
+
+        # build final strategy and insert into hydra
+        strategy_node = StrategyNode.make(allocation, self.portfolio)
+        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0))
+        
+        self.hydra.build()
 
 
 if __name__ == "__main__":

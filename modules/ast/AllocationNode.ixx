@@ -41,7 +41,7 @@ export class AllocationBaseNode : public StrategyBufferOpNode
 protected:
 	UniquePtr<AllocationBaseNodeImpl> m_impl;
 	
-	void reset() noexcept;
+	void reset() noexcept override;
 
 public:
 	virtual ~AllocationBaseNode() noexcept;
@@ -56,10 +56,13 @@ public:
 	[[nodiscard]] double getAllocEpsilon() const noexcept;
 	[[nodiscard]] virtual size_t getWarmup() const noexcept = 0;
 	[[nodiscard]] size_t getAssetCount() const noexcept;
-	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
 	void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
 	virtual void evaluateChild(LinAlg::EigenVectorXd& target) noexcept = 0;
 
+	size_t internalRefCount() const noexcept;
+
+	ATLAS_API void setWeightScale(SharedPtr<AllocationWeightNode> scale) noexcept;
+	ATLAS_API void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
 	ATLAS_API void setTradeLimit(TradeLimitType t, double limit) noexcept;
 	ATLAS_API Option<TradeLimitNode*> getTradeLimitNode() const noexcept;
 };
@@ -114,7 +117,7 @@ final
 {
 private:
 	Option<size_t> n_alloc_param = std::nullopt;
-	SharedPtr<ExchangeViewNode> m_exchange_view;
+	SharedPtr<StrategyBufferOpNode> m_exchange_view;
 public:
 	ATLAS_API ~AllocationNode() noexcept;
 
@@ -123,7 +126,7 @@ public:
 
 	//============================================================================
 	ATLAS_API AllocationNode(
-		SharedPtr<ExchangeViewNode> exchange_view,
+		SharedPtr<StrategyBufferOpNode> exchange_view,
 		AllocationType type = AllocationType::UNIFORM,
 		Option<double> alloc_param = std::nullopt,
 		double epsilon = 0.000f
@@ -132,7 +135,7 @@ public:
 	//============================================================================
 	ATLAS_API [[nodiscard]] static Result<SharedPtr<AllocationNode>, AtlasException>
 	make(
-			SharedPtr<ExchangeViewNode> exchange_view,
+			SharedPtr<StrategyBufferOpNode> exchange_view,
 			AllocationType type = AllocationType::UNIFORM,
 			Option<double> alloc_param = std::nullopt,
 			double epsilon = 0.000f
@@ -141,7 +144,7 @@ public:
 	//============================================================================
 	ATLAS_API [[nodiscard]] static SharedPtr<AllocationNode>
 	pyMake(
-			SharedPtr<ExchangeViewNode> exchange_view,
+			SharedPtr<StrategyBufferOpNode> exchange_view,
 			AllocationType type = AllocationType::UNIFORM,
 			Option<double> alloc_param = std::nullopt,
 			double epsilon = 0.000f

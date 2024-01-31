@@ -1,12 +1,17 @@
 module;
-
+#pragma once
+#ifdef ATLAS_EXPORTS
+#define ATLAS_API __declspec(dllexport)
+#else
+#define ATLAS_API  __declspec(dllimport)
+#endif
 export module RiskNodeModule;
-
 
 import AtlasLinAlg;
 import AtlasCore;
 import BaseNodeModule;
 import AtlasTimeModule;
+import StrategyBufferModule;
 
 namespace Atlas
 {
@@ -23,7 +28,7 @@ private:
 	LinAlg::EigenMatrixXd m_centered_returns;
 	SharedPtr<TriggerNode> m_trigger;
 	size_t m_lookback_window = 0;
-	Exchange const& m_exchange;
+	Exchange& m_exchange;
 	
 	//============================================================================
 	CovarianceNode(
@@ -55,16 +60,23 @@ public:
 	size_t getWarmup() const noexcept override { return m_lookback_window; }
 
 	//============================================================================
+	Exchange& getExchange() const noexcept { return m_exchange; }
+
+	//============================================================================
 	LinAlg::EigenMatrixXd const& getCovariance() const noexcept { return m_covariance; }
 };
 
 
 //============================================================================
-export class AllocationWeightNode : public OpperationNode<void, LinAlg::EigenVectorXd&>
+export class AllocationWeightNode : public StrategyBufferOpNode
 {
 protected:
-	SharedPtr<TriggerNode> m_trigger;
-	Exchange const& m_exchange;
+	SharedPtr<CovarianceNode> m_covariance = nullptr;
+	SharedPtr<AllocationBaseNode> m_allocation = nullptr;
+	Option<double> m_vol_target = std::nullopt;
+
+protected:
+	void targetVol(LinAlg::EigenVectorXd& target) const noexcept;
 
 public:
 	//============================================================================
@@ -72,14 +84,16 @@ public:
 
 	//============================================================================
 	AllocationWeightNode(
-		SharedPtr<TriggerNode> trigger
+		SharedPtr<AllocationBaseNode> allocation,
+		SharedPtr<CovarianceNode> covariance,
+		Option<double> vol_target
 	) noexcept;
-
-	//============================================================================
-	virtual void cache() noexcept = 0;
 	
 	//============================================================================
-	void evaluate(LinAlg::EigenVectorXd& target) noexcept override = 0;
+	void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
+
+	//============================================================================
+	virtual void evaluateChild(LinAlg::EigenVectorXd& target) noexcept = 0;
 };
 
 
@@ -87,22 +101,22 @@ public:
 export class InvVolWeight final : public AllocationWeightNode
 {
 private:
-	SharedPtr<CovarianceNode> m_covariance;
-	size_t m_lookback_window = 0;
 public:
 	//============================================================================
-	~InvVolWeight() noexcept;
+	ATLAS_API ~InvVolWeight() noexcept;
 
 	//============================================================================
-	InvVolWeight(
-		SharedPtr<CovarianceNode> covariance
+	ATLAS_API InvVolWeight(
+		SharedPtr<AllocationBaseNode> allocation,
+		SharedPtr<CovarianceNode> covariance,
+		Option<double> vol_target = std::nullopt
 	) noexcept;
 	
 	//============================================================================
-	size_t getWarmup() const noexcept override { return m_lookback_window; }
+	size_t getWarmup() const noexcept override { return m_covariance->getWarmup(); }
 
 	//============================================================================
-	void evaluate(LinAlg::EigenVectorXd& target) noexcept override = 0;
+	void evaluateChild(LinAlg::EigenVectorXd& target) noexcept override;
 };
 
 

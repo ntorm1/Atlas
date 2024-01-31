@@ -50,6 +50,16 @@ public:
 	) noexcept;
 	ATLAS_API ~EVRankNode() noexcept;
 
+
+	ATLAS_API static SharedPtr<EVRankNode> make(
+		SharedPtr<ExchangeViewNode> ev,
+		EVRankType type,
+		size_t count,
+		bool rank_in_place = false) noexcept
+	{
+		return std::make_shared<EVRankNode>(ev, type, count, rank_in_place);
+	}
+
 	size_t getWarmup() const noexcept override;
 	void evaluate(Eigen::VectorXd& target) noexcept override;
 };

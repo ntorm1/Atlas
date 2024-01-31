@@ -9,6 +9,7 @@ import ExchangeModule;
 import CommissionsModule;
 import ExchangeNodeModule;
 import TradeNodeModule;
+import RiskNodeModule;
 
 
 namespace Atlas
@@ -21,11 +22,13 @@ namespace AST
 //============================================================================
 struct AllocationBaseNodeImpl
 {
+	size_t m_ref_count = 0;
 	AllocationType m_type;
 	double m_epsilon;
 	Eigen::VectorXd m_weights_buffer;
 	Option<double> m_alloc_param = std::nullopt;
 	Option<SharedPtr<CommisionManager>> m_commision_manager = std::nullopt;
+	Option<SharedPtr<AllocationWeightNode>> m_weight_scale = std::nullopt;
 	Option<UniquePtr<TradeLimitNode>> m_trade_limit = std::nullopt;
 };
 
@@ -93,6 +96,22 @@ AllocationBaseNode::getAssetCount() const noexcept
 	return m_exchange.getAssetCount();
 }
 
+
+//============================================================================
+size_t AllocationBaseNode::internalRefCount() const noexcept
+{
+	return m_impl->m_ref_count;
+}
+
+
+//============================================================================
+void
+AllocationBaseNode::setWeightScale(SharedPtr<AllocationWeightNode> scale) noexcept
+{
+	m_impl->m_weight_scale = scale;
+	m_impl->m_ref_count++;
+}
+
 //============================================================================
 void
 AllocationBaseNode::setTradeLimit(TradeLimitType t, double limit) noexcept
@@ -145,6 +164,12 @@ AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 
 	evaluateChild(target);
 
+	// if we have a weight scale node we need to evaluate it over the generated weights
+	if (m_impl->m_weight_scale)
+	{
+		(*m_impl->m_weight_scale)->evaluate(target);
+	}
+
 	// if epsilon is set we need to check if the difference between the current
 	// weights and the new weights is less than epsilon. If it is we need to
 	// revert the weights back to the original weights before calculating any commissions
@@ -172,7 +197,7 @@ AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 
 //============================================================================
 AllocationNode::AllocationNode(
-	SharedPtr<ExchangeViewNode> exchange_view,
+	SharedPtr<StrategyBufferOpNode> exchange_view,
 	AllocationType type,
 	Option<double> alloc_param,
 	double epsilon
@@ -190,11 +215,11 @@ AllocationNode::AllocationNode(
 //============================================================================
 Result<SharedPtr<AllocationNode>, AtlasException>
 AllocationNode::make(
-	SharedPtr<ExchangeViewNode> exchange_view,
-		AllocationType type,
-		Option<double> alloc_param,
-		double epsilon
-	) noexcept
+	SharedPtr<StrategyBufferOpNode> exchange_view,
+	AllocationType type,
+	Option<double> alloc_param,
+	double epsilon
+) noexcept
 {
 	if (
 		type == AllocationType::CONDITIONAL_SPLIT
@@ -236,7 +261,12 @@ AllocationNode::make(
 
 //============================================================================
 SharedPtr<AllocationNode>
-AllocationNode::pyMake(SharedPtr<ExchangeViewNode> exchange_view, AllocationType type, Option<double> alloc_param, double epsilon)
+AllocationNode::pyMake(
+	SharedPtr<StrategyBufferOpNode> exchange_view,
+	AllocationType type,
+	Option<double> alloc_param,
+	double epsilon
+)
 {
 	auto result = AllocationNode::make(exchange_view, type, alloc_param, epsilon);
 	if (result)
