@@ -90,7 +90,7 @@ class RiskTest(unittest.TestCase):
         )
         
         # use inverse vol to target the weights equally, and target 10% vol
-        allocation.setWeightScale(InvVolWeight(allocation, covariance_node, 0.1))
+        allocation.setWeightScale(InvVolWeight(covariance_node, 0.1))
 
         # build final strategy and insert into hydra
         strategy_node = StrategyNode.make(allocation, self.portfolio)

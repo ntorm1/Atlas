@@ -154,7 +154,7 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::AllocationWeightNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AllocationWeightNode>>(m_ast, "AllocationWeightNode");
 
     py::class_<Atlas::AST::InvVolWeight, Atlas::AST::AllocationWeightNode, std::shared_ptr<Atlas::AST::InvVolWeight>>(m_ast, "InvVolWeight")
-        .def(py::init< std::shared_ptr<Atlas::AST::AllocationBaseNode>, std::shared_ptr<Atlas::AST::CovarianceNode>, std::optional<double>>());
+        .def(py::init<std::shared_ptr<Atlas::AST::CovarianceNode>, std::optional<double>>());
 
 
     py::class_<Atlas::AST::StrategyNode, std::shared_ptr<Atlas::AST::StrategyNode>>(m_ast, "StrategyNode")

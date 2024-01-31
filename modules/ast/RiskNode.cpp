@@ -69,12 +69,10 @@ AllocationWeightNode::~AllocationWeightNode() noexcept
 
 //============================================================================
 AllocationWeightNode::AllocationWeightNode(
-	SharedPtr<AllocationBaseNode> allocation,
 	SharedPtr<CovarianceNode> covariance,
 	Option<double> vol_target
 ) noexcept :
-	StrategyBufferOpNode(NodeType::ALLOC_WEIGHT, covariance->getExchange(), allocation.get()),
-	m_allocation(allocation),
+	StrategyBufferOpNode(NodeType::ALLOC_WEIGHT, covariance->getExchange(), std::nullopt),
 	m_covariance(covariance),
 	m_vol_target(vol_target)
 {
@@ -102,27 +100,17 @@ InvVolWeight::~InvVolWeight() noexcept
 
 //============================================================================
 InvVolWeight::InvVolWeight(
-	SharedPtr<AllocationBaseNode> allocation,
 	SharedPtr<CovarianceNode> covariance,
 	Option<double> vol_target
 ) noexcept :
-	AllocationWeightNode(std::move(allocation),std::move(covariance), vol_target)
+	AllocationWeightNode(std::move(covariance), vol_target)
 {
 }
 
 
 //============================================================================
 void
-AllocationWeightNode::evaluate(LinAlg::EigenVectorXd& target) noexcept
-{
-	m_allocation->evaluate(target);
-	evaluateChild(target);
-}
-
-
-//============================================================================
-void
-InvVolWeight::evaluateChild(LinAlg::EigenVectorXd& target) noexcept
+InvVolWeight::evaluate(LinAlg::EigenVectorXd& target) noexcept
 {
 	auto const& covariance = m_covariance->getCovariance();
 	assert(covariance.rows() == covariance.cols());

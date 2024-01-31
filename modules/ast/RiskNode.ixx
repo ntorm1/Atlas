@@ -72,7 +72,6 @@ export class AllocationWeightNode : public StrategyBufferOpNode
 {
 protected:
 	SharedPtr<CovarianceNode> m_covariance = nullptr;
-	SharedPtr<AllocationBaseNode> m_allocation = nullptr;
 	Option<double> m_vol_target = std::nullopt;
 
 protected:
@@ -84,16 +83,12 @@ public:
 
 	//============================================================================
 	AllocationWeightNode(
-		SharedPtr<AllocationBaseNode> allocation,
 		SharedPtr<CovarianceNode> covariance,
 		Option<double> vol_target
 	) noexcept;
 	
 	//============================================================================
-	void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
-
-	//============================================================================
-	virtual void evaluateChild(LinAlg::EigenVectorXd& target) noexcept = 0;
+	virtual void evaluate(LinAlg::EigenVectorXd& target) noexcept = 0;
 };
 
 
@@ -107,7 +102,6 @@ public:
 
 	//============================================================================
 	ATLAS_API InvVolWeight(
-		SharedPtr<AllocationBaseNode> allocation,
 		SharedPtr<CovarianceNode> covariance,
 		Option<double> vol_target = std::nullopt
 	) noexcept;
@@ -116,7 +110,7 @@ public:
 	size_t getWarmup() const noexcept override { return m_covariance->getWarmup(); }
 
 	//============================================================================
-	void evaluateChild(LinAlg::EigenVectorXd& target) noexcept override;
+	void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
 };
 
 
