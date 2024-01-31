@@ -49,17 +49,14 @@ CovarianceNode::evaluate() noexcept
 	{
 		return;
 	}
-	size_t start_idx = m_exchange.currentIdx() - m_lookback_window;
+	size_t start_idx = (m_exchange.currentIdx() - m_lookback_window) + 1;
 	auto const& returns_block = m_exchange.getMarketReturnsBlock(
 		start_idx,
 		m_exchange.currentIdx()
 	);
-	assert(returns_block.rows() == m_covariance.rows());
-	m_centered_returns = returns_block.rowwise() - returns_block.colwise().mean();
-	assert(m_centered_returns.rows() == returns_block.rows());
-	m_covariance = (m_centered_returns.adjoint() * m_centered_returns) / double(returns_block.rows() - 1);
-	assert(m_covariance.rows() == returns_block.rows());
-	assert(m_covariance.cols() == returns_block.rows());
+	Eigen::MatrixXd returns_block_transpose = returns_block.transpose();
+	m_centered_returns = returns_block_transpose.rowwise() - returns_block_transpose.colwise().mean();
+	m_covariance = (m_centered_returns.adjoint() * m_centered_returns) / double(returns_block_transpose.rows() - 1);
 }
 
 
