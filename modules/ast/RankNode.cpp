@@ -14,14 +14,12 @@ namespace AST
 EVRankNode::EVRankNode(
     SharedPtr<ExchangeViewNode> ev,
 	EVRankType type,
-	size_t count,
-    bool rank_in_place
+	size_t count
 ) noexcept :
 	StrategyBufferOpNode(NodeType::RANK_NODE, ev->getExchange(), ev.get()),
 	m_N(count),
 	m_type(type),
-	m_ev(std::move(ev)),
-	m_rank_in_place(rank_in_place)
+	m_ev(std::move(ev))
 {
 	size_t view_count = m_ev->getViewSize();
 	m_view.reserve(view_count);
@@ -107,9 +105,16 @@ EVRankNode::sort() noexcept
             m_view.begin() + m_N,
             m_view.end(),
             m_view.end(),
-            &comparePairsReverse
+            &comparePairs
         );
         break;
+    case EVRankType::FULL:
+		std::sort(
+			m_view.begin(),
+			m_view.end(),
+			&comparePairs
+		);
+		break;
     }
 }
 
@@ -145,24 +150,10 @@ EVRankNode::evaluate(Eigen::VectorXd& target) noexcept
 	sort();
     switch (m_type) {
         case EVRankType::NSMALLEST:
-            if (m_rank_in_place)
-            {
-                for (size_t i = 0; i < m_N; ++i)
-                {
-                    target[m_view[i].first] = static_cast<double>(i);
-                }
-            }
         case EVRankType::NLARGEST:
             for (size_t i = m_N; i < m_view.size(); ++i)
             {
 				target[m_view[i].first] = std::numeric_limits<double>::quiet_NaN();
-			}
-            if (m_rank_in_place)
-			{
-				for (size_t i = 0; i < m_N; ++i)
-				{
-                    target[m_view[i].first] = static_cast<double>(m_view.size() - i - 1);
-				}
 			}
 			break;
         case EVRankType::NEXTREME:
@@ -179,6 +170,12 @@ EVRankNode::evaluate(Eigen::VectorXd& target) noexcept
             for (size_t i = m_N; i < m_view.size() - m_N; ++i)
             {
                 target[m_view[i].first] = std::numeric_limits<double>::quiet_NaN();
+            }
+            break;
+        case EVRankType::FULL:
+            for (size_t i = 0; i < m_view.size(); ++i)
+            {
+                target[m_view[i].first] = static_cast<double>(i);
             }
     }
 }

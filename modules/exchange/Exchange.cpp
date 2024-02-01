@@ -393,6 +393,13 @@ Exchange::getAssetCount() const noexcept
 
 
 //============================================================================
+Int64 Exchange::getCurrentTimestamp() const noexcept
+{
+	return m_impl->current_timestamp;
+}
+
+
+//============================================================================
 Vector<Int64> const&
 Exchange::getTimestamps() const noexcept
 {

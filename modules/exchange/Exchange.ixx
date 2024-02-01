@@ -79,6 +79,7 @@ public:
 	ATLAS_API HashMap<String, size_t> const& getAssetMap() const noexcept;
 	ATLAS_API HashMap<String, size_t> const& getHeaders() const noexcept;
 	ATLAS_API size_t getAssetCount() const noexcept;
+	ATLAS_API Int64 getCurrentTimestamp() const noexcept;
 	ATLAS_API Vector<Int64> const& getTimestamps() const noexcept;
 };
 

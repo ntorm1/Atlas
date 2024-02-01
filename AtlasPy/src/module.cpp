@@ -61,13 +61,19 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::CovarianceNode, std::shared_ptr<Atlas::AST::CovarianceNode>>(m_ast, "CovarianceNode")
         .def("getCovarianceMatrix", &Atlas::AST::CovarianceNode::getCovariance, py::return_value_policy::reference_internal);
 
-    //py::class_<Atlas::CommisionManager, std::shared_ptr<Atlas::CommisionManager>>(m, "CommisionManager");
+    py::class_<Atlas::CommisionManager, std::shared_ptr<Atlas::CommisionManager>>(m, "CommisionManager")
+        .def("setCommissionPct", &Atlas::CommisionManager::setCommissionPct)
+        .def("setFixedCommission", &Atlas::CommisionManager::setFixedCommission);
 
 
     py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")
         .def("getTimestamps", &Atlas::Exchange::getTimestamps)
         .def("getCovarianceNode", &Atlas::Exchange::getCovarianceNode)
+        .def("getMarketReturns", &Atlas::Exchange::getMarketReturns,
+            py::arg("row_offset") = 0,
+            py::return_value_policy::reference_internal)
         .def("getAssetMap", &Atlas::Exchange::getAssetMap)
+        .def("getCurrentTimestamp", &Atlas::Exchange::getCurrentTimestamp)
         .def("getName",&Atlas::Exchange::getName,"get unique id of the exchange");
 
     py::enum_<Atlas::TracerType>(m, "TracerType")
@@ -123,12 +129,18 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def_static("make", &Atlas::AST::EVRankNode::make,
             py::arg("ev"),
             py::arg("type"),
-            py::arg("count"),
-            py::arg("rank_in_place") = false);
+            py::arg("count")
+          );
 
 
     py::class_<Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::TriggerNode>>(m_ast, "TriggerNode")
         .def("getMask", &Atlas::AST::TriggerNode::getMask, py::return_value_policy::reference_internal);
+
+    py::class_<Atlas::AST::PeriodicTriggerNode, Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::PeriodicTriggerNode>>(m_ast, "PeriodicTriggerNode")
+        .def_static("make", &Atlas::AST::PeriodicTriggerNode::make,
+            py::arg("exchange"),
+            py::arg("frequency")
+        );
 
     py::class_<Atlas::AST::StrategyMonthlyRunnerNode, Atlas::AST::TriggerNode, std::shared_ptr<Atlas::AST::StrategyMonthlyRunnerNode>>(m_ast, "StrategyMonthlyRunnerNode")
         .def_static("make", &Atlas::AST::StrategyMonthlyRunnerNode::make,
@@ -159,6 +171,7 @@ PYBIND11_MODULE(AtlasPy, m) {
 
     py::class_<Atlas::AST::StrategyNode, std::shared_ptr<Atlas::AST::StrategyNode>>(m_ast, "StrategyNode")
         .def("setTrigger", &Atlas::AST::StrategyNode::setTrigger)
+        .def("setWarmupOverride", &Atlas::AST::StrategyNode::setWarmupOverride)
         .def_static("make", &Atlas::AST::StrategyNode::make,
             py::arg("allocation"),
             py::arg("portfolio")
@@ -168,6 +181,7 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getNLV", &Atlas::Strategy::getNLV)
         .def("getName", &Atlas::Strategy::getName)
         .def("enableTracerHistory", &Atlas::Strategy::enableTracerHistory)
+        .def("initCommissionManager", &Atlas::Strategy::initCommissionManager)
         .def("getAllocationBuffer", &Atlas::Strategy::getAllocationBuffer, py::return_value_policy::reference_internal)
         .def("getHistory", &Atlas::Strategy::getHistory, py::return_value_policy::reference_internal)
         .def("getWeightHistory", &Atlas::Strategy::getWeightHistory, py::return_value_policy::reference_internal)

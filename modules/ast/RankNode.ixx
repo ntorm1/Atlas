@@ -25,7 +25,8 @@ export enum class EVRankType : uint8_t
 {
 	NLARGEST,	/// return the N largest
 	NSMALLEST,	/// return the N smallest
-	NEXTREME 	/// return the N largest and smallest
+	NEXTREME, 	/// return the N largest and smallest
+	FULL,		/// return the full rank
 };
 
 
@@ -37,16 +38,14 @@ private:
 	EVRankType m_type;
 	SharedPtr<ExchangeViewNode> m_ev;
 	Vector<std::pair<size_t, double>> m_view;
-	bool m_rank_in_place = false;
-
+	
 	void sort() noexcept;
 
 public:
 	ATLAS_API EVRankNode(
 		SharedPtr<ExchangeViewNode> ev,
 		EVRankType type,
-		size_t count,
-		bool rank_in_place = false
+		size_t count
 	) noexcept;
 	ATLAS_API ~EVRankNode() noexcept;
 
@@ -54,10 +53,10 @@ public:
 	ATLAS_API static SharedPtr<EVRankNode> make(
 		SharedPtr<ExchangeViewNode> ev,
 		EVRankType type,
-		size_t count,
-		bool rank_in_place = false) noexcept
+		size_t count
+	) noexcept
 	{
-		return std::make_shared<EVRankNode>(ev, type, count, rank_in_place);
+		return std::make_shared<EVRankNode>(ev, type, count);
 	}
 
 	size_t getWarmup() const noexcept override;

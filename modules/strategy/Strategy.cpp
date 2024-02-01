@@ -177,7 +177,7 @@ Strategy::lateRebalance() noexcept
 	m_impl->m_target_weights_buffer = returns.cwiseProduct(m_impl->m_target_weights_buffer);
 
 	// divide the target weights buffer by the sum to get the new weights
-	auto sum = m_impl->m_target_weights_buffer.sum();
+	auto sum = m_impl->m_target_weights_buffer.array().abs().sum();
 	if (sum > 0.0)
 	{
 		m_impl->m_target_weights_buffer /= sum;
