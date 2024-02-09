@@ -25,7 +25,7 @@ export enum class EVRankType : uint8_t
 {
 	NLARGEST,	/// return the N largest
 	NSMALLEST,	/// return the N smallest
-	NEXTREME, 	/// return the N largest and smallest
+	NEXTREME, 	/// return the N largest and smallest (eats signal. N Smallest set to -1, N largest to 1)
 	FULL,		/// return the full rank
 };
 

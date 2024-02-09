@@ -146,7 +146,7 @@ EVRankNode::evaluate(Eigen::VectorXd& target) noexcept
 	// the first N locations, we can then set the rest to Nan to
 	// prevent them from being allocated. At which point we have a 
 	// target vector that looks like: 
-	// [Nan, largest_element, Nan, second_largest_element, Nan, Nan]
+	// [Nan, largest_element(1), Nan, second_largest_element (-1), Nan, Nan]
 	sort();
     switch (m_type) {
         case EVRankType::NSMALLEST:

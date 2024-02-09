@@ -25,6 +25,45 @@ class AllocTest(unittest.TestCase):
         self.strategy_id = "test_s"
         self.asset_id1 = "asset1"
         self.asset_id2 = "asset2"
+        self.asset1_index = self.exchange.getAssetIndex(self.asset_id1)
+        self.asset2_index = self.exchange.getAssetIndex(self.asset_id2)
+
+        self.asset1_close = [101,103,105,106];
+        self.asset2_close = [101.5,99,97,101.5,101.5,96];
+
+    def testBuild(self) -> None:
+        timestamps = self.exchange.getTimestamps()
+        assert len(timestamps) == 6
+
+    def testSimpleAlloc(self) -> None:
+        read_close = AssetReadNode.make("close", 0, self.exchange)
+        exchange_view = ExchangeViewNode.make(self.exchange, read_close)
+        allocation = AllocationNode.make(
+            exchange_view,
+            AllocationType.UNIFORM,
+            0.0
+        )
+        
+        # build final strategy and insert into hydra
+        strategy_node = StrategyNode.make(allocation, self.portfolio)
+        self.hydra.build()
+        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0))
+        self.hydra.step()
+        nlv = strategy.getNLV()
+        assert nlv == self.intial_cash
+        self.hydra.step()
+
+        asset_2_return = (self.asset2_close[1] - self.asset2_close[0]) / self.asset2_close[0];
+        nlv = self.intial_cash * (1 + asset_2_return)
+        assert strategy.getNLV() == nlv
+        
+        self.hydra.step()
+        asset_2_return2 = (self.asset2_close[2] - self.asset2_close[1]) / self.asset2_close[1]
+        asset_1_return2 = (self.asset1_close[1] - self.asset1_close[0]) / self.asset1_close[0]
+        avg_return = (.5 * asset_2_return2) + (.5 * asset_1_return2)
+        nlv *= (1.0 + avg_return)
+        assert strategy.getNLV() == nlv
+
 
     def testFixedAlloc(self) -> None:
         alloc = [(self.asset_id1, 0.3), (self.asset_id2, 0.7)]
@@ -135,9 +174,8 @@ class RiskTest(unittest.TestCase):
         
         asset_read_node = AssetReadNode.make("close", 0, self.exchange)
         asser_read_previouse_node = AssetReadNode.make("close", -1, self.exchange)
-        spread = AssetQuotientNode.make(asset_read_node, asser_read_previouse_node)
-        op_variant = AssetOpNodeVariant(spread)
-        exchange_view = ExchangeViewNode.make(self.exchange, op_variant)
+        spread = AssetOpNode.make(asset_read_node, asser_read_previouse_node, AssetOpType.DIVIDE)
+        exchange_view = ExchangeViewNode.make(self.exchange, spread)
 
         # rank assets by 1 period return, flag the bottom 2 and top 2
         rank_node = EVRankNode.make(

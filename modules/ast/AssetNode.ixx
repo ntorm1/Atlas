@@ -11,6 +11,7 @@ export module AssetNodeModule;
 
 import AtlasCore;
 import BaseNodeModule;
+import StrategyBufferModule;
 import AtlasLinAlg;
 
 namespace Atlas
@@ -21,7 +22,7 @@ namespace AST
 
 //============================================================================
 export class AssetReadNode final
-	: public ExpressionNode<LinAlg::EigenConstColView<double>>
+	: public StrategyBufferOpNode
 {
 private:
 	size_t m_column;
@@ -31,12 +32,7 @@ private:
 	Exchange const& m_exchange;
 
 public:
-	AssetReadNode(size_t column, int row_offset, const Exchange& exchange) noexcept
-		: ExpressionNode<LinAlg::EigenConstColView<double>>(NodeType::ASSET_READ),
-		m_column(column),
-		m_row_offset(row_offset),
-		m_exchange(exchange),
-		m_warmup(static_cast<size_t>(std::abs(m_row_offset))) {}
+	AssetReadNode(size_t column, int row_offset, Exchange& exchange) noexcept;
 
 	ATLAS_API AssetReadNode(size_t column, int row_offset, SharedPtr<Exchange> exchange) noexcept :
 		AssetReadNode(column, row_offset, *exchange) {}
@@ -46,32 +42,32 @@ public:
 		make(
 			String const& column,
 			int row_offset,
-			Exchange const& m_exchange
+			Exchange& m_exchange
 		) noexcept;
 
 	ATLAS_API static SharedPtr<AssetReadNode>
 	pyMake(
 			String const& column,
 			int row_offset,
-			Exchange const& m_exchange
+			Exchange& m_exchange
 	);
 	
 	[[nodiscard]] int getRowOffset() const noexcept { return m_row_offset; }
 	[[nodiscard]] size_t getNullCount() const noexcept { return m_null_count; }
 	[[nodiscard]] size_t size() const noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
-	ATLAS_API [[nodiscard]] LinAlg::EigenConstColView<double> evaluate() noexcept override;
+	ATLAS_API void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
 };
 
 
 //============================================================================
-export template <typename NodeCwiseBinOp>
-	class AssetOpNode
-	:public ExpressionNode<LinAlg::EigenCwiseBinOp<NodeCwiseBinOp>>
+export class AssetOpNode final
+	: public StrategyBufferOpNode
 {
 private:
-	SharedPtr<AssetReadNode> m_asset_read_left;
-	SharedPtr<AssetReadNode> m_asset_read_right;
+	SharedPtr<StrategyBufferOpNode> m_asset_op_left;
+	SharedPtr<StrategyBufferOpNode> m_asset_op_right;
+	LinAlg::EigenVectorXd m_right_buffer;
 	AssetOpType m_op_type;
 	size_t warmup;
 
@@ -81,60 +77,41 @@ public:
 
 	//============================================================================
 	AssetOpNode(
-		SharedPtr<AssetReadNode> asset_read_left,
-		SharedPtr<AssetReadNode> asset_read_right
+		SharedPtr<StrategyBufferOpNode> asset_op_left,
+		SharedPtr<StrategyBufferOpNode> asset_op_right,
+		AssetOpType op_type
 	) noexcept :
-		ExpressionNode<LinAlg::EigenCwiseBinOp<NodeCwiseBinOp>>(NodeType::ASSET_OP),
-		m_asset_read_left(std::move(asset_read_left)),
-		m_asset_read_right(std::move(asset_read_right))
+		StrategyBufferOpNode(NodeType::ASSET_OP, asset_op_left->getExchange(), std::nullopt),
+		m_asset_op_left(std::move(asset_op_left)),
+		m_asset_op_right(std::move(asset_op_right)),
+		m_op_type(op_type)
 	{
-		warmup = std::max(m_asset_read_left->getWarmup(), m_asset_read_right->getWarmup());
-		if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseProductOp>)
-		{
-			m_op_type = AssetOpType::MULTIPLY;
-		}
-		else if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseQuotientOp>)
-		{
-			m_op_type = AssetOpType::DIVIDE;
-		}
-		else if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseSumOp>)
-		{
-			m_op_type = AssetOpType::ADD;
-		}
-		else if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseDifferenceOp>)
-		{
-			m_op_type = AssetOpType::SUBTRACT;
-		}
+		warmup = std::max(m_asset_op_left->getWarmup(), m_asset_op_right->getWarmup());
 	}
 
 
 	//============================================================================
 	ATLAS_API static Result<SharedPtr<AssetOpNode>, AtlasException>
 	make(
-			SharedPtr<AssetReadNode> asset_read_left,
-			SharedPtr<AssetReadNode> asset_read_right
+			SharedPtr<StrategyBufferOpNode> asset_op_left,
+			SharedPtr<StrategyBufferOpNode> asset_op_right,
+			AssetOpType op_type
 		) noexcept
 	{
-		return std::make_unique<AssetOpNode<NodeCwiseBinOp>>(
-			std::move(asset_read_left),
-			std::move(asset_read_right)
+		return std::make_unique<AssetOpNode>(
+			std::move(asset_op_left),
+			std::move(asset_op_right),
+			op_type
 		);
 	}
 
 	//============================================================================
 	ATLAS_API static SharedPtr<AssetOpNode>
 	pyMake(
-			SharedPtr<AssetReadNode> asset_read_left,
-			SharedPtr<AssetReadNode> asset_read_right
-		) noexcept
-	{
-		auto res = make(std::move(asset_read_left), std::move(asset_read_right));
-		if (res.hasError())
-		{
-			throw AtlasException(res.error());
-		}
-		return std::move(res.value());
-	}
+		SharedPtr<StrategyBufferOpNode> asset_op_left,
+		SharedPtr<StrategyBufferOpNode> asset_op_right,
+		AssetOpType op_type
+	);
 
 
 	//============================================================================
@@ -145,77 +122,8 @@ public:
 
 
 	//============================================================================
-	[[nodiscard]] size_t getNullCount() const noexcept
-	{
-		return std::max(
-			m_asset_read_left->getNullCount(),
-			m_asset_read_right->getNullCount()
-		);
-	}
-
-
-	//============================================================================
-	[[nodiscard]] LinAlg::EigenCwiseBinOp<NodeCwiseBinOp>
-		evaluate() noexcept override
-	{
-		auto left_view = m_asset_read_left->evaluate();
-		auto right_view = m_asset_read_right->evaluate();
-		assert(left_view.rows() == right_view.rows());
-		assert(left_view.cols() == right_view.cols());
-
-		// if template type is EigenCwiseProductOp, return left_view.cwiseProduct(right_view);
-		if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseProductOp>)
-		{
-			return left_view.cwiseProduct(right_view);
-		}
-		else if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseQuotientOp>)
-		{
-			return left_view.cwiseQuotient(right_view);
-		}
-		else if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseSumOp>)
-		{
-			return left_view + right_view;
-		}
-		else if constexpr (std::is_same_v<NodeCwiseBinOp, LinAlg::EigenCwiseDifferenceOp>)
-		{
-			return left_view - right_view;
-		}
-	}
+	ATLAS_API void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
 };
-
-
-	//============================================================================
-#define ASSET_OPERATION_NODE(NAME, OP_TYPE)                            \
-export class Asset##NAME##Node : public AssetOpNode<LinAlg::OP_TYPE>          \
-{                                                                      \
-public:                                                                \
-Asset##NAME##Node(                                                \
-    SharedPtr<AssetReadNode> asset_read_left,                     \
-    SharedPtr<AssetReadNode> asset_read_right                    \
-    ) noexcept :                               \
-    AssetOpNode<LinAlg::OP_TYPE>(                                 \
-        std::move(asset_read_left),                               \
-        std::move(asset_read_right)                              \
-        )                                                   \
-{}                                                                 \
-ATLAS_API static SharedPtr<Asset##NAME##Node> make( \
-	SharedPtr<AssetReadNode> asset_read_left, \
-	SharedPtr<AssetReadNode> asset_read_right \
-) noexcept \
-{ \
-	return std::make_unique<Asset##NAME##Node>( \
-		std::move(asset_read_left), \
-		std::move(asset_read_right) \
-	); \
-} \
-};
-
-ASSET_OPERATION_NODE(Product, EigenCwiseProductOp)
-ASSET_OPERATION_NODE(Quotient, EigenCwiseQuotientOp)
-ASSET_OPERATION_NODE(Sum, EigenCwiseSumOp)
-ASSET_OPERATION_NODE(Difference, EigenCwiseDifferenceOp)
-
-
 
 };
 

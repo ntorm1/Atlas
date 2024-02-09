@@ -22,54 +22,6 @@ namespace Atlas
 namespace AST
 {
 
-export enum class AssetNodeType {
-	AssetReadNode,
-	AssetProductNode,
-	AssetQuotientNode,
-	AssetSumNode,
-	AssetDifferenceNode
-};
-
-
-//============================================================================
-// Define AssetOpNodeVariant using std::variant
-export class AssetOpNodeVariant {
-public:
-	mutable std::variant<
-		SharedPtr<AssetReadNode>,
-		SharedPtr<AssetProductNode>,
-		SharedPtr<AssetQuotientNode>,
-		SharedPtr<AssetSumNode>,
-		SharedPtr<AssetDifferenceNode>
-	> value;
-	size_t warmup;
-	AssetNodeType  t;
-
-public:
-	using node_variant = std::variant <
-		SharedPtr<AssetReadNode>,
-		SharedPtr<AssetProductNode>,
-		SharedPtr<AssetQuotientNode>,
-		SharedPtr<AssetSumNode>,
-		SharedPtr<AssetDifferenceNode>>;
-
-	AssetOpNodeVariant(
-		node_variant node,
-		size_t warmup,
-		AssetNodeType t
-	) noexcept:
-		value(std::move(node)), warmup(warmup), t(t) {}
-
-	ATLAS_API AssetOpNodeVariant(const AssetOpNodeVariant& other);
-
-	AssetOpNodeVariant() = delete;
-	AssetOpNodeVariant(AssetOpNodeVariant&&) = default;
-	AssetOpNodeVariant& operator=(const AssetOpNodeVariant&) = default;
-	AssetOpNodeVariant& operator=(AssetOpNodeVariant&&) = default;
-	ATLAS_API AssetOpNodeVariant(node_variant node) noexcept;
-	ATLAS_API ~AssetOpNodeVariant() noexcept;
-};
-
 
 //============================================================================
 export enum class ExchangeViewFilterType
@@ -103,7 +55,7 @@ export class ExchangeViewNode
 {
 private:
 	Exchange& m_exchange;
-	AssetOpNodeVariant m_asset_op_node;
+	SharedPtr<StrategyBufferOpNode> m_asset_op_node;
 	size_t m_view_size;
 	size_t m_warmup;
 	Option<ExchangeViewFilter> m_filter = std::nullopt;
@@ -113,21 +65,21 @@ public:
 	//============================================================================
 	ATLAS_API ExchangeViewNode(
 		Exchange& exchange,
-		AssetOpNodeVariant asset_op_node
+		SharedPtr<StrategyBufferOpNode> asset_op_node
 	) noexcept;
 
 
 	//============================================================================
 	ATLAS_API ExchangeViewNode(
 		SharedPtr<Exchange> exchange,
-		AssetOpNodeVariant asset_op_node
+		SharedPtr<StrategyBufferOpNode> asset_op_node
 	) noexcept;
 
 
 	//============================================================================
 	ATLAS_API [[nodiscard]] static SharedPtr<ExchangeViewNode> make(
 		SharedPtr<Exchange> exchange,
-		AssetOpNodeVariant asset_op_node,
+		SharedPtr<StrategyBufferOpNode> asset_op_node,
 		Option<ExchangeViewFilter> filter = std::nullopt
 	) noexcept
 	{
@@ -151,13 +103,9 @@ public:
 		m_filter = filter;
 	}
 
-
-
-	[[nodiscard]] AssetNodeType getType() const noexcept { return m_asset_op_node.t; }
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	[[nodiscard]] size_t getViewSize() const noexcept { return m_view_size; }
 	[[nodiscard]] auto& getExchange() { return m_exchange; }
-	
 	void filter(LinAlg::EigenVectorXd& v) const noexcept;
 	ATLAS_API  void evaluate(LinAlg::EigenVectorXd&) noexcept override;
 };

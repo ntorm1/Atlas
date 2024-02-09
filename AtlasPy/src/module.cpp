@@ -12,6 +12,7 @@ import AllocationNodeModule;
 import AssetNodeModule;
 import AtlasEnumsModule;
 import AtlasException;
+import AtlasLinAlg;
 import AtlasCore;
 import CommissionsModule;
 import ExchangeModule;
@@ -73,6 +74,7 @@ PYBIND11_MODULE(AtlasPy, m) {
             py::arg("row_offset") = 0,
             py::return_value_policy::reference_internal)
         .def("getAssetMap", &Atlas::Exchange::getAssetMap)
+        .def("getAssetIndex", &Atlas::Exchange::getAssetIndex)
         .def("getCurrentTimestamp", &Atlas::Exchange::getCurrentTimestamp)
         .def("getName",&Atlas::Exchange::getName,"get unique id of the exchange");
 
@@ -94,30 +96,31 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("NSMALLEST", Atlas::AST::EVRankType::NSMALLEST)
         .value("NEXTREME", Atlas::AST::EVRankType::NEXTREME)
         .export_values();
+    py::enum_<Atlas::AST::AssetOpType>(m_ast, "AssetOpType")
+        .value("ADD", Atlas::AST::AssetOpType::ADD)
+        .value("SUBTRACT", Atlas::AST::AssetOpType::SUBTRACT)
+        .value("MULTIPLY", Atlas::AST::AssetOpType::MULTIPLY)
+        .value("DIVIDE", Atlas::AST::AssetOpType::DIVIDE)
+        .export_values();
 
 
-    py::class_<Atlas::AST::AssetReadNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNode")
+    py::class_<Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode");
+
+    py::class_<Atlas::AST::AssetReadNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNode")
+        .def("evaluate", [](py::array_t<double>& input_array) {
+            auto buffer = input_array.request();
+            double* ptr = static_cast<double*>(buffer.ptr);
+            Atlas::LinAlg::EigenVectorXd target(ptr, ptr + buffer.size);
+            evaluate(target);
+        });
         .def_static("make", &Atlas::AST::AssetReadNode::pyMake);
 
-    py::class_<Atlas::AST::AssetProductNode, std::shared_ptr<Atlas::AST::AssetProductNode>>(m_ast, "AssetProductNode")
-        .def_static("make", &Atlas::AST::AssetProductNode::make);
-
-    py::class_<Atlas::AST::AssetQuotientNode, std::shared_ptr<Atlas::AST::AssetQuotientNode>>(m_ast, "AssetQuotientNode")
-        .def_static("make", &Atlas::AST::AssetQuotientNode::make);
-
-    py::class_<Atlas::AST::AssetDifferenceNode, std::shared_ptr<Atlas::AST::AssetDifferenceNode>>(m_ast, "AssetDifferenceNode")
-        .def_static("make", &Atlas::AST::AssetDifferenceNode::make);
-
-    py::class_<Atlas::AST::AssetSumNode, std::shared_ptr<Atlas::AST::AssetSumNode>>(m_ast, "AssetSumNode")
-        .def_static("make", &Atlas::AST::AssetSumNode::make);
-
-    py::class_<Atlas::AST::AssetOpNodeVariant>(m_ast, "AssetOpNodeVariant")
-        .def(py::init<Atlas::AST::AssetOpNodeVariant::node_variant>());
+    py::class_<Atlas::AST::AssetOpNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetOpNode>>(m_ast, "AssetOpNode")
+        .def_static("make", &Atlas::AST::AssetOpNode::pyMake);
 
     py::class_<Atlas::AST::ExchangeViewFilter, std::shared_ptr<Atlas::AST::ExchangeViewFilter>>(m_ast, "ExchangeViewFilter")
         .def(py::init<Atlas::AST::ExchangeViewFilterType, double>());
 
-    py::class_<Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode");
 
     py::class_<Atlas::AST::ExchangeViewNode, Atlas::AST::StrategyBufferOpNode,  std::shared_ptr<Atlas::AST::ExchangeViewNode>>(m_ast, "ExchangeViewNode")
         .def_static("make", &Atlas::AST::ExchangeViewNode::make,
