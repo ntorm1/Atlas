@@ -27,7 +27,7 @@ export class TriggerNode
 	friend class Exchange;
 private:
 	virtual Result<bool, AtlasException> build() noexcept = 0;
-
+	virtual bool operator==(TriggerNode const& other) const noexcept = 0;
 	virtual void step() noexcept = 0;
 
 protected:
@@ -55,6 +55,15 @@ private:
 	size_t m_frequency;
 	Result<bool, AtlasException> build() noexcept;
 	void step() noexcept;
+	
+	bool operator==(TriggerNode const& other) const noexcept override
+	{
+		if (auto ptr = dynamic_cast<PeriodicTriggerNode const*>(&other)) 
+		{
+			return ptr->getFrequency() == getFrequency();
+		}
+		return false;
+	}
 
 public:
 	ATLAS_API ~PeriodicTriggerNode() noexcept = default;
@@ -65,6 +74,7 @@ public:
 
 	void reset() noexcept override;
 	bool evaluate() noexcept override;
+	size_t getFrequency() const noexcept { return m_frequency; }
 
 	ATLAS_API [[nodiscard]] static SharedPtr<TriggerNode>
 	make(
@@ -83,6 +93,15 @@ private:
 	void step() noexcept override;
 	bool m_eom_trigger;
 
+	bool operator==(TriggerNode const& other) const noexcept override
+	{
+		if (auto ptr = dynamic_cast<StrategyMonthlyRunnerNode const*>(&other))
+		{
+			return ptr->getEomTrigger() == getEomTrigger();
+		}
+		return false;
+	}
+
 public:
 	ATLAS_API ~StrategyMonthlyRunnerNode() noexcept = default;
 	ATLAS_API StrategyMonthlyRunnerNode(
@@ -91,6 +110,7 @@ public:
 	) noexcept;
 
 	void reset() noexcept override;
+	bool getEomTrigger() const noexcept { return m_eom_trigger; }
 	bool evaluate() noexcept override;
 
 	ATLAS_API [[nodiscard]] static SharedPtr<TriggerNode>

@@ -46,7 +46,7 @@ Tracer::evaluate() noexcept
             LinAlg::EigenMatrixXd const& covariance = (*m_covariance)->getCovariance();
             LinAlg::EigenVectorXd const& weights = m_strategy.getAllocationBuffer();
             auto current_vol = (weights.transpose() * covariance * weights);
-            m_volatility_history(m_idx) = std::sqrt(current_vol(0));
+            m_volatility_history(m_idx) = std::sqrt(current_vol(0)) * std::sqrt(252);
         }
 	}
     m_idx++;

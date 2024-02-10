@@ -185,7 +185,21 @@ Exchange::reset() noexcept
 	}
 	for (auto& trigger : m_impl->registered_triggers)
 	{
-		trigger->reset();
+		if (trigger.use_count() == 1)
+		{
+			m_impl->registered_triggers.erase(
+				std::remove(
+					m_impl->registered_triggers.begin(),
+					m_impl->registered_triggers.end(),
+					trigger
+				),
+				m_impl->registered_triggers.end()
+			);
+		}
+		else
+		{
+			trigger->reset();
+		}
 	}
 }
 
@@ -221,6 +235,15 @@ Exchange::step(Int64 global_time) noexcept
 void
 Exchange::registerTrigger(SharedPtr<AST::TriggerNode> trigger) noexcept
 {
+	// test to see if trigger with same definition already exists
+	for (auto const& existing_trigger : m_impl->registered_triggers)
+	{
+		if (*trigger == *existing_trigger)
+		{
+			trigger = existing_trigger;
+			return;
+		}
+	}
 	m_impl->registered_triggers.push_back(trigger);
 }
 
