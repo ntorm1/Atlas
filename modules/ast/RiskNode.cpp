@@ -16,22 +16,17 @@ namespace Atlas
 namespace AST
 {
 
-
 //============================================================================
-CovarianceNode::CovarianceNode(
+CovarianceNodeBase::CovarianceNodeBase(
 	Exchange& exchange,
 	SharedPtr<TriggerNode> trigger,
 	size_t lookback_window
 ) noexcept :
 	StatementNode(NodeType::COVARIANCE),
-	m_trigger(trigger),
 	m_exchange(exchange),
+	m_trigger(trigger),
 	m_lookback_window(lookback_window)
 {
-	size_t row_count = exchange.getAssetCount();
-	m_covariance.resize(row_count, row_count);
-	m_covariance.setZero();
-
 	// find the index location of the first non-zero value
 	Eigen::VectorXi const& mask = m_trigger->getMask();
 	size_t idx = 0;
@@ -45,6 +40,21 @@ CovarianceNode::CovarianceNode(
 	}
 	// set the warmup equal to the max of the lookback window and the index
 	m_warmup = std::max(m_lookback_window, idx);
+
+	size_t row_count = exchange.getAssetCount();
+	m_covariance.resize(row_count, row_count);
+	m_covariance.setZero();
+}
+
+
+//============================================================================
+CovarianceNode::CovarianceNode(
+	Exchange& exchange,
+	SharedPtr<TriggerNode> trigger,
+	size_t lookback_window
+) noexcept :
+	CovarianceNodeBase(exchange, trigger, lookback_window)
+{
 }
 
 
@@ -56,24 +66,9 @@ CovarianceNode::~CovarianceNode() noexcept
 
 
 //============================================================================
-size_t CovarianceNode::getWarmup() const noexcept
-{
-	return m_warmup;
-}
-
-
-//============================================================================
 void
-CovarianceNode::evaluate() noexcept
+CovarianceNode::evaluateChild() noexcept
 {
-	if (!m_trigger->evaluate())
-	{
-		return;
-	}
-	if (m_exchange.currentIdx() < m_lookback_window)
-	{
-		return;
-	}
 	size_t start_idx = (m_exchange.currentIdx() - m_lookback_window) + 1;
 	auto const& returns_block = m_exchange.getMarketReturnsBlock(
 		start_idx,
@@ -82,19 +77,100 @@ CovarianceNode::evaluate() noexcept
 	Eigen::MatrixXd returns_block_transpose = returns_block.transpose();
 	m_centered_returns = returns_block_transpose.rowwise() - returns_block_transpose.colwise().mean();
 	m_covariance = (m_centered_returns.adjoint() * m_centered_returns) / double(returns_block_transpose.rows() - 1);
-	m_cached = true;
+}
+
+
+//============================================================================
+IncrementalCovarianceNode::IncrementalCovarianceNode(
+	Exchange& exchange,
+	SharedPtr<TriggerNode> trigger,
+	size_t lookback_window
+) noexcept :
+	CovarianceNodeBase(exchange, trigger, lookback_window)
+{
+	size_t row_count = exchange.getAssetCount();
+	m_sum.resize(row_count, row_count);
+	m_sum.setZero();
+	m_sum_sq.resize(row_count, row_count);
+	m_sum_sq.setZero();
+	enableIncremental();
+}
+
+
+//============================================================================
+IncrementalCovarianceNode::~IncrementalCovarianceNode() noexcept
+{
+
 }
 
 
 //============================================================================
 void
-CovarianceNode::reset() noexcept
+IncrementalCovarianceNode::evaluateChild() noexcept
 {
-	m_covariance.setZero();
-	m_centered_returns.setZero();
-	m_cached = false;
+	auto returns = m_exchange.getMarketReturns().transpose();
+	m_sum.rowwise() += returns;
+	m_sum_product.rowwise() += returns.array().matrix() * returns.array().matrix().transpose();
+	
+	if (m_exchange.currentIdx() < m_lookback_window)
+	{
+		int row_offset = -1 * static_cast<int>(m_lookback_window);
+		returns = m_exchange.getMarketReturns(row_offset).transpose();
+		m_sum.rowwise() -= returns;
+		m_sum_product.rowwise() -= returns.array().matrix() * returns.array().matrix().transpose();
+	}
+	m_covariance = (m_sum_product - (m_sum * m_sum.transpose()) / double(m_lookback_window)) / double(m_lookback_window - 1);
 }
 
+
+//============================================================================
+void
+CovarianceNode::resetChild() noexcept
+{
+	m_centered_returns.setZero();
+}
+
+
+//============================================================================
+void
+IncrementalCovarianceNode::resetChild() noexcept
+{
+	m_counter = 0;
+}
+
+
+//============================================================================
+void
+CovarianceNodeBase::reset() noexcept
+{
+	m_covariance.setZero();
+	m_cached = false;
+	resetChild();
+}
+
+//============================================================================
+void
+CovarianceNodeBase::evaluate() noexcept
+{
+	if (!m_trigger->evaluate())
+	{
+		return;
+	}
+	if (m_exchange.currentIdx() < m_lookback_window)
+	{
+		if (!m_incremental)
+		{
+			return;
+		}
+		else
+		{
+			evaluateChild();
+		}
+		return;
+	}
+	evaluateChild();
+	m_cached = true;
+}
 
 //============================================================================
 AllocationWeightNode::~AllocationWeightNode() noexcept
@@ -104,7 +180,7 @@ AllocationWeightNode::~AllocationWeightNode() noexcept
 
 //============================================================================
 AllocationWeightNode::AllocationWeightNode(
-	SharedPtr<CovarianceNode> covariance,
+	SharedPtr<CovarianceNodeBase> covariance,
 	Option<double> vol_target
 ) noexcept :
 	StrategyBufferOpNode(NodeType::ALLOC_WEIGHT, covariance->getExchange(), std::nullopt),
@@ -136,7 +212,7 @@ InvVolWeight::~InvVolWeight() noexcept
 
 //============================================================================
 InvVolWeight::InvVolWeight(
-	SharedPtr<CovarianceNode> covariance,
+	SharedPtr<CovarianceNodeBase> covariance,
 	Option<double> vol_target
 ) noexcept :
 	AllocationWeightNode(std::move(covariance), vol_target)

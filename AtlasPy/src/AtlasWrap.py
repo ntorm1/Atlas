@@ -142,9 +142,16 @@ class RiskTest(unittest.TestCase):
             self.hydra.step()
 
     def testCovariance(self):
+        #daily_trigger_node = PeriodicTriggerNode.make(self.exchange, 1)
         monthly_trigger_node = StrategyMonthlyRunnerNode.make(self.exchange)
-        covariance_node = self.exchange.getCovarianceNode("30_PERIOD_COV", monthly_trigger_node, 30)
-        
+        covariance_node = self.exchange.getCovarianceNode(
+            "30_PERIOD_COV",
+            monthly_trigger_node,
+            30,
+            CovarianceType.FULL
+        )
+        #covariance_node_inc = 
+
         # data starts 2010-01-04, and the first day of february will not 
         # have 20 days of data to calculate covariance, so the first trigger date
         # will be 2010-03-01
@@ -196,9 +203,8 @@ class RiskTest(unittest.TestCase):
         strategy_node.setTrigger(monthly_trigger_node)
         self.hydra.build()
         strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0))
-        
         self.runTo("2010-02-01")
-
+        
         allocation = strategy.getAllocationBuffer()
         self.assertTrue(np.allclose(allocation, np.zeros_like(allocation)))
 
@@ -220,7 +226,6 @@ class RiskTest(unittest.TestCase):
         returns /= np.abs(returns).sum()
         allocation = strategy.getAllocationBuffer()
         self.assertTrue(np.allclose(allocation, returns))
-
 
 if __name__ == "__main__":
     unittest.main()

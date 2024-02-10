@@ -323,10 +323,13 @@ Exchange::getCloseIndex() const noexcept
 LinAlg::EigenConstColView<double>
 Exchange::getSlice(size_t column, int row_offset) const noexcept
 {
+	assert(m_impl->current_index > 0);
 	size_t idx = ((m_impl->current_index - 1) * m_impl->col_count) + column;
 	if (row_offset)
 	{
-		idx -= abs(row_offset) * m_impl->col_count;
+		size_t offset = abs(row_offset) * m_impl->col_count;
+		assert(idx >= offset);
+		idx -= offset;
 	}
 	assert(idx < static_cast<size_t>(m_impl->data.cols()));
 	return m_impl->data.col(idx);
@@ -357,11 +360,12 @@ Exchange::currentIdx() const noexcept
 
 
 //============================================================================
-SharedPtr<AST::CovarianceNode>
+SharedPtr<AST::CovarianceNodeBase>
 Exchange::getCovarianceNode(
 	String const& id,
 	SharedPtr<AST::TriggerNode> trigger,
-	size_t lookback
+	size_t lookback,
+	CovarianceType type
 ) noexcept
 {
 	// free and covariance nodes not being used and register the trigger
@@ -377,7 +381,16 @@ Exchange::getCovarianceNode(
 		registerTrigger(trigger);
 	}
 
-	auto node = AST::CovarianceNode::make(*this, trigger, lookback);
+	SharedPtr<AST::CovarianceNodeBase> node;
+	switch (type)
+	{
+		case CovarianceType::FULL:
+			node = AST::CovarianceNode::make(*this, trigger, lookback);
+			break;
+		case CovarianceType::INCREMENTAL:
+			node = AST::IncrementalCovarianceNode::make(*this, trigger, lookback);
+			break;
+	}
 	m_impl->covariance_nodes[id] = node;
 	return node;
 }

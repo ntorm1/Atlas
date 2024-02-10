@@ -9,7 +9,7 @@ export module ExchangeModule;
 
 import AtlasCore;
 import AtlasLinAlg;
-
+import AtlasEnumsModule;
 
 namespace Atlas
 {
@@ -72,10 +72,11 @@ public:
 	size_t getNullCount(int row_offset) const noexcept;
 
 	// ======= PUBLIC API ======= //
-	ATLAS_API SharedPtr<AST::CovarianceNode> getCovarianceNode(
+	ATLAS_API SharedPtr<AST::CovarianceNodeBase> getCovarianceNode(
 		String const& id,
 		SharedPtr<AST::TriggerNode> trigger,
-		size_t lookback
+		size_t lookback,
+		CovarianceType type
 	) noexcept;
 	
 	ATLAS_API EigenConstRowView<double> getAssetSlice(size_t asset_index) const noexcept;

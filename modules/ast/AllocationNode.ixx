@@ -42,7 +42,7 @@ protected:
 	UniquePtr<AllocationBaseNodeImpl> m_impl;
 	size_t m_warmup = 0;
 	void reset() noexcept override;
-
+	void setWarmup(size_t warmup) noexcept { m_warmup = warmup; }
 public:
 	virtual ~AllocationBaseNode() noexcept;
 	AllocationBaseNode(

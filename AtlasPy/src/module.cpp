@@ -59,13 +59,21 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getPortfolio", &Atlas::Hydra::pyGetPortfolio)
         .def(py::init<>());
 
-    py::class_<Atlas::AST::CovarianceNode, std::shared_ptr<Atlas::AST::CovarianceNode>>(m_ast, "CovarianceNode")
-        .def("getCovarianceMatrix", &Atlas::AST::CovarianceNode::getCovariance, py::return_value_policy::reference_internal);
+    py::class_<Atlas::AST::CovarianceNodeBase, std::shared_ptr<Atlas::AST::CovarianceNodeBase>>(m_ast, "CovarianceNodeBase")
+        .def("getCovarianceMatrix", &Atlas::AST::CovarianceNodeBase::getCovariance, py::return_value_policy::reference_internal);
+
+    py::class_<Atlas::AST::CovarianceNode, Atlas::AST::CovarianceNodeBase, std::shared_ptr<Atlas::AST::CovarianceNode>>(m_ast, "CovarianceNode");
+
+    py::class_<Atlas::AST::IncrementalCovarianceNode, Atlas::AST::CovarianceNodeBase, std::shared_ptr<Atlas::AST::IncrementalCovarianceNode>>(m_ast, "IncrementalCovarianceNode");
 
     py::class_<Atlas::CommisionManager, std::shared_ptr<Atlas::CommisionManager>>(m, "CommisionManager")
         .def("setCommissionPct", &Atlas::CommisionManager::setCommissionPct)
         .def("setFixedCommission", &Atlas::CommisionManager::setFixedCommission);
 
+    py::enum_<Atlas::CovarianceType>(m_ast, "CovarianceType")
+        .value("FULL", Atlas::CovarianceType::FULL)
+        .value("SUBTRACT", Atlas::CovarianceType::INCREMENTAL)
+        .export_values();
 
     py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")
         .def("getTimestamps", &Atlas::Exchange::getTimestamps)
@@ -165,7 +173,7 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::AllocationWeightNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AllocationWeightNode>>(m_ast, "AllocationWeightNode");
 
     py::class_<Atlas::AST::InvVolWeight, Atlas::AST::AllocationWeightNode, std::shared_ptr<Atlas::AST::InvVolWeight>>(m_ast, "InvVolWeight")
-        .def(py::init<std::shared_ptr<Atlas::AST::CovarianceNode>, std::optional<double>>());
+        .def(py::init<std::shared_ptr<Atlas::AST::CovarianceNodeBase>, std::optional<double>>());
 
 
     py::class_<Atlas::AST::StrategyNode, std::shared_ptr<Atlas::AST::StrategyNode>>(m_ast, "StrategyNode")

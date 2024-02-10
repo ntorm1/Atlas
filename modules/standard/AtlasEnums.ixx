@@ -18,4 +18,10 @@ export namespace Atlas
 		TAKE_PROFIT = 1,
 	};
 
+	//============================================================================
+	export enum class CovarianceType
+	{
+		FULL,
+		INCREMENTAL
+	};
 }

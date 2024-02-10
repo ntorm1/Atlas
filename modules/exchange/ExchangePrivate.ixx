@@ -40,7 +40,7 @@ export struct ExchangeImpl
 	Vector<Asset> assets;
 	Vector<Int64> timestamps;
 	Vector<SharedPtr<AST::TriggerNode>> registered_triggers;
-	FastMap<String,SharedPtr<AST::CovarianceNode>> covariance_nodes;
+	FastMap<String,SharedPtr<AST::CovarianceNodeBase>> covariance_nodes;
 	Vector<Strategy*> registered_strategies;
 	Int64 current_timestamp = 0;
 	Eigen::MatrixXd data;

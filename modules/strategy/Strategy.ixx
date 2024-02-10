@@ -60,7 +60,7 @@ public:
 	ATLAS_API [[nodiscard]] Exchange const& getExchange() const noexcept;
 	ATLAS_API [[nodiscard]] Result<bool, AtlasException> enableTracerHistory(TracerType t) noexcept;
 	ATLAS_API void pyEnableTracerHistory(TracerType t);
-	ATLAS_API void setVolTracer(SharedPtr<AST::CovarianceNode> node) noexcept;
+	ATLAS_API void setVolTracer(SharedPtr<AST::CovarianceNodeBase> node) noexcept;
 };
 
 

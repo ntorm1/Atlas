@@ -73,6 +73,8 @@ export namespace Atlas
 		class AssetSumNode;
 		class AssetDifferenceNode;
 		class AssetQuotientNode;
+		class CovarianceNodeBase;
+		class IncrementalCovarianceNode;
 		class CovarianceNode;
 		class ExchangeViewNode;
 		class StrategyNode;

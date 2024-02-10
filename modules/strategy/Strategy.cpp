@@ -122,7 +122,7 @@ Strategy::pyEnableTracerHistory(TracerType t)
 
 //============================================================================
 void
-Strategy::setVolTracer(SharedPtr<AST::CovarianceNode> node) noexcept
+Strategy::setVolTracer(SharedPtr<AST::CovarianceNodeBase> node) noexcept
 {
 	assert(node);
 	m_impl->m_tracer.setCovarianceNode(node);

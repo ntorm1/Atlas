@@ -221,6 +221,7 @@ AllocationNode::AllocationNode(
 		alloc_param),
 	m_exchange_view(std::move(exchange_view))
 {
+	setWarmup(m_exchange_view->getWarmup());
 }
 
 

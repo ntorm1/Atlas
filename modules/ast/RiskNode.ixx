@@ -19,18 +19,48 @@ namespace Atlas
 namespace AST
 {
 
+
 //============================================================================
-export class CovarianceNode : public StatementNode
+export class CovarianceNodeBase : public StatementNode
+{
+private:
+	bool m_cached = false;
+	bool m_incremental = false;
+	size_t m_warmup = 0;
+
+protected:
+	size_t m_lookback_window = 0;
+	SharedPtr<TriggerNode> m_trigger;
+	Exchange& m_exchange;
+	LinAlg::EigenMatrixXd m_covariance;
+
+	void enableIncremental() noexcept { m_incremental = true; }
+
+public:
+	CovarianceNodeBase(
+		Exchange& exchange,
+		SharedPtr<TriggerNode> trigger,
+		size_t lookback_window
+	) noexcept;
+
+	void reset() noexcept;
+	virtual void evaluateChild() noexcept = 0;
+	virtual void resetChild() noexcept = 0;
+	void evaluate() noexcept override;
+	bool getIsCached() const noexcept { return m_cached; }
+	size_t getWarmup() const noexcept override { return m_warmup; }
+	SharedPtr<TriggerNode> getTrigger() const noexcept { return m_trigger; }
+	Exchange& getExchange() const noexcept { return m_exchange; }
+	LinAlg::EigenMatrixXd const& getCovariance() const noexcept { return m_covariance; }
+
+};
+
+//============================================================================
+export class CovarianceNode : public CovarianceNodeBase
 {
 	friend class Exchange;
 private:
-	LinAlg::EigenMatrixXd m_covariance;
 	LinAlg::EigenMatrixXd m_centered_returns;
-	SharedPtr<TriggerNode> m_trigger;
-	bool m_cached = false;
-	size_t m_lookback_window = 0;
-	size_t m_warmup = 0;
-	Exchange& m_exchange;
 	
 	CovarianceNode(
 		Exchange& exchange,
@@ -49,13 +79,39 @@ public:
 		return std::make_shared<EnableMakeShared>(std::forward<Arg>(arg)...);
 	}
 
-	SharedPtr<TriggerNode> getTrigger() const noexcept { return m_trigger; }
-	void evaluate() noexcept override;
-	void reset() noexcept;
-	bool getIsCached() const noexcept { return m_cached; }
-	size_t getWarmup() const noexcept override;
-	Exchange& getExchange() const noexcept { return m_exchange; }
-	LinAlg::EigenMatrixXd const& getCovariance() const noexcept { return m_covariance; }
+	void evaluateChild() noexcept override;
+	void resetChild() noexcept override;
+};
+
+
+//============================================================================
+export class IncrementalCovarianceNode : public CovarianceNodeBase
+{
+	friend class Exchange;
+private:
+	size_t m_counter = 0;
+	LinAlg::EigenMatrixXd m_sum;
+	LinAlg::EigenMatrixXd m_sum_sq;
+	LinAlg::EigenMatrixXd m_sum_product;
+
+public:
+	IncrementalCovarianceNode(
+		Exchange& exchange,
+		SharedPtr<TriggerNode> trigger,
+		size_t lookback_window
+	) noexcept;
+	~IncrementalCovarianceNode() noexcept;
+
+	template<typename ...Arg> SharedPtr<IncrementalCovarianceNode>
+	static make(Arg&&...arg) {
+		struct EnableMakeShared : public IncrementalCovarianceNode {
+			EnableMakeShared(Arg&&...arg) :IncrementalCovarianceNode(std::forward<Arg>(arg)...) {}
+		};
+		return std::make_shared<EnableMakeShared>(std::forward<Arg>(arg)...);
+	}
+
+	void evaluateChild() noexcept override;
+	void resetChild() noexcept override;
 };
 
 
@@ -63,7 +119,7 @@ public:
 export class AllocationWeightNode : public StrategyBufferOpNode
 {
 protected:
-	SharedPtr<CovarianceNode> m_covariance = nullptr;
+	SharedPtr<CovarianceNodeBase> m_covariance = nullptr;
 	Option<double> m_vol_target = std::nullopt;
 
 protected:
@@ -73,7 +129,7 @@ public:
 	virtual ~AllocationWeightNode() noexcept;
 
 	AllocationWeightNode(
-		SharedPtr<CovarianceNode> covariance,
+		SharedPtr<CovarianceNodeBase> covariance,
 		Option<double> vol_target
 	) noexcept;
 	
@@ -90,7 +146,7 @@ public:
 	ATLAS_API ~InvVolWeight() noexcept;
 
 	ATLAS_API InvVolWeight(
-		SharedPtr<CovarianceNode> covariance,
+		SharedPtr<CovarianceNodeBase> covariance,
 		Option<double> vol_target = std::nullopt
 	) noexcept;
 	
