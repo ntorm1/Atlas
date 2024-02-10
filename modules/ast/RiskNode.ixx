@@ -27,7 +27,9 @@ private:
 	LinAlg::EigenMatrixXd m_covariance;
 	LinAlg::EigenMatrixXd m_centered_returns;
 	SharedPtr<TriggerNode> m_trigger;
+	bool m_cached = false;
 	size_t m_lookback_window = 0;
+	size_t m_warmup = 0;
 	Exchange& m_exchange;
 	
 	CovarianceNode(
@@ -49,7 +51,9 @@ public:
 
 	SharedPtr<TriggerNode> getTrigger() const noexcept { return m_trigger; }
 	void evaluate() noexcept override;
-	size_t getWarmup() const noexcept override { return m_lookback_window; }
+	void reset() noexcept;
+	bool getIsCached() const noexcept { return m_cached; }
+	size_t getWarmup() const noexcept override;
 	Exchange& getExchange() const noexcept { return m_exchange; }
 	LinAlg::EigenMatrixXd const& getCovariance() const noexcept { return m_covariance; }
 };
@@ -74,6 +78,7 @@ public:
 	) noexcept;
 	
 	virtual void evaluate(LinAlg::EigenVectorXd& target) noexcept = 0;
+	bool getIsCached() const noexcept { return m_covariance->getIsCached(); }
 };
 
 

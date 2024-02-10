@@ -40,7 +40,7 @@ export class AllocationBaseNode : public StrategyBufferOpNode
 	friend class StrategyNode;
 protected:
 	UniquePtr<AllocationBaseNodeImpl> m_impl;
-	
+	size_t m_warmup = 0;
 	void reset() noexcept override;
 
 public:
@@ -54,7 +54,7 @@ public:
 
 	[[nodiscard]] AllocationType getType() const noexcept;
 	[[nodiscard]] double getAllocEpsilon() const noexcept;
-	[[nodiscard]] virtual size_t getWarmup() const noexcept = 0;
+	[[nodiscard]] size_t getWarmup() const noexcept { return m_warmup; }
 	[[nodiscard]] size_t getAssetCount() const noexcept;
 	void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
 	virtual void evaluateChild(LinAlg::EigenVectorXd& target) noexcept = 0;
@@ -103,10 +103,7 @@ public:
 		double epsilon = 0.000f
 	);
 
-
 	void evaluateChild(LinAlg::EigenVectorXd& target) noexcept override;
-	[[nodiscard]] size_t getWarmup() const noexcept override { return 0; }
-
 };
 
 
@@ -124,7 +121,6 @@ public:
 	void setNAllocParam(size_t n) noexcept { n_alloc_param = n; }
 	[[nodiscard]] size_t getNAllocParam() const noexcept { return n_alloc_param.value(); }
 
-	//============================================================================
 	ATLAS_API AllocationNode(
 		SharedPtr<StrategyBufferOpNode> exchange_view,
 		AllocationType type = AllocationType::UNIFORM,
@@ -132,7 +128,6 @@ public:
 		double epsilon = 0.000f
 	) noexcept;
 
-	//============================================================================
 	ATLAS_API [[nodiscard]] static Result<SharedPtr<AllocationNode>, AtlasException>
 	make(
 			SharedPtr<StrategyBufferOpNode> exchange_view,
@@ -141,7 +136,6 @@ public:
 			double epsilon = 0.000f
 	) noexcept;
 
-	//============================================================================
 	ATLAS_API [[nodiscard]] static SharedPtr<AllocationNode>
 	pyMake(
 			SharedPtr<StrategyBufferOpNode> exchange_view,
@@ -150,8 +144,6 @@ public:
 			double epsilon = 0.000f
 	);
 
-
-	[[nodiscard]] size_t getWarmup() const noexcept override;
 	void evaluateChild(LinAlg::EigenVectorXd& target) noexcept override;
 };
 

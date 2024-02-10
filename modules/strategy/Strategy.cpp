@@ -234,19 +234,10 @@ Strategy::step() noexcept
 	// did not update the target weights buffer
 	if (!m_impl->m_ast->evaluate(m_impl->m_target_weights_buffer))
 	{
-		m_late_rebalance_call = true;
-	}
-	else
-	{
-		m_late_rebalance_call = false;
-	}
-	assert(!m_impl->m_target_weights_buffer.array().isNaN().any());
-
-	// if no action was taken, propogate asset returns to adjust weights
-	if (m_late_rebalance_call)
-	{
+		// if no action was taken, propogate asset returns to adjust weights
 		lateRebalance(m_impl->m_target_weights_buffer);
 	}
+	assert(!m_impl->m_target_weights_buffer.array().isNaN().any());
 	m_step_call = false;
 }
 

@@ -200,7 +200,8 @@ Exchange::reset() noexcept
 		{
 			trigger->reset();
 		}
-	}
+	}	
+	cleanupCovarianceNodes();
 }
 
 
@@ -245,6 +246,51 @@ Exchange::registerTrigger(SharedPtr<AST::TriggerNode> trigger) noexcept
 		}
 	}
 	m_impl->registered_triggers.push_back(trigger);
+}
+
+
+//============================================================================
+void
+Exchange::cleanupCovarianceNodes() noexcept
+{
+	Vector<String> keysToRemove; // Store keys of nodes to remove
+
+	// Iterate over covariance_nodes and check use_count of each node,
+	// if exchange is holding the only reference to the node, remove it
+	for (auto it = m_impl->covariance_nodes.begin(); it != m_impl->covariance_nodes.end();)
+	{
+		auto& [id, node] = *it;
+		node->reset();
+		size_t use_count = node.use_count();
+		if (use_count == 1)
+		{
+			keysToRemove.push_back(id);
+		}
+		++it;
+	}
+
+	// Remove nodes from covariance_nodes and registered_triggers if they are not being used
+	for (const auto& key : keysToRemove)
+	{
+		auto node = m_impl->covariance_nodes[key];
+		auto trigger = node->getTrigger();
+		m_impl->covariance_nodes.erase(key);
+
+		// delete node to clear up trigger use count. If the use count is equal to 2,
+		// i.e. the current node and the trigger held by the exchange then we can remove the trigger
+		node.reset();
+		if (trigger.use_count() == 2)
+		{
+			m_impl->registered_triggers.erase(
+				std::remove(
+					m_impl->registered_triggers.begin(),
+					m_impl->registered_triggers.end(),
+					trigger
+				),
+				m_impl->registered_triggers.end()
+			);
+		}
+	}
 }
 
 
@@ -315,11 +361,20 @@ SharedPtr<AST::CovarianceNode>
 Exchange::getCovarianceNode(
 	String const& id,
 	SharedPtr<AST::TriggerNode> trigger,
-	size_t lookback) noexcept
+	size_t lookback
+) noexcept
 {
+	// free and covariance nodes not being used and register the trigger
+	// if it is not already registered
+	cleanupCovarianceNodes();
 	if (m_impl->covariance_nodes.count(id) > 0)
 	{
 		return m_impl->covariance_nodes[id];
+	}
+	auto it = std::find(m_impl->registered_triggers.begin(), m_impl->registered_triggers.end(), trigger);
+	if (it == m_impl->registered_triggers.end())
+	{
+		registerTrigger(trigger);
 	}
 
 	auto node = AST::CovarianceNode::make(*this, trigger, lookback);

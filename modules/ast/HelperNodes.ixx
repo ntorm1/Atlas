@@ -33,6 +33,7 @@ private:
 protected:
 	Eigen::VectorXi m_tradeable_mask;	
 	size_t m_index_counter = 0;
+	size_t m_warmup = 0;
 	Exchange const& m_exchange;
 
 	static void registerNode(SharedPtr<TriggerNode> node) noexcept;

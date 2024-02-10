@@ -110,6 +110,7 @@ AllocationBaseNode::setWeightScale(SharedPtr<AllocationWeightNode> scale) noexce
 {
 	m_impl->m_weight_scale = scale;
 	m_impl->m_ref_count++;
+	m_warmup = std::max(m_warmup, scale->getWarmup());
 }
 
 //============================================================================
@@ -147,6 +148,16 @@ AllocationBaseNode::getTradeLimitNode() const noexcept
 void
 AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 {
+	// if we have weight scaler we have to weight for the first instance of the 
+	// covariance matrix cache to be filled before we can proceed
+	if (
+		m_impl->m_weight_scale &&
+		!(*m_impl->m_weight_scale)->getIsCached()
+		)
+	{
+		return;
+	}
+
 	// if we have a commission manager or trade watcher we need to copy the current weights buffer 
 	// into the commission manager buffer before it gets overwritten by the ast. 
 	// 
@@ -321,14 +332,6 @@ AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 	}
 }
 	
-
-//============================================================================
-size_t
-AllocationNode::getWarmup() const noexcept
-{
-	return m_exchange_view->getWarmup();
-}
-
 
 }
 
