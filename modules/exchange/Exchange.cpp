@@ -183,6 +183,10 @@ Exchange::reset() noexcept
 	{
 		strategy->m_step_call = false;
 	}
+	for (auto& trigger : m_impl->registered_triggers)
+	{
+		trigger->reset();
+	}
 }
 
 
@@ -207,7 +211,7 @@ Exchange::step(Int64 global_time) noexcept
 		strategy->m_step_call = true;
 	}
 
-	std::for_each(m_impl->registered_triggers.begin(), m_impl->registered_triggers.end(), [](auto& trigger) { trigger->step(); });
+	std::for_each(m_impl->registered_triggers.begin(), m_impl->registered_triggers.end(), [](auto& trigger) {assert(trigger); trigger->step(); });
 	m_impl->current_index++; // cov node valls currentIdx on first step
 	std::for_each(m_impl->covariance_nodes.begin(), m_impl->covariance_nodes.end(), [](auto& node_pair) { node_pair.second->evaluate(); });
 }
@@ -215,7 +219,7 @@ Exchange::step(Int64 global_time) noexcept
 
 //============================================================================
 void
-Exchange::registerTrigger(AST::TriggerNode* trigger) noexcept
+Exchange::registerTrigger(SharedPtr<AST::TriggerNode> trigger) noexcept
 {
 	m_impl->registered_triggers.push_back(trigger);
 }

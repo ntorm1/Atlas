@@ -34,10 +34,10 @@ private:
 	bool m_late_rebalance_call = false;
 	UniquePtr<StrategyImpl> m_impl;
 
-	void evaluate() noexcept;
+	void evaluate(Eigen::Ref<Eigen::VectorXd> const& target_weights_buffer) noexcept;
+	void lateRebalance(Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept;
 	void step() noexcept;
 	void reset() noexcept;
-	void lateRebalance() noexcept;
 	void setNlv(double nlv_new) noexcept;
 	void setID(size_t id) noexcept { m_id = id; }
 
@@ -49,18 +49,19 @@ public:
 	) noexcept;
 
 	ATLAS_API ~Strategy() noexcept;
-	ATLAS_API Eigen::VectorXd const& getAllocationBuffer() const noexcept;
-	ATLAS_API double getAllocation(size_t asset_index) const noexcept;
-	ATLAS_API Tracer const& getTracer() const noexcept;
-	ATLAS_API auto const& getName() const noexcept { return m_name; }
-	ATLAS_API auto const& getId() const noexcept { return m_id; }
-	ATLAS_API double getNLV() const noexcept;
-	ATLAS_API void enableTracerHistory(TracerType t) noexcept;
-	ATLAS_API Eigen::VectorXd const& getHistory(TracerType t) const noexcept;
-	ATLAS_API Eigen::MatrixXd const& getWeightHistory() const noexcept;
-	ATLAS_API SharedPtr<CommisionManager> initCommissionManager() noexcept;
-	ATLAS_API Exchange const& getExchange() const noexcept;
-
+	ATLAS_API [[nodiscard]] Eigen::VectorXd const& getAllocationBuffer() const noexcept;
+	ATLAS_API [[nodiscard]] double getAllocation(size_t asset_index) const noexcept;
+	ATLAS_API [[nodiscard]] Tracer const& getTracer() const noexcept;
+	ATLAS_API [[nodiscard]] auto const& getName() const noexcept { return m_name; }
+	ATLAS_API [[nodiscard]] auto const& getId() const noexcept { return m_id; }
+	ATLAS_API [[nodiscard]] double getNLV() const noexcept;
+	ATLAS_API [[nodiscard]] Eigen::VectorXd const& getHistory(TracerType t) const noexcept;
+	ATLAS_API [[nodiscard]] Eigen::MatrixXd const& getWeightHistory() const noexcept;
+	ATLAS_API [[nodiscard]] SharedPtr<CommisionManager> initCommissionManager() noexcept;
+	ATLAS_API [[nodiscard]] Exchange const& getExchange() const noexcept;
+	ATLAS_API [[nodiscard]] Result<bool, AtlasException> enableTracerHistory(TracerType t) noexcept;
+	ATLAS_API void pyEnableTracerHistory(TracerType t);
+	ATLAS_API void setVolTracer(SharedPtr<AST::CovarianceNode> node) noexcept;
 };
 
 

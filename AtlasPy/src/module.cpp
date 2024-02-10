@@ -78,9 +78,10 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getCurrentTimestamp", &Atlas::Exchange::getCurrentTimestamp)
         .def("getName",&Atlas::Exchange::getName,"get unique id of the exchange");
 
-    py::enum_<Atlas::TracerType>(m, "TracerType")
+    py::enum_<Atlas::TracerType>(m_ast, "TracerType")
         .value("NLV", Atlas::TracerType::NLV)
         .value("WEIGHTS", Atlas::TracerType::WEIGHTS)
+        .value("VOLATILITY", Atlas::TracerType::VOLATILITY)
         .export_values();
 
     // ======= AST API ======= //
@@ -107,21 +108,16 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode");
 
     py::class_<Atlas::AST::AssetReadNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNode")
-        .def("evaluate", [](py::array_t<double>& input_array) {
-            auto buffer = input_array.request();
-            double* ptr = static_cast<double*>(buffer.ptr);
-            Atlas::LinAlg::EigenVectorXd target(ptr, ptr + buffer.size);
-            evaluate(target);
-        });
         .def_static("make", &Atlas::AST::AssetReadNode::pyMake);
 
     py::class_<Atlas::AST::AssetOpNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetOpNode>>(m_ast, "AssetOpNode")
         .def_static("make", &Atlas::AST::AssetOpNode::pyMake);
 
-    py::class_<Atlas::AST::ExchangeViewFilter, std::shared_ptr<Atlas::AST::ExchangeViewFilter>>(m_ast, "ExchangeViewFilter")
-        .def(py::init<Atlas::AST::ExchangeViewFilterType, double>());
 
-
+    py::class_<Atlas::AST::ExchangeViewFilter>(m_ast, "ExchangeViewFilter")
+        .def(py::init<Atlas::AST::ExchangeViewFilterType, double, Atlas::Option<double>>(
+        ));
+    
     py::class_<Atlas::AST::ExchangeViewNode, Atlas::AST::StrategyBufferOpNode,  std::shared_ptr<Atlas::AST::ExchangeViewNode>>(m_ast, "ExchangeViewNode")
         .def_static("make", &Atlas::AST::ExchangeViewNode::make,
             py::arg("exchange"),
@@ -183,7 +179,8 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::Strategy, std::shared_ptr<Atlas::Strategy>>(m_core, "Strategy")
         .def("getNLV", &Atlas::Strategy::getNLV)
         .def("getName", &Atlas::Strategy::getName)
-        .def("enableTracerHistory", &Atlas::Strategy::enableTracerHistory)
+        .def("enableTracerHistory", &Atlas::Strategy::pyEnableTracerHistory)
+        .def("setVolTracer", &Atlas::Strategy::setVolTracer)
         .def("initCommissionManager", &Atlas::Strategy::initCommissionManager)
         .def("getAllocationBuffer", &Atlas::Strategy::getAllocationBuffer, py::return_value_policy::reference_internal)
         .def("getHistory", &Atlas::Strategy::getHistory, py::return_value_policy::reference_internal)

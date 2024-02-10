@@ -25,8 +25,10 @@ export class Tracer
 private:
 	Exchange const& m_exchange;
 	Strategy const& m_strategy;
+	Option<SharedPtr<AST::CovarianceNode>> m_covariance;
 	Eigen::MatrixXd m_weight_history;
 	Eigen::VectorXd m_nlv_history;
+	Eigen::VectorXd m_volatility_history;
 	size_t m_idx = 0;
 	double m_cash;
 	double m_initial_cash;
@@ -35,9 +37,11 @@ private:
 	void evaluate() noexcept;
 	void reset() noexcept;
 
-	void enableTracerHistory(TracerType t) noexcept;
+	[[nodiscard]] Result<bool,AtlasException> enableTracerHistory(TracerType t) noexcept;
 	void setNLV(double nlv) noexcept { m_nlv = nlv; }
+	void setCovarianceNode(SharedPtr<AST::CovarianceNode> covariance) noexcept { m_covariance = covariance; }
 	Eigen::VectorXd const& getHistory(TracerType t) const noexcept;
+
 
 public:
 	Tracer(Strategy const& strategy, Exchange const& exchange, double cash) noexcept;

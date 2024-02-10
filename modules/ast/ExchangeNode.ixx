@@ -37,14 +37,18 @@ export struct ExchangeViewFilter
 {
 	ExchangeViewFilterType type;
 	double value;
+	Option<double> value_inplace = std::nullopt;
 
 	ExchangeViewFilter() = delete;
 	ATLAS_API ~ExchangeViewFilter() noexcept = default;
 	ATLAS_API ExchangeViewFilter(
 		ExchangeViewFilterType type,
-		double value
+		double value,
+		Option<double> value_inplace = std::nullopt
 	)  noexcept :
-		type(type), value(value) {}
+		type(type), value(value), value_inplace(value_inplace) {}
+
+	void setValue(double v) noexcept { value = v; }
 };
 
 
@@ -58,7 +62,7 @@ private:
 	SharedPtr<StrategyBufferOpNode> m_asset_op_node;
 	size_t m_view_size;
 	size_t m_warmup;
-	Option<ExchangeViewFilter> m_filter = std::nullopt;
+	Vector<SharedPtr<ExchangeViewFilter>> m_filters;
 public:
 	ATLAS_API ~ExchangeViewNode() noexcept;
 
@@ -80,27 +84,36 @@ public:
 	ATLAS_API [[nodiscard]] static SharedPtr<ExchangeViewNode> make(
 		SharedPtr<Exchange> exchange,
 		SharedPtr<StrategyBufferOpNode> asset_op_node,
-		Option<ExchangeViewFilter> filter = std::nullopt
+		Option<SharedPtr<ExchangeViewFilter>> filter = std::nullopt
 	) noexcept
 	{
 		auto node = std::make_shared<ExchangeViewNode>(
 			exchange, std::move(asset_op_node)
 		);
-		node->setFilter(filter);
+		if (filter.has_value())
+		{
+			node->setFilter(filter.value());
+		}
 		return node;
 	}
 
 
 	//============================================================================
-	ATLAS_API void setFilter(ExchangeViewFilterType type, double value) noexcept
+	ATLAS_API SharedPtr<ExchangeViewFilter> setFilter(
+		ExchangeViewFilterType type, 
+		double value,
+		Option<double> value_inplace = std::nullopt
+	) noexcept
 	{
-		m_filter = ExchangeViewFilter(type, value);
+		auto f = std::make_shared<ExchangeViewFilter>(type, value, value_inplace);
+		return setFilter(f);
 	}
 
 	//============================================================================
-	ATLAS_API void setFilter(Option<ExchangeViewFilter> filter) noexcept
+	ATLAS_API SharedPtr<ExchangeViewFilter> setFilter(SharedPtr<ExchangeViewFilter> filter) noexcept
 	{
-		m_filter = filter;
+		m_filters.push_back(filter);
+		return filter;
 	}
 
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }

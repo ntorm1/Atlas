@@ -36,7 +36,7 @@ private:
 
 	void reset() noexcept;
 	void step(Int64 global_time) noexcept;
-	void registerTrigger(AST::TriggerNode* trigger) noexcept;
+	void registerTrigger(SharedPtr<AST::TriggerNode> trigger) noexcept;
 
 	Option<size_t> getCloseIndex() const noexcept;
 	EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;

@@ -1,9 +1,11 @@
 module;
 #include <Eigen/Dense>
+#include "AtlasMacros.hpp"
 module TracerModule;
 
 import ExchangeModule;
 import StrategyModule;
+import RiskNodeModule;
 
 namespace Atlas
 {
@@ -36,6 +38,17 @@ Tracer::evaluate() noexcept
     {
 		m_weight_history.col(m_idx) = m_strategy.getAllocationBuffer();
     }
+    if (m_volatility_history.size() > 0) 
+	{
+        assert(m_covariance);
+        if (m_idx > (*m_covariance)->getWarmup())
+        {
+            LinAlg::EigenMatrixXd const& covariance = (*m_covariance)->getCovariance();
+            LinAlg::EigenVectorXd const& weights = m_strategy.getAllocationBuffer();
+            auto current_vol = (weights.transpose() * covariance * weights);
+            m_volatility_history(m_idx) = std::sqrt(current_vol(0));
+        }
+	}
     m_idx++;
 }
 
@@ -55,13 +68,16 @@ Tracer::reset() noexcept
     {
 		m_weight_history.setZero();
 	}
-
+    if (m_volatility_history.size() > 0) 
+	{
+        m_volatility_history.setZero();
+	}
     m_idx = 0;
 }
 
 
 //============================================================================
-void
+Result<bool, AtlasException>
 Tracer::enableTracerHistory(TracerType t) noexcept
 {
     size_t n = m_exchange.getTimestamps().size();
@@ -74,7 +90,15 @@ Tracer::enableTracerHistory(TracerType t) noexcept
             m_weight_history.resize(m_exchange.getAssetCount(), n);
             m_weight_history.setZero();
             break;
+        case TracerType::VOLATILITY:
+            if (!m_covariance) {
+                return Err("Covariance matrix not set");
+            }
+            m_volatility_history.resize(n);
+			m_volatility_history.setZero();
+			break;
     }
+    return true;
 }
 
 
@@ -85,6 +109,8 @@ Tracer::getHistory(TracerType t) const noexcept
     switch (t) {
 		case TracerType::NLV:
 			return m_nlv_history;
+        case TracerType::VOLATILITY:
+            return m_volatility_history;
         case TracerType::WEIGHTS:
             assert(false);
             break; // handled differently 

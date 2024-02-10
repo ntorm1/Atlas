@@ -46,18 +46,30 @@ ExchangeViewNode::ExchangeViewNode(
 void
 ExchangeViewNode::filter(Eigen::VectorXd& view) const noexcept
 {
-    assert(m_filter.has_value());
-    double c = m_filter.value().value;
-    switch ((*m_filter).type) {
-    case ExchangeViewFilterType::GREATER_THAN:
-        view = (view.array() > c).select(view.array(), std::numeric_limits<double>::quiet_NaN());
-        break;
-    case ExchangeViewFilterType::LESS_THAN:
-		view = (view.array() < c).select(view.array(), std::numeric_limits<double>::quiet_NaN());
-		break;
-    case ExchangeViewFilterType::EQUAL_TO:
-        view = (view.array().abs() - c).select(view.array(), std::numeric_limits<double>::quiet_NaN());
-        break;
+    for (auto const& filter : m_filters)
+    {
+        double c = filter->value;
+        Option<double> value_inplace = filter->value_inplace;
+        switch (filter->type) {
+        case ExchangeViewFilterType::GREATER_THAN:
+            if (value_inplace.has_value())
+                view = (view.array() > c).select(value_inplace.value() * Eigen::VectorXd::Ones(view.size()), view);
+            else
+                view = (view.array() > c).select(view, std::numeric_limits<double>::quiet_NaN());
+            break;
+        case ExchangeViewFilterType::LESS_THAN:
+            if (value_inplace.has_value())
+                view = (view.array() < c).select(value_inplace.value() * Eigen::VectorXd::Ones(view.size()), view);
+            else
+                view = (view.array() < c).select(view, std::numeric_limits<double>::quiet_NaN());
+            break;
+        case ExchangeViewFilterType::EQUAL_TO:
+            if (value_inplace.has_value())
+                view = (view.array().abs() == c).select(value_inplace.value() * Eigen::VectorXd::Ones(view.size()), view);
+            else
+                view = (view.array().abs() == c).select(view, std::numeric_limits<double>::quiet_NaN());
+            break;
+        }
     }
 }
 
@@ -66,7 +78,7 @@ void
     ExchangeViewNode::evaluate(Eigen::VectorXd& view) noexcept
 {
     m_asset_op_node->evaluate(view);
-    if (m_filter.has_value()) {
+    if (m_filters.size()) {
         filter(view);
     }
 }

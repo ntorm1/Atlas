@@ -77,7 +77,7 @@ void AtlasXPortfolioManager::addPortfolio() noexcept
 {	
 	// Create a new dialog window
 	QDialog dialog(this);
-	dialog.setWindowTitle(tr("New Strategy"));
+	dialog.setWindowTitle(tr("New Portfolio"));
 
 	// Create widgets for the dialog
 	QLabel* name_label = new QLabel(tr("Portfolio Name:"), this);

@@ -39,7 +39,7 @@ export struct ExchangeImpl
 	HashMap<String, size_t> headers;
 	Vector<Asset> assets;
 	Vector<Int64> timestamps;
-	Vector<AST::TriggerNode*> registered_triggers;
+	Vector<SharedPtr<AST::TriggerNode>> registered_triggers;
 	FastMap<String,SharedPtr<AST::CovarianceNode>> covariance_nodes;
 	Vector<Strategy*> registered_strategies;
 	Int64 current_timestamp = 0;

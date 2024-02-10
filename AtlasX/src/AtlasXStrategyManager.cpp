@@ -215,9 +215,13 @@ AtlasXStrategyManager::onHydraRun()
 	m_impl->nlv_series = new QLineSeries();
 	m_impl->nlv_series->setName(QString::fromStdString(strategy_name));
 
-
-
 	auto const& nlv_history = m_impl->app->getStrategyNLV(strategy_name);
+	
+	if (!nlv_history.size())
+	{
+		return;
+	}
+	
 	for (size_t i = 0; i < nlv_history.size(); ++i)
 	{
 		m_impl->nlv_series->append(m_impl->chart_timestamps_ms[i], nlv_history[i]);
@@ -245,8 +249,11 @@ AtlasXStrategyManager::onHydraReset()
 	m_impl->chart_view->chart()->removeAllSeries();
 	m_impl->nlv_series = new QLineSeries();
 	m_impl->chart_view->chart()->addSeries(m_impl->nlv_series);
-	m_impl->nlv_series->attachAxis(m_impl->axisX);
-	m_impl->nlv_series->attachAxis(m_impl->axisY);
+	if (m_impl->axisX)
+	{
+		m_impl->nlv_series->attachAxis(m_impl->axisX);
+		m_impl->nlv_series->attachAxis(m_impl->axisY);
+	}
 }
 
 

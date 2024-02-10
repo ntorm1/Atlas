@@ -1,7 +1,6 @@
 module;
 #define NOMINMAX
 #include <Eigen/Dense>
-#include <iostream>
 #include "AtlasMacros.hpp"
 module StrategyModule;
 
@@ -102,10 +101,33 @@ Strategy::getNLV() const noexcept
 
 
 //============================================================================
-void
+[[nodiscard]] Result<bool, AtlasException>
 Strategy::enableTracerHistory(TracerType t) noexcept
 {
-	m_impl->m_tracer.enableTracerHistory(t);
+	return m_impl->m_tracer.enableTracerHistory(t);
+}
+
+
+//============================================================================
+void
+Strategy::pyEnableTracerHistory(TracerType t)
+{
+	auto res = enableTracerHistory(t);
+	if (!res)
+	{
+		throw std::runtime_error(res.error().what());
+	}
+}
+
+
+//============================================================================
+void
+Strategy::setVolTracer(SharedPtr<AST::CovarianceNode> node) noexcept
+{
+	assert(node);
+	m_impl->m_tracer.setCovarianceNode(node);
+	auto res = m_impl->m_tracer.enableTracerHistory(TracerType::VOLATILITY);
+	assert(res);
 }
 
 
@@ -145,17 +167,19 @@ Strategy::getExchange() const noexcept
 
 //============================================================================
 void
-Strategy::evaluate() noexcept
+Strategy::evaluate(
+	Eigen::Ref<Eigen::VectorXd> const& target_weights_buffer
+) noexcept
 {
 	// get the current market returns
 	LinAlg::EigenConstColView market_returns = m_impl->m_exchange.getMarketReturns();
 
 	// get the portfolio return by calculating the sum product of the market returns and the portfolio weights
-	assert(market_returns.rows() == m_impl->m_target_weights_buffer.rows());
+	assert(market_returns.rows() == target_weights_buffer.rows());
 	assert(!market_returns.array().isNaN().any());
 	
 	// print out target weights buffer and market returns
-	double portfolio_return = market_returns.dot(m_impl->m_target_weights_buffer);
+	double portfolio_return = market_returns.dot(target_weights_buffer);
 
 	// update the tracer nlv 
 	double nlv = m_impl->m_tracer.getNLV();
@@ -166,7 +190,9 @@ Strategy::evaluate() noexcept
 
 //============================================================================
 void
-Strategy::lateRebalance() noexcept
+Strategy::lateRebalance(
+	Eigen::Ref<Eigen::VectorXd> target_weights_buffer
+) noexcept
 {
 	// if the strategy does not override the target weights buffer at the end of a time step,
 	// then we need to rebalance the portfolio to the target weights buffer according to the market returns
@@ -174,23 +200,15 @@ Strategy::lateRebalance() noexcept
 
 	// update the target weights buffer according to the indivual asset returns
 	Eigen::VectorXd returns = market_returns.array() + 1.0;
-	m_impl->m_target_weights_buffer = returns.cwiseProduct(m_impl->m_target_weights_buffer);
+	target_weights_buffer = returns.cwiseProduct(target_weights_buffer);
 
 	// divide the target weights buffer by the sum to get the new weights
-	auto sum = m_impl->m_target_weights_buffer.array().abs().sum();
+	auto sum = target_weights_buffer.array().abs().sum();
 	if (sum > 0.0)
 	{
-		m_impl->m_target_weights_buffer /= sum;
+		target_weights_buffer /= sum;
 	}
-	assert(!m_impl->m_target_weights_buffer.array().isNaN().any());
-}
-
-
-//============================================================================
-void
-Strategy::setNlv(double nlv_new) noexcept
-{
-	m_impl->m_tracer.setNLV(nlv_new);
+	assert(!target_weights_buffer.array().isNaN().any());
 }
 
 
@@ -198,10 +216,15 @@ Strategy::setNlv(double nlv_new) noexcept
 void
 Strategy::step() noexcept
 {
+	// evaluate the strategy with the current market prices and weights
+	evaluate(m_impl->m_target_weights_buffer);
+
+	// check if exchange took step
 	if (!m_step_call)
 	{
 		return;
 	}
+
 	// check if warmup over 
 	if (m_impl->m_exchange.currentIdx() < m_impl->m_ast->getWarmup())
 	{
@@ -218,7 +241,21 @@ Strategy::step() noexcept
 		m_late_rebalance_call = false;
 	}
 	assert(!m_impl->m_target_weights_buffer.array().isNaN().any());
+
+	// if no action was taken, propogate asset returns to adjust weights
+	if (m_late_rebalance_call)
+	{
+		lateRebalance(m_impl->m_target_weights_buffer);
+	}
 	m_step_call = false;
+}
+
+
+//============================================================================
+void
+Strategy::setNlv(double nlv_new) noexcept
+{
+	m_impl->m_tracer.setNLV(nlv_new);
 }
 
 

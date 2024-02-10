@@ -187,17 +187,11 @@ Hydra::step() noexcept
 	
 	for (int i = 0; i < m_impl->m_strategies.size(); i++)
 	{
-		auto& strategy = m_impl->m_strategies[i];
-		// evaluate the strategy with the current target weights
-		strategy->evaluate();
 		// execute strategy logic to populate new target weights
+		auto& strategy = m_impl->m_strategies[i];
 		strategy->step();
-		// if no action was taken, propogate asset returns to adjust weights
-		if (strategy->m_late_rebalance_call)
-		{
-			strategy->lateRebalance();
-		}
 	}
+	m_state = HydraState::RUNING;
 }
 
 
@@ -223,6 +217,12 @@ Hydra::run() noexcept
 	if (steps == 0)
 	{
 		return Err("No timestamps found");
+	}
+
+	// adjust loop size if calling run from middle of simulation
+	if (m_state == HydraState::RUNING)
+	{
+		steps -= m_impl->m_exchange_map.getCurrentIdx();
 	}
 
 	for (size_t i = 0; i < steps; ++i)

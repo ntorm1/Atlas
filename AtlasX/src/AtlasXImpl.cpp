@@ -286,7 +286,7 @@ AtlasXAppImpl::getStrategyNLV(String const& strategy_name) const noexcept
 {
 	auto strategy = hydra->getStrategy(strategy_name);
 	assert(strategy);
-	return (*strategy)->getHistory(Atlas::TracerType::NLV);
+	return (*strategy)->getHistory(Atlas::TracerType::VOLATILITY);
 }
 
 

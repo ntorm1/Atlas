@@ -16,11 +16,18 @@ namespace AST
 
 
 //============================================================================
+void
+TriggerNode::registerNode(SharedPtr<TriggerNode> node) noexcept
+{
+	const_cast<Exchange&>(node->getExchange()).registerTrigger(node); // TODO: ugly hack
+
+}
+
+//============================================================================
 TriggerNode::TriggerNode(Exchange const& exchange) noexcept :
 	m_exchange(exchange),
 	ExpressionNode<bool>(NodeType::STRATEGY_RUNNER)
 {
-	const_cast<Exchange&>(m_exchange).registerTrigger(this); // TODO: ugly hack
 }
 
 	
@@ -167,6 +174,7 @@ PeriodicTriggerNode::make(SharedPtr<Exchange> exchange, size_t frequency)
 	{
 		throw std::runtime_error(result.error().what());
 	}
+	registerNode(node);
 	return node;
 
 }
@@ -189,12 +197,13 @@ StrategyMonthlyRunnerNode::make(
 	bool eom_trigger
 )
 {
-	auto node = std::make_unique<StrategyMonthlyRunnerNode>(*exchange);
+	auto node = std::make_shared<StrategyMonthlyRunnerNode>(*exchange);
 	auto result = node->build();
 	if (!result)
 	{
 		throw std::runtime_error(result.error().what());
 	}
+	registerNode(node);
 	return node;
 }
 

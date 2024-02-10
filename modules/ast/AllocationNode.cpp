@@ -299,29 +299,32 @@ AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
 	}
 
 	switch (m_impl->m_type) {
-	case AllocationType::NLARGEST:
-	case AllocationType::NSMALLEST:
-	case AllocationType::UNIFORM: {
-		target = target.unaryExpr([c](double x) { return x == x ? c : 0.0; });
-		break;
+		case AllocationType::NLARGEST:
+		case AllocationType::NSMALLEST:
+		case AllocationType::UNIFORM: {
+			target = target.unaryExpr([c](double x) { return x == x ? c : 0.0; });
+			break;
+		}
+		case AllocationType::CONDITIONAL_SPLIT: {
+			// conditional split takes the target array and sets all elemetns that 
+			// are less than the alloc param to -c and all elements greater than the
+			// alloc param to c. All other elements are set to 0.0
+			target = (target.array() < *m_impl->m_alloc_param)
+				.select(-c, (target.array() > *m_impl->m_alloc_param)
+					.select(c, target));
+			target = target.unaryExpr([](double x) { return x == x ? x : 0.0; });
+			break;
+		}
+		case AllocationType::NEXTREME: {
+			assert(false);
+		}
 	}
-	case AllocationType::CONDITIONAL_SPLIT: {
-		target = (target.array() < *m_impl->m_alloc_param)
-			.select(-c, (target.array() > *m_impl->m_alloc_param)
-				.select(c, target));
-		target = target.unaryExpr([](double x) { return x == x ? x : 0.0; });
-		break;
-	}
-	case AllocationType::NEXTREME:
-		assert(false); // not implemented
-	}
-	
 }
 	
 
 //============================================================================
 size_t
-	AllocationNode::getWarmup() const noexcept
+AllocationNode::getWarmup() const noexcept
 {
 	return m_exchange_view->getWarmup();
 }

@@ -28,7 +28,7 @@ export enum class AllocationType
 	FIXED = 2,
 	NLARGEST = 3,
 	NSMALLEST = 4,
-	NEXTREME = 5
+	NEXTREME = 5,
 };
 
 

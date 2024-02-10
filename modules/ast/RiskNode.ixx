@@ -30,7 +30,6 @@ private:
 	size_t m_lookback_window = 0;
 	Exchange& m_exchange;
 	
-	//============================================================================
 	CovarianceNode(
 		Exchange& exchange,
 		SharedPtr<TriggerNode> trigger,
@@ -38,10 +37,8 @@ private:
 	) noexcept;
 
 public:
-	//============================================================================
 	~CovarianceNode() noexcept;
 
-	//============================================================================
 	template<typename ...Arg> SharedPtr<CovarianceNode>
 	static make(Arg&&...arg) {
 		struct EnableMakeShared : public CovarianceNode {
@@ -50,19 +47,10 @@ public:
 		return std::make_shared<EnableMakeShared>(std::forward<Arg>(arg)...);
 	}
 
-	//============================================================================
 	SharedPtr<TriggerNode> getTrigger() const noexcept { return m_trigger; }
-
-	//============================================================================
 	void evaluate() noexcept override;
-
-	//============================================================================
 	size_t getWarmup() const noexcept override { return m_lookback_window; }
-
-	//============================================================================
 	Exchange& getExchange() const noexcept { return m_exchange; }
-
-	//============================================================================
 	LinAlg::EigenMatrixXd const& getCovariance() const noexcept { return m_covariance; }
 };
 
@@ -78,16 +66,13 @@ protected:
 	void targetVol(LinAlg::EigenVectorXd& target) const noexcept;
 
 public:
-	//============================================================================
 	virtual ~AllocationWeightNode() noexcept;
 
-	//============================================================================
 	AllocationWeightNode(
 		SharedPtr<CovarianceNode> covariance,
 		Option<double> vol_target
 	) noexcept;
 	
-	//============================================================================
 	virtual void evaluate(LinAlg::EigenVectorXd& target) noexcept = 0;
 };
 
@@ -97,19 +82,14 @@ export class InvVolWeight final : public AllocationWeightNode
 {
 private:
 public:
-	//============================================================================
 	ATLAS_API ~InvVolWeight() noexcept;
 
-	//============================================================================
 	ATLAS_API InvVolWeight(
 		SharedPtr<CovarianceNode> covariance,
 		Option<double> vol_target = std::nullopt
 	) noexcept;
 	
-	//============================================================================
 	size_t getWarmup() const noexcept override { return m_covariance->getWarmup(); }
-
-	//============================================================================
 	void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
 };
 
