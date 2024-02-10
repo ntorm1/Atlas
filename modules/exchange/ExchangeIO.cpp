@@ -3,6 +3,8 @@ module;
 #include <filesystem>
 #include <fstream>
 #include <cassert>
+#include <thread>
+#include <mutex>
 #include <H5Cpp.h>
 module ExchangeModule;
 
@@ -163,12 +165,28 @@ Exchange::initDir() noexcept
 	}
 
 	// load the files
+	std::vector<std::thread> threads;
+	String msg = "";
+	std::mutex m_mutex;
 	for (auto& asset : m_impl->assets) {
-		auto res = asset.loadCSV();
-		if (!res) {
-			String msg = "Error loading asset: " + String(res.error().what());
-			return Err(msg);
-		}
+		threads.push_back(std::thread([this, &asset, &m_mutex, &msg]() {
+			auto res = asset.loadCSV();
+			if (!res) {
+				std::lock_guard<std::mutex> lock(m_mutex);
+				String error = res.error().what();
+				String error_msg = std::format("Error loading asset: {} - {}\n", asset.id, error);
+				msg += error_msg;
+			}
+			}));
+	}
+
+	// Join all threads
+	for (auto& thread : threads) {
+		thread.join();
+	}
+
+	if (!msg.empty()) {
+		return Err(msg);
 	}
 
 	return true;
