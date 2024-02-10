@@ -7,6 +7,7 @@ module;
 module TradeNodeModule;
 
 import AllocationNodeModule;
+import AtlasEnumsModule;
 import ExchangeModule;
 
 namespace Atlas
@@ -19,13 +20,20 @@ namespace AST
 struct TradeLimitNodeImpl
 {
 	Eigen::VectorXd m_pnl;
-	TradeLimitType m_trade_type;
-	double m_limit;
+	double m_stop_loss = 0.0;
+	double m_take_profit = 0.0;
 
-	TradeLimitNodeImpl(TradeLimitType trade_type, double limit) noexcept:
-		m_trade_type(trade_type),
-		m_limit(limit)
+	TradeLimitNodeImpl(TradeLimitType trade_type, double limit) noexcept
 	{
+		switch (trade_type)
+		{
+			case TradeLimitType::STOP_LOSS:
+				m_stop_loss = limit;
+				break;
+			case TradeLimitType::TAKE_PROFIT:
+				m_take_profit = limit;
+				break;
+		}
 	}
 };
 
@@ -64,7 +72,6 @@ TradeLimitNode::TradeLimitNode(
 			limit = (1 + limit);
 			break;
 	}
-
 	m_impl = std::make_unique<TradeLimitNodeImpl>(trade_type, limit);
 	size_t asset_count = parent->getAssetCount();
 	m_impl->m_pnl.resize(asset_count);
@@ -102,18 +109,17 @@ void TradeLimitNode::evaluate(
 		// we zero out the weights when the pnl is less than the limit. For take profit
 		// we zero out the weights when the pnl is greater than the limit. Add an additional
 		// comparison to 0.0 to prevent the new weights from being zeroed out beforehand
-		switch (m_impl->m_trade_type)
+		if (isTradeTypeSet(TradeLimitType::STOP_LOSS))
 		{
-		case TradeLimitType::STOP_LOSS:
 			current_weights = current_weights.array().cwiseProduct(
-				((m_impl->m_pnl.array() > m_impl->m_limit) || (m_impl->m_pnl.array() == 0.0)).cast<double>()
+				((m_impl->m_pnl.array() > m_impl->m_stop_loss) || (m_impl->m_pnl.array() == 0.0)).cast<double>()
 			);
-			break;
-		case TradeLimitType::TAKE_PROFIT:
-			current_weights = current_weights.array().cwiseProduct(
-				((m_impl->m_pnl.array() < m_impl->m_limit) || (m_impl->m_pnl.array() == 0.0)).cast<double>()
+		}
+		if (isTradeTypeSet(TradeLimitType::TAKE_PROFIT))
+		{
+		current_weights = current_weights.array().cwiseProduct(
+				((m_impl->m_pnl.array() < m_impl->m_take_profit) || (m_impl->m_pnl.array() == 0.0)).cast<double>()
 			);
-			break;
 		}
 	}
 
@@ -137,6 +143,23 @@ void TradeLimitNode::evaluate(
 }
 
 	
+//============================================================================
+void
+TradeLimitNode::setStopLoss(double stop_loss) noexcept
+{
+	m_impl->m_stop_loss = stop_loss;
+	m_trade_type |= TradeLimitType::STOP_LOSS;
+}
+
+
+//============================================================================
+void 
+TradeLimitNode::setTakeProfit(double take_profit) noexcept
+{
+	m_impl->m_take_profit = take_profit;
+	m_trade_type |= TradeLimitType::TAKE_PROFIT;
+}
+
 //============================================================================
 LinAlg::EigenVectorXd const&
 TradeLimitNode::getPnl() const noexcept

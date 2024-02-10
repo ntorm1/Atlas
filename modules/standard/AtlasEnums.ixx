@@ -12,10 +12,12 @@ export namespace Atlas
 	};
 
 	//============================================================================
-	export enum class TradeLimitType
+	export enum TradeLimitType : unsigned int
 	{
-		STOP_LOSS = 0,
-		TAKE_PROFIT = 1,
+		NONE = 0,
+		STOP_LOSS = 1 << 0,
+		TAKE_PROFIT = 1 << 1,
+		BOTH = STOP_LOSS | TAKE_PROFIT
 	};
 
 	//============================================================================

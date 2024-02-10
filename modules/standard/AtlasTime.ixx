@@ -37,6 +37,7 @@ export struct TimeOffset
 
 export Int64 applyTimeOffset(Int64 t, TimeOffset o);
 export int getMonthFromEpoch(Int64 epoch) noexcept;
+export Result<Int64, AtlasException> strToEpoch(const String& str, const String& dt_format) noexcept;
 export ATLAS_API String convertNanosecondsToTime(Int64 nanoseconds);
 
 }

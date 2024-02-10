@@ -1,6 +1,7 @@
 module;
 #include <chrono>
 #include <cassert>
+#include "AtlasMacros.hpp"
 module AtlasTimeModule;
 
 
@@ -58,6 +59,32 @@ applyTimeOffset(Int64 timestamp, TimeOffset offset)
 			assert(false);
 			return 0;
 		}
+	}
+}
+
+
+//============================================================================
+Result<Int64, AtlasException>
+strToEpoch(
+	const String& date_string,
+	const String& dt_format
+) noexcept
+{
+	try {
+		std::tm timeStruct = {};
+		std::istringstream iss(date_string);
+		iss >> std::get_time(&timeStruct, dt_format.c_str());
+
+		std::time_t utcTime = std::mktime(&timeStruct);
+
+		// Convert to std::chrono::time_point
+		std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::from_time_t(utcTime);
+
+		// Get the epoch time in nanoseconds
+		return std::chrono::duration_cast<std::chrono::nanoseconds>(timePoint.time_since_epoch()).count();
+	}
+	catch (const std::exception& e) {
+		return Err(e.what());
 	}
 }
 

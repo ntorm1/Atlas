@@ -72,7 +72,7 @@ PYBIND11_MODULE(AtlasPy, m) {
 
     py::enum_<Atlas::CovarianceType>(m_ast, "CovarianceType")
         .value("FULL", Atlas::CovarianceType::FULL)
-        .value("SUBTRACT", Atlas::CovarianceType::INCREMENTAL)
+        .value("INCREMENTAL", Atlas::CovarianceType::INCREMENTAL)
         .export_values();
 
     py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")

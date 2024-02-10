@@ -14,13 +14,15 @@ from AtlasPy.ast import *
 
 exchange_path_sp500_ma = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/test/data_sp500_ma.h5"
 exchange_path = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasTest/scripts/data.h5"
+exchange_csv = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchange1"
+
 
 class AllocTest(unittest.TestCase):
     
     def setUp(self) -> None:
         self.hydra = Hydra()
         self.intial_cash = 100.0
-        self.exchange = self.hydra.addExchange("test", exchange_path)
+        self.exchange = self.hydra.addExchange("test", exchange_csv)
         self.portfolio = self.hydra.addPortfolio("test_p", self.exchange, self.intial_cash)
         self.strategy_id = "test_s"
         self.asset_id1 = "asset1"
@@ -142,7 +144,6 @@ class RiskTest(unittest.TestCase):
             self.hydra.step()
 
     def testCovariance(self):
-        #daily_trigger_node = PeriodicTriggerNode.make(self.exchange, 1)
         monthly_trigger_node = StrategyMonthlyRunnerNode.make(self.exchange)
         covariance_node = self.exchange.getCovarianceNode(
             "30_PERIOD_COV",
@@ -150,7 +151,6 @@ class RiskTest(unittest.TestCase):
             30,
             CovarianceType.FULL
         )
-        #covariance_node_inc = 
 
         # data starts 2010-01-04, and the first day of february will not 
         # have 20 days of data to calculate covariance, so the first trigger date
@@ -174,6 +174,9 @@ class RiskTest(unittest.TestCase):
         matrix_subset = matrix_subset.pct_change().dropna().cov(ddof=1)
 
         # assert all values are within 1e-6
+        cov_matrix_df = pd.DataFrame(cov_matrix, columns=ordered_columns, index=ordered_columns)
+        #print(cov_matrix_df)
+        #print(matrix_subset)
         self.assertTrue(np.allclose(cov_matrix, matrix_subset, atol=1e-8))
 
     def testRankNode(self):

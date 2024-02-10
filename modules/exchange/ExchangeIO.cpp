@@ -1,10 +1,13 @@
 module;
 #include "AtlasMacros.hpp"
 #include <filesystem>
+#include <fstream>
+#include <cassert>
 #include <H5Cpp.h>
 module ExchangeModule;
 
 import ExchangePrivateModule;
+import AtlasTimeModule;
 
 namespace Atlas
 {
@@ -51,12 +54,138 @@ static void
 
 //============================================================================
 Result<bool, AtlasException>
+Asset::loadCSV()
+{
+	assert(source);
+	try {
+		// Open the file
+		std::ifstream file(*source);
+		if (!file.is_open()) {
+			return Err("Failed to open file: " + *source);
+		}
+		// get row count
+		rows = 0;
+		std::string line;
+		while (std::getline(file, line)) {
+			rows++;
+		}
+		rows--;
+		file.clear();					// Clear any error flags
+		file.seekg(0, std::ios::beg);  // Move the file pointer back to the start
+
+		// Parse headers
+		if (std::getline(file, line)) {
+			std::stringstream ss(line);
+			std::string columnName;
+			int columnIndex = 0;
+
+			// Skip the first column (date)
+			std::getline(ss, columnName, ',');
+			while (std::getline(ss, columnName, ',')) {
+				headers[columnName] = columnIndex;
+				columnIndex++;
+			}
+		}
+		else {
+			return Err("Could not parse headers");
+		}
+		cols = headers.size();
+		resize(rows, cols);
+
+		size_t row_counter = 0;
+		while (std::getline(file, line))
+		{
+			std::stringstream ss(line);
+
+			// First column is datetime
+			std::string timestamp, columnValue;
+			std::getline(ss, timestamp, ',');
+
+			// try to convert string to epoch time 
+			auto res = Time::strToEpoch(timestamp,"%Y-%m-%d");
+			if (res)
+			{
+				timestamps[row_counter] = res.value();
+			}
+			else
+			{
+				timestamps[row_counter] = std::stoll(timestamp);
+			}
+
+			int col_idx = 0;
+			while (std::getline(ss, columnValue, ','))
+			{
+				double value = std::stod(columnValue);
+				size_t index = row_counter * cols + col_idx;
+				data[index] = value;
+				col_idx++;
+			}
+			row_counter++;
+		}
+		return true;
+	}
+	catch (const std::exception& e) {
+		return Err("Error loading CSV: " + std::string(e.what()));
+	}
+	catch (...) {
+		return Err("Error loading CSV: Unknown error");
+	}
+}
+
+
+//============================================================================
+Result<bool, AtlasException>
+Exchange::initDir() noexcept
+{
+	// get all the files in the directory
+	std::filesystem::path path(m_source);
+	std::vector<std::filesystem::path> files;
+	for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		if (entry.is_regular_file()) {
+			files.push_back(entry.path());
+		}
+		if (entry.is_directory()) {
+			String msg = "Exchange source directory contains subdirectories: " + entry.path().string();
+			return Err(msg);
+		}
+		if (entry.path().extension() != ".csv") {
+			String msg = "Exchange source directory contains non-csv file: " + entry.path().string();
+			msg += ", found extension: " + path.extension().string() + ", expected: .csv";
+			return Err(msg);
+		}
+		String asset_id = entry.path().stem().string();
+		auto asset = Asset(asset_id, m_impl->assets.size());
+		asset.setSource(entry.path().string());
+		m_impl->assets.push_back(std::move(asset));
+	}
+	if (files.empty()) {
+		return Err("Exchange source directory is empty");
+	}
+
+	// load the files
+	for (auto& asset : m_impl->assets) {
+		auto res = asset.loadCSV();
+		if (!res) {
+			String msg = "Error loading asset: " + String(res.error().what());
+			return Err(msg);
+		}
+	}
+
+	return true;
+}
+
+
+//============================================================================
+Result<bool, AtlasException>
 	Exchange::init() noexcept
 {
 	// make sure the source string is file
 	auto path = std::filesystem::path(m_source);
 	EXPECT_FALSE(!std::filesystem::exists(path), "Exchange source file does not exist");
-	EXPECT_FALSE(std::filesystem::is_directory(path), "Exchange source is a directory");
+
+	if (std::filesystem::is_directory(path)) {
+		return initDir();
+	}
 
 	// make sure the source file is an HDF5 file
 	if (path.extension() != ".h5") {

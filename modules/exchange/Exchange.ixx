@@ -30,6 +30,7 @@ private:
 	String m_source;
 	size_t m_id;
 
+	[[nodiscard]] Result<bool, AtlasException> initDir() noexcept;
 	[[nodiscard]] Result<bool,AtlasException> init() noexcept;
 	[[nodiscard]] Result<bool,AtlasException> validate() noexcept;
 	[[nodiscard]] Result<bool,AtlasException> build() noexcept;

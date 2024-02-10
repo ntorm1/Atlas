@@ -19,6 +19,10 @@ namespace Atlas
 namespace AST
 {
 
+// Define bitwise OR assignment operator for TradeLimitType
+TradeLimitType& operator|=(TradeLimitType& lhs, TradeLimitType rhs) {
+	return lhs = static_cast<TradeLimitType>(static_cast<unsigned int>(lhs) | static_cast<unsigned int>(rhs));
+}
 
 struct TradeLimitNodeImpl;
 
@@ -30,6 +34,7 @@ export class TradeLimitNode final
 
 private:
 	Exchange const& m_exchange;
+	TradeLimitType m_trade_type;
 	UniquePtr<TradeLimitNodeImpl> m_impl;
 	bool m_is_first_step = true;
 
@@ -47,7 +52,14 @@ public:
 		LinAlg::EigenVectorXd& current_weights,
 		LinAlg::EigenVectorXd& previous_weights
 	)noexcept override;
+
+	bool isTradeTypeSet(TradeLimitType type) const noexcept {
+		return (m_trade_type & static_cast<unsigned int>(type)) != 0;
+	}
+
 	size_t getWarmup() const noexcept override {return 0; }
+	void setStopLoss(double stop_loss) noexcept;
+	void setTakeProfit(double take_profit) noexcept;
 
 	ATLAS_API LinAlg::EigenVectorXd const& getPnl() const noexcept;
 };

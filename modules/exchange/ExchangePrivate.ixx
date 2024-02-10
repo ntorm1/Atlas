@@ -16,19 +16,32 @@ namespace Atlas
 export struct Asset {
 	Vector<Int64> timestamps;
 	Vector<double> data;
+	Option<String> source;
 	String name;
 	size_t id;
+	size_t rows = 0;
+	size_t cols = 0;
 	HashMap<String, size_t> headers;
 
-	void resize(size_t rows, size_t cols) noexcept
+	Asset(String _name, size_t _id) noexcept
+		: name(std::move(_name)), id(_id)
+	{}
+
+	void resize(size_t _rows, size_t _cols) noexcept
 	{
-		timestamps.resize(rows);
-		data.resize(rows * cols);
+		timestamps.resize(_rows);
+		data.resize(_rows * _cols);
+		rows = rows;
+		cols = _cols;
 	}
 
-	Asset(String n, size_t i) noexcept 
-		: name(std::move(n)), id(i)
-	{}
+	void setSource(String _source) noexcept
+	{
+		source = std::move(_source);
+	}
+
+	Result<bool, AtlasException> loadCSV();
+
 };
 
 

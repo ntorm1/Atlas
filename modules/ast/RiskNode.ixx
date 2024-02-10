@@ -91,7 +91,7 @@ export class IncrementalCovarianceNode : public CovarianceNodeBase
 private:
 	size_t m_counter = 0;
 	LinAlg::EigenMatrixXd m_sum;
-	LinAlg::EigenMatrixXd m_sum_sq;
+	LinAlg::EigenMatrixXd m_product_buffer;
 	LinAlg::EigenMatrixXd m_sum_product;
 
 public:

@@ -91,8 +91,10 @@ IncrementalCovarianceNode::IncrementalCovarianceNode(
 	size_t row_count = exchange.getAssetCount();
 	m_sum.resize(row_count, row_count);
 	m_sum.setZero();
-	m_sum_sq.resize(row_count, row_count);
-	m_sum_sq.setZero();
+	m_sum_product.resize(row_count, row_count);
+	m_sum_product.setZero();
+	m_product_buffer.resize(row_count, row_count);
+	m_product_buffer.setZero();
 	enableIncremental();
 }
 
@@ -108,18 +110,26 @@ IncrementalCovarianceNode::~IncrementalCovarianceNode() noexcept
 void
 IncrementalCovarianceNode::evaluateChild() noexcept
 {
+	assert(false);
+	/*
 	auto returns = m_exchange.getMarketReturns().transpose();
 	m_sum.rowwise() += returns;
-	m_sum_product.rowwise() += returns.array().matrix() * returns.array().matrix().transpose();
 	
-	if (m_exchange.currentIdx() < m_lookback_window)
+	m_product_buffer = returns.replicate(returns.cols(),1);
+	m_product_buffer = m_product_buffer.transpose().lazyProduct(m_product_buffer);
+	m_sum_product += m_product_buffer;
+	
+	if (m_exchange.currentIdx() >= m_lookback_window)
 	{
 		int row_offset = -1 * static_cast<int>(m_lookback_window);
 		returns = m_exchange.getMarketReturns(row_offset).transpose();
 		m_sum.rowwise() -= returns;
-		m_sum_product.rowwise() -= returns.array().matrix() * returns.array().matrix().transpose();
+		m_product_buffer = returns.replicate(returns.cols(), 1);
+		m_product_buffer = m_product_buffer.transpose().lazyProduct(m_product_buffer);
+		m_sum_product -= m_product_buffer;
 	}
 	m_covariance = (m_sum_product - (m_sum * m_sum.transpose()) / double(m_lookback_window)) / double(m_lookback_window - 1);
+	*/	
 }
 
 
@@ -136,6 +146,9 @@ void
 IncrementalCovarianceNode::resetChild() noexcept
 {
 	m_counter = 0;
+	m_sum.setZero();
+	m_sum_product.setZero();
+	m_product_buffer.setZero();
 }
 
 
