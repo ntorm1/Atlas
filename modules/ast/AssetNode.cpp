@@ -20,9 +20,17 @@ size_t
 
 //============================================================================
 void
-AssetReadNode::evaluate(LinAlg::EigenVectorXd& target) noexcept
+AssetReadNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
-	target = m_exchange.getSlice(m_column, m_row_offset);
+	auto slice = m_exchange.getSlice(m_column, m_row_offset);
+	assert(static_cast<size_t>(slice.rows()) == m_exchange.getAssetCount());
+	
+	size_t slice_rows = static_cast<size_t>(slice.rows());
+	size_t target_rows = static_cast<size_t>(target.rows());
+	assert(slice_rows == target_rows);
+	assert(static_cast<size_t>(slice.cols()) == 1);
+	assert(static_cast<size_t>(target.cols()) == 1);
+	target = slice;
 }
 
 
@@ -72,6 +80,23 @@ AssetReadNode::pyMake(String const& column, int row_offset, Exchange& m_exchange
 
 
 //============================================================================
+AssetOpNode::AssetOpNode(
+	SharedPtr<StrategyBufferOpNode> asset_op_left,
+	SharedPtr<StrategyBufferOpNode> asset_op_right,
+	AssetOpType op_type
+) noexcept:
+	StrategyBufferOpNode(NodeType::ASSET_OP, asset_op_left->getExchange(), std::nullopt),
+	m_asset_op_left(std::move(asset_op_left)),
+	m_asset_op_right(std::move(asset_op_right)),
+	m_op_type(op_type)
+{
+	warmup = std::max(m_asset_op_left->getWarmup(), m_asset_op_right->getWarmup());
+	m_right_buffer.resize(getExchange().getAssetCount());
+	m_right_buffer.setZero();
+}
+
+
+//============================================================================
 SharedPtr<AssetOpNode>
 AssetOpNode::pyMake(
 	SharedPtr<StrategyBufferOpNode> asset_op_left,
@@ -88,8 +113,11 @@ AssetOpNode::pyMake(
 
 
 void
-AssetOpNode::evaluate(LinAlg::EigenVectorXd& target) noexcept
+AssetOpNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
+	assert(static_cast<size_t>(target.rows()) == getExchange().getAssetCount());
+	assert(static_cast<size_t>(target.cols()) == 1);
+
 	m_asset_op_left->evaluate(target);
 	m_asset_op_right->evaluate(m_right_buffer);
 

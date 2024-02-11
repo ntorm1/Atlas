@@ -23,7 +23,7 @@ namespace AST
 
 
 //============================================================================
-export class StrategyNode final : OpperationNode<bool, LinAlg::EigenVectorXd&>
+export class StrategyNode final : OpperationNode<bool, LinAlg::EigenRef<LinAlg::EigenVectorXd>>
 {
 	friend class Strategy;
 private:
@@ -62,7 +62,7 @@ public:
 	);
 
 
-	ATLAS_API [[nodiscard]] bool evaluate(LinAlg::EigenVectorXd& target) noexcept override;
+	ATLAS_API [[nodiscard]] bool evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	ATLAS_API void setTrigger(SharedPtr<TriggerNode> trigger) noexcept;
 	ATLAS_API void setWarmupOverride(size_t warmup) noexcept { m_warmup = warmup; }
 	

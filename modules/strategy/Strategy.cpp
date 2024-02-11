@@ -22,8 +22,8 @@ class StrategyImpl
 public:
 	Exchange& m_exchange;
 	Portfolio& m_portfolio;
-	Tracer m_tracer;
 	Eigen::VectorXd m_target_weights_buffer;
+	SharedPtr<Tracer> m_tracer;
 	SharedPtr<AST::StrategyNode> m_ast;
 	Option<SharedPtr<CommisionManager>> m_commision_manager;
 
@@ -34,12 +34,12 @@ public:
 	) noexcept :
 		m_portfolio(ast->getPortfolio()),
 		m_exchange(ast->getExchange()),
-		m_tracer(*strategy, m_exchange, cash),
 		m_ast(std::move(ast))
 	{
 		m_exchange.registerStrategy(strategy);
 		m_target_weights_buffer.resize(m_exchange.getAssetCount());
 		m_target_weights_buffer.setZero();
+		m_tracer = std::make_shared<Tracer>(*strategy, m_exchange, cash);
 	}
 };
 
@@ -86,9 +86,9 @@ Strategy::getAllocation(size_t asset_index) const noexcept
 
 //============================================================================
 Tracer const&
-	Strategy::getTracer() const noexcept
+Strategy::getTracer() const noexcept
 {
-	return m_impl->m_tracer;
+	return *m_impl->m_tracer;
 }
 
 
@@ -96,7 +96,7 @@ Tracer const&
 double
 Strategy::getNLV() const noexcept
 {
-	return m_impl->m_tracer.getNLV();
+	return m_impl->m_tracer->getNLV();
 }
 
 
@@ -104,7 +104,7 @@ Strategy::getNLV() const noexcept
 [[nodiscard]] Result<bool, AtlasException>
 Strategy::enableTracerHistory(TracerType t) noexcept
 {
-	return m_impl->m_tracer.enableTracerHistory(t);
+	return m_impl->m_tracer->enableTracerHistory(t);
 }
 
 
@@ -125,8 +125,8 @@ void
 Strategy::setVolTracer(SharedPtr<AST::CovarianceNodeBase> node) noexcept
 {
 	assert(node);
-	m_impl->m_tracer.setCovarianceNode(node);
-	auto res = m_impl->m_tracer.enableTracerHistory(TracerType::VOLATILITY);
+	m_impl->m_tracer->setCovarianceNode(node);
+	auto res = m_impl->m_tracer->enableTracerHistory(TracerType::VOLATILITY);
 	assert(res);
 }
 
@@ -135,7 +135,7 @@ Strategy::setVolTracer(SharedPtr<AST::CovarianceNodeBase> node) noexcept
 Eigen::VectorXd const&
 Strategy::getHistory(TracerType t) const noexcept
 {
-	return m_impl->m_tracer.getHistory(t);
+	return m_impl->m_tracer->getHistory(t);
 }
 
 
@@ -143,7 +143,7 @@ Strategy::getHistory(TracerType t) const noexcept
 Eigen::MatrixXd const&
 Strategy::getWeightHistory() const noexcept
 {
-	return m_impl->m_tracer.m_weight_history;
+	return m_impl->m_tracer->m_weight_history;
 }
 
 
@@ -182,9 +182,9 @@ Strategy::evaluate(
 	double portfolio_return = market_returns.dot(target_weights_buffer);
 
 	// update the tracer nlv 
-	double nlv = m_impl->m_tracer.getNLV();
-	m_impl->m_tracer.setNLV(nlv * (1.0 + portfolio_return));
-	m_impl->m_tracer.evaluate();
+	double nlv = m_impl->m_tracer->getNLV();
+	m_impl->m_tracer->setNLV(nlv * (1.0 + portfolio_return));
+	m_impl->m_tracer->evaluate();
 }
 
 
@@ -214,8 +214,28 @@ Strategy::lateRebalance(
 
 //============================================================================
 void
+Strategy::step(Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept
+{
+	// evaluate a grid strategy with the current market prices and weights
+	evaluate(target_weights_buffer);
+
+	// execute the strategy AST node. Update rebalance call if AST 
+	// did not update the target weights buffer
+	if (!m_impl->m_ast->evaluate(target_weights_buffer))
+	{
+		// if no action was taken, propogate asset returns to adjust weights
+		lateRebalance(target_weights_buffer);
+	}
+}
+
+
+//============================================================================
+void
 Strategy::step() noexcept
 {
+	assert(static_cast<size_t>(m_impl->m_target_weights_buffer.rows()) == m_impl->m_exchange.getAssetCount());
+	assert(static_cast<size_t>(m_impl->m_target_weights_buffer.cols()) == 1);
+
 	// evaluate the strategy with the current market prices and weights
 	evaluate(m_impl->m_target_weights_buffer);
 
@@ -246,7 +266,23 @@ Strategy::step() noexcept
 void
 Strategy::setNlv(double nlv_new) noexcept
 {
-	m_impl->m_tracer.setNLV(nlv_new);
+	m_impl->m_tracer->setNLV(nlv_new);
+}
+
+
+//============================================================================
+SharedPtr<Tracer> 
+Strategy::getTracerPtr() const noexcept
+{
+	return m_impl->m_tracer;
+}
+
+
+//============================================================================
+void
+Strategy::setTracer(SharedPtr<Tracer> tracer) noexcept
+{
+	m_impl->m_tracer = std::move(tracer);
 }
 
 
@@ -254,7 +290,7 @@ Strategy::setNlv(double nlv_new) noexcept
 void
 Strategy::reset() noexcept
 {
-	m_impl->m_tracer.reset();
+	m_impl->m_tracer->reset();
 	m_impl->m_target_weights_buffer.setZero();
 	m_impl->m_ast->reset();
 	m_step_call = false;

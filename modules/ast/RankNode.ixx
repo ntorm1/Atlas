@@ -60,7 +60,7 @@ public:
 	}
 
 	size_t getWarmup() const noexcept override;
-	void evaluate(Eigen::VectorXd& target) noexcept override;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
 }

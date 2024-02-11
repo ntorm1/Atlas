@@ -19,7 +19,6 @@ namespace AST
 //============================================================================
 struct TradeLimitNodeImpl
 {
-	Eigen::VectorXd m_pnl;
 	double m_stop_loss = 0.0;
 	double m_take_profit = 0.0;
 
@@ -43,8 +42,8 @@ void
 TradeLimitNode::reset() noexcept
 {
 	m_is_first_step = true;
-	m_impl->m_pnl.setZero();
 }
+
 
 //============================================================================
 TradeLimitNode::~TradeLimitNode() noexcept
@@ -58,7 +57,8 @@ TradeLimitNode::TradeLimitNode(
 	TradeLimitType trade_type,
 	double limit
 ) noexcept:
-	OpperationNode<void, LinAlg::EigenVectorXd&, LinAlg::EigenVectorXd&>(NodeType::TRADE_LIMIT, parent),
+	OpperationNode<void,  LinAlg::EigenRef<LinAlg::EigenVectorXd>, LinAlg::EigenRef<LinAlg::EigenVectorXd>, LinAlg::EigenRef<LinAlg::EigenVectorXd>>
+		(NodeType::TRADE_LIMIT, parent),
 	m_exchange(parent->getExchange())
 {
 	switch (trade_type)
@@ -74,15 +74,14 @@ TradeLimitNode::TradeLimitNode(
 	}
 	m_impl = std::make_unique<TradeLimitNodeImpl>(trade_type, limit);
 	size_t asset_count = parent->getAssetCount();
-	m_impl->m_pnl.resize(asset_count);
-	m_impl->m_pnl.setZero();
 }
 
 
 //============================================================================
 void TradeLimitNode::evaluate(
-	LinAlg::EigenVectorXd& current_weights,
-	LinAlg::EigenVectorXd& previous_weights
+	 LinAlg::EigenRef<LinAlg::EigenVectorXd> pnl,
+	 LinAlg::EigenRef<LinAlg::EigenVectorXd> current_weights,
+	 LinAlg::EigenRef<LinAlg::EigenVectorXd> previous_weights
 ) noexcept
 {
 	// in the first step we can't have pnl as allocation node is evaluated after the 
@@ -103,7 +102,7 @@ void TradeLimitNode::evaluate(
 		previous_returns.array() += 1.0;
 
 		// multiply 1 + returns to get the new price using the m_pnl buffer
-		m_impl->m_pnl = m_impl->m_pnl.cwiseProduct(previous_returns);
+		pnl = pnl.cwiseProduct(previous_returns);
 
 		// switch on the trade type to zero out weights as required. For stop loss
 		// we zero out the weights when the pnl is less than the limit. For take profit
@@ -112,34 +111,34 @@ void TradeLimitNode::evaluate(
 		if (isTradeTypeSet(TradeLimitType::STOP_LOSS))
 		{
 			current_weights = current_weights.array().cwiseProduct(
-				((m_impl->m_pnl.array() > m_impl->m_stop_loss) || (m_impl->m_pnl.array() == 0.0)).cast<double>()
+				((pnl.array() > m_impl->m_stop_loss) || (pnl.array() == 0.0)).cast<double>()
 			);
 		}
 		if (isTradeTypeSet(TradeLimitType::TAKE_PROFIT))
 		{
 		current_weights = current_weights.array().cwiseProduct(
-				((m_impl->m_pnl.array() < m_impl->m_take_profit) || (m_impl->m_pnl.array() == 0.0)).cast<double>()
+				((pnl.array() < m_impl->m_take_profit) || (pnl.array() == 0.0)).cast<double>()
 			);
 		}
 	}
 
 	// init the pnl trade vector to 1 where the trade pct switched sign or 
 	// went from 0 to non-zero
-	m_impl->m_pnl = (
+	pnl = (
 		(current_weights.array() * previous_weights.array() < 0.0f)
 		||
 		(previous_weights.array() == 0) && (current_weights.array() != 0)
 		)
-		.select(1.0f, m_impl->m_pnl);
+		.select(1.0f, pnl);
 
 	// update closed trade. If the current weight is 0 and the previous weight is not 0
 	// then zero out the pnl vector
-	m_impl->m_pnl = (
+	pnl = (
 		(current_weights.array() == 0)
 		&& 
 		(previous_weights.array() != 0)
 		)
-		.select(0.0f, m_impl->m_pnl);
+		.select(0.0f, pnl);
 }
 
 	
@@ -160,11 +159,19 @@ TradeLimitNode::setTakeProfit(double take_profit) noexcept
 	m_trade_type |= TradeLimitType::TAKE_PROFIT;
 }
 
+
 //============================================================================
-LinAlg::EigenVectorXd const&
-TradeLimitNode::getPnl() const noexcept
+void TradeLimitNode::setLimit(TradeLimitType trade_type, double limit) noexcept
 {
-	return m_impl->m_pnl;
+	switch (trade_type)
+	{
+		case TradeLimitType::STOP_LOSS:
+			setStopLoss(limit);
+			break;
+		case TradeLimitType::TAKE_PROFIT:
+			setTakeProfit(limit);
+			break;
+	}
 }
 
 }

@@ -14,7 +14,7 @@ namespace AST
 
 //============================================================================
 export class StrategyBufferOpNode
-	: public OpperationNode<void, LinAlg::EigenVectorXd&> {
+	: public OpperationNode<void, LinAlg::EigenRef<LinAlg::EigenVectorXd>> {
 protected:
 	Exchange& m_exchange;
 
@@ -23,7 +23,7 @@ protected:
 		Exchange& exchange,
 		Option<ASTNode*> parent
 	) :
-		OpperationNode<void, LinAlg::EigenVectorXd&>(t, parent),
+		OpperationNode<void, LinAlg::EigenRef<LinAlg::EigenVectorXd>>(t, parent),
 		m_exchange(exchange)
 	{
 

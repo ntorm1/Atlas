@@ -24,6 +24,7 @@ class StrategyImpl;
 export class Strategy
 {
 	friend class AST::StrategyNode;
+	friend class AST::StrategyGrid;
 	friend class Exchange;
 	friend class Hydra;
 	friend class CommisionManager;
@@ -35,10 +36,13 @@ private:
 
 	void evaluate(Eigen::Ref<Eigen::VectorXd> const& target_weights_buffer) noexcept;
 	void lateRebalance(Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept;
+	void step(Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept;
 	void step() noexcept;
 	void reset() noexcept;
 	void setNlv(double nlv_new) noexcept;
 	void setID(size_t id) noexcept { m_id = id; }
+	SharedPtr<Tracer> getTracerPtr() const noexcept;
+	void setTracer(SharedPtr<Tracer> tracer) noexcept;
 
 public:
 	ATLAS_API Strategy(

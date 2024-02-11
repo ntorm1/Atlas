@@ -20,13 +20,23 @@ namespace AST
 {
 
 //============================================================================
-struct GridDimension
+export struct GridDimension
 {
 	String dimension_name;
 	size_t dimension_size;
 	Vector<double> dimension_values;
-	StrategyBufferOpNode& buffer_node;
-	std::function<void(StrategyBufferOpNode*, double)> buffer_node_callback;
+	SharedPtr<StrategyBufferOpNode> buffer_node;
+	std::function<void(StrategyBufferOpNode*, double)> buffer_node_getter;
+	std::function<void(StrategyBufferOpNode*, double)> buffer_node_setter;
+	size_t current_index = 0;
+
+	void set(size_t index) noexcept
+	{
+		current_index = index;
+		double value = dimension_values[index];
+		dimension_values[index] = value;
+		buffer_node_setter(buffer_node.get(), value);
+	}
 
 	size_t size() const noexcept
 	{
@@ -36,20 +46,34 @@ struct GridDimension
 
 
 //============================================================================
+enum class GridDimensionType
+{
+	WEIGHT,
+	PNL
+};
+
+
+//============================================================================
 class StrategyGrid
 {
+	friend class Strategy;
 private:
-	using NodeMatrix = LinAlg::EigenMatrix<SharedPtr<StrategyBufferOpNode>>;
-	NodeMatrix m_matrix;
-	std::pair<GridDimension, GridDimension> m_dimensions;
-	double* m_target_buffer_grid = nullptr;
+	Strategy* m_strategy;
 	Exchange const& m_exchange;
-	size_t m_asset_count;
+	std::pair<GridDimension, GridDimension> m_dimensions;
+	LinAlg::EigenMatrix<SharedPtr<Tracer>> m_tracers;
+	double* m_weights_grid = nullptr;
+	double* m_pnl_grid = nullptr;
+	size_t m_asset_count = 0;
 
-	Eigen::Map<LinAlg::EigenVectorXd> getDimensionBuffer(Vector<size_t> index) noexcept;
+	LinAlg::EigenMap<LinAlg::EigenVectorXd> getBuffer(size_t row, size_t col, GridDimensionType t) noexcept;
+	size_t gridStart(size_t row, size_t col) const noexcept;
+	void evaluateGrid() noexcept;
+	void evaluateChild() noexcept;
 
 public:
 	StrategyGrid(
+		Strategy* strategy,
 		Exchange const& exchange,
 		std::pair<GridDimension, GridDimension> m_dimensions
 	) noexcept;

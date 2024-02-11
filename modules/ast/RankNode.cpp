@@ -128,7 +128,7 @@ EVRankNode::getWarmup() const noexcept
 
 //============================================================================
 void
-EVRankNode::evaluate(Eigen::VectorXd& target) noexcept
+EVRankNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
 	// before executing cross sectional rank, execute the parent exchange 
 	// view operation to populate target vector with feature values

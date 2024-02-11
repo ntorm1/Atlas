@@ -78,6 +78,7 @@ export namespace Atlas
 		class CovarianceNode;
 		class ExchangeViewNode;
 		class StrategyNode;
+		class StrategyGrid;
 		class TriggerNode;
 		class TradeLimitNode;
 		class AllocationWeightNode;

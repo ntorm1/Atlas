@@ -28,7 +28,7 @@ struct TradeLimitNodeImpl;
 
 //============================================================================
 export class TradeLimitNode final 
-	: public OpperationNode<void, LinAlg::EigenVectorXd&,LinAlg::EigenVectorXd&>
+	: public OpperationNode<void,  LinAlg::EigenRef<LinAlg::EigenVectorXd> , LinAlg::EigenRef<LinAlg::EigenVectorXd>,  LinAlg::EigenRef<LinAlg::EigenVectorXd>>
 {
 	friend class AllocationBaseNode;
 
@@ -49,8 +49,9 @@ public:
 	) noexcept;
 
 	void evaluate(
-		LinAlg::EigenVectorXd& current_weights,
-		LinAlg::EigenVectorXd& previous_weights
+		 LinAlg::EigenRef<LinAlg::EigenVectorXd> pnl,
+		 LinAlg::EigenRef<LinAlg::EigenVectorXd> current_weights,
+		 LinAlg::EigenRef<LinAlg::EigenVectorXd> previous_weights
 	)noexcept override;
 
 	bool isTradeTypeSet(TradeLimitType type) const noexcept {
@@ -60,8 +61,7 @@ public:
 	size_t getWarmup() const noexcept override {return 0; }
 	void setStopLoss(double stop_loss) noexcept;
 	void setTakeProfit(double take_profit) noexcept;
-
-	ATLAS_API LinAlg::EigenVectorXd const& getPnl() const noexcept;
+	void setLimit(TradeLimitType trade_type, double limit) noexcept;
 };
 
 

@@ -21,7 +21,7 @@ StrategyNode::StrategyNode(
 	SharedPtr<AllocationBaseNode> allocation,
 	Portfolio& portfolio
 ) noexcept :
-	OpperationNode<bool, Eigen::VectorXd&>(NodeType::STRATEGY, allocation.get()),
+	OpperationNode<bool, Eigen::Ref<Eigen::VectorXd>>(NodeType::STRATEGY, allocation.get()),
 	m_allocation(std::move(allocation)),
 	m_portfolio(portfolio)
 {
@@ -37,7 +37,7 @@ StrategyNode::~StrategyNode() noexcept
 
 //============================================================================
 bool
-StrategyNode::evaluate(Eigen::VectorXd& target) noexcept
+StrategyNode::evaluate(Eigen::Ref<Eigen::VectorXd> target) noexcept
 {
 	if (m_trigger && !(*m_trigger)->evaluate())
 	{
@@ -182,7 +182,7 @@ FixedAllocationNode::pyMake(Vector<std::pair<String, double>> m_allocations, Exc
 
 //============================================================================
 void
-FixedAllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
+FixedAllocationNode::evaluateChild(LinAlg::EigenRef<LinAlg::EigenVectorXd>target) noexcept
 {
 	for (auto& pair : m_allocations)
 	{

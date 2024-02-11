@@ -123,7 +123,7 @@ protected:
 	Option<double> m_vol_target = std::nullopt;
 
 protected:
-	void targetVol(LinAlg::EigenVectorXd& target) const noexcept;
+	void targetVol( LinAlg::EigenRef<LinAlg::EigenVectorXd> target) const noexcept;
 
 public:
 	virtual ~AllocationWeightNode() noexcept;
@@ -133,7 +133,7 @@ public:
 		Option<double> vol_target
 	) noexcept;
 	
-	virtual void evaluate(LinAlg::EigenVectorXd& target) noexcept = 0;
+	virtual void evaluate( LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept = 0;
 	bool getIsCached() const noexcept { return m_covariance->getIsCached(); }
 };
 
@@ -151,7 +151,7 @@ public:
 	) noexcept;
 	
 	size_t getWarmup() const noexcept override { return m_covariance->getWarmup(); }
-	void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
+	void evaluate( LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
 

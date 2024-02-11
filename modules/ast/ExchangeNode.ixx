@@ -119,8 +119,8 @@ public:
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	[[nodiscard]] size_t getViewSize() const noexcept { return m_view_size; }
 	[[nodiscard]] auto& getExchange() { return m_exchange; }
-	void filter(LinAlg::EigenVectorXd& v) const noexcept;
-	ATLAS_API  void evaluate(LinAlg::EigenVectorXd&) noexcept override;
+	void filter(LinAlg::EigenRef<LinAlg::EigenVectorXd> v) const noexcept;
+	ATLAS_API  void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd>) noexcept override;
 };
 
 

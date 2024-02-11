@@ -14,6 +14,11 @@ export using EigenMatrixXd = Eigen::MatrixXd;
 export template<typename T>
 using EigenMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
+export template<typename T>
+using EigenMap = Eigen::Map<T>;
+
+export template<typename T>
+using EigenRef = Eigen::Ref<T>;
 
 export template <typename T>
 using EigenConstColView = Eigen::Block<Eigen::Matrix<T, -1, -1, 0, -1, -1>, -1, 1, true>;

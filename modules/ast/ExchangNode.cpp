@@ -44,7 +44,7 @@ ExchangeViewNode::ExchangeViewNode(
 
 //============================================================================
 void
-ExchangeViewNode::filter(Eigen::VectorXd& view) const noexcept
+ExchangeViewNode::filter(LinAlg::EigenRef<LinAlg::EigenVectorXd> view) const noexcept
 {
     for (auto const& filter : m_filters)
     {
@@ -75,11 +75,14 @@ ExchangeViewNode::filter(Eigen::VectorXd& view) const noexcept
 
 //============================================================================
 void
-    ExchangeViewNode::evaluate(Eigen::VectorXd& view) noexcept
+ExchangeViewNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
-    m_asset_op_node->evaluate(view);
+    assert(static_cast<size_t>(target.rows()) == getExchange().getAssetCount());
+    assert(static_cast<size_t>(target.cols()) == 1);
+
+    m_asset_op_node->evaluate(target);
     if (m_filters.size()) {
-        filter(view);
+        filter(target);
     }
 }
 

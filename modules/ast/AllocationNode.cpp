@@ -25,6 +25,7 @@ struct AllocationBaseNodeImpl
 	size_t m_ref_count = 0;
 	AllocationType m_type;
 	double m_epsilon;
+	Eigen::VectorXd m_pnl;
 	Eigen::VectorXd m_weights_buffer;
 	Option<double> m_alloc_param = std::nullopt;
 	Option<SharedPtr<CommisionManager>> m_commision_manager = std::nullopt;
@@ -117,7 +118,17 @@ AllocationBaseNode::setWeightScale(SharedPtr<AllocationWeightNode> scale) noexce
 void
 AllocationBaseNode::setTradeLimit(TradeLimitType t, double limit) noexcept
 {
-	m_impl->m_trade_limit = std::make_unique<TradeLimitNode>(this, t, limit);
+	if (!m_impl->m_trade_limit)
+	{
+		size_t count = getExchange().getAssetCount();
+		m_impl->m_pnl.resize(count);
+		m_impl->m_pnl.setZero();
+		m_impl->m_trade_limit = std::make_unique<TradeLimitNode>(this, t, limit);
+	}
+	else
+	{
+		(*m_impl->m_trade_limit)->setLimit(t, limit);
+	}
 }
 
 
@@ -146,8 +157,11 @@ AllocationBaseNode::getTradeLimitNode() const noexcept
 
 //============================================================================
 void
-AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
+AllocationBaseNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
+	assert(static_cast<size_t>(target.rows()) == getExchange().getAssetCount());
+	assert(static_cast<size_t>(target.cols()) == 1);
+
 	// if we have weight scaler we have to weight for the first instance of the 
 	// covariance matrix cache to be filled before we can proceed
 	if (
@@ -195,7 +209,11 @@ AllocationBaseNode::evaluate(Eigen::VectorXd& target) noexcept
 	// by passing in the previous weights to compute the pnl, then adjust target weights accordingly
 	if (m_impl->m_trade_limit)
 	{
-		(*m_impl->m_trade_limit)->evaluate(target, m_impl->m_weights_buffer);
+		(*m_impl->m_trade_limit)->evaluate(
+			m_impl->m_pnl,
+			target,
+			m_impl->m_weights_buffer
+		);
 	}
 
 	// if we have a commission manager we need to calculate the commission caused
@@ -295,7 +313,7 @@ AllocationNode::pyMake(
 
 //============================================================================
 void
-AllocationNode::evaluateChild(Eigen::VectorXd& target) noexcept
+AllocationNode::evaluateChild(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
 	// evaluate the exchange view to calculate the signal
 	m_exchange_view->evaluate(target);

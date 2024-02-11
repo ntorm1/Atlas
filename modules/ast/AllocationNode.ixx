@@ -56,8 +56,8 @@ public:
 	[[nodiscard]] double getAllocEpsilon() const noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept { return m_warmup; }
 	[[nodiscard]] size_t getAssetCount() const noexcept;
-	void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
-	virtual void evaluateChild(LinAlg::EigenVectorXd& target) noexcept = 0;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	virtual void evaluateChild(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept = 0;
 
 	size_t internalRefCount() const noexcept;
 
@@ -103,7 +103,7 @@ public:
 		double epsilon = 0.000f
 	);
 
-	void evaluateChild(LinAlg::EigenVectorXd& target) noexcept override;
+	void evaluateChild(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
 
@@ -144,7 +144,7 @@ public:
 			double epsilon = 0.000f
 	);
 
-	void evaluateChild(LinAlg::EigenVectorXd& target) noexcept override;
+	void evaluateChild(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
 

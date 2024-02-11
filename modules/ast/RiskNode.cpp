@@ -205,7 +205,7 @@ AllocationWeightNode::AllocationWeightNode(
 
 //============================================================================
 void
-AllocationWeightNode::targetVol(LinAlg::EigenVectorXd& target) const noexcept
+AllocationWeightNode::targetVol( LinAlg::EigenRef<LinAlg::EigenVectorXd> target) const noexcept
 {
 	auto const& covariance = m_covariance->getCovariance();
 	assert(covariance.rows() == covariance.cols());
@@ -235,7 +235,7 @@ InvVolWeight::InvVolWeight(
 
 //============================================================================
 void
-InvVolWeight::evaluate(LinAlg::EigenVectorXd& target) noexcept
+InvVolWeight::evaluate( LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
 	// prevent division by zero
 	assert(target.array().abs().sum() > 1e-10);

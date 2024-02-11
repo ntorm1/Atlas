@@ -56,7 +56,7 @@ public:
 	[[nodiscard]] size_t getNullCount() const noexcept { return m_null_count; }
 	[[nodiscard]] size_t size() const noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
-	ATLAS_API void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
+	ATLAS_API void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
 
@@ -80,15 +80,7 @@ public:
 		SharedPtr<StrategyBufferOpNode> asset_op_left,
 		SharedPtr<StrategyBufferOpNode> asset_op_right,
 		AssetOpType op_type
-	) noexcept :
-		StrategyBufferOpNode(NodeType::ASSET_OP, asset_op_left->getExchange(), std::nullopt),
-		m_asset_op_left(std::move(asset_op_left)),
-		m_asset_op_right(std::move(asset_op_right)),
-		m_op_type(op_type)
-	{
-		warmup = std::max(m_asset_op_left->getWarmup(), m_asset_op_right->getWarmup());
-	}
-
+	) noexcept;
 
 	//============================================================================
 	ATLAS_API static Result<SharedPtr<AssetOpNode>, AtlasException>
@@ -122,7 +114,7 @@ public:
 
 
 	//============================================================================
-	ATLAS_API void evaluate(LinAlg::EigenVectorXd& target) noexcept override;
+	ATLAS_API void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
 };
