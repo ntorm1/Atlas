@@ -20,6 +20,11 @@ protected slots:
 	void mousePress();
 	void mouseWheel();
 	void selectionChanged();
+	virtual void removeSelectedGraph();
+
+public slots:
+	virtual void removeGraphByName(std::string const& name);
+	virtual void removeAllGraphs();
 
 protected:
 	std::optional<std::string> selected_line = std::nullopt;
@@ -43,6 +48,7 @@ class AtlasStrategyPlot final : public AtlasPlot
 
 private:
 	AtlasXPlotBuilder* m_builder = nullptr;
+	String m_strategy_name;
 
 	void addPlot(QString const& name);
 
@@ -52,7 +58,8 @@ protected slots:
 public:
 	AtlasStrategyPlot(
 		QWidget* parent,
-		AtlasXPlotBuilder* builder
+		AtlasXPlotBuilder* builder,
+		String const& strategy_name
 	);
 	~AtlasStrategyPlot();
 

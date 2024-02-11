@@ -24,15 +24,22 @@ AtlasXPlotBuilder::~AtlasXPlotBuilder() noexcept
 
 //==============================================================================
 Option<Span<const Int64>>
-AtlasXPlotBuilder::getExchangeTimeStamps(
-	const String& exchange_name
+AtlasXPlotBuilder::getStrategyTimeStamps(
+	const String& strategy_name
 ) noexcept
 {
-	auto exchange = m_app->getExchange(exchange_name);
-	if (!exchange)
+	auto strategy = m_app->getStrategy(strategy_name);
+	if (!strategy)
 	{
 		return std::nullopt;
 	}
+
+	auto exchange_name = m_app->getParentExchangeName(*strategy);
+	if (!exchange_name)
+	{
+		return std::nullopt;
+	}
+	auto exchange = m_app->getExchange(*exchange_name);
 	Vector<Int64> const& vec = m_app->getTimestamps(*exchange);
 	return Span<const Int64>(vec);
 }
@@ -40,9 +47,21 @@ AtlasXPlotBuilder::getExchangeTimeStamps(
 
 //==============================================================================
 Option<Span<const double>>
-AtlasXPlotBuilder::getStrategyHistory(const String& strategy_name, const String& history_type) noexcept
+AtlasXPlotBuilder::getStrategyHistory(
+	const String& strategy_name,
+	const String& history_type
+) noexcept
 {
-	return Option<Span<const double>>();
+	if (!strategyHistoryTypeMap().contains(history_type))
+	{
+		return std::nullopt;
+	}
+	if (history_type == "NLV")
+	{
+		Atlas::LinAlg::EigenVectorXd const& nlv = m_app->getStrategyNLV(strategy_name);
+		return Span<const double>(const_cast<double*>(nlv.data()), nlv.size());
+	}
+	return std::nullopt;
 }
 
 

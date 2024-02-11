@@ -16,7 +16,7 @@ private:
 	AtlasXAppImpl* m_app;
 
 public:
-	Option<Span<const Int64>> getExchangeTimeStamps(const String& exchange_name) noexcept;
+	Option<Span<const Int64>> getStrategyTimeStamps(const String& strategy_name) noexcept;
 	Option<Span<const double>> getStrategyHistory(
 		const String& strategy_name,
 		const String& history_type

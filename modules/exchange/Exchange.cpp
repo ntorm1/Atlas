@@ -185,31 +185,42 @@ Exchange::reset() noexcept
 {
 	m_impl->current_index = 0;
 	m_impl->current_timestamp = 0;
+
+	// Reset strategies
 	for (auto& strategy : m_impl->registered_strategies)
 	{
 		strategy->m_step_call = false;
 	}
+
+	// Collect triggers to erase
+	Vector<SharedPtr<AST::TriggerNode>> triggersToErase;
 	for (auto& trigger : m_impl->registered_triggers)
 	{
+		assert(trigger);
 		if (trigger.use_count() == 1)
 		{
-			m_impl->registered_triggers.erase(
-				std::remove(
-					m_impl->registered_triggers.begin(),
-					m_impl->registered_triggers.end(),
-					trigger
-				),
-				m_impl->registered_triggers.end()
-			);
+			triggersToErase.push_back(trigger);
 		}
 		else
 		{
 			trigger->reset();
 		}
-	}	
+	}
+
+	// Erase collected triggers
+	for (auto& trigger : triggersToErase)
+	{
+		m_impl->registered_triggers.erase(
+			std::remove(
+				m_impl->registered_triggers.begin(),
+				m_impl->registered_triggers.end(),
+				trigger
+			),
+			m_impl->registered_triggers.end()
+		);
+	}
 	cleanupCovarianceNodes();
 }
-
 
 //============================================================================
 void
@@ -219,7 +230,7 @@ Exchange::step(Int64 global_time) noexcept
 	{
 		return;
 	}
-	
+
 	m_impl->current_timestamp = m_impl->timestamps[m_impl->current_index];
 	
 	if (m_impl->current_timestamp != global_time)

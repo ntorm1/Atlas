@@ -26,6 +26,9 @@ public:
 		AtlasXPlotBuilder* builder,
 		AtlasPlot* plot = nullptr
 	);
+
+	virtual void onHydraReset() {}
+
 	~AtlasPlotWrapper();
 };
 
@@ -41,7 +44,6 @@ private:
 	AtlasStrategyPlot* m_strategy_plot;
 	String m_strategy_name;
 
-
 public:
 	AtlasPlotStrategyWrapper(
 		QWidget* parent,
@@ -51,6 +53,7 @@ public:
 	~AtlasPlotStrategyWrapper();
 
 	String const& getStrategyName() const { return m_strategy_name; }
+	void onHydraReset() override;
 
 };
 

@@ -211,6 +211,7 @@ AtlasXStrategyManager::onHydraRun()
 void
 AtlasXStrategyManager::onHydraReset()
 {
+	m_impl->plot->onHydraReset();
 }
 
 
@@ -513,6 +514,13 @@ AtlasXStrategyManager::initUI() noexcept
 	splitter->addWidget(m_impl->plot.get());
 	splitter->addWidget(m_impl->editor.get());
 	setCentralWidget(splitter);
+}
+
+
+//============================================================================
+void
+AtlasXStrategyManager::initSignals() noexcept
+{
 }
 
 

@@ -46,11 +46,19 @@ AtlasPlotStrategyWrapper::AtlasPlotStrategyWrapper(
 	AtlasXPlotBuilder* builder,
 	String strategy_name
 ) : 
-	AtlasPlotWrapper(parent, builder, new AtlasStrategyPlot(parent, builder))
+	AtlasPlotWrapper(parent, builder, new AtlasStrategyPlot(parent, builder, strategy_name))
 {
 	m_strategy_plot = static_cast<AtlasStrategyPlot*>(m_plot);
 	m_strategy_name = strategy_name;
 	m_strategy_plot->setTitle(std::format("Strategy: {}", strategy_name).c_str());
+}
+
+
+//============================================================================
+void
+AtlasPlotStrategyWrapper::onHydraReset()
+{
+	m_strategy_plot->removeAllGraphs();
 }
 
 

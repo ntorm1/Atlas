@@ -293,7 +293,7 @@ AtlasXAppImpl::getStrategyNLV(String const& strategy_name) const noexcept
 {
 	auto strategy = hydra->getStrategy(strategy_name);
 	assert(strategy);
-	return (*strategy)->getHistory(Atlas::TracerType::VOLATILITY);
+	return (*strategy)->getHistory(Atlas::TracerType::NLV);
 }
 
 
@@ -302,6 +302,14 @@ Option<String>
 AtlasXAppImpl::getParentExchangeName(String const& asset_name) const noexcept
 {
 	return hydra->getParentExchangeName(asset_name);
+}
+
+
+//============================================================================
+Option<String>
+AtlasXAppImpl::getParentExchangeName(SharedPtr<Atlas::Strategy> strategy) const noexcept
+{
+	return strategy->getExchange().getName();
 }
 
 

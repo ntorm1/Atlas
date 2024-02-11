@@ -159,6 +159,7 @@ PeriodicTriggerNode::reset() noexcept
 bool
 PeriodicTriggerNode::evaluate() noexcept
 {
+	assert(m_index_counter > 0);
 	assert((m_index_counter - 1) < static_cast<size_t>(m_tradeable_mask.size()));
 	return static_cast<bool>(m_tradeable_mask(m_index_counter - 1));
 }

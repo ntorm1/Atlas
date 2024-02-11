@@ -84,22 +84,33 @@ void AtlasPlot::setTitle(std::string title)
 void
 AtlasPlot::plot(std::span<const long long> x, std::span<const double> y, std::string name)
 {
-	addGraph();
+	auto new_graph = addGraph();
+	auto fill_graph = addGraph();
 	auto q_name = QString::fromStdString(name);
-	graph()->setName(q_name);
+	new_graph->setName(q_name);
 
 	QVector<QCPGraphData> timeData(x.size());
+	QVector<QCPGraphData> fill(x.size());
 	for (int i = 0; i < x.size(); i++)
 	{
 		timeData[i].key = x[i] / static_cast<double>(1000000000);
 		timeData[i].value = y[i];
+		fill[i].key = x[i] / static_cast<double>(1000000000);
+		fill[i].value = y[0];
 	}
 
-	graph()->data()->set(timeData, true);
+	QBrush brush;
+	QPen pen;
+	QColor color = QColor(std::rand() % 245 + 10, std::rand() % 245 + 10, std::rand() % 245 + 10);
+	new_graph->setPen(QPen(color));
+	new_graph->setBrush(QBrush(color.lighter(150)));
+	new_graph->data()->set(timeData, true);
+
+	fill_graph->data()->set(fill, true);
+	new_graph->setPen(QPen(color));
+	new_graph->setChannelFillGraph(fill_graph);
+
 	rescaleAxes();
-	QPen graphPen;
-	graphPen.setColor(QColor(std::rand() % 245 + 10, std::rand() % 245 + 10, std::rand() % 245 + 10));
-	graph()->setPen(graphPen);
 	replot();
 }
 
@@ -232,12 +243,56 @@ AtlasPlot::selectionChanged()
 
 
 //============================================================================
+void
+AtlasPlot::removeSelectedGraph()
+{
+	if (this->selectedGraphs().size() > 0)
+	{
+		this->removeGraph(this->selectedGraphs().first());
+		this->rescaleAxes();
+		this->replot();
+	}
+}
+
+
+//============================================================================
+void
+AtlasPlot::removeGraphByName(std::string const& name)
+{
+	for (int i = 0; i < this->graphCount(); ++i)
+	{
+		QCPGraph* graph = this->graph(i);
+		if (!legend->hasItemWithPlottable(graph)) { continue; }
+		QCPPlottableLegendItem* item = this->legend->itemWithPlottable(graph);
+		if (item->plottable()->name().toStdString() == name)
+		{
+			removeGraph(graph);
+			rescaleAxes();
+			replot();
+		}
+	}
+}
+
+//============================================================================
+void
+AtlasPlot::removeAllGraphs()
+{
+	clearGraphs();
+	rescaleAxes();
+	replot();
+}
+
+
+
+//============================================================================
 AtlasStrategyPlot::AtlasStrategyPlot(
 	QWidget* parent,
-	AtlasXPlotBuilder* builder
+	AtlasXPlotBuilder* builder,
+	String const& strategy_name
 ) : 
 	AtlasPlot(parent),
-	m_builder(builder)
+	m_builder(builder),
+	m_strategy_name(strategy_name)
 {
 }
 
@@ -282,6 +337,31 @@ void
 AtlasStrategyPlot::addPlot(QString const& name)
 {
 	auto name_std = name.toStdString();
+	auto history = m_builder->getStrategyHistory(m_strategy_name, name_std);
+
+	if (!history)
+	{
+		auto error_msg = std::format("No history found for strategy {} and column {}", m_strategy_name, name_std);
+		QMessageBox::warning(this, "Error", QString::fromStdString(error_msg));
+		return;
+	}
+
+	auto x = m_builder->getStrategyTimeStamps(m_strategy_name);
+	auto y = m_builder->getStrategyHistory(m_strategy_name, name_std);
+
+	if (!x || !y)
+	{
+		auto error_msg = std::format("No {} history found for strategy {}", name.toStdString(), m_strategy_name);
+		QMessageBox::warning(this, "Error", QString::fromStdString(error_msg));
+		return;
+	}
+
+	plot(
+		*x,
+		*y,
+		name.toStdString()
+	);
+
 }
 
 

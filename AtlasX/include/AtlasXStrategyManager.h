@@ -30,6 +30,7 @@ private:
 	void initInterpreter() noexcept;
 	void appendIfNotInSysPath(String const& p) noexcept;
 	void initUI() noexcept;
+	void initSignals() noexcept;
 	void updatePlotUI(UniquePtr<AtlasPlotStrategyWrapper> plot) noexcept;
 	void initPlot(String const& strategy_name) noexcept;
 	void updateStrategyState(bool is_built) noexcept;

@@ -83,9 +83,9 @@ Hydra::addStrategy(
 	SharedPtr<Strategy> strategy,
 	bool replace_if_exists) noexcept
 {
-	if (m_state != HydraState::BUILT)
+	if (m_state != HydraState::BUILT && m_state != HydraState::FINISHED)
 	{
-		return Err("Hydra must be in build state to add strategy");
+		return Err("Hydra must be in build or finished state to add strategy");
 	}
 	if (m_impl->m_strategy_map.contains(strategy->getName()))
 	{
