@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 #include <set>
+#include <span>
 #include <expected>
 
 namespace AtlasX
@@ -28,6 +29,9 @@ namespace AtlasX
 
 	template <typename T>
 	using Vector = std::vector<T>;
+
+	template <typename T>
+	using Span = std::span<T>;
 
 	template <typename T, typename E>
 	using Result = std::expected<T, E>;

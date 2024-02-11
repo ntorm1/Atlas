@@ -65,7 +65,7 @@ class QScintillaEditor : public QMainWindow
     Q_OBJECT
 
 public:
-    QScintillaEditor();
+    QScintillaEditor(QWidget* parent);
     void loadFile(const QString& fileName);
     bool maybeSave();
     bool forceSave();

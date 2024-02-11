@@ -104,9 +104,13 @@ Asset::loadCSV()
 			std::getline(ss, timestamp, ',');
 
 			// try to convert string to epoch time 
-			auto res = Time::strToEpoch(timestamp,"%Y-%m-%d");
+			auto res = Time::strToEpoch(timestamp,"%m/%d/%Y");
 			if (res)
 			{
+				if (res.value() < 0)
+				{
+					return Err("Invalid timestamp: " + timestamp);
+				}
 				timestamps[row_counter] = res.value();
 			}
 			else

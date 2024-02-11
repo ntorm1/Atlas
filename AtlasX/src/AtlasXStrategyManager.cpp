@@ -2,12 +2,6 @@
 #include <filesystem>
 #include <fstream>
 
-#include "../include/AtlasXStrategyManager.h"
-#include "../include/AtlasXExchangeWidget.h"
-#include "../include/AtlasXEditor.h"
-#include "../include/AtlasXImpl.h"
-#include "../include/AtlasXPy.h"
-
 #include <qtoolbar.h>
 #include <qmenubar.h>
 #include <qboxlayout.h>
@@ -23,10 +17,14 @@
 #include <QComboBox>
 #include <QListWidgetItem>
 #include <QSplitter>
-#include <QChartView>
-#include <QDateTimeAxis>
-#include <QValueAxis>
-#include <QLineSeries>
+
+#include "../include/AtlasXStrategyManager.h"
+#include "../include/AtlasXExchangeWidget.h"
+#include "../include/AtlasXEditor.h"
+#include "../include/AtlasXImpl.h"
+#include "../include/AtlasXPy.h"
+#include "../include/AtlasXPlot.h"
+#include "../include/AtlasXPlotData.h"
 
 namespace fs = std::filesystem;
 namespace py = pybind11;
@@ -72,14 +70,12 @@ struct AtlasXStrategyManagerImpl
 	QLabel* strategy_status = nullptr;
 	Option<UniquePtr<AtlasXStrategyTemp>> strategy_temp = std::nullopt;
 	UniquePtr<QScintillaEditor> editor = nullptr;
-	UniquePtr<QChartView> chart_view = nullptr;
+	UniquePtr<AtlasPlotWrapper> plot = nullptr;
+	UniquePtr<AtlasXPlotBuilder> plot_builder = nullptr;
 	bool is_built = false;
 
 
 	Vector<Int64> chart_timestamps_ms;
-	QDateTimeAxis* axisX = nullptr;
-	QValueAxis* axisY = nullptr;
-	QLineSeries* nlv_series = nullptr;
 	double nlv_min = 1e13;
 	double nlv_max = 0.0;
 
@@ -91,8 +87,8 @@ struct AtlasXStrategyManagerImpl
 		self(self),
 		app(app)
 	{
+		plot_builder = std::make_unique<AtlasXPlotBuilder>(app);
 	}
-
 };
 
 
@@ -174,11 +170,6 @@ AtlasXStrategyManager::onHydraStep()
 	auto idx = m_impl->app->getCurrentIdx();
 	assert(idx < static_cast<size_t>(nlv_history.size()));
 	auto nlv = nlv_history[idx];
-	m_impl->nlv_series->append(m_impl->chart_timestamps_ms[idx], nlv);
-	m_impl->chart_view->chart()->axisX()->setRange(
-		QDateTime::fromMSecsSinceEpoch(m_impl->chart_timestamps_ms.front()),
-		QDateTime::fromMSecsSinceEpoch(m_impl->chart_timestamps_ms[idx])
-	);
 
 	if (nlv < m_impl->nlv_min)
 	{
@@ -188,10 +179,6 @@ AtlasXStrategyManager::onHydraStep()
 	{
 		m_impl->nlv_max = nlv;
 	}
-	m_impl->chart_view->chart()->axisY()->setRange(
-		.95*m_impl->nlv_min,
-		1.05*m_impl->nlv_max
-	);
 }
 
 
@@ -211,34 +198,12 @@ AtlasXStrategyManager::onHydraRun()
 	}
 
 	auto const& strategy_name = m_impl->strategy_temp.value()->strategy_name;
-	m_impl->chart_view->chart()->removeAllSeries();
-	m_impl->nlv_series = new QLineSeries();
-	m_impl->nlv_series->setName(QString::fromStdString(strategy_name));
-
 	auto const& nlv_history = m_impl->app->getStrategyNLV(strategy_name);
 	
 	if (!nlv_history.size())
 	{
 		return;
 	}
-	
-	for (size_t i = 0; i < nlv_history.size(); ++i)
-	{
-		m_impl->nlv_series->append(m_impl->chart_timestamps_ms[i], nlv_history[i]);
-	}
-	m_impl->chart_view->chart()->axisX()->setRange(
-		QDateTime::fromMSecsSinceEpoch(m_impl->chart_timestamps_ms.front()),
-		QDateTime::fromMSecsSinceEpoch(m_impl->chart_timestamps_ms.back())
-	);
-	m_impl->nlv_min = *std::min_element(nlv_history.begin(), nlv_history.end());
-	m_impl->nlv_max = *std::max_element(nlv_history.begin(), nlv_history.end());
-	m_impl->chart_view->chart()->axisY()->setRange(
-		.95*m_impl->nlv_min,
-		1.05*m_impl->nlv_max
-	);
-	m_impl->chart_view->chart()->addSeries(m_impl->nlv_series);
-	m_impl->nlv_series->attachAxis(m_impl->axisX);
-	m_impl->nlv_series->attachAxis(m_impl->axisY);
 }
 
 
@@ -246,14 +211,6 @@ AtlasXStrategyManager::onHydraRun()
 void
 AtlasXStrategyManager::onHydraReset()
 {
-	m_impl->chart_view->chart()->removeAllSeries();
-	m_impl->nlv_series = new QLineSeries();
-	m_impl->chart_view->chart()->addSeries(m_impl->nlv_series);
-	if (m_impl->axisX)
-	{
-		m_impl->nlv_series->attachAxis(m_impl->axisX);
-		m_impl->nlv_series->attachAxis(m_impl->axisY);
-	}
 }
 
 
@@ -357,6 +314,7 @@ AtlasXStrategyManager::openStrategy() noexcept
 		strategy_file << "portfolio_id = \"" << m_impl->strategy_temp.value()->portfolio_name << "\"\n";
 		strategy_file << "alloc = " << alloc << "\n\n";
 		strategy_file << "def build(hydra):\n";
+		strategy_file << "\thydra.removeStrategy" << "(strategy_id)\n";
 		strategy_file << "\texchange = hydra.getExchange(exchange_id)\n";
 		strategy_file << "\tportfolio = hydra.getPortfolio(portfolio_id)\n\n\n";
 		strategy_file << "\tstrategy = hydra.addStrategy(Strategy(strategy_id, strategy_node, alloc))\n";
@@ -422,7 +380,7 @@ AtlasXStrategyManager::compileStrategy() noexcept
 		return;
 	}
 	updateStrategyState(true);
-	initPlot();
+	initPlot(m_impl->strategy_temp.value()->strategy_name);
 }
 
 
@@ -477,19 +435,27 @@ AtlasXStrategyManager::selectStrategy() noexcept
 		qDebug() << "Loading Strategy Name: " << strategy_name;
 
 		// get the full path to the strategy
-		fs::path strategy_path = strategy_dir / (strategy_name.toStdString() + ".py");
+		auto strategy_name_std = strategy_name.toStdString();
+		fs::path strategy_path = strategy_dir / (strategy_name_std + ".py");
 
 		// open the strategy in the editor
 		m_impl->editor->loadFile(QString::fromStdString(strategy_path.string()));
 
 		// init the strategy temp
 		m_impl->strategy_temp = std::make_unique<AtlasXStrategyTemp>(
-			strategy_name.toStdString(),
+			strategy_name_std,
 			"",
 			"",
 			strategy_path.string(),
 			0.0
 		);
+
+		// load in strategy plot if it exists
+		auto strategy = m_impl->app->getStrategy(strategy_name_std);
+		if (strategy)
+		{
+			initPlot(strategy_name_std);
+		}
 	}
 }
 
@@ -539,10 +505,12 @@ AtlasXStrategyManager::initUI() noexcept
 	auto splitter = new QSplitter(Qt::Horizontal, this);
 	splitter->setContentsMargins(0, 0, 0, 0);
 
-	initPlot();
-	m_impl->editor = std::make_unique<QScintillaEditor>();
+	initPlot("");
 	
-	splitter->addWidget(m_impl->chart_view.get());
+	m_impl->editor = std::make_unique<QScintillaEditor>(this);
+	m_impl->plot = std::make_unique<AtlasPlotWrapper>(this, m_impl->plot_builder.get());
+
+	splitter->addWidget(m_impl->plot.get());
 	splitter->addWidget(m_impl->editor.get());
 	setCentralWidget(splitter);
 }
@@ -550,53 +518,52 @@ AtlasXStrategyManager::initUI() noexcept
 
 //============================================================================
 void
-AtlasXStrategyManager::initPlot() noexcept
+AtlasXStrategyManager::updatePlotUI(UniquePtr<AtlasPlotStrategyWrapper> new_plot) noexcept
 {
-	// Create a chart view and set the chart
-	if (!m_impl->chart_view)
+	// Get the splitter containing the plot
+	QSplitter* splitter = qobject_cast<QSplitter*>(centralWidget());
+	assert(splitter);
+
+	// Get the index of the plot widget in the splitter
+	int plotIndex = splitter->indexOf(m_impl->plot.get());
+	assert(plotIndex != -1);
+
+	// Replace the old plot widget with the new one
+	splitter->replaceWidget(plotIndex, new_plot.get());
+
+	// Set the new plot widget
+	m_impl->plot = std::move(new_plot);
+}
+
+
+//============================================================================
+void
+AtlasXStrategyManager::initPlot(String const& strategy_name) noexcept
+{
+	// check if the strategy has a plot
+	if (strategy_name == "")
 	{
-		m_impl->chart_view = std::make_unique<QChartView>(this);
-		m_impl->chart_view->setRenderHint(QPainter::Antialiasing);
+		m_impl->plot = std::make_unique<AtlasPlotWrapper>(
+			this, m_impl->plot_builder.get()
+		);
+		return;
 	}
-	else
+
+	// check if the init call is on the same strategy as the current plot
+	auto strategy_wrapper = dynamic_cast<AtlasPlotStrategyWrapper*>(m_impl->plot.get());
+	if (strategy_wrapper && strategy_wrapper->getStrategyName() == strategy_name)
 	{
-		m_impl->chart_view->chart()->removeAllSeries();
-		m_impl->chart_view->chart()->removeAxis(m_impl->axisX);
-		m_impl->chart_view->chart()->removeAxis(m_impl->axisY);
+		return;
 	}
-	
-	auto chart = m_impl->chart_view->chart();
 
-	if (m_impl->strategy_temp)
-	{
-		String const& strategy_name = m_impl->strategy_temp.value()->strategy_name;
-		String const& exchange_name = m_impl->strategy_temp.value()->exchange_name;
-		chart->setTitle(QString::fromStdString(strategy_name));
+	auto strategy = m_impl->app->getStrategy(strategy_name);
+	assert(strategy.has_value());
 
-		auto exchange = m_impl->app->getExchange(exchange_name);
-		assert(exchange);
-		auto const& timestamps = m_impl->app->getTimestamps(*exchange);
-		m_impl->axisX = new QDateTimeAxis;
-		m_impl->axisX->setFormat("yyyy-MM-dd HH:mm:ss");
-		m_impl->axisX->setTitleText("Date");
-		m_impl->axisX->setMax(QDateTime::fromMSecsSinceEpoch(timestamps.back() / 1000000));
-		m_impl->axisX->setMin(QDateTime::fromMSecsSinceEpoch(timestamps.front() / 1000000));
-		chart->addAxis(m_impl->axisX, Qt::AlignBottom);
-
-		// Create a value axis for the Y-axis
-		m_impl->axisY = new QValueAxis;
-		chart->addAxis(m_impl->axisY, Qt::AlignLeft);
-
-		for (size_t i = 0; i < timestamps.size(); ++i)
-		{
-			m_impl->chart_timestamps_ms.push_back(timestamps[i] / 1000000);
-		}
-
-		m_impl->nlv_series = new QLineSeries();
-		m_impl->chart_view->chart()->addSeries(m_impl->nlv_series);
-		m_impl->nlv_series->attachAxis(m_impl->axisX);
-		m_impl->nlv_series->attachAxis(m_impl->axisY);
-	}
+	// build the new plot instance and rebuild the splitter
+	auto plot = std::make_unique<AtlasPlotStrategyWrapper>(
+		this, m_impl->plot_builder.get(), strategy_name
+	);
+	updatePlotUI(std::move(plot));
 }
 
 

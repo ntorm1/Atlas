@@ -9,6 +9,7 @@ namespace AtlasX
 {
 
 struct AtlasXStrategyManagerImpl;
+class AtlasPlotStrategyWrapper;
 
 class AtlasXStrategyManager : public QMainWindow
 {
@@ -29,7 +30,8 @@ private:
 	void initInterpreter() noexcept;
 	void appendIfNotInSysPath(String const& p) noexcept;
 	void initUI() noexcept;
-	void initPlot() noexcept;
+	void updatePlotUI(UniquePtr<AtlasPlotStrategyWrapper> plot) noexcept;
+	void initPlot(String const& strategy_name) noexcept;
 	void updateStrategyState(bool is_built) noexcept;
 
 	String strategyIdToPath(String const& id) noexcept;

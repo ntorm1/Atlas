@@ -57,6 +57,8 @@ public:
 		String name
 	) noexcept;
 
+	//============================================================================
+	Option<SharedPtr<Atlas::Strategy>> getStrategy(String const& strategy_name) noexcept;
 
 	//============================================================================
 	[[nodiscard]] Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException> getExchange(

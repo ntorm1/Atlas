@@ -187,13 +187,12 @@ AtlasXExchangeManager::newExchange()
 
     // Connect signals and slots
     connect(browseButton, &QPushButton::clicked, [&]() {
-        QString filter = tr("HDF5 Files (*.h5)");
-        QString directory = QFileDialog::getOpenFileName(&dialog, tr("Select HDF5 File"), QDir::homePath(), filter, nullptr, QFileDialog::DontUseNativeDialog);
+        QString directory = QFileDialog::getExistingDirectory(&dialog, tr("Select Folder"), QDir::homePath(), QFileDialog::DontUseNativeDialog);
 
         if (!directory.isEmpty()) {
             locationLineEdit->setText(directory);
         }
-    });
+        });
 
     // Add buttons to the dialog
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);

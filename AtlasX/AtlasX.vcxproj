@@ -38,12 +38,12 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>6.5.3</QtInstall>
-    <QtModules>core;gui;widgets;charts</QtModules>
+    <QtModules>core;gui;widgets;printsupport</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>6.5.3</QtInstall>
-    <QtModules>core;gui;widgets;charts</QtModules>
+    <QtModules>core;gui;widgets;printsupport</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -124,6 +124,7 @@
     <QtUic Include="AtlasX.ui" />
     <QtMoc Include="include\AtlasX.h" />
     <QtMoc Include="include\AtlasXExchangeWidget.h" />
+    <ClCompile Include="external\src\qcustomplot.cpp" />
     <ClCompile Include="src\AtlasXAssetWidget.cpp" />
     <ClCompile Include="src\AtlasXEditor.cpp" />
     <ClCompile Include="src\AtlasXExchangeManager.cpp" />
@@ -152,6 +153,14 @@
     <ClCompile Include="src\AtlasX.cpp" />
     <ClCompile Include="src\AtlasXExchangeWidget.cpp" />
     <ClCompile Include="src\AtlasXImpl.cpp" />
+    <ClCompile Include="src\AtlasXPlot.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
+    <ClCompile Include="src\AtlasXPlotData.cpp" />
+    <ClCompile Include="src\AtlasXPlotImpl.cpp" />
     <ClCompile Include="src\AtlasXPortfolioManager.cpp" />
     <ClCompile Include="src\AtlasXPy.cpp" />
     <ClCompile Include="src\AtlasXStrategyManager.cpp" />
@@ -189,13 +198,17 @@
     <QtMoc Include="Qt-Advanced-Docking-System\src\DockAreaWidget.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="external\include\qcustomplot.h" />
     <ClInclude Include="external\include\rangelimitedvalueaxis.h" />
     <QtMoc Include="include\AtlasXEditor.h" />
+    <QtMoc Include="include\AtlasXPlotImpl.h" />
     <ClInclude Include="include\AtlasXHelpers.h" />
     <QtMoc Include="include\AtlasXAssetWidget.h" />
     <ClInclude Include="include\AtlasXImpl.h" />
     <QtMoc Include="include\AtlasXStrategyManager.h" />
     <QtMoc Include="include\AtlasXPortfolioManager.h" />
+    <QtMoc Include="include\AtlasXPlot.h" />
+    <ClInclude Include="include\AtlasXPlotData.h" />
     <ClInclude Include="include\AtlasXPy.h" />
     <ClInclude Include="include\AtlasXTypes.h" />
     <QtMoc Include="include\AtlasXExchangeManager.h" />

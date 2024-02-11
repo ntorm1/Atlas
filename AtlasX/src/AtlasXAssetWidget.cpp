@@ -7,19 +7,11 @@
 #include <QDatetime>
 #include <QScrollArea>
 #include <QMessageBox>
-#include <QChartView>
-#include <QLineSeries>
-#include <QDatetimeAxis>
 
 #include "../include/AtlasXAssetWidget.h"
 #include "../include/AtlasXImpl.h"
 #include "../include/AtlasXHelpers.h"
 
-
-#if QT_VERSION <= 0x060000
-using namespace QtCharts;
-#endif
-#include <QValueAxis>
 
 namespace AtlasX
 {
@@ -33,8 +25,6 @@ struct AtlasXAssetImpl
 	SharedPtr<Atlas::Exchange> exchange;
 	UniquePtr<QTabWidget> tables = nullptr;
 	UniquePtr<QTableView> table_view = nullptr;
-	UniquePtr<QChartView> chart_view = nullptr;
-	HashMap<String, QLineSeries*> series;
 
 	AtlasXAssetImpl(
 		AtlasXAppImpl* a,
@@ -84,7 +74,7 @@ AtlasXAsset::initUI() noexcept
 
 	// asset plot
 	initPlot();
-	asset_internal_layout->addWidget(impl->chart_view.get());
+	//asset_internal_layout->addWidget(impl->chart_view.get());
 
 	auto right_widget = new QWidget(this);
 	impl->tables = std::make_unique<QTabWidget>(this);
@@ -183,27 +173,6 @@ void
 AtlasXAsset::initPlot() noexcept
 {
 	String asset_name = impl->asset_name.has_value() ? impl->asset_name.value() : "No asset selected";
-	
-	// Create a chart view and set the chart
-	impl->chart_view = std::make_unique<QChartView>(this);
-	impl->chart_view->setRenderHint(QPainter::Antialiasing);
-	auto chart = impl->chart_view->chart();
-
-	chart->setTitle(("Asset ID: " + asset_name).c_str());
-
-	auto const& timestamps = impl->app->getTimestamps(impl->exchange);
-	QDateTimeAxis* axisX = new QDateTimeAxis;
-	axisX->setFormat("yyyy-MM-dd HH:mm:ss");
-	axisX->setTitleText("Date");
-	axisX->setMax(QDateTime::fromMSecsSinceEpoch(timestamps.back() / 1000000));
-	axisX->setMin(QDateTime::fromMSecsSinceEpoch(timestamps.front() / 1000000));
-	chart->addAxis(axisX, Qt::AlignBottom);
-
-	// Create a value axis for the Y-axis
-	QValueAxis* axisY = new QValueAxis;
-	chart->addAxis(axisY, Qt::AlignLeft);
-
-
 }
 
 
@@ -223,27 +192,9 @@ AtlasXAsset::plotColumn(int columnIndex) noexcept
 	}
 	assert(column_name != "");
 	
-	if (impl->series.contains(column_name))
-	{
-		return;
-	}
-	
 	auto const& slice = impl->app->getAssetSlice(impl->asset_name.value()).value();
 	auto const& timestamps = impl->app->getTimestamps(impl->exchange);
 	size_t rows = timestamps.size();
-
-	auto chart = impl->chart_view->chart();
-	auto series = new QLineSeries();
-	for (size_t i = 0; i < rows; ++i)
-	{
-		size_t index = i * impl->headers.size() + columnIndex;
-		double val = slice(index);
-		Int64 ms_epoch = timestamps[i] / 1000000;
-		series->append(ms_epoch, val);
-	}
-	series->setName(column_name.c_str());
-	impl->series[column_name] = series;
-	chart->addSeries(series);
 }
 
 
@@ -262,16 +213,6 @@ AtlasXAsset::removeColumn(int columnIndex) noexcept
 		}
 	}
 	assert(column_name != "");
-
-	if (!impl->series.contains(column_name))
-	{
-		return;
-	}
-
-	auto chart = impl->chart_view->chart();
-	auto series = impl->series[column_name];
-	chart->removeSeries(series);
-	impl->series.erase(column_name);
 }
 
 

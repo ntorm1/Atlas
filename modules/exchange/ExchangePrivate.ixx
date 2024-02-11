@@ -40,6 +40,17 @@ export struct Asset {
 		source = std::move(_source);
 	}
 
+	bool isAscending() noexcept
+	{
+		for (size_t i = 1; i < timestamps.size(); ++i)
+		{
+			if (timestamps[i] < timestamps[i - 1])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 	Result<bool, AtlasException> loadCSV();
 
 };

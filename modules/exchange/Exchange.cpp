@@ -6,6 +6,7 @@ module ExchangeModule;
 import ExchangePrivateModule;
 import StrategyModule;
 import AtlasUtilsModule;
+import AtlasTimeModule;
 import HelperNodesModule;
 import RiskNodeModule;
 
@@ -59,10 +60,15 @@ Exchange::validate() noexcept
 		for (size_t i = 1; i < timestamps.size(); i++)
 		{
 			bool is_descending = timestamps[i] < timestamps[i - 1];
-			EXPECT_FALSE(
-				is_descending,
-				"Asset timestamps are not in ascending order"
-			);
+			if (is_descending)
+			{
+				String message = std::format(
+					"Asset timestamps are not in ascending order: i-1: {}, i: {}",
+					Time::convertNanosecondsToTime(timestamps[i - 1]),
+					Time::convertNanosecondsToTime(timestamps[i])
+				);
+				return Err(message);
+			};
 		}
 		m_impl->asset_id_map[asset.name] = m_impl->asset_id_map.size();
 		m_impl->timestamps = sortedUnion(m_impl->timestamps, timestamps);

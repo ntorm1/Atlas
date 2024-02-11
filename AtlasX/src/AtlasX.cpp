@@ -21,6 +21,8 @@
 #include "DockComponentsFactory.h"
 #include "DockAreaWidget.h"
 #include "DockAreaTitleBar.h"
+#include <QLineEdit>
+#include <QComboBox>
 
 using namespace ads;
 
@@ -131,7 +133,6 @@ AtlasXApp::AtlasXApp(QWidget* parent
     initToolBar();
     initStateBar();
     initSignals();
-    initEnvironment();
 }
 
 
@@ -476,8 +477,43 @@ AtlasXApp::initEnvironment() noexcept
         fs::create_directory(path);
     }
 
+    // get all environment folders in the envs parent directory
+    auto env_parent_path = path.parent_path();
+    std::vector<std::string> envs;
+	for (const auto& entry : fs::directory_iterator(env_parent_path))
+	{
+		if (entry.is_directory())
+		{
+			envs.push_back(entry.path().filename().string());
+		}
+	}
+
+    // open a dialog to select the environment to restore
+    QDialog dialog(this);
+    dialog.setWindowTitle("Restore Environment");
+	QVBoxLayout dialog_layout(&dialog);
+    QLabel label("Select Environment to Restore", &dialog);
+	QComboBox combo_box(&dialog);
+    for (const auto& env : envs)
+	{
+		combo_box.addItem(env.c_str());
+	}
+    QPushButton ok_button("OK", &dialog);
+    QPushButton cancel_button("Cancel", &dialog);
+    dialog_layout.addWidget(&label);
+    dialog_layout.addWidget(&combo_box);
+    dialog_layout.addWidget(&ok_button);
+    dialog_layout.addWidget(&cancel_button);
+    connect(&ok_button, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(&cancel_button, &QPushButton::clicked, &dialog, &QDialog::reject);
+    if (dialog.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+
     // load in the hydra config file if it exists
-    auto hydra_config_path = path / "hydra_config.json";
+    auto new_path = env_parent_path / combo_box.currentText().toStdString();
+    auto hydra_config_path = new_path / "hydra_config.json";
     if (fs::exists(hydra_config_path))
 	{
 		qDebug() << "LOADING HYDRA CONFIG";

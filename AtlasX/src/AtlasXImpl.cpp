@@ -75,6 +75,13 @@ AtlasXAppImpl::getPortfolio(String name) noexcept
 	}
 }
 
+
+//============================================================================
+Option<SharedPtr<Atlas::Strategy>> AtlasXAppImpl::getStrategy(String const& strategy_name) noexcept
+{
+	return hydra->getStrategy(strategy_name);
+}
+
 //============================================================================
 Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException>
 AtlasXAppImpl::getExchange(String name) noexcept

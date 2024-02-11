@@ -92,7 +92,7 @@ static QIcon svgIcon(const QString& File)
 }
 
 //============================================================================
-QScintillaEditor::QScintillaEditor()
+QScintillaEditor::QScintillaEditor(QWidget* parent) : QMainWindow(parent)
 {
     textEdit = new QsciScintilla(this);
     setCentralWidget(textEdit);
