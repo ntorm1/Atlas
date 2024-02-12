@@ -114,7 +114,7 @@ AtlasXApp::AtlasXApp(QWidget* parent
     );
 
 
-    auto strategy_manager_dock = AtlasXStrategyManager::make(this,m_impl);
+    auto strategy_manager_dock = AtlasXStrategyManager::make(this,m_impl, m_DockManager);
     m_impl->strategy_manager = static_cast<AtlasXStrategyManager*>(strategy_manager_dock->widget());
     strategy_manager_dock->setFeature(ads::CDockWidget::DockWidgetClosable, false);
     DockArea = m_DockManager->addDockWidgetTabToArea(

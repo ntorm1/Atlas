@@ -38,12 +38,12 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>6.5.3</QtInstall>
-    <QtModules>core;gui;widgets;printsupport</QtModules>
+    <QtModules>core;gui;widgets;printsupport;datavisualization</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>6.5.3</QtInstall>
-    <QtModules>core;gui;widgets;printsupport</QtModules>
+    <QtModules>core;gui;widgets;printsupport;datavisualization</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -163,6 +163,7 @@
     <ClCompile Include="src\AtlasXPlotImpl.cpp" />
     <ClCompile Include="src\AtlasXPortfolioManager.cpp" />
     <ClCompile Include="src\AtlasXPy.cpp" />
+    <ClCompile Include="src\AtlasXScene.cpp" />
     <ClCompile Include="src\AtlasXStrategyManager.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
@@ -210,8 +211,10 @@
     <QtMoc Include="include\AtlasXPlot.h" />
     <ClInclude Include="include\AtlasXPlotData.h" />
     <ClInclude Include="include\AtlasXPy.h" />
+    <QtMoc Include="include\AtlasXScene.h" />
     <ClInclude Include="include\AtlasXTypes.h" />
     <QtMoc Include="include\AtlasXExchangeManager.h" />
+    <ClInclude Include="include\AtlasInter.h" />
     <ClInclude Include="Qt-Advanced-Docking-System\src\DockComponentsFactory.h" />
     <ClInclude Include="Qt-Advanced-Docking-System\src\DockingStateReader.h" />
     <ClInclude Include="Qt-Advanced-Docking-System\src\IconProvider.h" />

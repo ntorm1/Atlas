@@ -68,6 +68,7 @@ public:
 	void registerStrategy(Strategy* strategy) noexcept;
 	auto const& getSource() const noexcept{return m_source;}
 	size_t currentIdx() const noexcept;
+	EigenVectorXd const& getReturnsScalar() const noexcept;
 	EigenBlockView<double> getMarketReturnsBlock(size_t start_idex, size_t end_idx) const noexcept;
 	Option<size_t> getColumnIndex(String const& column) const noexcept;
 	size_t getNullCount(int row_offset) const noexcept;

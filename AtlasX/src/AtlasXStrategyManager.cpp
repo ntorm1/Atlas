@@ -18,6 +18,9 @@
 #include <QListWidgetItem>
 #include <QSplitter>
 
+#include <DockManager.h>
+#include <DockWidget.h>
+
 #include "../include/AtlasXStrategyManager.h"
 #include "../include/AtlasXExchangeWidget.h"
 #include "../include/AtlasXEditor.h"
@@ -25,6 +28,7 @@
 #include "../include/AtlasXPy.h"
 #include "../include/AtlasXPlot.h"
 #include "../include/AtlasXPlotData.h"
+#include "../include/AtlasXScene.h"
 
 namespace fs = std::filesystem;
 namespace py = pybind11;
@@ -69,6 +73,7 @@ struct AtlasXStrategyManagerImpl
 	HashMap<String , py::module_> modules;
 	QLabel* strategy_status = nullptr;
 	Option<UniquePtr<AtlasXStrategyTemp>> strategy_temp = std::nullopt;
+	Option<SharedPtr<AtlasXOptimizer>> optimizer = std::nullopt;
 	UniquePtr<QScintillaEditor> editor = nullptr;
 	UniquePtr<AtlasPlotWrapper> plot = nullptr;
 	UniquePtr<AtlasXPlotBuilder> plot_builder = nullptr;
@@ -95,17 +100,19 @@ struct AtlasXStrategyManagerImpl
 //============================================================================
 AtlasXStrategyManager::AtlasXStrategyManager(
 	QWidget* parent,
-	AtlasXAppImpl* app
+	AtlasXAppImpl* app,
+	ads::CDockManager* dock_manager
 ) noexcept:
 	QMainWindow(parent),
-	m_impl(new AtlasXStrategyManagerImpl(this, app))
+	m_impl(new AtlasXStrategyManagerImpl(this, app)),
+	m_dock_manager(dock_manager)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	auto tool_bar = new QToolBar(this);
 
 	QIcon icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/add.png"));
 	auto a = new QAction(icon, tr("&New Strategy"), this);
-	a->setStatusTip(tr("Create a new strategy"));
+	a->setToolTip(tr("Create a new strategy"));
 	a->setShortcut(QKeySequence::New);
 	connect(
 		a, &QAction::triggered,
@@ -116,7 +123,7 @@ AtlasXStrategyManager::AtlasXStrategyManager(
 
 	icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/select.png"));
 	a = new QAction(icon, tr("&Select Strategy"), this);
-	a->setStatusTip(tr("Select and exsisting strategy"));
+	a->setToolTip(tr("Select and exsisting strategy"));
 	connect(
 		a, &QAction::triggered,
 		this, &AtlasXStrategyManager::selectStrategy
@@ -126,11 +133,21 @@ AtlasXStrategyManager::AtlasXStrategyManager(
 
 	icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/compile.png"));
 	a = new QAction(icon, tr("&Compile"), this);
-	a->setStatusTip(tr("Compile strategy"));
+	a->setToolTip(tr("Compile strategy"));
 	a->setShortcut(QKeySequence::Save);
 	connect(
 		a, &QAction::triggered,
 		this, &AtlasXStrategyManager::compileStrategy
+	);
+	tool_bar->addAction(a);
+
+	icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/comp.png"));
+	a = new QAction(icon, tr("&Optimize"), this);
+	a->setToolTip(tr("Optimizer"));
+	a->setShortcut(QKeySequence::Save);
+	connect(
+		a, &QAction::triggered,
+		this, &AtlasXStrategyManager::openOptimizer
 	);
 	tool_bar->addAction(a);
 
@@ -196,13 +213,15 @@ AtlasXStrategyManager::onHydraRun()
 	{
 		return;
 	}
-
 	auto const& strategy_name = m_impl->strategy_temp.value()->strategy_name;
-	auto const& nlv_history = m_impl->app->getStrategyNLV(strategy_name);
 	
-	if (!nlv_history.size())
+	if (m_impl->optimizer)
 	{
-		return;
+		auto grid_state = m_impl->app->getStrategyGridState(strategy_name);
+		if (grid_state.has_value())
+		{
+			m_impl->optimizer.value()->setGridState(grid_state.value());
+		}
 	}
 }
 
@@ -463,6 +482,20 @@ AtlasXStrategyManager::selectStrategy() noexcept
 
 //============================================================================
 void
+AtlasXStrategyManager::openOptimizer() noexcept
+{
+	ads::CDockWidget* dock = new ads::CDockWidget(
+		"AtlasX Strategy Optimizer"
+	);
+	m_impl->optimizer = std::make_shared<AtlasXOptimizer>(this);
+	dock->setWidget(m_impl->optimizer.value().get());
+	dock->setIcon(QIcon("./styles/icons/comp.png"));
+	auto DockArea = m_dock_manager->addDockWidgetFloating(dock);
+}
+
+
+//============================================================================
+void
 AtlasXStrategyManager::initInterpreter() noexcept
 {
 	auto const& env_path_str = m_impl->app->getEnvPath();
@@ -620,13 +653,14 @@ auto const& env_path_str = m_impl->app->getEnvPath();
 ads::CDockWidget*
 AtlasXStrategyManager::make(
 	QWidget* parent,
-	AtlasXAppImpl* app
+	AtlasXAppImpl* app,
+	ads::CDockManager* dock_manager
 )
 {
 	ads::CDockWidget* dock = new ads::CDockWidget(
 		"AtlasX Strategy Manager"
 	);
-	auto node = new AtlasXStrategyManager(dock, app);
+	auto node = new AtlasXStrategyManager(dock, app, dock_manager);
 	node->setFocusPolicy(Qt::NoFocus);
 	dock->setWidget(node);
 	dock->setIcon(QIcon("./styles/icons/flow.png"));

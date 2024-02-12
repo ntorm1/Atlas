@@ -110,6 +110,12 @@ Exchange::build() noexcept
 		m_impl->assets.size(),
 		m_impl->timestamps.size()
 	);
+	// store 1 + the percentage change in price for each asset at the current timestamp
+	m_impl->returns_scalar.resize(
+		m_impl->assets.size()
+	);
+	m_impl->returns_scalar.setZero();
+
 	// store nan counts for fast access at sim time
 	m_impl->null_count.resize(m_impl->timestamps.size());
 	m_impl->null_count.setZero();
@@ -246,6 +252,10 @@ Exchange::step(Int64 global_time) noexcept
 	std::for_each(m_impl->registered_triggers.begin(), m_impl->registered_triggers.end(), [](auto& trigger) {assert(trigger); trigger->step(); });
 	m_impl->current_index++; // cov node valls currentIdx on first step
 	std::for_each(m_impl->covariance_nodes.begin(), m_impl->covariance_nodes.end(), [](auto& node_pair) { node_pair.second->evaluate(); });
+
+	// cache the scalar returns used for evaluating portfolio
+	LinAlg::EigenConstColView<double> market_returns = getMarketReturns();
+	m_impl->returns_scalar = market_returns.array() + 1.0;
 }
 
 
@@ -373,6 +383,14 @@ Exchange::currentIdx() const noexcept
 {
 	assert(m_impl->current_index > 0);
 	return (m_impl->current_index - 1);
+}
+
+
+//============================================================================
+Eigen::VectorXd const&
+Exchange::getReturnsScalar() const noexcept
+{
+	return m_impl->returns_scalar;
 }
 
 

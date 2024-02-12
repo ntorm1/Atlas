@@ -34,7 +34,11 @@ private:
 	size_t m_warmup;
 
 	void reset() noexcept;
+	void setTracer(SharedPtr<Tracer> tracer) noexcept;
 	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
+	Option<SharedPtr<TradeLimitNode>> getTradeLimitNode() const noexcept;
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
+
 
 public:
 	//============================================================================

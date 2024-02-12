@@ -1,9 +1,14 @@
 #pragma once
 #include <QMainWindow>
 
-#include <DockWidget.h>
 
 #include "../include/AtlasXTypes.h"
+
+namespace ads
+{
+	class CDockManager;
+	class CDockWidget;
+};
 
 namespace AtlasX
 {
@@ -21,12 +26,14 @@ public slots:
 	void onHydraReset();
 
 private:
+	ads::CDockManager* m_dock_manager;
 	AtlasXStrategyManagerImpl* m_impl;
 
 	void newStrategy() noexcept;
 	void openStrategy() noexcept;
 	void compileStrategy() noexcept;
 	void selectStrategy() noexcept;
+	void openOptimizer() noexcept;
 	void initInterpreter() noexcept;
 	void appendIfNotInSysPath(String const& p) noexcept;
 	void initUI() noexcept;
@@ -40,7 +47,8 @@ private:
 public:
 	AtlasXStrategyManager(
 		QWidget *parent,
-		AtlasXAppImpl* app
+		AtlasXAppImpl* app,
+		ads::CDockManager* dock_manager
 		) noexcept;
 	~AtlasXStrategyManager() noexcept;
 
@@ -48,7 +56,8 @@ public:
 	//============================================================================
 	static ads::CDockWidget* make(
 		QWidget* parent,
-		AtlasXAppImpl* hydra
+		AtlasXAppImpl* hydra,
+		ads::CDockManager* dock_manager
 	);
 
 };

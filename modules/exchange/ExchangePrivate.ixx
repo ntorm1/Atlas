@@ -69,6 +69,7 @@ export struct ExchangeImpl
 	Int64 current_timestamp = 0;
 	Eigen::MatrixXd data;
 	Eigen::MatrixXd returns;
+	Eigen::VectorXd returns_scalar;
 	Eigen::VectorXi null_count;
 	size_t col_count = 0;
 	size_t close_index = 0;

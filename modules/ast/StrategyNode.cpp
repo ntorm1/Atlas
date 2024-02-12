@@ -63,6 +63,22 @@ StrategyNode::setCommissionManager(SharedPtr<CommisionManager> manager) noexcept
 }
 
 
+//============================================================================
+Option<SharedPtr<TradeLimitNode>>
+StrategyNode::getTradeLimitNode() const noexcept
+{
+	return m_allocation->getTradeLimitNode();
+}
+
+
+//============================================================================
+LinAlg::EigenRef<LinAlg::EigenVectorXd>
+StrategyNode::getPnL() noexcept
+{
+	return m_allocation->getPnL();
+}
+
+
 //============================================================================s
 Exchange&
 StrategyNode::getExchange() noexcept
@@ -80,6 +96,14 @@ StrategyNode::reset() noexcept
 		(*m_trigger)->reset();
 	}
 	m_allocation->reset();
+}
+
+
+//============================================================================
+void
+StrategyNode::setTracer(SharedPtr<Tracer> tracer) noexcept
+{
+	m_allocation->setTracer(tracer);
 }
 
 

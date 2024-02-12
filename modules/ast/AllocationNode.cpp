@@ -9,6 +9,7 @@ import ExchangeModule;
 import CommissionsModule;
 import ExchangeNodeModule;
 import TradeNodeModule;
+import TracerModule;
 import RiskNodeModule;
 
 
@@ -25,12 +26,12 @@ struct AllocationBaseNodeImpl
 	size_t m_ref_count = 0;
 	AllocationType m_type;
 	double m_epsilon;
-	Eigen::VectorXd m_pnl;
 	Eigen::VectorXd m_weights_buffer;
+	SharedPtr<Tracer> m_tracer = nullptr;
 	Option<double> m_alloc_param = std::nullopt;
 	Option<SharedPtr<CommisionManager>> m_commision_manager = std::nullopt;
 	Option<SharedPtr<AllocationWeightNode>> m_weight_scale = std::nullopt;
-	Option<UniquePtr<TradeLimitNode>> m_trade_limit = std::nullopt;
+	Option<SharedPtr<TradeLimitNode>> m_trade_limit = std::nullopt;
 };
 
 
@@ -121,9 +122,7 @@ AllocationBaseNode::setTradeLimit(TradeLimitType t, double limit) noexcept
 	if (!m_impl->m_trade_limit)
 	{
 		size_t count = getExchange().getAssetCount();
-		m_impl->m_pnl.resize(count);
-		m_impl->m_pnl.setZero();
-		m_impl->m_trade_limit = std::make_unique<TradeLimitNode>(this, t, limit);
+		m_impl->m_trade_limit = std::make_shared<TradeLimitNode>(this, t, limit);
 	}
 	else
 	{
@@ -141,17 +140,33 @@ AllocationBaseNode::setCommissionManager(SharedPtr<CommisionManager> manager) no
 
 
 //============================================================================
-Option<TradeLimitNode*>
+void
+AllocationBaseNode::setTracer(SharedPtr<Tracer> tracer) noexcept
+{
+	m_impl->m_tracer = tracer;
+}
+
+
+//============================================================================
+Option<SharedPtr<TradeLimitNode>>
 AllocationBaseNode::getTradeLimitNode() const noexcept
 {
 	if (m_impl->m_trade_limit)
 	{
-		return m_impl->m_trade_limit->get();
+		return m_impl->m_trade_limit.value();
 	}
 	else
 	{
 		return std::nullopt;
 	}
+}
+
+
+//============================================================================
+LinAlg::EigenRef<LinAlg::EigenVectorXd>
+AllocationBaseNode::getPnL() noexcept
+{
+	return m_impl->m_tracer->getPnL();
 }
 
 
@@ -210,7 +225,7 @@ AllocationBaseNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noe
 	if (m_impl->m_trade_limit)
 	{
 		(*m_impl->m_trade_limit)->evaluate(
-			m_impl->m_pnl,
+			m_impl->m_tracer->getPnL(),
 			target,
 			m_impl->m_weights_buffer
 		);

@@ -5,12 +5,14 @@
 #include "../include/AtlasXImpl.h"
 
 
-import HydraModule;
 import AtlasSerializeModule;
 import AtlasTimeModule;
 import ExchangeMapModule;
 import ExchangeModule;
+import HydraModule;
+import OptimizeNodeModule;
 import StrategyModule;
+import TracerModule;
 
 namespace AtlasX
 {
@@ -318,6 +320,53 @@ HashMap<String, size_t>
 AtlasXAppImpl::getAssetMap(SharedPtr<Atlas::Exchange> e) noexcept
 {
 	return e->getAssetMap();
+}
+
+
+//============================================================================
+Option<SharedPtr<GridState>>
+AtlasXAppImpl::getStrategyGridState(String const& strategy_name) noexcept
+{
+	auto strategy = hydra->getStrategy(strategy_name);
+	if (!strategy)
+	{
+		return std::nullopt;
+	}
+	auto grid = (*strategy)->getGrid();
+	if (!grid)
+	{
+		return std::nullopt;
+	}
+	auto const& grid_ref = grid.value();
+	auto const& dims = grid_ref->getDimensions();
+	Vector<double> x = dims.first->dimension_values;
+	Vector<double> y = dims.second->dimension_values;
+	String x_label = dims.first->dimension_name;
+	String y_label = dims.second->dimension_name;
+
+	auto const& tracers = grid_ref->getTracers();
+	Vector<Vector<double>> z;
+	z.reserve(x.size());
+	for (size_t i = 0; i < x.size(); ++i)
+	{
+		Vector<double> row;
+		row.reserve(y.size());
+		for (size_t j = 0; j < y.size(); ++j)
+		{
+			auto const& tracer = tracers(i, j);
+			double returns = 0;//tracer->getNLV();
+			row.push_back(returns);
+		}
+		z.push_back(row);
+	}
+	return std::make_shared<GridState>(
+		"Returns",
+		x_label,
+		y_label,
+		x,
+		y,
+		z
+	);
 }
 
 }

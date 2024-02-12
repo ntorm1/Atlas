@@ -73,6 +73,7 @@ TradeLimitNode::TradeLimitNode(
 			break;
 	}
 	m_impl = std::make_unique<TradeLimitNodeImpl>(trade_type, limit);
+	m_trade_type |= trade_type;
 	size_t asset_count = parent->getAssetCount();
 }
 
@@ -143,22 +144,52 @@ void TradeLimitNode::evaluate(
 
 	
 //============================================================================
-void
-TradeLimitNode::setStopLoss(double stop_loss) noexcept
+double
+TradeLimitNode::getStopLoss(SharedPtr<TradeLimitNode> node) noexcept
 {
-	m_impl->m_stop_loss = stop_loss;
-	m_trade_type |= TradeLimitType::STOP_LOSS;
+	if (node->isTradeTypeSet(TradeLimitType::STOP_LOSS))
+	{
+		return node->m_impl->m_stop_loss;
+	}
+	return 0.0;
 }
-
 
 //============================================================================
-void 
-TradeLimitNode::setTakeProfit(double take_profit) noexcept
+double
+TradeLimitNode::getTakeProfit(SharedPtr<TradeLimitNode> node) noexcept
 {
-	m_impl->m_take_profit = take_profit;
-	m_trade_type |= TradeLimitType::TAKE_PROFIT;
+	if (node->isTradeTypeSet(TradeLimitType::TAKE_PROFIT))
+	{
+		return node->m_impl->m_take_profit;
+	}
+	return 0.0;
 }
 
+//============================================================================
+void
+TradeLimitNode::setStopLoss(SharedPtr<TradeLimitNode> node, double stopLoss) noexcept
+{
+	if (stopLoss == 0.0)
+	{
+		node->unsetTradeType(TradeLimitType::STOP_LOSS);
+		return;
+	}
+	node->m_impl->m_stop_loss = 1 - stopLoss;
+	node->m_trade_type |= TradeLimitType::STOP_LOSS;
+}
+
+//============================================================================
+void
+TradeLimitNode::setTakeProfit(SharedPtr<TradeLimitNode> node, double takeProfit) noexcept
+{
+	if (takeProfit == 0.0)
+	{
+		node->unsetTradeType(TradeLimitType::TAKE_PROFIT);
+		return;
+	}
+	node->m_impl->m_take_profit = 1 + takeProfit;
+	node->m_trade_type |= TradeLimitType::TAKE_PROFIT;
+}
 
 //============================================================================
 void TradeLimitNode::setLimit(TradeLimitType trade_type, double limit) noexcept
@@ -166,10 +197,22 @@ void TradeLimitNode::setLimit(TradeLimitType trade_type, double limit) noexcept
 	switch (trade_type)
 	{
 		case TradeLimitType::STOP_LOSS:
-			setStopLoss(limit);
+			if (limit == 0.0)
+			{
+				unsetTradeType(TradeLimitType::STOP_LOSS);
+				return;
+			}
+			m_impl->m_stop_loss = 1 - limit;
+			m_trade_type |= TradeLimitType::STOP_LOSS;
 			break;
 		case TradeLimitType::TAKE_PROFIT:
-			setTakeProfit(limit);
+			if (limit == 0.0)
+			{
+				unsetTradeType(TradeLimitType::TAKE_PROFIT);
+				return;
+			}
+			m_impl->m_take_profit = 1 + limit;
+			m_trade_type |= TradeLimitType::TAKE_PROFIT;
 			break;
 	}
 }

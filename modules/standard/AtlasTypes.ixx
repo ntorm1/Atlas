@@ -79,6 +79,7 @@ export namespace Atlas
 		class ExchangeViewNode;
 		class StrategyNode;
 		class StrategyGrid;
+		struct GridDimension;
 		class TriggerNode;
 		class TradeLimitNode;
 		class AllocationWeightNode;

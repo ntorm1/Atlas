@@ -2,8 +2,8 @@
 
 #include <QStringList>
 
-#include "../include/AtlasXTypes.h"
-
+#include "AtlasXTypes.h"
+#include "AtlasInter.h"
 
 
 import AtlasException;
@@ -60,7 +60,6 @@ public:
 	) noexcept;
 
 	
-	HashMap<String, size_t> getPortfolioIdxMap() const noexcept;
 
 	
 	[[nodiscard]] Result<bool, Atlas::AtlasException> deserialize(
@@ -78,7 +77,6 @@ public:
 	
 	HashMap<String, size_t> getExchangeIds() noexcept;
 	size_t* getCurrentIdxPtr() const noexcept;
-	
 	Vector<Int64> const& getTimestamps(SharedPtr<Atlas::Exchange> exchange) noexcept;
 	Vector<Int64> const& getTimestamps() noexcept;
 	QStringList const& getTimestampsStr(SharedPtr<Atlas::Exchange> exchange) noexcept;
@@ -88,7 +86,6 @@ public:
 	String convertNanosecondsToTime(Int64 nanoseconds);
 
 
-	HashMap<String, size_t> const& getExchangeHeaders(SharedPtr<Atlas::Exchange> exchange) noexcept;
 	[[nodiscard]] Option<String> getStrategyParentExchange(
 		String const& strategy_name
 	) const noexcept;
@@ -101,9 +98,11 @@ public:
 	[[nodiscard]] Option<String> getParentExchangeName(
 		SharedPtr<Atlas::Strategy> strategy
 	) const noexcept;
+	HashMap<String, size_t> getPortfolioIdxMap() const noexcept;
+	HashMap<String, size_t> const& getExchangeHeaders(SharedPtr<Atlas::Exchange> exchange) noexcept;
 	HashMap<String, size_t> getAssetMap(SharedPtr<Atlas::Exchange> e) noexcept;
 
-
+	Option<SharedPtr<GridState>> getStrategyGridState(String const& strategy_name) noexcept;
 	
 };
 

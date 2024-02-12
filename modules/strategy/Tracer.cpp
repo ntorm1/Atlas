@@ -55,6 +55,27 @@ Tracer::evaluate() noexcept
 
 //============================================================================
 void
+Tracer::initPnL() noexcept
+{
+    m_pnl.resize(m_exchange.getAssetCount());
+    m_pnl.setZero();
+}
+
+
+//============================================================================
+LinAlg::EigenVectorXd& 
+Tracer::getPnL() noexcept
+{
+    if (!m_pnl.rows()) 
+    {
+		initPnL();
+	}
+    return m_pnl;
+}
+
+
+//============================================================================
+void
 Tracer::reset() noexcept
 {
     m_cash = m_initial_cash;
@@ -103,6 +124,13 @@ Tracer::enableTracerHistory(TracerType t) noexcept
 
 
 //============================================================================
+void
+Tracer::setPnL(LinAlg::EigenRef<LinAlg::EigenVectorXd> pnl) noexcept
+{
+    m_pnl = pnl;
+}
+
+//============================================================================
 Eigen::VectorXd const&
 Tracer::getHistory(TracerType t) const noexcept
 {
@@ -115,6 +143,7 @@ Tracer::getHistory(TracerType t) const noexcept
             assert(false);
             break; // handled differently 
 	}
+    std::unreachable();
 }
 
 

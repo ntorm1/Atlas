@@ -5,6 +5,7 @@ module;
 #else
 #define ATLAS_API  __declspec(dllimport)
 #endif
+#include <functional>
 export module TradeNodeModule;
 
 import AtlasCore;
@@ -22,6 +23,11 @@ namespace AST
 // Define bitwise OR assignment operator for TradeLimitType
 TradeLimitType& operator|=(TradeLimitType& lhs, TradeLimitType rhs) {
 	return lhs = static_cast<TradeLimitType>(static_cast<unsigned int>(lhs) | static_cast<unsigned int>(rhs));
+}
+
+TradeLimitType& operator&=(TradeLimitType& lhs, unsigned int rhs) {
+	lhs = static_cast<TradeLimitType>(static_cast<unsigned int>(lhs) & static_cast<unsigned int>(rhs));
+	return lhs;
 }
 
 struct TradeLimitNodeImpl;
@@ -58,10 +64,29 @@ public:
 		return (m_trade_type & static_cast<unsigned int>(type)) != 0;
 	}
 
+	void unsetTradeType(TradeLimitType type) noexcept {
+		m_trade_type &= ~static_cast<unsigned int>(type);
+	}
+
 	size_t getWarmup() const noexcept override {return 0; }
-	void setStopLoss(double stop_loss) noexcept;
-	void setTakeProfit(double take_profit) noexcept;
 	void setLimit(TradeLimitType trade_type, double limit) noexcept;
+	ATLAS_API static double getStopLoss(SharedPtr<TradeLimitNode> node) noexcept;
+	ATLAS_API static double getTakeProfit(SharedPtr<TradeLimitNode> node) noexcept;
+	ATLAS_API static void setStopLoss(SharedPtr<TradeLimitNode> node, double stopLoss) noexcept;
+	ATLAS_API static void setTakeProfit(SharedPtr<TradeLimitNode> node, double takeProfit) noexcept;
+	
+	ATLAS_API uintptr_t getStopLossGetter() const noexcept {
+		return reinterpret_cast<uintptr_t>(&TradeLimitNode::getStopLoss);
+	}
+	ATLAS_API uintptr_t getTakeProfitGetter() const noexcept {
+		return reinterpret_cast<uintptr_t>(&TradeLimitNode::getTakeProfit);
+	}
+	ATLAS_API uintptr_t getStopLossSetter() const noexcept {
+		return reinterpret_cast<uintptr_t>(&TradeLimitNode::setStopLoss);
+	}
+	ATLAS_API uintptr_t getTakeProfitSetter() const noexcept {
+		return reinterpret_cast<uintptr_t>(&TradeLimitNode::setTakeProfit);
+	}
 };
 
 

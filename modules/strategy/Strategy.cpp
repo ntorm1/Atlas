@@ -9,6 +9,7 @@ import TracerModule;
 import PortfolioModule;
 import StrategyNodeModule;
 import CommissionsModule;
+import OptimizeNodeModule;
 
 import AtlasLinAlg;
 
@@ -26,6 +27,7 @@ public:
 	SharedPtr<Tracer> m_tracer;
 	SharedPtr<AST::StrategyNode> m_ast;
 	Option<SharedPtr<CommisionManager>> m_commision_manager;
+	Option<SharedPtr<AST::StrategyGrid>> m_grid;
 
 	StrategyImpl(
 		Strategy* strategy,
@@ -57,6 +59,7 @@ Strategy::Strategy(
 		std::move(ast),
 		portfolio_weight * init_cash
 	);
+	m_impl->m_ast->setTracer(m_impl->m_tracer);
 	m_name = std::move(name);
 }
 
@@ -105,6 +108,43 @@ Strategy::getNLV() const noexcept
 Strategy::enableTracerHistory(TracerType t) noexcept
 {
 	return m_impl->m_tracer->enableTracerHistory(t);
+}
+
+
+//============================================================================
+Option<SharedPtr<AST::StrategyGrid>> Strategy::getGrid() const noexcept
+{
+	return m_impl->m_grid;
+}
+
+
+//============================================================================
+Result<SharedPtr<AST::StrategyGrid const>, AtlasException>
+Strategy::setGridDimmensions(std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>> dimensions)
+{
+	if (m_impl->m_grid)
+	{
+		return Err("Grid already set");
+	}
+	m_impl->m_grid = std::make_shared<AST::StrategyGrid>(
+		this,
+		m_impl->m_exchange,
+		std::move(dimensions)
+	);
+	return m_impl->m_grid.value();
+}
+
+
+//============================================================================
+SharedPtr<AST::StrategyGrid const>
+Strategy::pySetGridDimmensions(std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>> dimensions)
+{
+	auto res = setGridDimmensions(std::move(dimensions));
+	if (!res)
+	{
+		throw std::runtime_error(res.error().what());
+	}
+	return res.value();
 }
 
 
@@ -196,11 +236,8 @@ Strategy::lateRebalance(
 {
 	// if the strategy does not override the target weights buffer at the end of a time step,
 	// then we need to rebalance the portfolio to the target weights buffer according to the market returns
-	LinAlg::EigenConstColView market_returns = m_impl->m_exchange.getMarketReturns();
-
 	// update the target weights buffer according to the indivual asset returns
-	Eigen::VectorXd returns = market_returns.array() + 1.0;
-	target_weights_buffer = returns.cwiseProduct(target_weights_buffer);
+	target_weights_buffer = m_impl->m_exchange.getReturnsScalar().cwiseProduct(target_weights_buffer);
 
 	// divide the target weights buffer by the sum to get the new weights
 	auto sum = target_weights_buffer.array().abs().sum();
@@ -218,6 +255,14 @@ Strategy::step(Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept
 {
 	// evaluate a grid strategy with the current market prices and weights
 	evaluate(target_weights_buffer);
+
+	if (
+		!m_step_call ||
+		m_impl->m_exchange.currentIdx() < m_impl->m_ast->getWarmup()
+		)
+	{
+		return;
+	}
 
 	// execute the strategy AST node. Update rebalance call if AST 
 	// did not update the target weights buffer
@@ -239,15 +284,20 @@ Strategy::step() noexcept
 	// evaluate the strategy with the current market prices and weights
 	evaluate(m_impl->m_target_weights_buffer);
 
-	// check if exchange took step
+	// check if exchange took step or if the warmup is not over. In which case,
+	// we do not need to execute the strategy AST node but we do check to see 
+	// if the grid needs to be evaluated so that the grid history lines up 
+	// with the base strategy
 	if (!m_step_call)
 	{
+		if (m_impl->m_grid)	(*m_impl->m_grid)->evaluateGrid();
 		return;
 	}
 
 	// check if warmup over 
 	if (m_impl->m_exchange.currentIdx() < m_impl->m_ast->getWarmup())
 	{
+		if (m_impl->m_grid)	(*m_impl->m_grid)->evaluateGrid();
 		return;
 	}
 	// execute the strategy AST node. Update rebalance call if AST 
@@ -259,6 +309,8 @@ Strategy::step() noexcept
 	}
 	assert(!m_impl->m_target_weights_buffer.array().isNaN().any());
 	m_step_call = false;
+
+	if (m_impl->m_grid)	(*m_impl->m_grid)->evaluateGrid();
 }
 
 
@@ -279,9 +331,27 @@ Strategy::getTracerPtr() const noexcept
 
 
 //============================================================================
+Option<SharedPtr<AST::TradeLimitNode>>
+Strategy::getTradeLimitNode() const noexcept
+{
+	return m_impl->m_ast->getTradeLimitNode();
+}
+
+
+//============================================================================
+LinAlg::EigenRef<LinAlg::EigenVectorXd> Strategy::getPnL() noexcept
+{
+	return m_impl->m_ast->getPnL();
+}
+
+
+
+
+//============================================================================
 void
 Strategy::setTracer(SharedPtr<Tracer> tracer) noexcept
 {
+	m_impl->m_ast->setTracer(tracer);
 	m_impl->m_tracer = std::move(tracer);
 }
 
@@ -293,6 +363,7 @@ Strategy::reset() noexcept
 	m_impl->m_tracer->reset();
 	m_impl->m_target_weights_buffer.setZero();
 	m_impl->m_ast->reset();
+	if (m_impl->m_grid)	(*m_impl->m_grid)->reset();
 	m_step_call = false;
 }
 

@@ -43,6 +43,9 @@ protected:
 	size_t m_warmup = 0;
 	void reset() noexcept override;
 	void setWarmup(size_t warmup) noexcept { m_warmup = warmup; }
+	void setTracer(SharedPtr<Tracer> tracer) noexcept;
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
+
 public:
 	virtual ~AllocationBaseNode() noexcept;
 	AllocationBaseNode(
@@ -60,11 +63,10 @@ public:
 	virtual void evaluateChild(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept = 0;
 
 	size_t internalRefCount() const noexcept;
-
+	ATLAS_API Option<SharedPtr<TradeLimitNode>> getTradeLimitNode() const noexcept;
 	ATLAS_API void setWeightScale(SharedPtr<AllocationWeightNode> scale) noexcept;
 	ATLAS_API void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
 	ATLAS_API void setTradeLimit(TradeLimitType t, double limit) noexcept;
-	ATLAS_API Option<TradeLimitNode*> getTradeLimitNode() const noexcept;
 };
 
 
