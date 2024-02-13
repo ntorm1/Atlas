@@ -85,13 +85,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>;ADS_STATIC</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(Qt_DEFINES_);%(PreprocessorDefinitions);ADS_STATIC</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <DisableSpecificWarnings>5050</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);python312.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);python312.lib;qscintilla2_qt6.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">

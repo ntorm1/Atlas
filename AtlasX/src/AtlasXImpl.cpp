@@ -354,7 +354,7 @@ AtlasXAppImpl::getStrategyGridState(String const& strategy_name) noexcept
 		for (size_t j = 0; j < y.size(); ++j)
 		{
 			auto const& tracer = tracers(i, j);
-			double returns = 0;//tracer->getNLV();
+			double returns = tracer->getNLV();
 			row.push_back(returns);
 		}
 		z.push_back(row);

@@ -33,9 +33,9 @@ private:
 	LinAlg::EigenVectorXd m_volatility_history;
 	LinAlg::EigenVectorXd m_pnl;
 	size_t m_idx = 0;
-	double m_cash;
-	double m_initial_cash;
-	double m_nlv;
+	double m_cash = 0.0;
+	double m_initial_cash = 0.0;
+	double m_nlv = 0.0;
 
 	void evaluate() noexcept;
 	void reset() noexcept;

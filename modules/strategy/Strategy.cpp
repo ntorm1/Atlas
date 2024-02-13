@@ -256,14 +256,6 @@ Strategy::step(Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept
 	// evaluate a grid strategy with the current market prices and weights
 	evaluate(target_weights_buffer);
 
-	if (
-		!m_step_call ||
-		m_impl->m_exchange.currentIdx() < m_impl->m_ast->getWarmup()
-		)
-	{
-		return;
-	}
-
 	// execute the strategy AST node. Update rebalance call if AST 
 	// did not update the target weights buffer
 	if (!m_impl->m_ast->evaluate(target_weights_buffer))
@@ -278,9 +270,6 @@ Strategy::step(Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept
 void
 Strategy::step() noexcept
 {
-	assert(static_cast<size_t>(m_impl->m_target_weights_buffer.rows()) == m_impl->m_exchange.getAssetCount());
-	assert(static_cast<size_t>(m_impl->m_target_weights_buffer.cols()) == 1);
-
 	// evaluate the strategy with the current market prices and weights
 	evaluate(m_impl->m_target_weights_buffer);
 

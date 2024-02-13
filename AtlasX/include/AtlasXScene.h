@@ -61,16 +61,22 @@ private:
     Q3DSurface* m_graph;
     QHeightMapSurfaceDataProxy* m_heightMapProxy;
     QSurfaceDataProxy* proxy;
+    QSurfaceDataProxy* proxy_grid;
     QSurface3DSeries* m_heightMapSeries;
     QSurface3DSeries* series;
+    QSurface3DSeries* series_grid;
     Option<SharedPtr<GridState>> m_gridState = std::nullopt;
 
     QSlider* m_axisMinSliderX;
     QSlider* m_axisMaxSliderX;
     QSlider* m_axisMinSliderZ;
     QSlider* m_axisMaxSliderZ;
-    float m_rangeMinX;
-    float m_rangeMinZ;
+    float m_rangeMinX = 0.0f;
+    float m_rangeMaxX = 0.0f;
+    float m_rangeMaxZ = 0.0f;
+    float m_rangeMinZ = 0.0f;
+    int m_sampleCountX = 50;
+    int m_sampleCountZ = 50;
     float m_stepX;
     float m_stepZ;
     int m_heightMapWidth;

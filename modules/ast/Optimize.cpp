@@ -1,5 +1,6 @@
 module;
 #include <Eigen/dense>
+#include <omp.h> 
 module OptimizeNodeModule;
 
 import ExchangeModule;
@@ -80,6 +81,7 @@ StrategyGrid::StrategyGrid(
 	}
 
 	m_weights_grid = new double[row_count * col_count * depth];
+	memset(m_weights_grid, 0, row_count * col_count * depth * sizeof(double));
 }
 
 
@@ -105,8 +107,7 @@ StrategyGrid::reset() noexcept
 	{
 		for (size_t j = 0; j < col_count; ++j)
 		{
-			auto tracer = m_tracers(i, j);
-			tracer->reset();
+			m_tracers(i, j)->reset();
 		}
 	}
 

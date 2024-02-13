@@ -21,8 +21,7 @@ namespace AtlasX
 {
 
 
-const int sampleCountX = 50;
-const int sampleCountZ = 50;
+
 const int heightMapGridStepX = 6;
 const int heightMapGridStepZ = 6;
 
@@ -33,9 +32,14 @@ SurfaceGraph::SurfaceGraph(Q3DSurface* surface)
     m_graph->setAxisX(new QValue3DAxis);
     m_graph->setAxisY(new QValue3DAxis);
     m_graph->setAxisZ(new QValue3DAxis);
+    m_graph->axisX()->setTitleVisible(true);
+    m_graph->axisY()->setTitleVisible(true);
+    m_graph->axisZ()->setTitleVisible(true);
 
     //! [0]
     proxy = new QSurfaceDataProxy();
+    proxy_grid = new QSurfaceDataProxy();
+    series_grid = new QSurface3DSeries(proxy_grid);
     series = new QSurface3DSeries(proxy);
     //! [0]
     fillSqrtSinProxy();
@@ -60,18 +64,18 @@ SurfaceGraph::~SurfaceGraph()
 void
 SurfaceGraph::fillSqrtSinProxy()
 {
-    float stepX = (m_sampleMax - m_sampleMin) / float(sampleCountX - 1);
-    float stepZ = (m_sampleMax - m_sampleMin) / float(sampleCountZ - 1);
+    float stepX = (m_sampleMax - m_sampleMin) / float(m_sampleCountX - 1);
+    float stepZ = (m_sampleMax - m_sampleMin) / float(m_sampleCountZ - 1);
 
     QSurfaceDataArray* dataArray = new QSurfaceDataArray;
-    dataArray->reserve(sampleCountZ);
-    for (int i = 0; i < sampleCountZ; i++) {
-        QSurfaceDataRow* newRow = new QSurfaceDataRow(sampleCountX);
+    dataArray->reserve(m_sampleCountZ);
+    for (int i = 0; i < m_sampleCountZ; i++) {
+        QSurfaceDataRow* newRow = new QSurfaceDataRow(m_sampleCountX);
         // Keep values within range bounds, since just adding step can cause minor drift due
         // to the rounding errors.
         float z = qMin(m_sampleMax, (i * stepZ + m_sampleMin));
         int index = 0;
-        for (int j = 0; j < sampleCountX; j++) {
+        for (int j = 0; j < m_sampleCountX; j++) {
             float x = qMin(m_sampleMax, (j * stepX + m_sampleMin));
             float R = qSqrt(z * z + x * x) + 0.01f;
             float y = (qSin(R) / R + 0.24f) * 1.61f;
@@ -103,7 +107,7 @@ SurfaceGraph::fillGridProxy()
 		}
 		*dataArray << newRow;
 	}
-    proxy->resetArray(dataArray);
+    proxy_grid->resetArray(dataArray);
 }
 
 
@@ -112,33 +116,31 @@ void
 SurfaceGraph::enableSqrtSinModel(bool enable)
 {
     if (enable) {
-        series->setDrawMode(QSurface3DSeries::DrawSurfaceAndWireframe);
-        series->setFlatShadingEnabled(true);
+        series_grid->setDrawMode(QSurface3DSeries::DrawSurfaceAndWireframe);
+        series_grid->setFlatShadingEnabled(true);
 
         m_graph->axisX()->setLabelFormat("%.2f");
         m_graph->axisZ()->setLabelFormat("%.2f");
-        m_graph->axisX()->setRange(m_sampleMin, m_sampleMax);
-        m_graph->axisY()->setRange(0.0f, 2.0f);
-        m_graph->axisZ()->setRange(m_sampleMin, m_sampleMax);
+        m_graph->axisX()->setRange(m_rangeMinX, m_rangeMaxX);
+        m_graph->axisY()->setRange(m_sampleMin, m_sampleMax);
+        m_graph->axisZ()->setRange(m_rangeMinZ, m_rangeMaxZ);
         m_graph->axisX()->setLabelAutoRotation(30);
         m_graph->axisY()->setLabelAutoRotation(90);
         m_graph->axisZ()->setLabelAutoRotation(30);
 
         m_graph->removeSeries(m_heightMapSeries);
-        m_graph->addSeries(series);
+        m_graph->addSeries(series_grid);
 
-        m_rangeMinX = m_sampleMin;
-        m_rangeMinZ = m_sampleMin;
-        m_stepX = (m_sampleMax - m_sampleMin) / float(sampleCountX - 1);
-        m_stepZ = (m_sampleMax - m_sampleMin) / float(sampleCountZ - 1);
-        m_axisMinSliderX->setMaximum(sampleCountX - 2);
+        m_stepX = (m_rangeMaxX - m_rangeMinX) / float(m_sampleCountX - 1);
+        m_stepZ = (m_rangeMaxZ - m_rangeMinZ) / float(m_sampleCountZ - 1);
+        m_axisMinSliderX->setMaximum(m_sampleCountX - 2);
         m_axisMinSliderX->setValue(0);
-        m_axisMaxSliderX->setMaximum(sampleCountX - 1);
-        m_axisMaxSliderX->setValue(sampleCountX - 1);
-        m_axisMinSliderZ->setMaximum(sampleCountZ - 2);
+        m_axisMaxSliderX->setMaximum(m_sampleCountX - 1);
+        m_axisMaxSliderX->setValue(m_sampleCountX - 1);
+        m_axisMinSliderZ->setMaximum(m_sampleCountZ - 2);
         m_axisMinSliderZ->setValue(0);
-        m_axisMaxSliderZ->setMaximum(sampleCountZ - 1);
-        m_axisMaxSliderZ->setValue(sampleCountZ - 1);
+        m_axisMaxSliderZ->setMaximum(m_sampleCountZ - 1);
+        m_axisMaxSliderZ->setValue(m_sampleCountZ - 1);
     }
 }
 
@@ -158,6 +160,17 @@ SurfaceGraph::enableGrid(bool enable)
         Vector<double> const& dim1 = state->dim1;
         Vector<double> const& dim2 = state->dim2;
         Vector<Vector<double>> const& data = state->data;
+
+        m_rangeMinX = dim1[0];
+        m_rangeMaxX = dim1[dim1.size() - 1];
+        m_rangeMinZ = dim2[0];
+        m_rangeMaxZ = dim2[dim2.size() - 1];
+        m_sampleCountX = dim1.size();
+        m_sampleCountZ = dim2.size();
+
+        m_graph->axisX()->setTitle(QString::fromStdString(state->dim1_name));
+        m_graph->axisZ()->setTitle(QString::fromStdString(state->dim2_name));
+        m_graph->axisY()->setTitle(QString::fromStdString(state->measure));
 
         double smallest = 1e10;
         double largest = -1e10;
@@ -281,6 +294,7 @@ void
 SurfaceGraph::setGridState(SharedPtr<GridState> state)
 {
     m_gridState = state;
+    fillGridProxy();
 	enableGrid(true);
 }
 
