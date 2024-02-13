@@ -89,8 +89,9 @@ public:
 	[[nodiscard]] Option<String> getStrategyParentExchange(
 		String const& strategy_name
 	) const noexcept;
-	Atlas::LinAlg::EigenVectorXd const& getStrategyNLV(
-		String const& strategy_name
+	Atlas::LinAlg::EigenVectorXd const& getStrategyMeasure(
+		String const& strategy_name,
+		String const& measure
 	) const noexcept;
 	[[nodiscard]] Option<String> getParentExchangeName(
 		String const& asset_name

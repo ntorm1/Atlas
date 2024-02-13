@@ -24,6 +24,9 @@ Tracer::Tracer(
     m_nlv = cash;
     m_initial_cash = cash;
     m_weight_history.resize(0, 0);
+    m_nlv_history.resize(0);
+    m_weights_buffer.resize(exchange.getAssetCount());
+    m_weights_buffer.setZero();
 }
 
 

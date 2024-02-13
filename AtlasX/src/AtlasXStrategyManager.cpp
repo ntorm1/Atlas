@@ -177,7 +177,7 @@ AtlasXStrategyManager::onHydraStep()
 		return;
 	}
 	auto const& strategy_name = m_impl->strategy_temp.value()->strategy_name;
-	auto const& nlv_history = m_impl->app->getStrategyNLV(strategy_name);
+	auto const& nlv_history = m_impl->app->getStrategyMeasure(strategy_name, "NLV");
 
 	if (!nlv_history.size())
 	{

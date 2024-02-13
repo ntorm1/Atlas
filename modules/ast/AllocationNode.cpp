@@ -26,7 +26,6 @@ struct AllocationBaseNodeImpl
 	size_t m_ref_count = 0;
 	AllocationType m_type;
 	double m_epsilon;
-	Eigen::VectorXd m_weights_buffer;
 	SharedPtr<Tracer> m_tracer = nullptr;
 	Option<double> m_alloc_param = std::nullopt;
 	Option<SharedPtr<CommisionManager>> m_commision_manager = std::nullopt;
@@ -68,8 +67,6 @@ AllocationBaseNode::AllocationBaseNode(
 
 	m_impl = std::make_unique<AllocationBaseNodeImpl>();
 	m_impl->m_type = m_type;
-	m_impl->m_weights_buffer.resize(exchange.getAssetCount());
-	m_impl->m_weights_buffer.setZero();
 	m_impl->m_epsilon = epsilon;
 	m_impl->m_alloc_param = alloc_param;
 }
@@ -199,7 +196,7 @@ AllocationBaseNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noe
 		m_impl->m_trade_limit
 		)
 	{
-		m_impl->m_weights_buffer = target;
+		m_impl->m_tracer->m_weights_buffer = target;
 	}
 
 	// generate new target weights using derived class implementation
@@ -216,8 +213,8 @@ AllocationBaseNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noe
 	// revert the weights back to the original weights before calculating any commissions
 	if (m_impl->m_epsilon)
 	{
-		target = ((target - m_impl->m_weights_buffer).cwiseAbs().array() < m_impl->m_epsilon)
-			.select(m_impl->m_weights_buffer, target);
+		target = ((target - m_impl->m_tracer->m_weights_buffer).cwiseAbs().array() < m_impl->m_epsilon)
+			.select(m_impl->m_tracer->m_weights_buffer, target);
 	}
 
 	// if we have stop loss or take profit we need to check if the trade limits have been exceeded
@@ -227,7 +224,7 @@ AllocationBaseNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noe
 		(*m_impl->m_trade_limit)->evaluate(
 			m_impl->m_tracer->getPnL(),
 			target,
-			m_impl->m_weights_buffer
+			m_impl->m_tracer->m_weights_buffer
 		);
 	}
 
@@ -235,7 +232,7 @@ AllocationBaseNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noe
 	// by the current weights adjustment
 	if (m_impl->m_commision_manager && (*m_impl->m_commision_manager)->hasCommission())
 	{
-		(*m_impl->m_commision_manager)->calculateCommission(target, m_impl->m_weights_buffer);
+		(*m_impl->m_commision_manager)->calculateCommission(target, m_impl->m_tracer->m_weights_buffer);
 	}
 }
 

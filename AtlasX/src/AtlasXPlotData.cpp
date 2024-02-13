@@ -58,7 +58,18 @@ AtlasXPlotBuilder::getStrategyHistory(
 	}
 	if (history_type == "NLV")
 	{
-		Atlas::LinAlg::EigenVectorXd const& nlv = m_app->getStrategyNLV(strategy_name);
+		Atlas::LinAlg::EigenVectorXd const& nlv = m_app->getStrategyMeasure(
+			strategy_name,
+			"NLV"
+		);
+		return Span<const double>(const_cast<double*>(nlv.data()), nlv.size());
+	}
+	if (history_type == "Volatility")
+	{
+		Atlas::LinAlg::EigenVectorXd const& nlv = m_app->getStrategyMeasure(
+			strategy_name,
+			"Volatility"
+		);
 		return Span<const double>(const_cast<double*>(nlv.data()), nlv.size());
 	}
 	return std::nullopt;

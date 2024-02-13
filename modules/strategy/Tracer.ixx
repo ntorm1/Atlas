@@ -32,6 +32,7 @@ private:
 	LinAlg::EigenVectorXd m_nlv_history;
 	LinAlg::EigenVectorXd m_volatility_history;
 	LinAlg::EigenVectorXd m_pnl;
+	LinAlg::EigenVectorXd m_weights_buffer;
 	size_t m_idx = 0;
 	double m_cash = 0.0;
 	double m_initial_cash = 0.0;

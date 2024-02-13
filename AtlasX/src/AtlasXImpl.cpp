@@ -291,11 +291,22 @@ AtlasXAppImpl::getStrategyParentExchange(String const& strategy_name) const noex
 
 //============================================================================
 Atlas::LinAlg::EigenVectorXd const&
-AtlasXAppImpl::getStrategyNLV(String const& strategy_name) const noexcept
+AtlasXAppImpl::getStrategyMeasure(
+	String const& strategy_name,
+	String const& measure
+) const noexcept
 {
 	auto strategy = hydra->getStrategy(strategy_name);
 	assert(strategy);
-	return (*strategy)->getHistory(Atlas::TracerType::NLV);
+	if (measure == "NLV")
+	{
+		return (*strategy)->getHistory(Atlas::TracerType::NLV);
+	}
+	else if (measure == "Volatility")
+	{
+		return (*strategy)->getHistory(Atlas::TracerType::VOLATILITY);
+	}
+	return (*strategy)->getHistory(Atlas::TracerType::NLV); //TODO fix 
 }
 
 
