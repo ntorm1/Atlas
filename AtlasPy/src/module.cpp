@@ -164,10 +164,14 @@ PYBIND11_MODULE(AtlasPy, m) {
         );
 
     py::class_<Atlas::AST::TradeLimitNode, Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::TradeLimitNode>>(m_ast, "TradeLimitNode")
-        .def("getStopLoss", &Atlas::AST::TradeLimitNode::getStopLossGetter)
-        .def("getTakeProfit", &Atlas::AST::TradeLimitNode::getTakeProfitGetter)
-        .def("setStopLoss", &Atlas::AST::TradeLimitNode::getStopLossSetter)
-        .def("setTakeProfit", &Atlas::AST::TradeLimitNode::getTakeProfitSetter);
+        .def_static("getStopLoss", &Atlas::AST::TradeLimitNode::getStopLoss)
+        .def_static("setStopLoss", &Atlas::AST::TradeLimitNode::setStopLoss)
+        .def_static("getTakeProfit", &Atlas::AST::TradeLimitNode::getTakeProfit)
+        .def_static("setTakeProfit", &Atlas::AST::TradeLimitNode::setTakeProfit)
+        .def("stopLossGetter", &Atlas::AST::TradeLimitNode::getStopLossGetter)
+        .def("takeProfitGetter", &Atlas::AST::TradeLimitNode::getTakeProfitGetter)
+        .def("stopLossSetter", &Atlas::AST::TradeLimitNode::getStopLossSetter)
+        .def("takeProfitSetter", &Atlas::AST::TradeLimitNode::getTakeProfitSetter);
 
     py::class_<Atlas::AST::AllocationBaseNode, std::shared_ptr<Atlas::AST::AllocationBaseNode>>(m_ast, "AllocationBaseNode")
         .def("setTradeLimit", &Atlas::AST::AllocationBaseNode::setTradeLimit)

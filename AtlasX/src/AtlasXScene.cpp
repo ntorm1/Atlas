@@ -101,9 +101,9 @@ SurfaceGraph::fillGridProxy()
     Vector<Vector<double>> const& data = state->data;
 
     for (int i = 0; i < dim2.size(); i++) {
-		QSurfaceDataRow* newRow = new QSurfaceDataRow(dim1.size());
-		for (int j = 0; j < dim1.size(); j++) {
-			(*newRow)[j].setPosition(QVector3D(dim1[j], data[i][j], dim2[i]));
+        QSurfaceDataRow* newRow = new QSurfaceDataRow(dim1.size());
+        for (int j = 0; j < dim1.size(); j++) {
+            (*newRow)[j].setPosition(QVector3D(dim2[j], data[i][j], dim1[i]));
 		}
 		*dataArray << newRow;
 	}
@@ -119,8 +119,8 @@ SurfaceGraph::enableSqrtSinModel(bool enable)
         series_grid->setDrawMode(QSurface3DSeries::DrawSurfaceAndWireframe);
         series_grid->setFlatShadingEnabled(true);
 
-        m_graph->axisX()->setLabelFormat("%.2f");
-        m_graph->axisZ()->setLabelFormat("%.2f");
+        m_graph->axisX()->setLabelFormat("%.4f");
+        m_graph->axisZ()->setLabelFormat("%.4f");
         m_graph->axisX()->setRange(m_rangeMinX, m_rangeMaxX);
         m_graph->axisY()->setRange(m_sampleMin, m_sampleMax);
         m_graph->axisZ()->setRange(m_rangeMinZ, m_rangeMaxZ);
@@ -168,14 +168,14 @@ SurfaceGraph::enableGrid(bool enable)
         m_sampleCountX = dim1.size();
         m_sampleCountZ = dim2.size();
 
-        m_graph->axisX()->setTitle(QString::fromStdString(state->dim1_name));
-        m_graph->axisZ()->setTitle(QString::fromStdString(state->dim2_name));
+        m_graph->axisX()->setTitle(QString::fromStdString(state->dim2_name));
+        m_graph->axisZ()->setTitle(QString::fromStdString(state->dim1_name));
         m_graph->axisY()->setTitle(QString::fromStdString(state->measure));
 
         double smallest = 1e10;
         double largest = -1e10;
-        for (int i = 0; i < dim2.size(); i++) {
-			for (int j = 0; j < dim1.size(); j++) {
+        for (int i = 0; i < dim1.size(); i++) {
+			for (int j = 0; j < dim2.size(); j++) {
 				if (data[i][j] < smallest) {
 					smallest = data[i][j];
 				}

@@ -246,7 +246,7 @@ InvVolWeight::evaluate( LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 	auto vol = covariance.diagonal().array().sqrt();
 	assert(!vol.array().isNaN().any());
 	
-	target = (target.array() / vol.array()).matrix();
+	target.array() /= vol.array();
 	double abs_weight_sum = target.array().abs().sum();
 	assert(abs_weight_sum > 1e-10);
 	target = (target.array() / abs_weight_sum).matrix();

@@ -96,6 +96,8 @@ Tracer::reset() noexcept
 	{
         m_volatility_history.setZero();
 	}
+    m_weights_buffer.setZero();
+    m_pnl.setZero();
     m_idx = 0;
 }
 

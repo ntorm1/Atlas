@@ -253,8 +253,6 @@ Strategy::lateRebalance(
 void
 Strategy::step(Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept
 {
-	// evaluate a grid strategy with the current market prices and weights
-	evaluate(target_weights_buffer);
 
 	// execute the strategy AST node. Update rebalance call if AST 
 	// did not update the target weights buffer

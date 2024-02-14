@@ -149,7 +149,7 @@ TradeLimitNode::getStopLoss(SharedPtr<TradeLimitNode> node) noexcept
 {
 	if (node->isTradeTypeSet(TradeLimitType::STOP_LOSS))
 	{
-		return node->m_impl->m_stop_loss;
+		return 1 - node->m_impl->m_stop_loss;
 	}
 	return 0.0;
 }
@@ -160,7 +160,7 @@ TradeLimitNode::getTakeProfit(SharedPtr<TradeLimitNode> node) noexcept
 {
 	if (node->isTradeTypeSet(TradeLimitType::TAKE_PROFIT))
 	{
-		return node->m_impl->m_take_profit;
+		return node->m_impl->m_take_profit - 1;
 	}
 	return 0.0;
 }

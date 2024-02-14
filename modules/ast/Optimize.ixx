@@ -90,6 +90,7 @@ private:
 	LinAlg::EigenMap<LinAlg::EigenVectorXd> getBuffer(size_t row, size_t col) noexcept;
 	size_t gridStart(size_t row, size_t col) const noexcept;
 	void reset() noexcept;
+	void evaluate() noexcept;
 	void evaluateGrid() noexcept;
 	void evaluateChild(size_t row, size_t col) noexcept;
 

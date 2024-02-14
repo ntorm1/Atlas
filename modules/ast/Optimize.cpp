@@ -85,14 +85,7 @@ StrategyGrid::StrategyGrid(
 }
 
 
-//============================================================================
-size_t
-StrategyGrid::gridStart(size_t row, size_t col) const noexcept
-{
-	size_t col_count = m_dimensions.second->size();
-	size_t depth = m_asset_count;
-	return (row * col_count * depth) + (col * depth);
-}
+
 
 
 //============================================================================
@@ -117,6 +110,41 @@ StrategyGrid::reset() noexcept
 	{
 		m_weights_grid[i] = 0.0;
 	}
+}
+
+
+//============================================================================
+void
+StrategyGrid::evaluate() noexcept
+{
+	LinAlg::EigenConstColView market_returns = m_exchange.getMarketReturns();
+	LinAlg::EigenMap<LinAlg::EigenMatrixXd> weights_grid(
+		m_weights_grid,
+		m_asset_count,
+		m_dimensions.first->size() * m_dimensions.second->size()
+	);
+	assert(market_returns.rows() == weights_grid.rows());
+	LinAlg::EigenVectorXd portfolio_returns = market_returns.transpose() * weights_grid;
+	for (size_t i = 0; i < m_dimensions.first->size(); ++i)
+	{
+		for (size_t j = 0; j < m_dimensions.second->size(); ++j)
+		{
+			auto tracer = m_tracers(i, j);
+			double nlv = tracer->getNLV();
+			tracer->setNLV(nlv * (1.0 + portfolio_returns(i * m_dimensions.second->size() + j)));
+			tracer->evaluate();
+		}
+	}
+}
+
+
+//============================================================================
+size_t
+StrategyGrid::gridStart(size_t row, size_t col) const noexcept
+{
+	size_t col_count = m_dimensions.second->size();
+	size_t depth = m_asset_count;
+	return (row * col_count * depth) + (col * depth);
 }
 
 
@@ -147,20 +175,21 @@ StrategyGrid::evaluateGrid() noexcept
 	double original_row_value = m_dimensions.first->getNodeValue();
 	double original_col_value = m_dimensions.second->getNodeValue();
 
+	// evaluate the grid strategy with the current market prices and weights
+	evaluate();
+
 	for (size_t i = 0; i < row_count; ++i)
 	{
 		double row_value = m_dimensions.first->getNodeValue();
 		m_dimensions.first->set(i);
 		for (size_t j = 0; j < col_count; ++j)
 		{
-			double col_value = m_dimensions.second->getNodeValue();
-			m_dimensions.second->set(j);
-			evaluateChild(i, j);
+			double col_value = m_dimensions.second->dimension_values[j];
 			m_dimensions.second->setNodeValue(col_value);
+			evaluateChild(i, j);
 		}
 		m_dimensions.first->setNodeValue(row_value);
 	}
-
 	// restore original value of the dimensions for the base strategy
 	m_dimensions.first->setNodeValue(original_row_value);
 	m_dimensions.second->setNodeValue(original_col_value);
