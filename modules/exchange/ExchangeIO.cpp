@@ -104,7 +104,7 @@ Asset::loadCSV()
 			std::getline(ss, timestamp, ',');
 
 			// try to convert string to epoch time 
-			auto res = Time::strToEpoch(timestamp,"%m/%d/%Y");
+			auto res = Time::strToEpoch(timestamp,"%Y-%m-%d");
 			if (res)
 			{
 				if (res.value() < 0)

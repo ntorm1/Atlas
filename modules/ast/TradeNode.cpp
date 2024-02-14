@@ -99,8 +99,7 @@ void TradeLimitNode::evaluate(
 		// Therefore, current_weights hold the weights that were used for the most 
 		// recent evaluation. So we need to update the trade pnl vector to adjust the pnl
 		// Stat by pulling in the previous market returns using index offset and making a mutable copy of the view
-		Eigen::VectorXd previous_returns = m_exchange.getMarketReturns();
-		previous_returns.array() += 1.0;
+		auto const& previous_returns = m_exchange.getReturnsScalar();
 
 		// multiply 1 + returns to get the new price using the m_pnl buffer
 		pnl = pnl.cwiseProduct(previous_returns);
