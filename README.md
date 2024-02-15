@@ -3,7 +3,7 @@
 ## About
 Atlas is a high performance Algorthmic Trading Backtesting library written in C++23 with a Python wrapper build using pybind11 and a GUI based on QT. It is split into five parts
 
-1. Atlas (core c++ runtime build is Visual Studio Project)
+1. Atlas (core c++ runtime build is Visual Studio DLL Project)
 2. AtlasTest (c++ test suite)
 3. AtlasPy (pybind11 wrapper)
 3. AtlasPerf (dummy c++ project)
@@ -16,7 +16,11 @@ Install requires visual studio and vcpkg manager and the following packages inst
 2. H5CPP
 3. Pybind11 (AtlasPy)
 4. Qt (AtlasX)
-To build simply open the Visual Studio Solution and build AtlasPy. The output of which is a .pyd extension that can be directly imported into Python.
+
+To build simply open the Visual Studio Solution and build AtlasPy. The output of which is a .pyd extension that can be directly imported into Python.         
+To run AtlasX, first build the QScintlla dll files and then build the AtlasX solution and copy over the dll's.
+Let me know of any build issues. Make sure vcpkgs are installed and check the include/dll paths if the solutions to make sure.
+
 
 ## Getting Started
 Currently the only support data form is .h5 files. Here is a dummy example of what the format should look like. Provided you have a dataframe df that looks like this
