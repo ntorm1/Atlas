@@ -238,13 +238,6 @@ Strategy::lateRebalance(
 	// then we need to rebalance the portfolio to the target weights buffer according to the market returns
 	// update the target weights buffer according to the indivual asset returns
 	target_weights_buffer = m_impl->m_exchange.getReturnsScalar().cwiseProduct(target_weights_buffer);
-
-	// divide the target weights buffer by the sum to get the new weights
-	auto sum = target_weights_buffer.array().abs().sum();
-	if (sum > 0.0)
-	{
-		target_weights_buffer /= sum;
-	}
 	assert(!target_weights_buffer.array().isNaN().any());
 }
 
