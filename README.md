@@ -80,15 +80,15 @@ hydra.build()
 Define the strategy. The below strategy will go long all assets if their fast moving average is above their slow, and short vice versa.
 
 ```python
-read_fast = AssetReadNodeWrapper.make("ma_fast", 0, exchange)
-read_slow = AssetReadNodeWrapper.make("ma_slow", 0, exchange)
-spread = AssetDifferenceNodeWrapper.make(read_fast, read_slow)
+read_fast = AssetReadNode.make("ma_fast", 0, exchange)
+read_slow = AssetReadNode.make("ma_slow", 0, exchange)
+spread = AssetOpNode.make(read_fast, read_slow, AssetOpType.SUBTRACT)
 op_variant = AssetOpNodeVariant.make(spread)
 
-filter = ExchangeViewFilter(ExchangeViewFilterType.GREATER_THAN, 0.0)
-exchange_view = ExchangeViewNode(exchange, op_variant, filter)
-allocation = AllocationNodeWrapper.make(exchange_view)
-strategy_node = StrategyNodeWrapper.make(allocation, portfolio)
+exchange_view = ExchangeViewNode.make(exchange, spread)
+exchange_view.setFilter(ExchangeViewFilterType.GREATER_THAN, 0.0)
+allocation = AllocationNode.make(exchange_view)
+strategy_node = StrategyNode.make(allocation, portfolio)
 strategy = hydra.addStrategy(Strategy(strategy_id, strategy_node, alloc), True)
 strategy.enableTracerHistory(TracerType.WEIGHTS)
 strategy.enableTracerHistory(TracerType.NLV)
