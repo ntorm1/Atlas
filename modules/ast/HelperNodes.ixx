@@ -36,7 +36,7 @@ protected:
 	size_t m_warmup = 0;
 	Exchange const& m_exchange;
 
-	static void registerNode(SharedPtr<TriggerNode> node) noexcept;
+	static SharedPtr<TriggerNode> registerNode(SharedPtr<TriggerNode>&& node) noexcept;
 
 public:
 	virtual ~TriggerNode() noexcept = default;

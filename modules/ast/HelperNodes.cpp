@@ -16,11 +16,10 @@ namespace AST
 
 
 //============================================================================
-void
-TriggerNode::registerNode(SharedPtr<TriggerNode> node) noexcept
+SharedPtr<TriggerNode>
+TriggerNode::registerNode(SharedPtr<TriggerNode>&& node) noexcept
 {
-	const_cast<Exchange&>(node->getExchange()).registerTrigger(node); // TODO: ugly hack
-
+	return const_cast<Exchange&>(node->getExchange()).registerTrigger(std::move(node)); // TODO: ugly hack
 }
 
 //============================================================================
@@ -175,8 +174,7 @@ PeriodicTriggerNode::make(SharedPtr<Exchange> exchange, size_t frequency)
 	{
 		throw std::runtime_error(result.error().what());
 	}
-	registerNode(node);
-	return node;
+	return registerNode(std::move(node));
 
 }
 
@@ -204,8 +202,7 @@ StrategyMonthlyRunnerNode::make(
 	{
 		throw std::runtime_error(result.error().what());
 	}
-	registerNode(node);
-	return node;
+	return registerNode(std::move(node));
 }
 
 

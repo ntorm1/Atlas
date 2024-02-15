@@ -159,4 +159,16 @@ ExchangeMap::step() noexcept
 	++m_impl->current_index;
 }
 
+
+//============================================================================
+void
+ExchangeMap::cleanup() noexcept
+{
+	for (auto& exchange : m_impl->exchanges)
+	{
+		exchange->cleanupCovarianceNodes();
+		exchange->cleanupTriggerNodes();
+	}
+}
+
 }

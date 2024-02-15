@@ -92,7 +92,6 @@ Hydra::addStrategy(
 		if (!replace_if_exists)
 		{
 			return Err("Strategy with name " + strategy->getName() + " already exists");
-
 		}
 		// find the strategy and replace it in the vector
 		auto idx = m_impl->m_strategy_map[strategy->getName()];
@@ -162,6 +161,7 @@ Hydra::removeStrategy(String const& name) noexcept
 {
 	if (!m_impl->m_strategy_map.contains(name))
 	{
+		m_impl->m_exchange_map.cleanup();
 		return;
 	}
 	auto idx = m_impl->m_strategy_map[name];
@@ -171,10 +171,16 @@ Hydra::removeStrategy(String const& name) noexcept
 		m_impl->m_strategies[i]->setID(i-1);
 		m_impl->m_strategy_map[m_impl->m_strategies[i]->getName()] = i-1;
 	}
+
+	auto strategy = m_impl->m_strategies[idx];
 	// erase the strategy from the vector
 	m_impl->m_strategies.erase(m_impl->m_strategies.begin() + idx);
+	// assert reference count is 1
+	assert(strategy.use_count() == 1);
 	// update the strategy map
 	m_impl->m_strategy_map.erase(name);
+	// check for unused trigger nodes or covariance nodes.
+	m_impl->m_exchange_map.cleanup();
 }
 
 

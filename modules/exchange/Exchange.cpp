@@ -260,19 +260,19 @@ Exchange::step(Int64 global_time) noexcept
 
 
 //============================================================================
-void
-Exchange::registerTrigger(SharedPtr<AST::TriggerNode> trigger) noexcept
+SharedPtr<AST::TriggerNode>
+Exchange::registerTrigger(SharedPtr<AST::TriggerNode>&& trigger) noexcept
 {
 	// test to see if trigger with same definition already exists
 	for (auto const& existing_trigger : m_impl->registered_triggers)
 	{
 		if (*trigger == *existing_trigger)
 		{
-			trigger = existing_trigger;
-			return;
+			return existing_trigger;
 		}
 	}
 	m_impl->registered_triggers.push_back(trigger);
+	return trigger;
 }
 
 
@@ -316,6 +316,25 @@ Exchange::cleanupCovarianceNodes() noexcept
 				),
 				m_impl->registered_triggers.end()
 			);
+		}
+	}
+}
+
+
+//============================================================================
+void
+Exchange::cleanupTriggerNodes() noexcept
+{
+	for (auto it = m_impl->registered_triggers.begin(); it != m_impl->registered_triggers.end();)
+	{
+		auto trigger = *it;
+		if (trigger.use_count() == 1)
+		{
+			it = m_impl->registered_triggers.erase(it);
+		}
+		else
+		{
+			++it;
 		}
 	}
 }
@@ -413,7 +432,7 @@ Exchange::getCovarianceNode(
 	auto it = std::find(m_impl->registered_triggers.begin(), m_impl->registered_triggers.end(), trigger);
 	if (it == m_impl->registered_triggers.end())
 	{
-		registerTrigger(trigger);
+		trigger = registerTrigger(std::move(trigger));
 	}
 
 	SharedPtr<AST::CovarianceNodeBase> node;

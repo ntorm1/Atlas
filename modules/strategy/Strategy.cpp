@@ -333,13 +333,12 @@ LinAlg::EigenRef<LinAlg::EigenVectorXd> Strategy::getPnL() noexcept
 
 
 
-
 //============================================================================
 void
 Strategy::setTracer(SharedPtr<Tracer> tracer) noexcept
 {
 	m_impl->m_ast->setTracer(tracer);
-	m_impl->m_tracer = std::move(tracer);
+	std::swap(m_impl->m_tracer, tracer);
 }
 
 

@@ -23,26 +23,21 @@ private:
 	void build() noexcept;
 	void reset() noexcept;
 	void step() noexcept;
+	void cleanup() noexcept;
 
-	//============================================================================
-	Vector<Int64> const& getTimestamps() const noexcept;
-
-	//============================================================================
 	Result<SharedPtr<Exchange>, AtlasException> addExchange(
 		String name,
 		String source
 	) noexcept;
-
-	//============================================================================
 	Result<SharedPtr<Exchange>, AtlasException> getExchange(
 		String const& name
 	) const noexcept;
 
-	//============================================================================
-	size_t getCurrentIdx() const noexcept;
 
-	//============================================================================
+	size_t getCurrentIdx() const noexcept;
 	size_t* getCurrentIdxPtr() const noexcept;
+	Vector<Int64> const& getTimestamps() const noexcept;
+
 
 public:
 	ExchangeMap() noexcept;

@@ -34,11 +34,12 @@ private:
 	[[nodiscard]] Result<bool,AtlasException> init() noexcept;
 	[[nodiscard]] Result<bool,AtlasException> validate() noexcept;
 	[[nodiscard]] Result<bool,AtlasException> build() noexcept;
-
+	
+	[[nodiscard]] SharedPtr<AST::TriggerNode> registerTrigger(SharedPtr<AST::TriggerNode>&& trigger) noexcept;
 	void reset() noexcept;
 	void step(Int64 global_time) noexcept;
-	void registerTrigger(SharedPtr<AST::TriggerNode> trigger) noexcept;
 	void cleanupCovarianceNodes() noexcept;
+	void cleanupTriggerNodes() noexcept;
 
 	Option<size_t> getCloseIndex() const noexcept;
 	EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;

@@ -103,13 +103,15 @@ AtlasPlot::plot(std::span<const long long> x, std::span<const double> y, std::st
 	QPen pen;
 	QColor color = QColor(std::rand() % 245 + 10, std::rand() % 245 + 10, std::rand() % 245 + 10);
 	new_graph->setPen(QPen(color));
-	new_graph->setBrush(QBrush(color.lighter(150)));
 	new_graph->data()->set(timeData, true);
 
-	fill_graph->data()->set(fill, true);
-	new_graph->setPen(QPen(color));
-	new_graph->setChannelFillGraph(fill_graph);
-
+	if (name == "NLV")
+	{
+		new_graph->setBrush(QBrush(color.lighter(150)));
+		fill_graph->data()->set(fill, true);
+		new_graph->setPen(QPen(color));
+		new_graph->setChannelFillGraph(fill_graph);
+	}
 	rescaleAxes();
 	replot();
 }
