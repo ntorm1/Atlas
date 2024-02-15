@@ -17,9 +17,11 @@ Install requires visual studio and vcpkg manager and the following packages inst
 3. Pybind11 (AtlasPy)
 4. Qt (AtlasX)
 
-To build simply open the Visual Studio Solution and build AtlasPy. The output of which is a .pyd extension that can be directly imported into Python.         
-To run AtlasX, first build the QScintlla dll files and then build the AtlasX solution and copy over the dll's.
-Let me know of any build issues. Make sure vcpkgs are installed and check the include/dll paths if the solutions to make sure.
+To build
+- cd to AtlasX/external/QScintilla/src. Open x64 Native Tools Command Prompt
+- run qmake
+- run nmake /f Makefile.Debug (and release), then copy dll files to x64/debug and release
+- Open AtlasX.sln and build.
 
 
 ## Getting Started
