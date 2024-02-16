@@ -12,6 +12,7 @@ namespace Atlas
 struct ExchangeMapImpl
 {
 	HashMap<String, size_t> exchange_id_map;
+	HashMap<size_t, String> asset_map;
 	Vector<SharedPtr<Exchange>> exchanges;
 	Vector<Int64> timestamps;
 	Int64 global_time;
@@ -114,7 +115,15 @@ ExchangeMap::addExchange(String name, String source) noexcept
 	EXPECT_TRUE(res_build, exchange->build());
 	SAFE_MAP_INSERT(m_impl->exchange_id_map, exchange->getName(), m_impl->exchanges.size());
 	m_impl->exchanges.push_back(std::move(exchange));
-	return m_impl->exchanges.back();
+
+	// copy over exchange's asset map and set the exchange's index offset equal to the asset map size
+	auto exchange_ptr = m_impl->exchanges.back();
+	for (auto const& asset : exchange_ptr->getAssetMap())
+	{
+		m_impl->asset_map[asset.second + m_impl->asset_map.size()] = asset.first ;
+	}
+	exchange_ptr->setExchangeOffset(m_impl->asset_map.size());
+	return exchange_ptr;
 }
 
 

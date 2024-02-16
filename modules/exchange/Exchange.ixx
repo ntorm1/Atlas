@@ -40,9 +40,7 @@ private:
 	void step(Int64 global_time) noexcept;
 	void cleanupCovarianceNodes() noexcept;
 	void cleanupTriggerNodes() noexcept;
-
-	Option<size_t> getCloseIndex() const noexcept;
-	EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;
+	void setExchangeOffset(size_t _offset) noexcept;
 
 public:
 	Exchange(
@@ -69,10 +67,13 @@ public:
 	void registerStrategy(Strategy* strategy) noexcept;
 	auto const& getSource() const noexcept{return m_source;}
 	size_t currentIdx() const noexcept;
+
 	EigenVectorXd const& getReturnsScalar() const noexcept;
 	EigenBlockView<double> getMarketReturnsBlock(size_t start_idex, size_t end_idx) const noexcept;
+	EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;
 	Option<size_t> getColumnIndex(String const& column) const noexcept;
-	size_t getNullCount(int row_offset) const noexcept;
+	Option<size_t> getCloseIndex() const noexcept;
+	size_t getExchangeOffset() const noexcept;
 
 	// ======= PUBLIC API ======= //
 	ATLAS_API SharedPtr<AST::CovarianceNodeBase> getCovarianceNode(

@@ -39,6 +39,7 @@ private:
 	void step(LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
 	void step() noexcept;
 	void reset() noexcept;
+	void realize() noexcept;
 	void setNlv(double nlv_new) noexcept;
 	void setID(size_t id) noexcept { m_id = id; }
 	SharedPtr<Tracer> getTracerPtr() const noexcept;

@@ -24,7 +24,6 @@ AssetReadNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
 	auto slice = m_exchange.getSlice(m_column, m_row_offset);
 	assert(static_cast<size_t>(slice.rows()) == m_exchange.getAssetCount());
-	
 	size_t slice_rows = static_cast<size_t>(slice.rows());
 	size_t target_rows = static_cast<size_t>(target.rows());
 	assert(slice_rows == target_rows);

@@ -107,6 +107,15 @@ Strategy::getNLV() const noexcept
 [[nodiscard]] Result<bool, AtlasException>
 Strategy::enableTracerHistory(TracerType t) noexcept
 {
+	switch (t)
+	{
+		case TracerType::ORDERS_EAGER:
+		case TracerType::ORDERS_LAZY:
+			m_impl->m_ast->enableCopyWeightsBuffer();
+		default:
+			break;
+	}
+
 	return m_impl->m_tracer->enableTracerHistory(t);
 }
 
@@ -344,6 +353,14 @@ Strategy::reset() noexcept
 	m_impl->m_ast->reset();
 	if (m_impl->m_grid)	(*m_impl->m_grid)->reset();
 	m_step_call = false;
+}
+
+
+//============================================================================
+void
+Strategy::realize() noexcept
+{
+	m_impl->m_tracer->realize();
 }
 
 

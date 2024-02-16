@@ -231,10 +231,18 @@ Hydra::run() noexcept
 		steps -= m_impl->m_exchange_map.getCurrentIdx();
 	}
 
+	// enter simulation loop
 	for (size_t i = 0; i < steps; ++i)
 	{
 		step();
 	}
+
+	// on finish realize strategy valuation as needed
+	for (auto& strategy : m_impl->m_strategies)
+	{
+		strategy->realize();
+	}
+
 	m_state = HydraState::FINISHED;
 	return true;
 }

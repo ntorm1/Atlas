@@ -36,6 +36,7 @@ private:
 	void reset() noexcept;
 	void setTracer(SharedPtr<Tracer> tracer) noexcept;
 	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;
+	void enableCopyWeightsBuffer() noexcept;
 	Option<SharedPtr<TradeLimitNode>> getTradeLimitNode() const noexcept;
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
 

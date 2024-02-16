@@ -69,6 +69,10 @@ AllocationBaseNode::AllocationBaseNode(
 	m_impl->m_type = m_type;
 	m_impl->m_epsilon = epsilon;
 	m_impl->m_alloc_param = alloc_param;
+	if (epsilon)
+	{
+		copy_weights_buffer = true;
+	}
 }
 
 
@@ -116,6 +120,7 @@ AllocationBaseNode::setWeightScale(SharedPtr<AllocationWeightNode> scale) noexce
 void
 AllocationBaseNode::setTradeLimit(TradeLimitType t, double limit) noexcept
 {
+	copy_weights_buffer = true;
 	if (!m_impl->m_trade_limit)
 	{
 		size_t count = getExchange().getAssetCount();
@@ -132,6 +137,7 @@ AllocationBaseNode::setTradeLimit(TradeLimitType t, double limit) noexcept
 void
 AllocationBaseNode::setCommissionManager(SharedPtr<CommisionManager> manager) noexcept
 {
+	copy_weights_buffer = true;
 	m_impl->m_commision_manager = manager;
 }
 
@@ -189,12 +195,8 @@ AllocationBaseNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noe
 	// 
 	// Additionally if weight epsilon is set we need to copy the current weights
 	// so that any adjustments made are reverted back if the absolute value of the
-	// differene is less than epsilon
-	if (
-		m_impl->m_commision_manager||
-		m_impl->m_epsilon ||
-		m_impl->m_trade_limit
-		)
+	// difference is less than epsilon
+	if (copy_weights_buffer)
 	{
 		m_impl->m_tracer->m_weights_buffer = target;
 	}

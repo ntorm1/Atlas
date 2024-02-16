@@ -59,6 +59,9 @@ export struct Asset {
 //============================================================================
 export struct ExchangeImpl
 {
+	friend class Exchange;
+
+public:
 	HashMap<String, size_t> asset_id_map;
 	HashMap<String, size_t> headers;
 	Vector<Asset> assets;
@@ -70,7 +73,7 @@ export struct ExchangeImpl
 	Eigen::MatrixXd data;
 	Eigen::MatrixXd returns;
 	Eigen::VectorXd returns_scalar;
-	Eigen::VectorXi null_count;
+	size_t exchange_offset = 0;
 	size_t col_count = 0;
 	size_t close_index = 0;
 	size_t current_index = 0;
@@ -79,6 +82,13 @@ export struct ExchangeImpl
 	{
 		data = Eigen::MatrixXd::Zero(0, 0);
 	}
+
+private:
+	void setExchangeOffset(size_t _offset) noexcept
+	{
+		exchange_offset = _offset;
+	}
+
 };
 
 }

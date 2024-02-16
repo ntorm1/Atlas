@@ -8,7 +8,9 @@ export namespace Atlas
 	export enum class TracerType {
 		NLV,
 		VOLATILITY,
-		WEIGHTS
+		WEIGHTS,
+		ORDERS_EAGER,
+		ORDERS_LAZY
 	};
 
 	//============================================================================

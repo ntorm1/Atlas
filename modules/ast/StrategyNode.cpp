@@ -64,6 +64,14 @@ StrategyNode::setCommissionManager(SharedPtr<CommisionManager> manager) noexcept
 
 
 //============================================================================
+void
+StrategyNode::enableCopyWeightsBuffer() noexcept
+{
+	m_allocation->setCopyWeightsBuffer(true);
+}
+
+
+//============================================================================
 Option<SharedPtr<TradeLimitNode>>
 StrategyNode::getTradeLimitNode() const noexcept
 {

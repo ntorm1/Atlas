@@ -53,6 +53,13 @@ Tracer::evaluate() noexcept
             m_volatility_history(m_idx) = current_volatility;
         }
 	}
+    if (m_struct_tracer && m_struct_tracer.value()->eager())
+    {
+        m_struct_tracer.value()->evaluate(
+			m_strategy.getAllocationBuffer(),
+			m_weights_buffer
+		);
+    }
     m_idx++;
 }
 
@@ -97,6 +104,10 @@ Tracer::reset() noexcept
 	{
         m_volatility_history.setZero();
 	}
+    if (m_struct_tracer)
+    {
+        m_struct_tracer.value()->reset();
+    }
     m_weights_buffer.setZero();
     m_pnl.setZero();
     m_idx = 0;
@@ -124,6 +135,13 @@ Tracer::enableTracerHistory(TracerType t) noexcept
             m_volatility_history.resize(n);
 			m_volatility_history.setZero();
 			break;
+        case TracerType::ORDERS_LAZY:
+        case TracerType::ORDERS_EAGER:
+            if (!m_struct_tracer) {
+                m_struct_tracer = std::make_unique<StructTracer>(m_exchange, *this);
+            }
+            m_struct_tracer.value()->enabelTracerHistory(t);
+            break;
     }
     return true;
 }
@@ -135,6 +153,17 @@ Tracer::setPnL(LinAlg::EigenRef<LinAlg::EigenVectorXd> pnl) noexcept
 {
     m_pnl = pnl;
 }
+
+
+//============================================================================
+void
+Tracer::realize() noexcept
+{
+    if (m_struct_tracer) {
+		m_struct_tracer.value()->realize();
+	}
+}
+
 
 //============================================================================
 Eigen::VectorXd const&
@@ -150,6 +179,102 @@ Tracer::getHistory(TracerType t) const noexcept
             break; // handled differently 
 	}
     std::unreachable();
+}
+
+
+//============================================================================
+StructTracer::StructTracer(
+    Exchange const& exchange,
+    Tracer const& tracer
+) noexcept:
+    m_exchange(exchange),
+    m_tracer(tracer)
+{
+    auto close_idx = exchange.getCloseIndex();
+    assert(close_idx);
+    close_index = *close_idx;
+}
+
+//============================================================================
+StructTracer::~StructTracer() noexcept
+{
+
+}
+
+
+//============================================================================
+void
+StructTracer::enabelTracerHistory(TracerType t) noexcept
+{
+	switch (t) {
+		case TracerType::ORDERS_EAGER:
+            orders_eager = true;
+			break;
+        case TracerType::ORDERS_LAZY:
+            orders_lazy = true;
+			break;
+        default:
+            return;
+	}
+}
+
+
+//============================================================================
+void
+StructTracer::evaluate(
+    LinAlg::EigenVectorXd const& weights,
+    LinAlg::EigenVectorXd const& previous_weights
+) noexcept
+{
+    if (orders_eager) {
+        // get the deviation from the previous weights
+        LinAlg::EigenVectorXd deviation = weights - previous_weights;
+        // scale weights by the nlv 
+        deviation *= m_tracer.m_nlv;
+        // fetch the current market prices
+        auto close_prices = m_exchange.getSlice(close_index, 0);
+        // scale the deviation by the market prices to get the units
+        deviation = deviation.cwiseQuotient(close_prices);
+        // populate order struct where deviation is greater than 0
+        Int64 current_time = m_exchange.getCurrentTimestamp();
+        size_t exchange_offset = m_exchange.getExchangeOffset();
+        size_t strategy_id = m_tracer.m_strategy.getId();
+        for (size_t i = 0; i < static_cast<size_t>(deviation.size()); i++) {
+            auto order = Order(
+				i + exchange_offset,
+				strategy_id,
+				current_time,
+				deviation(i),
+				close_prices(i)
+			);
+            m_orders.push_back(std::move(order));
+        }
+    }
+}
+
+
+//============================================================================
+void
+StructTracer::realize() noexcept
+{
+    if (!m_tracer.m_weight_history.cols()) return;
+
+    if (orders_lazy) {
+        for (size_t i = 1; i < static_cast<size_t>(m_tracer.m_weight_history.cols()); i++) {
+            auto previous_weights = m_tracer.m_weight_history.col(i - 1);
+            auto current_weights = m_tracer.m_weight_history.col(i);
+            evaluate(current_weights, previous_weights);
+        }
+    }
+}
+
+
+//============================================================================
+void
+StructTracer::reset() noexcept
+{
+    m_orders.clear();
+    m_trades.clear();
 }
 
 

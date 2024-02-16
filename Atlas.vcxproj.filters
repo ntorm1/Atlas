@@ -24,6 +24,9 @@
     <ClInclude Include="include\unordered_dense.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\AtlasStruct.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

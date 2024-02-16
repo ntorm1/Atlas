@@ -41,9 +41,11 @@ export class AllocationBaseNode : public StrategyBufferOpNode
 protected:
 	UniquePtr<AllocationBaseNodeImpl> m_impl;
 	size_t m_warmup = 0;
+	bool copy_weights_buffer = false;
 	void reset() noexcept override;
 	void setWarmup(size_t warmup) noexcept { m_warmup = warmup; }
 	void setTracer(SharedPtr<Tracer> tracer) noexcept;
+	void setCopyWeightsBuffer(bool copy) noexcept { copy_weights_buffer = copy; }
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
 
 public:

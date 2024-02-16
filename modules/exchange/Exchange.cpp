@@ -116,10 +116,6 @@ Exchange::build() noexcept
 	);
 	m_impl->returns_scalar.setZero();
 
-	// store nan counts for fast access at sim time
-	m_impl->null_count.resize(m_impl->timestamps.size());
-	m_impl->null_count.setZero();
-
 	for (auto const& asset : m_impl->assets)
 	{
 		size_t asset_index = 0;
@@ -147,7 +143,6 @@ Exchange::build() noexcept
 				// fill returns matrix with 0
 				m_impl->returns(asset_id, exchange_index) = 0;
 				// update null count
-				m_impl->null_count(exchange_index) += 1;
 			}
 			else 
 			{
@@ -341,6 +336,14 @@ Exchange::cleanupTriggerNodes() noexcept
 
 
 //============================================================================
+void
+Exchange::setExchangeOffset(size_t _offset) noexcept
+{
+	m_impl->setExchangeOffset(_offset);
+}
+
+
+//============================================================================
 Option<size_t>
 Exchange::getCloseIndex() const noexcept
 {
@@ -496,15 +499,12 @@ Exchange::getColumnIndex(String const& column) const noexcept
 	return m_impl->headers[column];
 }
 
-
+	
 //============================================================================
 size_t
-Exchange::getNullCount(int row_offset) const noexcept
+Exchange::getExchangeOffset() const noexcept
 {
-	size_t idx = ((m_impl->current_index - 1) 
-		- (static_cast<size_t>(abs(row_offset))));
-	assert(idx < static_cast<size_t>(m_impl->null_count.size()));
-	return m_impl->null_count(idx);
+	return m_impl->exchange_offset;
 }
 
 
@@ -544,8 +544,10 @@ Exchange::getAssetCount() const noexcept
 
 
 //============================================================================
-Int64 Exchange::getCurrentTimestamp() const noexcept
+Int64
+Exchange::getCurrentTimestamp() const noexcept
 {
+	assert(m_impl->current_index > 0);
 	return m_impl->current_timestamp;
 }
 
