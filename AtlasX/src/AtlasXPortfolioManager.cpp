@@ -69,6 +69,7 @@ AtlasXPortfolioManager::initToolbar() noexcept
 		this, &AtlasXPortfolioManager::selectPortfolio
 	);
 	tool_bar->addAction(a);
+	addToolBar(Qt::TopToolBarArea, tool_bar);
 }
 
 

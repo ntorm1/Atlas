@@ -10,6 +10,8 @@
 
 #include "../include/AtlasXAssetWidget.h"
 #include "../include/AtlasXImpl.h"
+#include "../include/AtlasXPlot.h"
+#include "../include/AtlasXPlotData.h"
 #include "../include/AtlasXHelpers.h"
 
 
@@ -25,6 +27,8 @@ struct AtlasXAssetImpl
 	SharedPtr<Atlas::Exchange> exchange;
 	UniquePtr<QTabWidget> tables = nullptr;
 	UniquePtr<QTableView> table_view = nullptr;
+	UniquePtr<AtlasPlotAssetWrapper> plot = nullptr;
+	UniquePtr<AtlasXAssetPlotBuilder> plot_builder = nullptr;
 
 	AtlasXAssetImpl(
 		AtlasXAppImpl* a,
@@ -36,6 +40,7 @@ struct AtlasXAssetImpl
 		asset_name(asset_name)
 	{
 		headers = app->getExchangeHeaders(exchange);
+		plot_builder = std::make_unique<AtlasXAssetPlotBuilder>(app);
 	}
 };
 
@@ -62,20 +67,10 @@ AtlasXAsset::initUI() noexcept
 	auto splitter = new QSplitter(Qt::Horizontal, this);
 	splitter->setContentsMargins(0, 0, 0, 0);
 
-	// asset info layout
-	auto left_widget = new QWidget(this);
-	auto asset_info_layout = new QVBoxLayout();
-	String asset_name = impl->asset_name.has_value() ? impl->asset_name.value() : "No asset selected";
-	asset_info_layout->addWidget(new QLabel(("Asset ID: " + asset_name).c_str()));
-	left_widget->setLayout(asset_info_layout);
-
 	// asset table view
-	auto asset_internal_layout = new QVBoxLayout();
+	auto asset_internal_layout = new QHBoxLayout(this);
 
-	// asset plot
-	initPlot();
-	//asset_internal_layout->addWidget(impl->chart_view.get());
-
+	// init asset table
 	auto right_widget = new QWidget(this);
 	impl->tables = std::make_unique<QTabWidget>(this);
 	impl->table_view = std::make_unique<QTableView>(this);
@@ -89,9 +84,15 @@ AtlasXAsset::initUI() noexcept
 	asset_internal_layout->addWidget(impl->tables.get());
 	right_widget->setLayout(asset_internal_layout);
 
+	// asset plot
+	initPlot();
+
 	// Add widgets to the splitter
-	//splitter->addWidget(left_widget);
+	splitter->addWidget(impl->plot.get());
 	splitter->addWidget(right_widget);
+	QList<int> sizes;
+	sizes << splitter->sizeHint().width() * 3 << splitter->sizeHint().width();
+	splitter->setSizes(sizes);
 
 	// Add the splitter to the main layout
 	auto layout = new QHBoxLayout(this);
@@ -173,6 +174,11 @@ void
 AtlasXAsset::initPlot() noexcept
 {
 	String asset_name = impl->asset_name.has_value() ? impl->asset_name.value() : "No asset selected";
+	impl->plot = std::make_unique<AtlasPlotAssetWrapper>(
+		this,
+		impl->plot_builder.get(),
+		asset_name
+	);
 }
 
 

@@ -41,7 +41,7 @@ AtlasXExchangeManager::AtlasXExchangeManager(
     m_impl(new AtlasXExchangeManagerImpl)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
+    auto tool_bar = new QToolBar(this);
 
 	// add new exchange tool button
 	const QIcon new_Exchange_icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/add.png"));
@@ -52,7 +52,7 @@ AtlasXExchangeManager::AtlasXExchangeManager(
 		new_exchange_action, &QAction::triggered,
 		this, &AtlasXExchangeManager::newExchange
 	);
-	fileMenu->addAction(new_exchange_action);
+    tool_bar->addAction(new_exchange_action);
 
     // add a select exchange tool button
     const QIcon select_Exchange_icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/select.png"));
@@ -62,8 +62,8 @@ AtlasXExchangeManager::AtlasXExchangeManager(
         select_exchange_action, &QAction::triggered,
         this, &AtlasXExchangeManager::selectExchange
     );
-    fileMenu->addAction(select_exchange_action);
-
+    tool_bar->addAction(select_exchange_action);
+    addToolBar(Qt::TopToolBarArea, tool_bar);
     buildUI();
     buildSignals();
 }

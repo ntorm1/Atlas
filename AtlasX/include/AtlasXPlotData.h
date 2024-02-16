@@ -10,7 +10,7 @@ class AtlasXAppImpl;
 
 
 //============================================================================
-class AtlasXPlotBuilder {
+class AtlasXStrategyPlotBuilder {
 
 private:
 	AtlasXAppImpl* m_app;
@@ -24,10 +24,21 @@ public:
 
 	static HashMap<String, size_t> const& strategyHistoryTypeMap() noexcept;
 
-	AtlasXPlotBuilder(AtlasXAppImpl* app) noexcept;
-	~AtlasXPlotBuilder() noexcept;
+	AtlasXStrategyPlotBuilder(AtlasXAppImpl* app) noexcept;
+	~AtlasXStrategyPlotBuilder() noexcept;
 };
 
+
+//============================================================================
+class AtlasXAssetPlotBuilder {
+private:
+	AtlasXAppImpl* m_app;
+
+public:
+	AtlasXAssetPlotBuilder(AtlasXAppImpl* app) noexcept;
+	~AtlasXAssetPlotBuilder() noexcept;
+
+};
 
 
 }

@@ -15,12 +15,10 @@ namespace AtlasX
 //============================================================================
 AtlasPlotWrapper::AtlasPlotWrapper(
 	QWidget* parent,
-	AtlasXPlotBuilder* builder,
 	AtlasPlot* plot
 ) : 
 	QWidget(parent),
-	m_plot(plot),
-	m_builder(builder)
+	m_plot(plot)
 {
 	if (!plot)
 	{
@@ -43,10 +41,10 @@ AtlasPlotWrapper::~AtlasPlotWrapper()
 //============================================================================
 AtlasPlotStrategyWrapper::AtlasPlotStrategyWrapper(
 	QWidget* parent,
-	AtlasXPlotBuilder* builder,
+	AtlasXStrategyPlotBuilder* builder,
 	String strategy_name
 ) : 
-	AtlasPlotWrapper(parent, builder, new AtlasStrategyPlot(parent, builder, strategy_name))
+	AtlasPlotWrapper(parent, new AtlasStrategyPlot(parent, builder, strategy_name))
 {
 	m_strategy_plot = static_cast<AtlasStrategyPlot*>(m_plot);
 	m_strategy_name = strategy_name;
@@ -64,6 +62,26 @@ AtlasPlotStrategyWrapper::onHydraReset()
 
 //============================================================================
 AtlasPlotStrategyWrapper::~AtlasPlotStrategyWrapper()
+{
+}
+
+
+//============================================================================
+AtlasPlotAssetWrapper::AtlasPlotAssetWrapper(
+	QWidget* parent,
+	AtlasXAssetPlotBuilder* builder,
+	String asset
+) noexcept :
+	AtlasPlotWrapper(parent, new AtlasAssetPlot(parent, builder, asset))
+{
+	m_asset_plot = static_cast<AtlasAssetPlot*>(m_plot);
+	m_asset_name = asset;
+	m_asset_plot->setTitle(std::format("Asset: {}", asset).c_str());
+}
+
+
+//============================================================================
+AtlasPlotAssetWrapper::~AtlasPlotAssetWrapper() noexcept
 {
 }
 

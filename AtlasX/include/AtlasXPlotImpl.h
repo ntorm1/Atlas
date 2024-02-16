@@ -6,7 +6,8 @@
 namespace AtlasX
 {
 
-class AtlasXPlotBuilder;
+class AtlasXStrategyPlotBuilder;
+class AtlasXAssetPlotBuilder;
 
 
 //============================================================================
@@ -47,7 +48,7 @@ class AtlasStrategyPlot final : public AtlasPlot
 	Q_OBJECT
 
 private:
-	AtlasXPlotBuilder* m_builder = nullptr;
+	AtlasXStrategyPlotBuilder* m_builder = nullptr;
 	String m_strategy_name;
 
 	void addPlot(QString const& name);
@@ -58,10 +59,33 @@ protected slots:
 public:
 	AtlasStrategyPlot(
 		QWidget* parent,
-		AtlasXPlotBuilder* builder,
+		AtlasXStrategyPlotBuilder* builder,
 		String const& strategy_name
 	);
 	~AtlasStrategyPlot();
+};
+
+
+//============================================================================
+class AtlasAssetPlot final : public AtlasPlot
+{
+	Q_OBJECT
+
+private:
+	AtlasXAssetPlotBuilder* m_builder = nullptr;
+	String m_asset_name;
+
+protected slots:
+	void contextMenuRequest(QPoint pos) override;
+
+public:
+	AtlasAssetPlot(
+		QWidget* parent,
+		AtlasXAssetPlotBuilder* builder,
+		String const& asset_name
+	) noexcept;
+	~AtlasAssetPlot() noexcept;
+
 
 };
 

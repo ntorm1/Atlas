@@ -8,7 +8,7 @@ namespace AtlasX
 
 
 //==============================================================================
-AtlasXPlotBuilder::AtlasXPlotBuilder(
+AtlasXStrategyPlotBuilder::AtlasXStrategyPlotBuilder(
 	AtlasXAppImpl* app
 ) noexcept :
 	m_app(app)
@@ -17,14 +17,14 @@ AtlasXPlotBuilder::AtlasXPlotBuilder(
 
 
 //==============================================================================
-AtlasXPlotBuilder::~AtlasXPlotBuilder() noexcept
+AtlasXStrategyPlotBuilder::~AtlasXStrategyPlotBuilder() noexcept
 {
 }
 
 
 //==============================================================================
 Option<Span<const Int64>>
-AtlasXPlotBuilder::getStrategyTimeStamps(
+AtlasXStrategyPlotBuilder::getStrategyTimeStamps(
 	const String& strategy_name
 ) noexcept
 {
@@ -47,7 +47,7 @@ AtlasXPlotBuilder::getStrategyTimeStamps(
 
 //==============================================================================
 Option<Span<const double>>
-AtlasXPlotBuilder::getStrategyHistory(
+AtlasXStrategyPlotBuilder::getStrategyHistory(
 	const String& strategy_name,
 	const String& history_type
 ) noexcept
@@ -78,13 +78,28 @@ AtlasXPlotBuilder::getStrategyHistory(
 
 //==============================================================================
 HashMap<String, size_t> const&
-AtlasXPlotBuilder::strategyHistoryTypeMap() noexcept
+AtlasXStrategyPlotBuilder::strategyHistoryTypeMap() noexcept
 {
 	static HashMap<String, size_t> map = {
 		{"NLV", 0},
 		{"Volatility", 1}
 	};
 	return map;
+}
+
+
+//==============================================================================
+AtlasXAssetPlotBuilder::AtlasXAssetPlotBuilder(
+	AtlasXAppImpl* app
+) noexcept:
+	m_app(app)
+{
+}
+
+
+//==============================================================================
+AtlasXAssetPlotBuilder::~AtlasXAssetPlotBuilder() noexcept
+{
 }
 
 }

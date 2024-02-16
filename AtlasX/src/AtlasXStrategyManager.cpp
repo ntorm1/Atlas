@@ -75,8 +75,8 @@ struct AtlasXStrategyManagerImpl
 	Option<UniquePtr<AtlasXStrategyTemp>> strategy_temp = std::nullopt;
 	Option<SharedPtr<AtlasXOptimizer>> optimizer = std::nullopt;
 	UniquePtr<QScintillaEditor> editor = nullptr;
-	UniquePtr<AtlasPlotWrapper> plot = nullptr;
-	UniquePtr<AtlasXPlotBuilder> plot_builder = nullptr;
+	UniquePtr<AtlasPlotStrategyWrapper> plot = nullptr;
+	UniquePtr<AtlasXStrategyPlotBuilder> plot_builder = nullptr;
 	bool is_built = false;
 
 
@@ -92,7 +92,7 @@ struct AtlasXStrategyManagerImpl
 		self(self),
 		app(app)
 	{
-		plot_builder = std::make_unique<AtlasXPlotBuilder>(app);
+		plot_builder = std::make_unique<AtlasXStrategyPlotBuilder>(app);
 	}
 };
 
@@ -542,7 +542,7 @@ AtlasXStrategyManager::initUI() noexcept
 	initPlot("");
 	
 	m_impl->editor = std::make_unique<QScintillaEditor>(this);
-	m_impl->plot = std::make_unique<AtlasPlotWrapper>(this, m_impl->plot_builder.get());
+	m_impl->plot = std::make_unique<AtlasPlotStrategyWrapper>(this, m_impl->plot_builder.get(),"");
 
 	splitter->addWidget(m_impl->plot.get());
 	splitter->addWidget(m_impl->editor.get());
@@ -584,8 +584,10 @@ AtlasXStrategyManager::initPlot(String const& strategy_name) noexcept
 	// check if the strategy has a plot
 	if (strategy_name == "")
 	{
-		m_impl->plot = std::make_unique<AtlasPlotWrapper>(
-			this, m_impl->plot_builder.get()
+		m_impl->plot = std::make_unique<AtlasPlotStrategyWrapper>(
+			this,
+			m_impl->plot_builder.get(),
+			strategy_name
 		);
 		return;
 	}

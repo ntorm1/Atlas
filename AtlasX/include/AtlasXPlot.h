@@ -7,8 +7,10 @@ namespace AtlasX
 {
 
 class AtlasPlot;
+class AtlasAssetPlot;
 class AtlasStrategyPlot;
-class AtlasXPlotBuilder;
+class AtlasXStrategyPlotBuilder;
+class AtlasXAssetPlotBuilder;
 
 //============================================================================
 class AtlasPlotWrapper : public QWidget
@@ -18,12 +20,10 @@ class AtlasPlotWrapper : public QWidget
 
 protected:
 	AtlasPlot* m_plot = nullptr;
-	AtlasXPlotBuilder* m_builder = nullptr;
 
 public:
 	AtlasPlotWrapper(
 		QWidget* parent,
-		AtlasXPlotBuilder* builder,
 		AtlasPlot* plot = nullptr
 	);
 
@@ -42,18 +42,39 @@ class AtlasPlotStrategyWrapper : public AtlasPlotWrapper
 
 private:
 	AtlasStrategyPlot* m_strategy_plot;
+	AtlasXStrategyPlotBuilder* m_builder = nullptr;
 	String m_strategy_name;
 
 public:
 	AtlasPlotStrategyWrapper(
 		QWidget* parent,
-		AtlasXPlotBuilder* m_builder,
+		AtlasXStrategyPlotBuilder* m_builder,
 		String strategy
 	);
 	~AtlasPlotStrategyWrapper();
 
 	String const& getStrategyName() const { return m_strategy_name; }
 	void onHydraReset() override;
+};
+
+
+//============================================================================
+class AtlasPlotAssetWrapper : public AtlasPlotWrapper
+{
+	Q_OBJECT
+
+	friend class AtlasAssetPlot;
+private:
+	String m_asset_name;
+	AtlasAssetPlot* m_asset_plot;
+
+public:
+	AtlasPlotAssetWrapper(
+		QWidget* parent,
+		AtlasXAssetPlotBuilder* builder,
+		String asset
+	) noexcept;
+	~AtlasPlotAssetWrapper() noexcept;
 
 };
 

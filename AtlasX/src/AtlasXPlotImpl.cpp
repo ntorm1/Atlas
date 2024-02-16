@@ -289,7 +289,7 @@ AtlasPlot::removeAllGraphs()
 //============================================================================
 AtlasStrategyPlot::AtlasStrategyPlot(
 	QWidget* parent,
-	AtlasXPlotBuilder* builder,
+	AtlasXStrategyPlotBuilder* builder,
 	String const& strategy_name
 ) : 
 	AtlasPlot(parent),
@@ -369,6 +369,32 @@ AtlasStrategyPlot::addPlot(QString const& name)
 
 //============================================================================
 AtlasStrategyPlot::~AtlasStrategyPlot()
+{
+}
+
+
+//============================================================================
+AtlasAssetPlot::AtlasAssetPlot(
+	QWidget* parent,
+	AtlasXAssetPlotBuilder* builder,
+	String const& asset_name
+) noexcept :
+	AtlasPlot(parent),
+	m_builder(builder),
+	m_asset_name(asset_name)
+{
+}
+
+
+//============================================================================
+AtlasAssetPlot::~AtlasAssetPlot() noexcept
+{
+}
+
+
+//============================================================================
+void
+AtlasAssetPlot::contextMenuRequest(QPoint pos)
 {
 }
 
