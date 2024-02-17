@@ -10,23 +10,25 @@ namespace AST
 {
 
 //============================================================================
-export enum class NodeType
+export enum class NodeType : Uint8
 {
-	ALLOC = 3,
-	ALLOC_WEIGHT = 6,
-	ASSET_OP = 1,
-	ASSET_READ = 0,
-	COVARIANCE = 9,
-	EXCHANGE_VIEW = 2,
-	RANK_NODE = 7,
-	STRATEGY = 4,
-	STRATEGY_RUNNER = 5,
-	TRADE_LIMIT = 8,
+	ALLOC = 0,
+	ALLOC_WEIGHT = 1,
+	ASSET_OP = 2,
+	ASSET_READ = 3,
+	ASSET_OBSERVER = 4,
+	ASSET_SCALAR = 5,
+	COVARIANCE = 6,
+	EXCHANGE_VIEW = 7,
+	RANK_NODE = 8,
+	STRATEGY = 9,
+	STRATEGY_RUNNER = 10,
+	TRADE_LIMIT = 11,
 };
 
 
 //============================================================================
-export enum class AssetOpType
+export enum class AssetOpType : Uint8
 {
 	ADD = 0,
 	SUBTRACT = 1,

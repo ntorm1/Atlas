@@ -9,6 +9,7 @@ namespace Atlas
 namespace AST
 {
 
+//============================================================================
 Option<AllocationBaseNode*>
 StrategyBufferOpNode::getAllocationNode() const noexcept {
 	Option<ASTNode*> m_parent = getParent();

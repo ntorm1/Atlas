@@ -35,7 +35,6 @@ public:
 	virtual void reset() noexcept {}
 
 	Option<AllocationBaseNode*> getAllocationNode() const noexcept;
-
 	[[nodiscard]] Exchange& getExchange() noexcept {return m_exchange;}
 };
 
