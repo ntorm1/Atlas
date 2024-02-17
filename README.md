@@ -112,7 +112,7 @@ portfolio = hydra.addPortfolio(portfolio_id, exchange, intial_cash)
 hydra.build()
 ```
 
-Define the strategy. The below strategy will go long all assets if their fast moving average is above their slow, and short vice versa.
+Define the strategy. The below strategy will go long all assets if their fast moving average is above their slow.
 
 ```python
 st = time.time()
