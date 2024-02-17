@@ -6,6 +6,7 @@ module;
 #else
 #define ATLAS_API  __declspec(dllimport)
 #endif
+#include <cassert>
 export module AssetNodeModule;
 
 import AtlasCore;
@@ -54,6 +55,7 @@ public:
 	[[nodiscard]] int getRowOffset() const noexcept { return m_row_offset; }
 	[[nodiscard]] size_t getNullCount() const noexcept { return m_null_count; }
 	[[nodiscard]] size_t size() const noexcept;
+	[[nodiscard]] size_t getColumn() const noexcept { return m_column; }
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	ATLAS_API void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
@@ -89,7 +91,9 @@ public:
 			AssetOpType op_type
 		) noexcept
 	{
-		return std::make_unique<AssetOpNode>(
+		assert(asset_op_left);
+		assert(asset_op_right);
+		return std::make_shared<AssetOpNode>(
 			std::move(asset_op_left),
 			std::move(asset_op_right),
 			op_type

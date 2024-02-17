@@ -99,7 +99,11 @@ ExchangeMap::getParentExchangeName(String const& asset_name) const noexcept
 
 //============================================================================
 Result<SharedPtr<Exchange>, AtlasException>
-ExchangeMap::addExchange(String name, String source) noexcept
+ExchangeMap::addExchange(
+	String name,
+	String source,
+	Option<String> datetime_format
+) noexcept
 {
 	EXPECT_FALSE(
 		m_impl->exchange_id_map.contains(name),
@@ -108,7 +112,8 @@ ExchangeMap::addExchange(String name, String source) noexcept
 	auto exchange = std::make_unique<Exchange>(
 		std::move(name),
 		std::move(source),
-		m_impl->exchanges.size()
+		m_impl->exchanges.size(),
+		datetime_format
 	);
 	EXPECT_TRUE(res, exchange->init());
 	EXPECT_TRUE(res_val, exchange->validate());

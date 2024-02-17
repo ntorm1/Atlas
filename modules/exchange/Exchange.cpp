@@ -9,6 +9,7 @@ import AtlasUtilsModule;
 import AtlasTimeModule;
 import HelperNodesModule;
 import RiskNodeModule;
+import ObserverNodeModule;
 
 namespace Atlas
 {
@@ -17,10 +18,12 @@ namespace Atlas
 Exchange::Exchange(
 	String name,
 	String source,
-	size_t id
+	size_t id,
+	Option<String> datetime_format
 ) noexcept
 {
 	m_impl = std::make_unique<ExchangeImpl>();
+	m_impl->datetime_format = std::move(datetime_format);
 	m_name = std::move(name);
 	m_source = std::move(source);
 	m_id = id;
@@ -220,6 +223,14 @@ Exchange::reset() noexcept
 			m_impl->registered_triggers.end()
 		);
 	}
+
+	// reset cache of any asset observers
+	std::for_each(
+		m_impl->asset_observers.begin(),
+		m_impl->asset_observers.end(),
+		[](auto& observer) { observer.second->resetBase(); }
+	);
+
 	cleanupCovarianceNodes();
 }
 
@@ -248,6 +259,13 @@ Exchange::step(Int64 global_time) noexcept
 	m_impl->current_index++; // cov node valls currentIdx on first step
 	std::for_each(m_impl->covariance_nodes.begin(), m_impl->covariance_nodes.end(), [](auto& node_pair) { node_pair.second->evaluate(); });
 
+	// update the cache of any asset observers
+	std::for_each(
+		m_impl->asset_observers.begin(),
+		m_impl->asset_observers.end(), 
+		[](auto& observer) { observer.second->cacheBase(); }
+	);
+
 	// cache the scalar returns used for evaluating portfolio
 	LinAlg::EigenConstColView<double> market_returns = getMarketReturns();
 	m_impl->returns_scalar = market_returns.array() + 1.0;
@@ -268,6 +286,20 @@ Exchange::registerTrigger(SharedPtr<AST::TriggerNode>&& trigger) noexcept
 	}
 	m_impl->registered_triggers.push_back(trigger);
 	return trigger;
+}
+
+
+//============================================================================
+SharedPtr<AST::AssetObserverNode>
+Exchange::registerObserver(SharedPtr<AST::AssetObserverNode> observer) noexcept
+{
+	size_t observer_hash = observer->hash();
+	if (m_impl->asset_observers.count(observer_hash) > 0)
+	{
+		return m_impl->asset_observers[observer_hash];
+	}
+	m_impl->asset_observers[observer_hash] = observer;
+	return observer;
 }
 
 

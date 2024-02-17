@@ -21,6 +21,7 @@ import ExchangeNodeModule;
 import HelperNodesModule;
 import HydraModule;
 import OptimizeNodeModule;
+import ObserverNodeModule;
 import RankNodeModule;
 import StrategyModule;
 import StrategyNodeModule;
@@ -48,11 +49,15 @@ PYBIND11_MODULE(AtlasPy, m) {
         );
     py::class_<Atlas::Hydra, std::shared_ptr<Atlas::Hydra>>(m_core, "Hydra")
         .def("build", &Atlas::Hydra::pyBuild)
-        .def("run", &Atlas::Hydra::run)
+        .def("run", &Atlas::Hydra::pyRun)
         .def("step", &Atlas::Hydra::step)
         .def("removeStrategy", &Atlas::Hydra::removeStrategy)
         .def("reset", &Atlas::Hydra::pyReset)
-        .def("addExchange", &Atlas::Hydra::pyAddExchange)
+        .def("addExchange", &Atlas::Hydra::pyAddExchange,
+            py::arg("name"),
+            py::arg("source"),
+            py::arg("datetime_format") = std::nullopt
+        )
         .def("getExchange", &Atlas::Hydra::pyGetExchange)
         .def("addStrategy", &Atlas::Hydra::pyAddStrategy,
             py::arg("strategy"),
@@ -78,7 +83,13 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("INCREMENTAL", Atlas::CovarianceType::INCREMENTAL)
         .export_values();
 
+    py::class_<Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::ASTNode>>(m_ast, "ASTNode");
+    py::class_<Atlas::AST::StrategyBufferOpNode, Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode");
+    py::class_<Atlas::AST::AssetObserverNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetObserverNode>>(m_ast, "AssetObserverNode");
+
+
     py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")
+        .def("registerObserver", &Atlas::Exchange::registerObserver)
         .def("getTimestamps", &Atlas::Exchange::getTimestamps)
         .def("getCovarianceNode", &Atlas::Exchange::getCovarianceNode)
         .def("getMarketReturns", &Atlas::Exchange::getMarketReturns,
@@ -93,6 +104,8 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("NLV", Atlas::TracerType::NLV)
         .value("WEIGHTS", Atlas::TracerType::WEIGHTS)
         .value("VOLATILITY", Atlas::TracerType::VOLATILITY)
+        .value("ORDERS_EAGER", Atlas::TracerType::ORDERS_EAGER)
+        .value("ORDERS_LAZY", Atlas::TracerType::ORDERS_LAZY)
         .export_values();
 
     // ======= AST API ======= //
@@ -119,9 +132,6 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("TAKE_PROFIT", Atlas::TradeLimitType::TAKE_PROFIT)
         .export_values();
 
-    py::class_<Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::ASTNode>>(m_ast, "ASTNode");
-
-    py::class_<Atlas::AST::StrategyBufferOpNode, Atlas::AST::ASTNode,  std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode");
 
     py::class_<Atlas::AST::AssetReadNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNode")
         .def_static("make", &Atlas::AST::AssetReadNode::pyMake);
@@ -130,7 +140,7 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def_static("make", &Atlas::AST::AssetOpNode::pyMake);
 
 
-    py::class_<Atlas::AST::ExchangeViewFilter>(m_ast, "ExchangeViewFilter")
+    py::class_<Atlas::AST::ExchangeViewFilter, std::shared_ptr<Atlas::AST::ExchangeViewFilter>>(m_ast, "ExchangeViewFilter")
         .def(py::init<Atlas::AST::ExchangeViewFilterType, double, Atlas::Option<double>>(
         ));
     
@@ -202,6 +212,14 @@ PYBIND11_MODULE(AtlasPy, m) {
             py::arg("allocation"),
             py::arg("portfolio")
         );
+
+
+    py::class_<Atlas::AST::AssetScalerNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetScalerNode>>(m_ast, "AssetScalerNode")
+       .def(py::init<std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, Atlas::AST::AssetOpType, double>());
+
+    py::class_<Atlas::AST::SumObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::SumObserverNode>>(m_ast, "SumObserverNode")
+        .def(py::init<std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
+
 
     py::class_<Atlas::AST::StrategyGrid, std::shared_ptr<Atlas::AST::StrategyGrid>>(m_ast, "StrategyGrid");
 

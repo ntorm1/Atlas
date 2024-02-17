@@ -27,7 +27,8 @@ private:
 
 	Result<SharedPtr<Exchange>, AtlasException> addExchange(
 		String name,
-		String source
+		String source,
+		Option<String> datetime_format = std::nullopt
 	) noexcept;
 	Result<SharedPtr<Exchange>, AtlasException> getExchange(
 		String const& name

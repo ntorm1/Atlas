@@ -56,7 +56,7 @@ static void
 
 //============================================================================
 Result<bool, AtlasException>
-Asset::loadCSV()
+Asset::loadCSV(String const& datetime_format)
 {
 	assert(source);
 	try {
@@ -104,7 +104,7 @@ Asset::loadCSV()
 			std::getline(ss, timestamp, ',');
 
 			// try to convert string to epoch time 
-			auto res = Time::strToEpoch(timestamp,"%Y-%m-%d");
+			auto res = Time::strToEpoch(timestamp, datetime_format);
 			if (res)
 			{
 				if (res.value() < 0)
@@ -168,13 +168,18 @@ Exchange::initDir() noexcept
 		return Err("Exchange source directory is empty");
 	}
 
+	// make sure have datetime format
+	if (!m_impl->datetime_format) {
+		return Err("Datetime format is required for loading CSV files");
+	}
+
 	// load the files
 	std::vector<std::thread> threads;
 	String msg = "";
 	std::mutex m_mutex;
 	for (auto& asset : m_impl->assets) {
 		threads.push_back(std::thread([this, &asset, &m_mutex, &msg]() {
-			auto res = asset.loadCSV();
+			auto res = asset.loadCSV(*(this->m_impl->datetime_format));
 			if (!res) {
 				std::lock_guard<std::mutex> lock(m_mutex);
 				String error = res.error().what();

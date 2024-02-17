@@ -153,7 +153,7 @@
       <EnableModules>true</EnableModules>
       <EnablePREfast>true</EnablePREfast>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>
       </FloatingPointModel>
       <BufferSecurityCheck>false</BufferSecurityCheck>

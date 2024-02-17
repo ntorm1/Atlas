@@ -34,7 +34,7 @@ private:
 	[[nodiscard]] Result<bool,AtlasException> init() noexcept;
 	[[nodiscard]] Result<bool,AtlasException> validate() noexcept;
 	[[nodiscard]] Result<bool,AtlasException> build() noexcept;
-	
+
 	[[nodiscard]] SharedPtr<AST::TriggerNode> registerTrigger(SharedPtr<AST::TriggerNode>&& trigger) noexcept;
 	void reset() noexcept;
 	void step(Int64 global_time) noexcept;
@@ -46,7 +46,8 @@ public:
 	Exchange(
 		String name,
 		String source,
-		size_t id
+		size_t id,
+		Option<String> datetime_format = std::nullopt
 	) noexcept;
 
 
@@ -83,6 +84,7 @@ public:
 		CovarianceType type
 	) noexcept;
 	
+	ATLAS_API SharedPtr<AST::AssetObserverNode> registerObserver(SharedPtr<AST::AssetObserverNode> observer) noexcept;
 	ATLAS_API EigenConstRowView<double> getAssetSlice(size_t asset_index) const noexcept;
 	ATLAS_API EigenConstColView<double> getMarketReturns(int row_offset = 0) const noexcept;
 	ATLAS_API String const& getName() const noexcept {return m_name;}

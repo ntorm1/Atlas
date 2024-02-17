@@ -4,7 +4,7 @@ import unittest
 import pandas as pd
 import numpy as np
 
-atlas_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/x64/Debug"
+atlas_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/x64/Release"
 sys.path.append(atlas_path)
 
 
@@ -22,7 +22,7 @@ class AllocTest(unittest.TestCase):
     def setUp(self) -> None:
         self.hydra = Hydra()
         self.intial_cash = 100.0
-        self.exchange = self.hydra.addExchange("test", exchange_csv)
+        self.exchange = self.hydra.addExchange("test", exchange_csv, "%Y-%m-%d")
         self.portfolio = self.hydra.addPortfolio("test_p", self.exchange, self.intial_cash)
         self.strategy_id = "test_s"
         self.asset_id1 = "asset1"
@@ -120,6 +120,43 @@ class AllocTest(unittest.TestCase):
         self.assertAlmostEqual(allocation.sum(), 1.0)
         self.assertAlmostEqual(strategy.getNLV(), nlv - commission)
 
+
+class VectorBTCompare(unittest.TestCase):
+    def setUp(self) -> None:
+        exchange_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchangeVBT"
+        self.hydra = Hydra()
+        self.exchange = self.hydra.addExchange("test", exchange_path,  "%Y-%m-%d %H:%M:%S")
+        self.portfolio = self.hydra.addPortfolio("test_p", self.exchange, 100.0)
+        self.strategy_id = "test_s" 
+        self.hydra.build()
+
+    def test_ma_cross(self):
+        fast_n = 50
+        slow_n = 200
+        close = AssetReadNode.make("Close", 0, self.exchange)
+        fast_ma = AssetScalerNode(
+            self.exchange.registerObserver(SumObserverNode(close, fast_n)),
+            AssetOpType.DIVIDE,
+            fast_n
+        )
+        slow_ma = AssetScalerNode(
+            self.exchange.registerObserver(SumObserverNode(close, slow_n)),
+            AssetOpType.DIVIDE,
+            slow_n
+        )
+        spread = AssetOpNode.make(fast_ma, slow_ma, AssetOpType.SUBTRACT)
+        spread_filter = ExchangeViewFilter(ExchangeViewFilterType.GREATER_THAN, 0.0, None)
+        exchange_view = ExchangeViewNode.make(self.exchange, spread, spread_filter)
+
+        allocation = AllocationNode.make(exchange_view)
+        strategy_node = StrategyNode.make(allocation, self.portfolio)
+        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0), True)
+        strategy.enableTracerHistory(TracerType.NLV)
+        self.hydra.run()
+
+        nlv = strategy.getHistory(TracerType.NLV)
+        returns = nlv[-1] / nlv[0] - 1
+        self.assertAlmostEqual(returns, 4.851262581813536)
 
 class RiskTest(unittest.TestCase):
 

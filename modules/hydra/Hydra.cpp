@@ -53,13 +53,21 @@ Hydra::getParentExchangeName(String const& asset_name) const noexcept
 
 //============================================================================
 Result<SharedPtr<Exchange>, AtlasException>
-Hydra::addExchange(String name, String source) noexcept
+Hydra::addExchange(
+	String name,
+	String source,
+	Option<String> datetime_format
+) noexcept
 {
 	if (m_state != HydraState::INIT && m_state != HydraState::BUILT)
 	{
 		return Err("Hydra must be in init state to add exchange");
 	}
-	auto res = m_impl->m_exchange_map.addExchange(std::move(name), std::move(source));
+	auto res = m_impl->m_exchange_map.addExchange(
+		std::move(name),
+		std::move(source),
+		std::move(datetime_format)
+	);
 	if (!res)
 	{
 		return res;
@@ -341,9 +349,17 @@ Hydra::getPortfolioIdxMap() const noexcept
 
 //============================================================================
 SharedPtr<Exchange>
-Hydra::pyAddExchange(String name, String source)
+Hydra::pyAddExchange(
+	String name,
+	String source,
+	Option<String> datetime_format
+)
 {
-	auto res = addExchange(std::move(name), std::move(source));
+	auto res = addExchange(
+		std::move(name),
+		std::move(source),
+		std::move(datetime_format)
+	);
 	if (!res)
 	{
 		throw std::exception(res.error().what());
@@ -405,6 +421,17 @@ Hydra::pyGetPortfolio(String const& name) const
 	return m_impl->m_portfolios[m_impl->m_portfolio_map[name]];
 }
 
+
+//============================================================================
+void
+Hydra::pyRun()
+{
+	auto res = run();
+	if (!res)
+	{
+		throw std::exception(res.error().what());
+	}
+}
 
 //============================================================================
 void

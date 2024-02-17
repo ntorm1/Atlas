@@ -136,7 +136,6 @@ AssetOpNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 		target = target.cwiseQuotient(m_right_buffer);
 		break;
 	}
-
 }
 
 }

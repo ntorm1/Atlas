@@ -51,7 +51,7 @@ export struct Asset {
 		}
 		return true;
 	}
-	Result<bool, AtlasException> loadCSV();
+	Result<bool, AtlasException> loadCSV(String const& datetime_format);
 
 };
 
@@ -68,11 +68,13 @@ public:
 	Vector<Int64> timestamps;
 	Vector<SharedPtr<AST::TriggerNode>> registered_triggers;
 	FastMap<String,SharedPtr<AST::CovarianceNodeBase>> covariance_nodes;
+	FastMap<size_t, SharedPtr<AST::AssetObserverNode>> asset_observers;
 	Vector<Strategy*> registered_strategies;
 	Int64 current_timestamp = 0;
 	Eigen::MatrixXd data;
 	Eigen::MatrixXd returns;
 	Eigen::VectorXd returns_scalar;
+	Option<String> datetime_format = std::nullopt;
 	size_t exchange_offset = 0;
 	size_t col_count = 0;
 	size_t close_index = 0;
