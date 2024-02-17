@@ -26,6 +26,13 @@ class AssetObserverImpl;
 
 
 //============================================================================
+export enum class AssetObserverType : Uint8
+{
+	SUM = 0
+};
+
+
+//============================================================================
 export class AssetScalerNode : public StrategyBufferOpNode
 {
 private:
@@ -51,6 +58,7 @@ export class AssetObserverNode
 	: public StrategyBufferOpNode
 {
 private:
+	AssetObserverType m_observer_type;
 	size_t m_buffer_idx = 0;
 	size_t m_window = 0;
 	LinAlg::EigenMatrixXd m_buffer_matrix;
@@ -65,6 +73,7 @@ protected:
 	AssetObserverNode(
 		Exchange& exchange,
 		SharedPtr<StrategyBufferOpNode> parent,
+		AssetObserverType observer_type,
 		size_t window
 	) noexcept;
 	~AssetObserverNode() noexcept;

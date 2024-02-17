@@ -16,11 +16,13 @@ namespace AST
 AssetObserverNode::AssetObserverNode(
 	Exchange& exchange,
 	SharedPtr<StrategyBufferOpNode> parent,
+	AssetObserverType observer_type,
 	size_t window
 ) noexcept :
 	StrategyBufferOpNode(NodeType::ASSET_OBSERVER, exchange, parent.get()),
 	m_parent(parent),
-	m_window(window)
+	m_window(window),
+	m_observer_type(observer_type)
 {
 	m_buffer_matrix.resize(exchange.getAssetCount(), window);
 	m_buffer_matrix.setZero();
@@ -38,14 +40,13 @@ void
 AssetObserverNode::cacheBase() noexcept
 {
 	cache();
-	size_t current_index = m_exchange.currentIdx();
-	if (current_index >= m_window)
+	if (m_exchange.currentIdx() >= m_window)
 	{
 		auto col = m_buffer_matrix.col(m_buffer_idx);
 		onOutOfRange(col);
 	}
 	m_buffer_idx++;
-	if (m_buffer_idx == m_window)
+	if ((m_buffer_idx % m_window) == 0)
 	{
 		m_buffer_idx = 0;
 	}
@@ -65,7 +66,7 @@ SumObserverNode::SumObserverNode(
 	SharedPtr<StrategyBufferOpNode> parent,
 	size_t window
 ) noexcept:
-	AssetObserverNode(*exchange, parent, window),
+	AssetObserverNode(*exchange, parent, AssetObserverType::SUM, window),
 	m_window(window)
 {
 	m_sum.resize(m_exchange.getAssetCount());
