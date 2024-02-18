@@ -258,6 +258,15 @@ AllocationNode::AllocationNode(
 
 
 //============================================================================
+size_t
+AllocationNode::refreshWarmup() noexcept
+{
+	setWarmup(m_exchange_view->refreshWarmup());
+	return getWarmup();
+}
+
+
+//============================================================================
 Result<SharedPtr<AllocationNode>, AtlasException>
 AllocationNode::make(
 	SharedPtr<StrategyBufferOpNode> exchange_view,

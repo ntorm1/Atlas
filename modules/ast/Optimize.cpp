@@ -6,6 +6,7 @@ module OptimizeNodeModule;
 import ExchangeModule;
 import TracerModule;
 import StrategyModule;
+import ObserverNodeModule;
 
 namespace Atlas
 {
@@ -18,13 +19,32 @@ namespace AST
 GridDimension::GridDimension(
 	const String& name,
 	const Vector<double>& dimension_values,
+	DimensionType type
+) noexcept :
+	m_name(name),
+	m_dimension_values(std::move(dimension_values)),
+	m_type(type)
+{
+	m_dimension_size = m_dimension_values.size();
+}
+
+
+//============================================================================
+GridDimension::~GridDimension() noexcept
+{
+
+}
+
+
+//============================================================================
+GridDimensionLimit::GridDimensionLimit(
+	const String& name,
+	const Vector<double>& dimension_values,
 	const SharedPtr<TradeLimitNode>& node,
 	uintptr_t getter,
 	uintptr_t setter
 ) noexcept :
-	dimension_name(name),
-	dimension_size(dimension_values.size()),
-	dimension_values(dimension_values),
+	GridDimension(name, dimension_values, DimensionType::LIMIT),
 	buffer_node(node),
 	getter_addr(getter),
 	setter_addr(setter)
@@ -32,14 +52,15 @@ GridDimension::GridDimension(
 
 	buffer_node_setter = reinterpret_cast<SetterFuncType>(setter);
 	buffer_node_getter = reinterpret_cast<GetterFuncType>(getter);
+	original_value = buffer_node_getter(buffer_node);
 }
 
 
 //============================================================================
-SharedPtr<GridDimension>
-GridDimension::make(const String& name, const Vector<double>& dimension_values, const SharedPtr<TradeLimitNode>& node, uintptr_t getter, uintptr_t setter) noexcept
+SharedPtr<GridDimensionLimit>
+GridDimensionLimit::make(const String& name, const Vector<double>& dimension_values, const SharedPtr<TradeLimitNode>& node, uintptr_t getter, uintptr_t setter) noexcept
 {
-	return std::make_shared<GridDimension>(name,
+	return std::make_shared<GridDimensionLimit>(name,
 		dimension_values, 
 		node,
 		getter,
@@ -79,13 +100,10 @@ StrategyGrid::StrategyGrid(
 			);
 		}
 	}
-
 	m_weights_grid = new double[row_count * col_count * depth];
 	memset(m_weights_grid, 0, row_count * col_count * depth * sizeof(double));
+	buildNodeGrid();
 }
-
-
-
 
 
 //============================================================================
@@ -109,6 +127,70 @@ StrategyGrid::reset() noexcept
 	for (size_t i = 0; i < buffer_size; ++i)
 	{
 		m_weights_grid[i] = 0.0;
+	}
+}
+
+
+//============================================================================
+void
+StrategyGrid::builNodeDim(GridDimensionObserver* observer_dim) noexcept
+{
+	size_t size = observer_dim->size();
+	SharedPtr<AssetObserverNode> const& observer_node = observer_dim->getObserverBase();
+	for (size_t i = 0; i < size; ++i)
+	{
+		switch (observer_node->observerType())
+		{
+		case AssetObserverType::SUM:
+		{
+			SharedPtr<SumObserverNode> new_observer = std::make_shared<SumObserverNode>(
+				observer_node->parent(),
+				static_cast<size_t>(observer_dim->get(i))
+			);
+			observer_dim->addObserver(std::move(new_observer), i);
+			break;
+		}
+		case AssetObserverType::MEAN:
+		{
+			SharedPtr<MeanObserverNode> new_observer = std::make_shared<MeanObserverNode>(
+				observer_node->parent(),
+				static_cast<size_t>(observer_dim->get(i))
+			);
+			observer_dim->addObserver(std::move(new_observer), i);
+			break;
+		}
+		default:
+			assert(false);
+		}
+	}
+}
+
+//============================================================================
+void
+StrategyGrid::buildNodeGrid() noexcept
+{
+	int dim_count = 0;
+	if (m_dimensions.first->getType() == DimensionType::OBSERVER)
+		++dim_count;
+	if (m_dimensions.second->getType() == DimensionType::OBSERVER)
+		++dim_count;
+	if (!dim_count) {
+		return;
+	}
+	if (dim_count == 1) {
+		auto observer_dim = m_dimensions.first->getType() == DimensionType::OBSERVER ?
+			static_cast<GridDimensionObserver*>(m_dimensions.first.get()) :
+			static_cast<GridDimensionObserver*>(m_dimensions.second.get());
+		observer_dim->buildWarmup(m_strategy);
+		builNodeDim(observer_dim);
+	}
+	else {
+		auto dim1 = static_cast<GridDimensionObserver*>(m_dimensions.first.get());
+		auto dim2 = static_cast<GridDimensionObserver*>(m_dimensions.second.get());
+		builNodeDim(static_cast<GridDimensionObserver*>(dim1));
+		builNodeDim(static_cast<GridDimensionObserver*>(dim2));
+		dim1->buildWarmup(m_strategy);
+		dim2->buildWarmup(m_strategy);
 	}
 }
 
@@ -171,28 +253,48 @@ StrategyGrid::evaluateGrid() noexcept
 	size_t row_count = m_dimensions.first->size();
 	size_t col_count = m_dimensions.second->size();
 
-	// store the original value of the dimensions
-	double original_row_value = m_dimensions.first->getNodeValue();
-	double original_col_value = m_dimensions.second->getNodeValue();
-
 	// evaluate the grid strategy with the current market prices and weights
 	evaluate();
 
+	auto dim1 = m_dimensions.first->getType() == DimensionType::OBSERVER ?
+		static_cast<GridDimensionObserver*>(m_dimensions.first.get()) :
+		nullptr;
+	auto dim2 = m_dimensions.second->getType() == DimensionType::OBSERVER ?
+		static_cast<GridDimensionObserver*>(m_dimensions.second.get()) :
+		nullptr;
+
 	for (size_t i = 0; i < row_count; ++i)
 	{
-		double row_value = m_dimensions.first->getNodeValue();
+		if (dim1 && m_exchange.currentIdx() < dim1->m_warmup(i))
+		{
+			continue;
+		}
+
 		m_dimensions.first->set(i);
 		for (size_t j = 0; j < col_count; ++j)
 		{
-			double col_value = m_dimensions.second->dimension_values[j];
-			m_dimensions.second->setNodeValue(col_value);
+			if (dim2 && m_exchange.currentIdx() < dim2->m_warmup(j))
+			{
+				continue;
+			}
+
+			m_dimensions.second->set(j);
 			evaluateChild(i, j);
+
+			// swap the observer node back into the grid
+			if (dim2)
+			{
+				m_dimensions.second->set(j);
+			}
 		}
-		m_dimensions.first->setNodeValue(row_value);
+		if (dim1)
+		{
+			m_dimensions.first->set(i);
+		}
 	}
 	// restore original value of the dimensions for the base strategy
-	m_dimensions.first->setNodeValue(original_row_value);
-	m_dimensions.second->setNodeValue(original_col_value);
+	m_dimensions.first->reset();
+	m_dimensions.second->reset();
 	m_strategy->setTracer(tracer);
 }
 
@@ -215,12 +317,133 @@ StrategyGrid::evaluateChild(size_t row, size_t col) noexcept
 
 
 //============================================================================
+bool
+StrategyGrid::enableTracerHistory(TracerType t) noexcept
+{
+	for (size_t i = 0; i < m_dimensions.first->size(); ++i)
+	{
+		for (size_t j = 0; j < m_dimensions.second->size(); ++j)
+		{
+			if(!m_tracers(i, j)->enableTracerHistory(t))
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+//============================================================================
+double
+StrategyGrid::meanReturn() noexcept
+{
+	double returns = 0.0;
+	size_t row_count = m_dimensions.first->size();
+	size_t col_count = m_dimensions.second->size();
+	for (size_t i = 0; i < row_count; ++i)
+	{
+		for (size_t j = 0; j < col_count; ++j)
+		{
+			returns += (m_tracers(i, j)->getNLV() - m_tracers(i, j)->getInitialCash())
+				/ m_tracers(i, j)->getInitialCash();
+		}
+	}
+	return returns / (row_count * col_count);
+}
+
+
+//============================================================================
+Option<SharedPtr<Tracer>>
+StrategyGrid::getTracer(size_t row, size_t col) const noexcept
+{
+	if (row < m_dimensions.first->size() && col < m_dimensions.second->size())
+	{
+		return m_tracers(row, col);
+	}
+	return std::nullopt;
+}
+
+
+//============================================================================
 StrategyGrid::~StrategyGrid() noexcept
 {
 	if (m_weights_grid)
 	{
 		delete[] m_weights_grid;
 	}
+}
+
+
+//============================================================================
+GridDimensionObserver::GridDimensionObserver(
+	const String& name,
+	const Vector<double>& dimension_values,
+	SharedPtr<AssetObserverNode> observer_base,
+	SharedPtr<StrategyBufferOpNode> observer_child,
+	uintptr_t swap_addr
+) noexcept :
+	GridDimension(name, dimension_values, DimensionType::OBSERVER),
+	m_observer_base(observer_base),
+	m_observer_child(observer_child)
+{
+	m_observers.resize(dimension_values.size(), 1);
+	swap_func = reinterpret_cast<swapFuncType>(swap_addr);
+}
+
+
+//============================================================================
+GridDimensionObserver::~GridDimensionObserver() noexcept
+{
+}
+
+
+//============================================================================
+SharedPtr<GridDimensionObserver>
+GridDimensionObserver::make(
+	const String& name,
+	const Vector<double>& dimension_values,
+	SharedPtr<AssetObserverNode> observer_base,
+	SharedPtr<StrategyBufferOpNode> observer_child,
+	uintptr_t swap_addr
+) noexcept
+{
+	return std::make_shared<GridDimensionObserver>(
+		name,
+		dimension_values,
+		observer_base,
+		observer_child,
+		swap_addr
+	);
+
+}
+
+
+//============================================================================
+void
+GridDimensionObserver::buildWarmup(Strategy* m_strategy) noexcept
+{
+	m_warmup.resize(m_dimension_size);
+	m_warmup.setZero();
+	SharedPtr<StrategyBufferOpNode> temp = nullptr;
+	swap_func(m_observer_child, temp);
+	for (size_t i = 0; i < m_dimension_size; ++i)
+	{
+		swap_func(m_observer_child, m_observers(i));
+		auto warmup = m_strategy->refreshWarmup();
+		m_warmup(i) = warmup;
+		swap_func(m_observer_child, m_observers(i));
+	}
+	swap_func(m_observer_child, temp);
+	m_strategy->refreshWarmup();
+}
+
+
+//============================================================================
+void
+GridDimensionObserver::reset() noexcept
+{
+	auto node = std::dynamic_pointer_cast<StrategyBufferOpNode>(m_observer_base);
+	swap_func(m_observer_child, node);
 }
 
 

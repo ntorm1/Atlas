@@ -73,8 +73,10 @@ private:
 	size_t warmup;
 
 public:
-	virtual ~AssetOpNode() noexcept = default;
+	auto& getLeft() noexcept { return m_asset_op_left; }
+	auto& getRight() noexcept { return m_asset_op_right; }
 
+	virtual ~AssetOpNode() noexcept = default;
 
 	//============================================================================
 	AssetOpNode(
@@ -82,6 +84,9 @@ public:
 		SharedPtr<StrategyBufferOpNode> asset_op_right,
 		AssetOpType op_type
 	) noexcept;
+
+	[[nodiscard]] size_t refreshWarmup() noexcept override;
+	[[nodiscard]] size_t getWarmup() const noexcept override { return warmup; }
 
 	//============================================================================
 	ATLAS_API static Result<SharedPtr<AssetOpNode>, AtlasException>
@@ -107,16 +112,11 @@ public:
 		SharedPtr<StrategyBufferOpNode> asset_op_right,
 		AssetOpType op_type
 	);
-
-
-	//============================================================================
-	[[nodiscard]] size_t getWarmup() const noexcept override
-	{
-		return warmup;
-	}
-
-
-	//============================================================================
+	
+	ATLAS_API static void swapLeft(SharedPtr<ASTNode> asset_op, SharedPtr<StrategyBufferOpNode>& left) noexcept;
+	ATLAS_API static void swapRight(SharedPtr<ASTNode> asset_op, SharedPtr<StrategyBufferOpNode>& right) noexcept;
+	ATLAS_API uintptr_t getSwapLeft() const noexcept { return reinterpret_cast<uintptr_t>(&AssetOpNode::swapLeft);}
+	ATLAS_API uintptr_t getSwapRight() const noexcept { return reinterpret_cast<uintptr_t>(&AssetOpNode::swapRight);}
 	ATLAS_API void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 

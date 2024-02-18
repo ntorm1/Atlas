@@ -25,6 +25,7 @@ export class Strategy
 {
 	friend class AST::StrategyNode;
 	friend class AST::StrategyGrid;
+	friend class AST::GridDimensionObserver;
 	friend class Exchange;
 	friend class Hydra;
 	friend class CommisionManager;
@@ -46,7 +47,8 @@ private:
 	Option<SharedPtr<AST::TradeLimitNode>> getTradeLimitNode() const noexcept;
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
 	void setTracer(SharedPtr<Tracer> tracer) noexcept;
-
+	size_t refreshWarmup() noexcept;
+	size_t getWarmup() const noexcept;
 public:
 	ATLAS_API Strategy(
 		String name,

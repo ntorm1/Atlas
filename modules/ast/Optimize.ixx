@@ -5,10 +5,10 @@ module;
 #else
 #define ATLAS_API  __declspec(dllimport)
 #endif
-#include <functional>
 export module OptimizeNodeModule;
 
 import AtlasCore;
+import AtlasEnumsModule;
 import AtlasLinAlg;
 import BaseNodeModule;
 import StrategyBufferModule;
@@ -20,22 +20,135 @@ namespace AST
 {
 
 //============================================================================
-export struct GridDimension
+export enum class DimensionType : Uint8
 {
+	OBSERVER = 0,
+	LIMIT = 1
+};
+
+
+//============================================================================
+export class GridDimension
+{
+private:
+
+protected:
+	String m_name;
+	size_t m_dimension_size;
+	Vector<double> m_dimension_values;
+	DimensionType m_type;
+
+public:
+	GridDimension(
+		const String& name,
+		const Vector<double>& dimension_values,
+		DimensionType type
+	) noexcept;
+
+	ATLAS_API virtual ~GridDimension() noexcept;
+
+	virtual void reset() noexcept = 0;
+	virtual void set(size_t index) noexcept = 0;
+
+	String const& getName() const noexcept
+	{
+		return m_name;
+	}
+
+	Vector<double> const& getValues() const noexcept
+	{
+		return m_dimension_values;
+	}
+	
+	DimensionType getType() const noexcept
+	{
+		return m_type;
+	}
+
+	double get(size_t index) const noexcept
+	{
+		return m_dimension_values[index];
+	}
+
+	size_t size() const noexcept
+	{
+		return m_dimension_size;
+	}
+};
+
+
+//============================================================================
+export class GridDimensionObserver : public GridDimension
+{
+	friend class StrategyGrid;
+private:
+	using swapFuncType = void(*)(SharedPtr<ASTNode>, SharedPtr<StrategyBufferOpNode>&) noexcept;
+
+	uintptr_t swap_addr;
+	void(*swap_func)(SharedPtr<ASTNode>, SharedPtr<StrategyBufferOpNode>&) noexcept;
+	SharedPtr<AssetObserverNode> m_observer_base;
+	SharedPtr<StrategyBufferOpNode> m_observer_child;
+	LinAlg::EigenVector<SharedPtr<StrategyBufferOpNode>> m_observers;
+	LinAlg::EigenVector<size_t> m_warmup;
+
+public:
+	GridDimensionObserver(
+		const String& name,
+		const Vector<double>& dimension_values,
+		SharedPtr<AssetObserverNode> observer_base,
+		SharedPtr<StrategyBufferOpNode> observer_child,
+		uintptr_t swap_addr
+	) noexcept;
+	ATLAS_API ~GridDimensionObserver() noexcept;
+
+
+	ATLAS_API static SharedPtr<GridDimensionObserver> make(
+		const String& name,
+		const Vector<double>& dimension_values,
+		SharedPtr<AssetObserverNode> observer_base,
+		SharedPtr<StrategyBufferOpNode> observer_child,
+		uintptr_t swap_addr
+	) noexcept;
+
+	void buildWarmup(Strategy* m_strategy) noexcept;
+
+	void addObserver(SharedPtr<StrategyBufferOpNode> observer, size_t i) noexcept
+	{
+		m_observers(i) = observer;
+	}
+
+	SharedPtr<AssetObserverNode> const& getObserverBase() const noexcept
+	{
+		return m_observer_base;
+	}
+
+	void set(size_t index) noexcept override
+	{
+		swap_func(m_observer_child, m_observers(index));
+	}
+
+	void reset() noexcept override;
+};
+
+
+//============================================================================
+export class GridDimensionLimit : public GridDimension
+{
+private:
 	using GetterFuncType = double(*)(SharedPtr<TradeLimitNode>) noexcept;
 	using SetterFuncType = void(*)(SharedPtr<TradeLimitNode>, double) noexcept;
 
-	String dimension_name;
-	size_t dimension_size;
-	Vector<double> dimension_values;
 	SharedPtr<TradeLimitNode> buffer_node;
 	double(*buffer_node_getter)(SharedPtr<TradeLimitNode>);
 	void(*buffer_node_setter)(SharedPtr<TradeLimitNode>, double);
 	uintptr_t getter_addr;
 	uintptr_t setter_addr;
 	size_t current_index = 0;
+	double cached_value = 0;
+	double original_value = 0;
 
-	GridDimension(
+public:
+	GridDimensionLimit(
 		const String& name,
 		const Vector<double>& dimension_values,
 		const SharedPtr<TradeLimitNode>& node,
@@ -43,7 +156,7 @@ export struct GridDimension
 		uintptr_t setter
 	) noexcept;
 
-	ATLAS_API static SharedPtr<GridDimension> make(
+	ATLAS_API static SharedPtr<GridDimensionLimit> make(
 		const String& name,
 		const Vector<double>& dimension_values,
 		const SharedPtr<TradeLimitNode>& node,
@@ -51,26 +164,21 @@ export struct GridDimension
 		uintptr_t setter
 	) noexcept;
 
-	void set(size_t index) noexcept
+	void reset() noexcept override
 	{
-		current_index = index;
-		double value = dimension_values[index];
-		setNodeValue(value);
+		setNodeValue(original_value);
 	}
 
-	double getNodeValue() const noexcept
+	void set(size_t index) noexcept override
 	{
-		return buffer_node_getter(buffer_node);
+		current_index = index;
+		double value = m_dimension_values[index];
+		setNodeValue(value);
 	}
 
 	void setNodeValue(double value) noexcept
 	{
 		buffer_node_setter(buffer_node, value);
-	}
-
-	size_t size() const noexcept
-	{
-		return dimension_size;
 	}
 };
 
@@ -90,6 +198,8 @@ private:
 	LinAlg::EigenMap<LinAlg::EigenVectorXd> getBuffer(size_t row, size_t col) noexcept;
 	size_t gridStart(size_t row, size_t col) const noexcept;
 	void reset() noexcept;
+	void buildNodeGrid() noexcept;
+	void builNodeDim(GridDimensionObserver* dim) noexcept;
 	void evaluate() noexcept;
 	void evaluateGrid() noexcept;
 	void evaluateChild(size_t row, size_t col) noexcept;
@@ -111,8 +221,14 @@ public:
 		return m_dimensions;
 	}
 
+	ATLAS_API [[nodiscard ]] bool enableTracerHistory(TracerType t) noexcept;
+	ATLAS_API double meanReturn() noexcept;
+	ATLAS_API Option<SharedPtr<Tracer>> getTracer(size_t row, size_t col) const noexcept;
 	ATLAS_API ~StrategyGrid() noexcept;
+	ATLAS_API size_t rows() const noexcept {return m_dimensions.first->size();}
+	ATLAS_API size_t cols() const noexcept {return m_dimensions.second->size();}
 };
+
 
 
 }

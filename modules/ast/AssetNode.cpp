@@ -111,6 +111,39 @@ AssetOpNode::pyMake(
 }
 
 
+//============================================================================
+void
+AssetOpNode::swapLeft(
+	SharedPtr<ASTNode> asset_op,
+	SharedPtr<StrategyBufferOpNode>& left
+) noexcept
+{
+	auto asset_op_node = std::dynamic_pointer_cast<AssetOpNode>(asset_op);
+	std::swap(asset_op_node->getLeft(), left);
+}
+
+
+//============================================================================
+void
+AssetOpNode::swapRight(
+	SharedPtr<ASTNode> asset_op,
+	SharedPtr<StrategyBufferOpNode>& right
+) noexcept
+{
+	auto asset_op_node = std::dynamic_pointer_cast<AssetOpNode>(asset_op);
+	std::swap(asset_op_node->getRight(), right);
+}
+
+
+//============================================================================
+size_t
+AssetOpNode::refreshWarmup() noexcept
+{
+	warmup = std::max(m_asset_op_left->refreshWarmup(), m_asset_op_right->refreshWarmup());
+	return warmup;
+}
+
+
 void
 AssetOpNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {

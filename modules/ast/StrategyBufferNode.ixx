@@ -33,7 +33,7 @@ public:
 	virtual ~StrategyBufferOpNode() = default;
 
 	virtual void reset() noexcept {}
-
+	virtual size_t refreshWarmup() noexcept {return 0;}
 	Option<AllocationBaseNode*> getAllocationNode() const noexcept;
 	[[nodiscard]] Exchange& getExchange() noexcept {return m_exchange;}
 };

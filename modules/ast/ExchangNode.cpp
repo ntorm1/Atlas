@@ -43,6 +43,15 @@ ExchangeViewNode::ExchangeViewNode(
 
 
 //============================================================================
+size_t
+ExchangeViewNode::refreshWarmup() noexcept
+{
+    m_warmup = m_asset_op_node->refreshWarmup();
+    return m_warmup;
+}
+
+
+//============================================================================
 void
 ExchangeViewNode::filter(LinAlg::EigenRef<LinAlg::EigenVectorXd> view) const noexcept
 {

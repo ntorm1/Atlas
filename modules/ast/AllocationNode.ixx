@@ -46,7 +46,7 @@ protected:
 	void setWarmup(size_t warmup) noexcept { m_warmup = warmup; }
 	void setTracer(SharedPtr<Tracer> tracer) noexcept;
 	void setCopyWeightsBuffer(bool copy) noexcept { copy_weights_buffer = copy; }
-	LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
+	[[nodiscard]] LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
 
 public:
 	virtual ~AllocationBaseNode() noexcept;
@@ -91,7 +91,6 @@ public:
 	) noexcept;
 
 
-	//============================================================================
 	ATLAS_API [[nodiscard]] static Result<SharedPtr<FixedAllocationNode>, AtlasException>
 	make(
 			Vector<std::pair<String, double>> m_allocations,
@@ -99,7 +98,6 @@ public:
 			double epsilon = 0.000f
 	) noexcept;
 
-	//============================================================================
 	ATLAS_API [[nodiscard]] static SharedPtr<FixedAllocationNode>
 	pyMake(
 		Vector<std::pair<String, double>> m_allocations,
@@ -107,6 +105,7 @@ public:
 		double epsilon = 0.000f
 	);
 
+	[[nodiscard]] size_t refreshWarmup() noexcept override {return 0;}
 	void evaluateChild(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
@@ -148,6 +147,7 @@ public:
 			double epsilon = 0.000f
 	);
 
+	[[nodiscard]] size_t refreshWarmup() noexcept override;
 	void evaluateChild(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 

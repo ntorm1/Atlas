@@ -158,6 +158,69 @@ class VectorBTCompare(unittest.TestCase):
         returns = nlv[-1] / nlv[0] - 1
         self.assertAlmostEqual(returns, 4.851262581813536)
 
+    def test_grid_search(self):
+        fast_n = 6
+        slow_n = 12
+        windows = np.arange(5, 11)
+
+        close = AssetReadNode.make("Close", 0, self.exchange)
+        fast_ma = MeanObserverNode(
+            close,
+            fast_n
+        )
+        slow_ma = MeanObserverNode(
+            close,
+            slow_n
+        )
+
+        spread = AssetOpNode.make(fast_ma, slow_ma, AssetOpType.SUBTRACT)
+        spread_filter = ExchangeViewFilter(ExchangeViewFilterType.GREATER_THAN, 0.0, None)
+        exchange_view = ExchangeViewNode.make(self.exchange, spread, spread_filter)
+
+        fast_ma_dim = GridDimensionObserver.make(
+            name="Fast MA",
+            dimension_values=windows,
+            observer_base=fast_ma,
+            observer_child=spread,
+            swap_addr=spread.getSwapLeft()
+        )
+        slow_ma_dim = GridDimensionObserver.make(
+            name="Slow MA",
+            dimension_values=windows,
+            observer_base=slow_ma,
+            observer_child=spread,
+            swap_addr=spread.getSwapRight()
+        )
+        allocation = AllocationNode.make(exchange_view)
+        strategy_node = StrategyNode.make(allocation, self.portfolio)
+        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0), True)
+        grid = strategy.setGridDimmensions((fast_ma_dim, slow_ma_dim))
+        grid.enableTracerHistory(TracerType.NLV)
+        strategy.enableTracerHistory(TracerType.NLV)
+        self.hydra.run()
+
+        nlv = strategy.getHistory(TracerType.NLV)
+        returns = nlv[-1] / nlv[0] - 1
+        self.assertAlmostEqual(returns, 2.690064243907679)
+
+        rows = grid.rows()
+        cols = grid.cols()
+
+        pairs = []
+        returns_dict = {}
+        for i in range(rows):
+            for j in range(cols):
+                if i >= j:
+                    continue
+
+                pairs.append((windows[i], windows[j]))
+                tracer = grid.getTracer(i, j)
+                nlv = tracer.getHistory(TracerType.NLV)
+                returns = nlv[-1] / nlv[0] - 1
+                returns_dict[pairs[-1]] = returns
+        avg = np.mean(list(returns_dict.values()))
+        self.assertAlmostEqual(avg, 3.0260831737612692)
+
 class RiskTest(unittest.TestCase):
 
     def setUp(self) -> None:

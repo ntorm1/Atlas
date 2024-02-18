@@ -15,6 +15,9 @@ export template<typename T>
 using EigenMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
 export template<typename T>
+using EigenVector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
+
+export template<typename T>
 using EigenMap = Eigen::Map<T>;
 
 export template<typename T>

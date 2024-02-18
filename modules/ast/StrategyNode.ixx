@@ -33,6 +33,7 @@ private:
 	Portfolio& m_portfolio;
 	size_t m_warmup;
 
+	[[nodiscard]] size_t refreshWarmup() noexcept;
 	void reset() noexcept;
 	void setTracer(SharedPtr<Tracer> tracer) noexcept;
 	void setCommissionManager(SharedPtr<CommisionManager> manager) noexcept;

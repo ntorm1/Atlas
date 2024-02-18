@@ -38,7 +38,7 @@ export struct StructTracer
 	StructTracer(StructTracer&&) = delete;
 	StructTracer& operator=(StructTracer const&) = delete;
 	StructTracer& operator=(StructTracer&&) = delete;
-	~StructTracer() noexcept;
+	ATLAS_API ~StructTracer() noexcept;
 
 	bool eager() const noexcept { return orders_eager; }
 	void realize() noexcept;
@@ -80,13 +80,13 @@ private:
 	[[nodiscard]] Result<bool,AtlasException> enableTracerHistory(TracerType t) noexcept;
 	void setNLV(double nlv) noexcept { m_nlv = nlv; }
 	void setCovarianceNode(SharedPtr<AST::CovarianceNodeBase> covariance) noexcept { m_covariance = covariance; }
-	LinAlg::EigenVectorXd const& getHistory(TracerType t) const noexcept;
 	LinAlg::EigenVectorXd& getPnL() noexcept;
 	void setPnL(LinAlg::EigenRef<LinAlg::EigenVectorXd> pnl) noexcept;
 	void initPnL() noexcept;
 
 public:
 	Tracer(Strategy const& strategy, Exchange const& exchange, double cash) noexcept;
+	ATLAS_API LinAlg::EigenVectorXd const& getHistory(TracerType t) const noexcept;
 	ATLAS_API double getCash() const noexcept { return m_cash; }
 	ATLAS_API double getNLV() const noexcept { return m_nlv; }
 	ATLAS_API double getInitialCash() const noexcept { return m_initial_cash; }

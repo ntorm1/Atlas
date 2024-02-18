@@ -350,10 +350,10 @@ AtlasXAppImpl::getStrategyGridState(String const& strategy_name) noexcept
 	}
 	auto const& grid_ref = grid.value();
 	auto const& dims = grid_ref->getDimensions();
-	Vector<double> x = dims.first->dimension_values;
-	Vector<double> y = dims.second->dimension_values;
-	String x_label = dims.first->dimension_name;
-	String y_label = dims.second->dimension_name;
+	Vector<double> x = dims.first->getValues();
+	Vector<double> y = dims.second->getValues();
+	String x_label = dims.first->getName();
+	String y_label = dims.second->getName();
 
 	auto const& tracers = grid_ref->getTracers();
 	Vector<Vector<double>> z;

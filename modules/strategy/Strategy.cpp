@@ -279,7 +279,7 @@ Strategy::step() noexcept
 	// with the base strategy
 	if (!m_step_call)
 	{
-		if (m_impl->m_grid)	(*m_impl->m_grid)->evaluateGrid();
+		if (m_impl->m_grid)	(*m_impl->m_grid)->evaluate();
 		return;
 	}
 
@@ -341,6 +341,22 @@ Strategy::setTracer(SharedPtr<Tracer> tracer) noexcept
 {
 	m_impl->m_ast->setTracer(tracer);
 	std::swap(m_impl->m_tracer, tracer);
+}
+
+
+//============================================================================
+size_t
+Strategy::refreshWarmup() noexcept
+{
+	return m_impl->m_ast->refreshWarmup();
+}
+
+
+//============================================================================
+size_t
+Strategy::getWarmup() const noexcept
+{
+	return m_impl->m_ast->getWarmup();
 }
 
 

@@ -96,6 +96,14 @@ StrategyNode::getExchange() noexcept
 
 
 //============================================================================
+size_t
+StrategyNode::refreshWarmup() noexcept
+{
+	m_warmup = m_allocation->refreshWarmup();
+	return m_warmup;
+}
+
+//============================================================================
 void
 StrategyNode::reset() noexcept
 {

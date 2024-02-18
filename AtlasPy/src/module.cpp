@@ -28,11 +28,10 @@ import StrategyNodeModule;
 import StrategyBufferModule;
 import RiskNodeModule;
 import TradeNodeModule;
-
+import TracerModule;
 
 
 namespace py = pybind11;
-
 
 
 PYBIND11_MODULE(AtlasPy, m) {
@@ -137,6 +136,8 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def_static("make", &Atlas::AST::AssetReadNode::pyMake);
 
     py::class_<Atlas::AST::AssetOpNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetOpNode>>(m_ast, "AssetOpNode")
+        .def("getSwapLeft", &Atlas::AST::AssetOpNode::getSwapLeft)
+        .def("getSwapRight", &Atlas::AST::AssetOpNode::getSwapRight)
         .def_static("make", &Atlas::AST::AssetOpNode::pyMake);
 
 
@@ -204,7 +205,6 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::InvVolWeight, Atlas::AST::AllocationWeightNode, std::shared_ptr<Atlas::AST::InvVolWeight>>(m_ast, "InvVolWeight")
         .def(py::init<std::shared_ptr<Atlas::AST::CovarianceNodeBase>, std::optional<double>>());
 
-
     py::class_<Atlas::AST::StrategyNode, std::shared_ptr<Atlas::AST::StrategyNode>>(m_ast, "StrategyNode")
         .def("setTrigger", &Atlas::AST::StrategyNode::setTrigger)
         .def("setWarmupOverride", &Atlas::AST::StrategyNode::setWarmupOverride)
@@ -213,6 +213,8 @@ PYBIND11_MODULE(AtlasPy, m) {
             py::arg("portfolio")
         );
 
+    py::class_<Atlas::Tracer, std::shared_ptr<Atlas::Tracer>>(m_ast, "Tracer")
+        .def("getHistory", &Atlas::Tracer::getHistory, py::return_value_policy::reference_internal);
 
     py::class_<Atlas::AST::AssetScalerNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetScalerNode>>(m_ast, "AssetScalerNode")
        .def(py::init<std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, Atlas::AST::AssetOpType, double>());
@@ -220,8 +222,15 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::SumObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::SumObserverNode>>(m_ast, "SumObserverNode")
         .def(py::init<std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
 
+    py::class_<Atlas::AST::MeanObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::MeanObserverNode>>(m_ast, "MeanObserverNode")
+        .def(py::init<std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
 
-    py::class_<Atlas::AST::StrategyGrid, std::shared_ptr<Atlas::AST::StrategyGrid>>(m_ast, "StrategyGrid");
+    py::class_<Atlas::AST::StrategyGrid, std::shared_ptr<Atlas::AST::StrategyGrid>>(m_ast, "StrategyGrid")
+        .def("enableTracerHistory", &Atlas::AST::StrategyGrid::enableTracerHistory)
+        .def("getTracer", &Atlas::AST::StrategyGrid::getTracer)
+        .def("rows", &Atlas::AST::StrategyGrid::rows)
+        .def("cols", &Atlas::AST::StrategyGrid::cols)
+        .def("meanReturn", &Atlas::AST::StrategyGrid::meanReturn);
 
     py::class_<Atlas::Strategy, std::shared_ptr<Atlas::Strategy>>(m_core, "Strategy")
         .def("getNLV", &Atlas::Strategy::getNLV)
@@ -235,10 +244,21 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getWeightHistory", &Atlas::Strategy::getWeightHistory, py::return_value_policy::reference_internal)
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyNode>, double>());
 
+    py::class_<Atlas::AST::GridDimension, std::shared_ptr<Atlas::AST::GridDimension>>(m_ast, "GridDimension");
 
-    py::class_<Atlas::AST::GridDimension, std::shared_ptr<Atlas::AST::GridDimension>>(m_ast, "GridDimension")
+    py::class_<Atlas::AST::GridDimensionObserver, Atlas::AST::GridDimension, std::shared_ptr<Atlas::AST::GridDimensionObserver>>(m_ast, "GridDimensionObserver")
         .def_static("make",
-            &Atlas::AST::GridDimension::make,
+            &Atlas::AST::GridDimensionObserver::make,
+            py::arg("name"),
+            py::arg("dimension_values"),
+            py::arg("observer_base"),
+            py::arg("observer_child"),
+            py::arg("swap_addr")
+        );
+
+    py::class_<Atlas::AST::GridDimensionLimit, Atlas::AST::GridDimension, std::shared_ptr<Atlas::AST::GridDimensionLimit>>(m_ast, "GridDimensionLimit")
+        .def_static("make",
+            &Atlas::AST::GridDimensionLimit::make,
             py::arg("name"),
             py::arg("dimension_values"),
             py::arg("node"),
