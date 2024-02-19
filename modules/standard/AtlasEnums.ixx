@@ -9,8 +9,7 @@ export namespace Atlas
 		NLV,
 		VOLATILITY,
 		WEIGHTS,
-		ORDERS_EAGER,
-		ORDERS_LAZY
+		ORDERS_EAGER
 	};
 
 	//============================================================================

@@ -135,7 +135,6 @@ Tracer::enableTracerHistory(TracerType t) noexcept
             m_volatility_history.resize(n);
 			m_volatility_history.setZero();
 			break;
-        case TracerType::ORDERS_LAZY:
         case TracerType::ORDERS_EAGER:
             if (!m_struct_tracer) {
                 m_struct_tracer = std::make_unique<StructTracer>(m_exchange, *this);
@@ -159,9 +158,14 @@ Tracer::setPnL(LinAlg::EigenRef<LinAlg::EigenVectorXd> pnl) noexcept
 void
 Tracer::realize() noexcept
 {
-    if (m_struct_tracer) {
-		m_struct_tracer.value()->realize();
-	}
+}
+
+
+//============================================================================
+Vector<Order>
+const& Tracer::getOrders() const noexcept
+{
+	return m_struct_tracer.value()->m_orders;
 }
 
 
@@ -210,9 +214,6 @@ StructTracer::enabelTracerHistory(TracerType t) noexcept
 		case TracerType::ORDERS_EAGER:
             orders_eager = true;
 			break;
-        case TracerType::ORDERS_LAZY:
-            orders_lazy = true;
-			break;
         default:
             return;
 	}
@@ -240,6 +241,9 @@ StructTracer::evaluate(
         size_t exchange_offset = m_exchange.getExchangeOffset();
         size_t strategy_id = m_tracer.m_strategy.getId();
         for (size_t i = 0; i < static_cast<size_t>(deviation.size()); i++) {
+            if (abs(deviation(i)) < ORDER_EPSILON) {
+				continue;
+			}
             auto order = Order(
 				i + exchange_offset,
 				strategy_id,
@@ -248,22 +252,6 @@ StructTracer::evaluate(
 				close_prices(i)
 			);
             m_orders.push_back(std::move(order));
-        }
-    }
-}
-
-
-//============================================================================
-void
-StructTracer::realize() noexcept
-{
-    if (!m_tracer.m_weight_history.cols()) return;
-
-    if (orders_lazy) {
-        for (size_t i = 1; i < static_cast<size_t>(m_tracer.m_weight_history.cols()); i++) {
-            auto previous_weights = m_tracer.m_weight_history.col(i - 1);
-            auto current_weights = m_tracer.m_weight_history.col(i);
-            evaluate(current_weights, previous_weights);
         }
     }
 }

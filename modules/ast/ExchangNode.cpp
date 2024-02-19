@@ -32,6 +32,7 @@ ExchangeViewNode::ExchangeViewNode(
     m_view_size = m_exchange.getAssetCount();
     if (m_left_view)
     {
+        asSignal(true);
         m_buffer.resize(m_exchange.getAssetCount());
         m_buffer.setZero();
     }
@@ -104,28 +105,42 @@ ExchangeViewNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexc
 
     // on evaluation start ev is pass in the current weights to override.
     // store these weights to compare agaisnt the next time step
-    if (m_as_signal)
-    {
-        m_buffer = target;
-    }
 
     m_asset_op_node->evaluate(target);
     if (m_filters.size()) {
         filter(target);
     }
 
-    // if ev is operating as signal compare against previous time step and
-    // copy the result to the buffer
-    if (m_as_signal)
+    if (m_as_signal && m_left_view)
     {
-        assert(m_buffer.size() == target.size());
-        target = (
-            (target.array() * m_buffer.array() < 0.0f)
-            ||
-            (m_buffer.array() == 0.0f) && (target.array() != 0.0f)
-            )
-            .select(target, m_buffer);
+        // copy over the previous ev signals to a temp buffer
+        LinAlg::EigenVectorXd temp = m_buffer;
+
+        // evaluate the left view over the ev buffer
+        (*m_left_view)->evaluate(m_buffer);
+
+        for (int i = 0; i < m_buffer.size(); i++)
+		{
+            // if left signal not nan take that
+			if (!std::isnan(m_buffer(i)))
+			{
+                target(i) = m_buffer(i);
+			}
+            // else if previous signal not nan take that
+            else if (!std::isnan(temp(i)))
+			{
+                if (i >= 1 && temp(i) * temp(i - 1) > 0)
+                {
+                    target(i) = temp(i);
+                }
+			}
+		}
+        m_buffer = target;
     }
+    if (hasCache())
+	{
+        cacheColumn() = target;
+	}
 }
 
 }

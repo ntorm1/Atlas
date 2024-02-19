@@ -5,6 +5,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
+#include "AtlasStruct.hpp"
 
 import PortfolioModule;
 
@@ -33,11 +34,59 @@ import TracerModule;
 
 namespace py = pybind11;
 
+// Wrapper for the Order struct
+void wrap_order(py::module& m) {
+    py::class_<Atlas::Order>(m, "Order")
+        .def(py::init<size_t, size_t, long long, double, double>())
+        .def_readonly("asset_id", &Atlas::Order::asset_id)
+        .def_readonly("strategy_id", &Atlas::Order::strategy_id)
+        .def_readonly("fill_time", &Atlas::Order::fill_time)
+        .def_readonly("quantity", &Atlas::Order::quantity)
+        .def_readonly("fill_price", &Atlas::Order::fill_price)
+        .def("to_dict", 
+            [](const Atlas::Order& order) {
+                py::dict d;
+                d["asset_id"] = order.asset_id;
+                d["strategy_id"] = order.strategy_id;
+                d["fill_time"] = order.fill_time;
+                d["quantity"] = order.quantity;
+                d["fill_price"] = order.fill_price;
+                return d;
+            });
+}
+
+// Wrapper for the Trade struct
+void wrap_trade(py::module& m) {
+    py::class_<Atlas::Trade>(m, "Trade")
+        .def(py::init<size_t, size_t, long long, long long, double, double, double>())
+        .def_readonly("asset_id", &Atlas::Trade::asset_id)
+        .def_readonly("strategy_id", &Atlas::Trade::strategy_id)
+        .def_readonly("open_time", &Atlas::Trade::open_time)
+        .def_readonly("close_time", &Atlas::Trade::close_time)
+        .def_readonly("quantity", &Atlas::Trade::quantity)
+        .def_readonly("open_price", &Atlas::Trade::open_price)
+        .def_readonly("close_price", &Atlas::Trade::close_price)
+        .def("to_dict",
+			[](const Atlas::Trade& trade) {
+				py::dict d;
+				d["asset_id"] = trade.asset_id;
+				d["strategy_id"] = trade.strategy_id;
+				d["open_time"] = trade.open_time;
+				d["close_time"] = trade.close_time;
+				d["quantity"] = trade.quantity;
+				d["open_price"] = trade.open_price;
+				d["close_price"] = trade.close_price;
+				return d;
+			});
+}
+
 
 PYBIND11_MODULE(AtlasPy, m) {
     auto m_core = m.def_submodule("core");
     auto m_ast = m.def_submodule("ast");
-    
+
+    wrap_order(m_core);
+    wrap_trade(m_core);
 
     // ======= PYTHON API ======= //
     py::class_<Atlas::Portfolio, std::shared_ptr<Atlas::Portfolio>>(m_core, "Portfolio")
@@ -83,7 +132,12 @@ PYBIND11_MODULE(AtlasPy, m) {
         .export_values();
 
     py::class_<Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::ASTNode>>(m_ast, "ASTNode");
-    py::class_<Atlas::AST::StrategyBufferOpNode, Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode");
+    
+    py::class_<Atlas::AST::StrategyBufferOpNode, Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode")
+        .def("enableCache", &Atlas::AST::StrategyBufferOpNode::enableCache,
+            py::arg("v") = true)
+        .def("cache", &Atlas::AST::StrategyBufferOpNode::cache, py::return_value_policy::reference_internal);
+    
     py::class_<Atlas::AST::AssetObserverNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetObserverNode>>(m_ast, "AssetObserverNode");
 
 
@@ -104,12 +158,12 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("WEIGHTS", Atlas::TracerType::WEIGHTS)
         .value("VOLATILITY", Atlas::TracerType::VOLATILITY)
         .value("ORDERS_EAGER", Atlas::TracerType::ORDERS_EAGER)
-        .value("ORDERS_LAZY", Atlas::TracerType::ORDERS_LAZY)
         .export_values();
 
     // ======= AST API ======= //
     py::enum_<Atlas::AST::ExchangeViewFilterType>(m_ast, "ExchangeViewFilterType")
         .value("GREATER_THAN", Atlas::AST::ExchangeViewFilterType::GREATER_THAN)
+        .value("LESS_THAN", Atlas::AST::ExchangeViewFilterType::LESS_THAN)
         .export_values();
     py::enum_<Atlas::AST::AllocationType>(m_ast, "AllocationType")
         .value("UNIFORM", Atlas::AST::AllocationType::UNIFORM)
@@ -160,7 +214,8 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def_static("make", &Atlas::AST::ExchangeViewNode::make,
             py::arg("exchange"),
             py::arg("asset_op_node"),
-            py::arg("filter") = std::nullopt);
+            py::arg("filter") = std::nullopt,
+            py::arg("left_view") = std::nullopt);
 
     py::class_<Atlas::AST::EVRankNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::EVRankNode>>(m_ast, "EVRankNode")
         .def_static("make", &Atlas::AST::EVRankNode::make,
@@ -225,6 +280,7 @@ PYBIND11_MODULE(AtlasPy, m) {
         );
 
     py::class_<Atlas::Tracer, std::shared_ptr<Atlas::Tracer>>(m_ast, "Tracer")
+        .def("getOrders", &Atlas::Tracer::getOrders, py::return_value_policy::reference_internal)
         .def("getHistory", &Atlas::Tracer::getHistory, py::return_value_policy::reference_internal);
 
     py::class_<Atlas::AST::AssetScalerNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetScalerNode>>(m_ast, "AssetScalerNode")
@@ -251,6 +307,7 @@ PYBIND11_MODULE(AtlasPy, m) {
             py::arg("dimensions"),
             py::arg("grid_type") = std::nullopt
             )
+        .def("getTracer", &Atlas::Strategy::getTracer, py::return_value_policy::reference_internal)
         .def("setVolTracer", &Atlas::Strategy::setVolTracer)
         .def("initCommissionManager", &Atlas::Strategy::initCommissionManager)
         .def("getAllocationBuffer", &Atlas::Strategy::getAllocationBuffer, py::return_value_policy::reference_internal)

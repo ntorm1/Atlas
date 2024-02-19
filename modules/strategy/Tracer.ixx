@@ -28,7 +28,6 @@ export struct StructTracer
 	Vector<Trade> m_trades;
 	size_t close_index = 0;
 	bool orders_eager = false;
-	bool orders_lazy = false;
 
 	StructTracer(
 		Exchange const& exchange,
@@ -41,7 +40,6 @@ export struct StructTracer
 	ATLAS_API ~StructTracer() noexcept;
 
 	bool eager() const noexcept { return orders_eager; }
-	void realize() noexcept;
 	void enabelTracerHistory(TracerType t) noexcept;
 	void evaluate(
 		LinAlg::EigenVectorXd const& weights,
@@ -86,6 +84,7 @@ private:
 
 public:
 	Tracer(Strategy const& strategy, Exchange const& exchange, double cash) noexcept;
+	ATLAS_API Vector<Order> const& getOrders() const noexcept;
 	ATLAS_API LinAlg::EigenVectorXd const& getHistory(TracerType t) const noexcept;
 	ATLAS_API double getCash() const noexcept { return m_cash; }
 	ATLAS_API double getNLV() const noexcept { return m_nlv; }

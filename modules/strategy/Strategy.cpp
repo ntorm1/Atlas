@@ -110,7 +110,6 @@ Strategy::enableTracerHistory(TracerType t) noexcept
 	switch (t)
 	{
 		case TracerType::ORDERS_EAGER:
-		case TracerType::ORDERS_LAZY:
 			m_impl->m_ast->enableCopyWeightsBuffer();
 		default:
 			break;

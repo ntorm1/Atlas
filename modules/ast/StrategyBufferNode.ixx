@@ -1,4 +1,10 @@
 module;
+#pragma once
+#ifdef ATLAS_EXPORTS
+#define ATLAS_API __declspec(dllexport)
+#else
+#define ATLAS_API  __declspec(dllimport)
+#endif
 export module StrategyBufferModule;
 
 import AtlasCore;
@@ -17,6 +23,7 @@ export class StrategyBufferOpNode
 	: public OpperationNode<void, LinAlg::EigenRef<LinAlg::EigenVectorXd>> {
 protected:
 	Exchange& m_exchange;
+	LinAlg::EigenMatrixXd m_cache;
 
 	StrategyBufferOpNode(
 		NodeType t,
@@ -29,6 +36,9 @@ protected:
 
 	}
 
+	bool hasCache() const noexcept { return m_cache.cols() > 1; }
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> cacheColumn() noexcept;
+
 public:
 	virtual ~StrategyBufferOpNode() = default;
 
@@ -36,6 +46,8 @@ public:
 	virtual size_t refreshWarmup() noexcept {return 0;}
 	Option<AllocationBaseNode*> getAllocationNode() const noexcept;
 	[[nodiscard]] Exchange& getExchange() noexcept {return m_exchange;}
+	ATLAS_API void enableCache(bool v = true) noexcept;
+	ATLAS_API auto const& cache() noexcept {return m_cache;}
 };
 
 

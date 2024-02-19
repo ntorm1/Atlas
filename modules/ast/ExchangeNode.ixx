@@ -70,7 +70,7 @@ public:
 	ATLAS_API ~ExchangeViewNode() noexcept;
 
 	//============================================================================
-	ExchangeViewNode(
+	ATLAS_API ExchangeViewNode(
 		SharedPtr<Exchange> exchange,
 		SharedPtr<StrategyBufferOpNode> asset_op_node,
 		Option<SharedPtr<ExchangeViewNode>> left_view

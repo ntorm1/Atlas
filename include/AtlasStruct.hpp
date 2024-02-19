@@ -1,21 +1,10 @@
 #pragma once
 
 
-#ifdef __cplusplus
-extern "C" 
-{
-
-struct Order;
-struct Trade;
-
-}
-
-#endif
-
-
 namespace Atlas
 {
 
+//============================================================================
 struct Order
 {
 	size_t asset_id;
@@ -34,6 +23,7 @@ struct Order
 	{}
 };
 
+//============================================================================
 struct Trade
 {
 	size_t asset_id;
