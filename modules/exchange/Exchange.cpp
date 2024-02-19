@@ -407,6 +407,18 @@ Exchange::enableNodeCache(String const& name, SharedPtr<AST::StrategyBufferOpNod
 {
 	node->enableCache();
 	m_impl->ast_cache[name] = node;
+
+	assert(m_impl->current_index == 0);
+
+	LinAlg::EigenVectorXd buffer;
+	buffer.resize(m_impl->asset_id_map.size());
+	buffer.setZero();
+	for (size_t i = 0; i < m_impl->timestamps.size(); i++)
+	{
+		step(m_impl->timestamps[i]);
+		node->evaluate(buffer);
+	}
+	reset();
 }
 
 
