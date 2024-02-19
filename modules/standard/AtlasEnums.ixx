@@ -28,4 +28,13 @@ export namespace Atlas
 		FULL,
 		INCREMENTAL
 	};
+
+	//============================================================================
+	export enum class GridType
+	{
+		FULL = 0,
+		UPPER_TRIANGULAR = 1,
+		LOWER_TRIANGULAR = 2
+	};
+
 }

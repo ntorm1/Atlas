@@ -130,6 +130,10 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("STOP_LOSS", Atlas::TradeLimitType::STOP_LOSS)
         .value("TAKE_PROFIT", Atlas::TradeLimitType::TAKE_PROFIT)
         .export_values();
+    py::enum_<Atlas::GridType>(m_ast, "GridType")
+        .value("UPPER_TRIANGULAR", Atlas::GridType::UPPER_TRIANGULAR)
+        .value("LOWER_TRIANGULAR", Atlas::GridType::LOWER_TRIANGULAR)
+        .export_values();
 
 
     py::class_<Atlas::AST::AssetReadNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNode")
@@ -236,7 +240,10 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getNLV", &Atlas::Strategy::getNLV)
         .def("getName", &Atlas::Strategy::getName)
         .def("enableTracerHistory", &Atlas::Strategy::pyEnableTracerHistory)
-        .def("setGridDimmensions", &Atlas::Strategy::pySetGridDimmensions)
+        .def("setGridDimmensions", &Atlas::Strategy::pySetGridDimmensions,
+            py::arg("dimensions"),
+            py::arg("grid_type") = std::nullopt
+            )
         .def("setVolTracer", &Atlas::Strategy::setVolTracer)
         .def("initCommissionManager", &Atlas::Strategy::initCommissionManager)
         .def("getAllocationBuffer", &Atlas::Strategy::getAllocationBuffer, py::return_value_policy::reference_internal)

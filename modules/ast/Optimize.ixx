@@ -194,6 +194,10 @@ private:
 	LinAlg::EigenMatrix<SharedPtr<Tracer>> m_tracers;
 	double* m_weights_grid = nullptr;
 	size_t m_asset_count = 0;
+	GridType m_grid_type = GridType::FULL;
+	GridDimensionObserver* __observer_dim1 = nullptr;
+	GridDimensionObserver* __observer_dim2 = nullptr;
+
 
 	LinAlg::EigenMap<LinAlg::EigenVectorXd> getBuffer(size_t row, size_t col) noexcept;
 	size_t gridStart(size_t row, size_t col) const noexcept;
@@ -208,7 +212,8 @@ public:
 	StrategyGrid(
 		Strategy* strategy,
 		Exchange const& exchange,
-		std::pair<SharedPtr<GridDimension>, SharedPtr<GridDimension>> m_dimensions
+		std::pair<SharedPtr<GridDimension>, SharedPtr<GridDimension>> m_dimensions,
+		Option<GridType> grid_type = std::nullopt
 	) noexcept;
 
 	auto const& getTracers() const noexcept

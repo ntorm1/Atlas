@@ -73,9 +73,10 @@ GridDimensionLimit::make(const String& name, const Vector<double>& dimension_val
 StrategyGrid::StrategyGrid(
 	Strategy* strategy,
 	Exchange const& exchange,
-	std::pair<SharedPtr<GridDimension>, SharedPtr<GridDimension>> dimensions
+	std::pair<SharedPtr<GridDimension>, SharedPtr<GridDimension>> dimensions,
+	Option<GridType> grid_type
 ) noexcept
-:
+	:
 	m_strategy(strategy),
 	m_exchange(exchange),
 	m_dimensions(dimensions),
@@ -100,6 +101,19 @@ StrategyGrid::StrategyGrid(
 			);
 		}
 	}
+
+	if (grid_type)
+	{
+		m_grid_type = *grid_type;
+	}
+
+	__observer_dim1 = m_dimensions.first->getType() == DimensionType::OBSERVER ?
+		static_cast<GridDimensionObserver*>(m_dimensions.first.get()) :
+		nullptr;
+	__observer_dim2 = m_dimensions.second->getType() == DimensionType::OBSERVER ?
+		static_cast<GridDimensionObserver*>(m_dimensions.second.get()) :
+		nullptr;
+
 	m_weights_grid = new double[row_count * col_count * depth];
 	memset(m_weights_grid, 0, row_count * col_count * depth * sizeof(double));
 	buildNodeGrid();
@@ -256,16 +270,9 @@ StrategyGrid::evaluateGrid() noexcept
 	// evaluate the grid strategy with the current market prices and weights
 	evaluate();
 
-	auto dim1 = m_dimensions.first->getType() == DimensionType::OBSERVER ?
-		static_cast<GridDimensionObserver*>(m_dimensions.first.get()) :
-		nullptr;
-	auto dim2 = m_dimensions.second->getType() == DimensionType::OBSERVER ?
-		static_cast<GridDimensionObserver*>(m_dimensions.second.get()) :
-		nullptr;
-
 	for (size_t i = 0; i < row_count; ++i)
 	{
-		if (dim1 && m_exchange.currentIdx() < dim1->m_warmup(i))
+		if (__observer_dim1 && m_exchange.currentIdx() < __observer_dim1->m_warmup(i))
 		{
 			continue;
 		}
@@ -273,21 +280,43 @@ StrategyGrid::evaluateGrid() noexcept
 		m_dimensions.first->set(i);
 		for (size_t j = 0; j < col_count; ++j)
 		{
-			if (dim2 && m_exchange.currentIdx() < dim2->m_warmup(j))
+			if (__observer_dim2 && m_exchange.currentIdx() < __observer_dim2->m_warmup(j))
 			{
 				continue;
+			}
+
+			switch (m_grid_type)
+			{
+				case GridType::UPPER_TRIANGULAR:
+				{
+					if (j < i)
+					{
+						continue;
+					}
+					break;
+				}
+				case GridType::LOWER_TRIANGULAR:
+				{
+					if (j > i)
+					{
+						continue;
+					}
+					break;
+				}
+				default:
+					break;
 			}
 
 			m_dimensions.second->set(j);
 			evaluateChild(i, j);
 
 			// swap the observer node back into the grid
-			if (dim2)
+			if (__observer_dim2)
 			{
 				m_dimensions.second->set(j);
 			}
 		}
-		if (dim1)
+		if (__observer_dim1)
 		{
 			m_dimensions.first->set(i);
 		}

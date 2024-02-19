@@ -194,7 +194,7 @@ class VectorBTCompare(unittest.TestCase):
         allocation = AllocationNode.make(exchange_view)
         strategy_node = StrategyNode.make(allocation, self.portfolio)
         strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0), True)
-        grid = strategy.setGridDimmensions((fast_ma_dim, slow_ma_dim))
+        grid = strategy.setGridDimmensions((fast_ma_dim, slow_ma_dim), GridType.UPPER_TRIANGULAR)
         grid.enableTracerHistory(TracerType.NLV)
         strategy.enableTracerHistory(TracerType.NLV)
         self.hydra.run()

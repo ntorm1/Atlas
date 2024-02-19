@@ -129,7 +129,10 @@ Option<SharedPtr<AST::StrategyGrid>> Strategy::getGrid() const noexcept
 
 //============================================================================
 Result<SharedPtr<AST::StrategyGrid const>, AtlasException>
-Strategy::setGridDimmensions(std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>> dimensions)
+Strategy::setGridDimmensions(
+	std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>> dimensions,
+	Option<GridType> grid_type
+	) noexcept
 {
 	if (m_impl->m_grid)
 	{
@@ -138,7 +141,8 @@ Strategy::setGridDimmensions(std::pair<SharedPtr<AST::GridDimension>, SharedPtr<
 	m_impl->m_grid = std::make_shared<AST::StrategyGrid>(
 		this,
 		m_impl->m_exchange,
-		std::move(dimensions)
+		std::move(dimensions),
+		grid_type
 	);
 	return m_impl->m_grid.value();
 }
@@ -146,9 +150,12 @@ Strategy::setGridDimmensions(std::pair<SharedPtr<AST::GridDimension>, SharedPtr<
 
 //============================================================================
 SharedPtr<AST::StrategyGrid const>
-Strategy::pySetGridDimmensions(std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>> dimensions)
+Strategy::pySetGridDimmensions(
+	std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>> dimensions,
+	Option<GridType> grid_type
+)
 {
-	auto res = setGridDimmensions(std::move(dimensions));
+	auto res = setGridDimmensions(std::move(dimensions), grid_type);
 	if (!res)
 	{
 		throw std::runtime_error(res.error().what());

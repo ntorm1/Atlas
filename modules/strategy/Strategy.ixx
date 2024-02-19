@@ -74,11 +74,13 @@ public:
 	
 	ATLAS_API [[nodiscard]] Result<SharedPtr<AST::StrategyGrid const>, AtlasException>
 	setGridDimmensions(
-		std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>> dimensions
-	);
+		std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>> dimensions,
+		Option<GridType> grid_type = std::nullopt
+	) noexcept;
 	ATLAS_API [[nodiscard]] SharedPtr<AST::StrategyGrid const>
 	pySetGridDimmensions(
-			std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>> dimensions
+		std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>> dimensions,
+		Option<GridType> grid_type = std::nullopt
 	);
 };
 

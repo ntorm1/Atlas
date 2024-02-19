@@ -213,11 +213,19 @@ AllocationBaseNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noe
 	// if epsilon is set we need to check if the difference between the current
 	// weights and the new weights is less than epsilon. If it is we need to
 	// revert the weights back to the original weights before calculating any commissions
-	if (m_impl->m_epsilon)
+	if (m_impl->m_epsilon > 0)
 	{
 		target = ((target - m_impl->m_tracer->m_weights_buffer).cwiseAbs().array() < m_impl->m_epsilon)
 			.select(m_impl->m_tracer->m_weights_buffer, target);
 	}
+	// if epsilons is less than 0, revert weights back to original if the sign is the same or if it closed. If the trade
+	// switched sides then allow the trade to go through
+	else if (m_impl->m_epsilon < 0)
+	{
+		target = ((target.array() * m_impl->m_tracer->m_weights_buffer.array()) > 0)
+			.select(m_impl->m_tracer->m_weights_buffer, target);
+	}
+
 
 	// if we have stop loss or take profit we need to check if the trade limits have been exceeded
 	// by passing in the previous weights to compute the pnl, then adjust target weights accordingly
