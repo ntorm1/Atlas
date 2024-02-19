@@ -5,7 +5,6 @@ module;
 #else
 #define ATLAS_API  __declspec(dllimport)
 #endif
-#include <functional>
 export module TradeNodeModule;
 
 import AtlasCore;

@@ -117,10 +117,80 @@ public:
 	ATLAS_API static void swapRight(SharedPtr<ASTNode> asset_op, SharedPtr<StrategyBufferOpNode>& right) noexcept;
 	ATLAS_API uintptr_t getSwapLeft() const noexcept { return reinterpret_cast<uintptr_t>(&AssetOpNode::swapLeft);}
 	ATLAS_API uintptr_t getSwapRight() const noexcept { return reinterpret_cast<uintptr_t>(&AssetOpNode::swapRight);}
-	ATLAS_API void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
+
+//============================================================================
+export class AssetMedianNode
+	: public StrategyBufferOpNode
+{
+private:
+	size_t m_col_1;
+	size_t m_col_2;
+
+	AssetMedianNode(SharedPtr<Exchange> exchange, size_t col_1, size_t col_2) noexcept;
+
+public:
+	template<typename ...Arg> SharedPtr<AssetMedianNode>
+	static make(Arg&&...arg) {
+		struct EnableMakeShared : public AssetMedianNode {
+			EnableMakeShared(Arg&&...arg) :AssetMedianNode(std::forward<Arg>(arg)...) {}
+		};
+		return std::make_shared<EnableMakeShared>(std::forward<Arg>(arg)...);
+	}
+
+	ATLAS_API static SharedPtr<AssetMedianNode> pyMake(SharedPtr<Exchange> exchange, String const& col_1, String const& col_2);
+	ATLAS_API ~AssetMedianNode() noexcept;
+
+	[[nodiscard]] size_t getWarmup() const noexcept override { return 0; }
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+
 };
+
+
+//============================================================================
+export class ATRNode
+	: public StrategyBufferOpNode
+{
+private:
+	size_t m_window = 0;
+	size_t m_high = 0;
+	size_t m_low = 0;
+	size_t m_close = 0;
+	LinAlg::EigenMatrixXd m_atr;
+
+	ATRNode(
+		Exchange& exchange,
+		size_t high,
+		size_t low,
+		size_t window
+	) noexcept;
+	void build() noexcept;
+
+public:
+	template<typename ...Arg> SharedPtr<ATRNode>
+	static make(Arg&&...arg) {
+		struct EnableMakeShared : public ATRNode {
+			EnableMakeShared(Arg&&...arg) :ATRNode(std::forward<Arg>(arg)...) {}
+		};
+		return std::make_shared<EnableMakeShared>(std::forward<Arg>(arg)...);
+	}
+	ATLAS_API static SharedPtr<ATRNode> pyMake(
+		SharedPtr<Exchange> exchange,
+		String const& high,
+		String const& low,
+		size_t window
+	);
+
+	ATLAS_API ~ATRNode() noexcept;
+	ATLAS_API auto const& getATR() const noexcept { return m_atr; }
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	[[nodiscard]] size_t getWarmup() const noexcept override { return m_window; }
+};
+
+
+}
 
 
 }

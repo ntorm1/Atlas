@@ -69,6 +69,7 @@ public:
 	auto const& getSource() const noexcept{return m_source;}
 	size_t currentIdx() const noexcept;
 
+	EigenMatrixXd const& getData() const noexcept;
 	EigenVectorXd const& getReturnsScalar() const noexcept;
 	EigenBlockView<double> getMarketReturnsBlock(size_t start_idex, size_t end_idx) const noexcept;
 	EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;

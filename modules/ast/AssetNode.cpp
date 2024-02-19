@@ -171,6 +171,145 @@ AssetOpNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 	}
 }
 
+
+//============================================================================
+AssetMedianNode::AssetMedianNode(
+	SharedPtr<Exchange> exchange,
+	size_t col_1,
+	size_t col_2
+) noexcept:
+	StrategyBufferOpNode(NodeType::ASSET_MEDIAN, *exchange, std::nullopt),
+	m_col_1(col_1),
+	m_col_2(col_2)
+{
+}
+
+
+//============================================================================
+SharedPtr<AssetMedianNode>
+AssetMedianNode::pyMake(SharedPtr<Exchange> exchange, String const& col_1, String const& col_2)
+{
+	auto column_index1 = exchange->getColumnIndex(col_1);
+	auto column_index2 = exchange->getColumnIndex(col_2);
+	if (!column_index1 || !column_index2)
+		throw std::runtime_error("Column not found");
+	return AssetMedianNode::make(exchange, *column_index1, *column_index2);
+}
+
+//============================================================================
+AssetMedianNode::~AssetMedianNode() noexcept
+{
+}
+
+
+//============================================================================
+void AssetMedianNode::evaluate(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
+) noexcept
+{
+	target = (m_exchange.getSlice(m_col_1, 0) + m_exchange.getSlice(m_col_2, 0)) / 2;
+}
+
+
+
+//============================================================================
+ATRNode::ATRNode(
+	Exchange& exchange,
+	size_t high,
+	size_t low,
+	size_t window
+) noexcept :
+	StrategyBufferOpNode(NodeType::ASSET_ATR, exchange, std::nullopt),
+	m_high(high),
+	m_low(low),
+	m_window(window)
+{
+	m_atr.resize(
+		m_exchange.getAssetCount(),
+		m_exchange.getTimestamps().size()
+	);
+	m_atr.setZero();
+	m_close = m_exchange.getCloseIndex().value();
+	build();
+}
+
+
+//============================================================================
+void
+ATRNode::build() noexcept
+{
+	auto const& data = m_exchange.getData();
+	size_t col_count = m_exchange.getHeaders().size();
+
+	// True Range holder for EMA
+	LinAlg::EigenMatrixXd tr(m_exchange.getAssetCount(), m_window);
+	tr.setZero();
+	size_t tr_idx = 0;
+	double alpha = 1 / static_cast<double>(m_window);
+
+	for (size_t i = 1; i < m_exchange.getTimestamps().size(); ++i)
+	{
+		size_t high_idx = i * col_count + m_high;
+		size_t low_idx = i * col_count + m_low;
+		size_t close_idx = i * col_count + m_close;
+
+		auto high_slice = data.col(high_idx);
+		auto low_slice = data.col(low_idx);
+		auto close_slice = data.col(close_idx);
+
+		auto tr0 = (high_slice - low_slice).cwiseAbs();
+		auto tr1 = (high_slice - data.col(close_idx-col_count)).cwiseAbs();
+		auto tr2 = (low_slice - data.col(close_idx-col_count)).cwiseAbs();
+		tr.col(tr_idx) = tr0.cwiseMax(tr1).cwiseMax(tr2);
+
+		if (i < m_window)
+		{
+			continue;
+		}
+		else if (i == m_window - 1)
+		{
+			m_atr.col(i) = tr.rowwise().mean();
+		}
+		else if (i > m_window - 1)
+		{
+			m_atr.col(i) = m_atr.col(i - 1) * (1 - alpha) + tr.col(tr_idx) * alpha;
+		}
+		++tr_idx;
+		tr_idx %= m_window;
+	}
+}
+
+
+//============================================================================
+SharedPtr<ATRNode>
+ATRNode::pyMake(
+	SharedPtr<Exchange> exchange,
+	String const& high,
+	String const& low,
+	size_t window
+)
+{
+	auto high_idx = exchange->getColumnIndex(high);
+	auto low_idx = exchange->getColumnIndex(low);
+	if (!high_idx || !low_idx) {
+		throw std::runtime_error("Invalid column name");
+	}
+	return ATRNode::make(*exchange, *high_idx, *low_idx, window);
+}
+
+//============================================================================
+ATRNode::~ATRNode() noexcept
+{
+}
+
+
+//============================================================================
+void
+ATRNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
+{
+	target = m_atr.col(m_exchange.currentIdx());
+}
+
 }
 
 }

@@ -29,7 +29,8 @@ class AssetObserverImpl;
 export enum class AssetObserverType : Uint8
 {
 	SUM = 0,
-	MEAN = 1
+	MEAN = 1,
+	ATR = 2
 };
 
 

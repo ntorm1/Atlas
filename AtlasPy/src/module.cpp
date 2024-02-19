@@ -139,6 +139,13 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::AssetReadNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNode")
         .def_static("make", &Atlas::AST::AssetReadNode::pyMake);
 
+    py::class_<Atlas::AST::AssetMedianNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetMedianNode>>(m_ast, "AssetMedianNode")
+        .def_static("make", &Atlas::AST::AssetMedianNode::pyMake);
+
+    py::class_<Atlas::AST::ATRNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::ATRNode>>(m_ast, "ATRNode")
+        .def("getATR", &Atlas::AST::ATRNode::getATR, py::return_value_policy::reference_internal)
+        .def_static("make", &Atlas::AST::ATRNode::pyMake);
+
     py::class_<Atlas::AST::AssetOpNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetOpNode>>(m_ast, "AssetOpNode")
         .def("getSwapLeft", &Atlas::AST::AssetOpNode::getSwapLeft)
         .def("getSwapRight", &Atlas::AST::AssetOpNode::getSwapRight)

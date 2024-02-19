@@ -441,6 +441,13 @@ Exchange::currentIdx() const noexcept
 
 
 //============================================================================
+EigenMatrixXd const&
+Exchange::getData() const noexcept
+{
+	return m_impl->data;
+}
+
+//============================================================================
 Eigen::VectorXd const&
 Exchange::getReturnsScalar() const noexcept
 {
@@ -518,6 +525,7 @@ Exchange::getMarketReturnsBlock(
 		Eigen::seq(start_idx, end_idx)
 	);
 }
+
 
 
 //============================================================================
