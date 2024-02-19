@@ -206,16 +206,24 @@ class VectorBTCompare(unittest.TestCase):
 
         cache = exchange_view.cache()
         cache_signal = exchange_view_up.cache()
-        self.assertTrue(np.allclose(cache, cache_signal))
+        # signal only update when opposite ev is triggered so cache is not equal
+        self.assertFalse(np.allclose(cache, cache_signal))      
 
         tracer1 = strategy.getTracer()
         tracer2 = strategy_signal.getTracer()
         orders1 = tracer1.getOrders()
         orders2 = tracer2.getOrders()
+        df_orders1 = pd.DataFrame([order.to_dict() for order in orders1])
+        df_orders2 = pd.DataFrame([order.to_dict() for order in orders2])
+        df_orders1["fill_time"] = pd.to_datetime(df_orders1["fill_time"], unit="ns")
+        df_orders2["fill_time"] = pd.to_datetime(df_orders2["fill_time"], unit="ns")
+
         self.assertEqual(len(orders1), len(orders2))
+
         nlv1 = strategy.getHistory(TracerType.NLV)[-1]
         nlv2 = strategy_signal.getHistory(TracerType.NLV)[-1]
         self.assertAlmostEqual(nlv1, nlv2)
+
 
     def test_grid_search(self):
         """

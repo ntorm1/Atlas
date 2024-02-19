@@ -111,6 +111,8 @@ ExchangeViewNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexc
         filter(target);
     }
 
+    // If operating ev as a signal, then we assume that the left and right view cannot be non-Nan
+    // at the same time. We only update the EV when the opposing view is non-Nan.
     if (m_as_signal && m_left_view)
     {
         // copy over the previous ev signals to a temp buffer
@@ -122,14 +124,21 @@ ExchangeViewNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexc
         for (int i = 0; i < m_buffer.size(); i++)
 		{
             // if left signal not nan take that
-			if (!std::isnan(m_buffer(i)))
-			{
-                target(i) = m_buffer(i);
-			}
+            if (!std::isnan(m_buffer(i)))
+            {
+                if (m_buffer(i) * temp(i) > 0)
+                {
+                    target(i) = temp(i);
+                }
+                else
+                {
+                    target(i) = m_buffer(i);
+                }
+            }
             // else if previous signal not nan take that
             else if (!std::isnan(temp(i)))
 			{
-                if (i >= 1 && temp(i) * temp(i - 1) > 0)
+                if (target(i) * temp(i) > 0)
                 {
                     target(i) = temp(i);
                 }
