@@ -27,6 +27,21 @@ StrategyBufferOpNode::getAllocationNode() const noexcept {
 
 //============================================================================
 void
+StrategyBufferOpNode::setTakeFromCache(bool v) noexcept
+{
+	if (v && m_cache.cols() > 1)
+	{
+		m_take_from_cache = true;
+	}
+	else
+	{
+		m_take_from_cache = false;
+	}
+}
+
+
+//============================================================================
+void
 StrategyBufferOpNode::enableCache(bool v) noexcept
 {
 	size_t rows = m_exchange.getAssetCount();

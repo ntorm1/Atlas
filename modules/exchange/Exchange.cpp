@@ -10,6 +10,7 @@ import AtlasTimeModule;
 import HelperNodesModule;
 import RiskNodeModule;
 import ObserverNodeModule;
+import StrategyBufferModule;
 
 namespace Atlas
 {
@@ -187,6 +188,11 @@ Exchange::build() noexcept
 void
 Exchange::reset() noexcept
 {
+	if (m_impl->current_index == m_impl->timestamps.size())
+	{
+		enableCache();
+	}
+
 	m_impl->current_index = 0;
 	m_impl->current_timestamp = 0;
 
@@ -224,6 +230,15 @@ Exchange::reset() noexcept
 		);
 	}
 
+	// clear cached ast nodes
+	for (auto const& [name, node] : m_impl->ast_cache)
+	{
+		if (node.use_count() == 1)
+		{
+			m_impl->ast_cache.erase(name);
+		}
+	}
+
 	// reset cache of any asset observers
 	std::for_each(
 		m_impl->asset_observers.begin(),
@@ -232,6 +247,17 @@ Exchange::reset() noexcept
 	);
 
 	cleanupCovarianceNodes();
+}
+
+
+//============================================================================
+void
+Exchange::enableCache() noexcept
+{
+	for (auto const& [name, node] : m_impl->ast_cache)
+	{
+		node->setTakeFromCache(true);
+	}
 }
 
 //============================================================================
@@ -372,6 +398,15 @@ void
 Exchange::setExchangeOffset(size_t _offset) noexcept
 {
 	m_impl->setExchangeOffset(_offset);
+}
+
+
+//============================================================================
+void
+Exchange::enableNodeCache(String const& name, SharedPtr<AST::StrategyBufferOpNode> node) noexcept
+{
+	node->enableCache();
+	m_impl->ast_cache[name] = node;
 }
 
 

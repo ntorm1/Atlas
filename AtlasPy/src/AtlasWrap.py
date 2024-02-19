@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 import unittest
 import pandas as pd
 import numpy as np
@@ -180,8 +181,8 @@ class VectorBTCompare(unittest.TestCase):
         exchange_view_up = ExchangeViewNode.make(self.exchange, spread, spread_filter_up, exchange_view_down)
 
         exchange_view = ExchangeViewNode.make(self.exchange, spread, None)
-        exchange_view.enableCache()
-        exchange_view_up.enableCache()
+        self.exchange.enableNodeCache("ev", exchange_view)
+        self.exchange.enableNodeCache("ev_signal",exchange_view_up)
 
         allocation = AllocationNode.make(
             exchange_view,
@@ -202,6 +203,7 @@ class VectorBTCompare(unittest.TestCase):
         strategy.enableTracerHistory(TracerType.ORDERS_EAGER)
         strategy_signal.enableTracerHistory(TracerType.NLV)
         strategy_signal.enableTracerHistory(TracerType.ORDERS_EAGER)
+
         self.hydra.run()
 
         cache = exchange_view.cache()
@@ -223,7 +225,14 @@ class VectorBTCompare(unittest.TestCase):
         nlv1 = strategy.getHistory(TracerType.NLV)[-1]
         nlv2 = strategy_signal.getHistory(TracerType.NLV)[-1]
         self.assertAlmostEqual(nlv1, nlv2)
+        
+        self.hydra.reset()
+        self.hydra.run()
 
+        nlv1_reset = strategy.getHistory(TracerType.NLV)[-1]
+        nlv2_reset = strategy_signal.getHistory(TracerType.NLV)[-1]
+        self.assertAlmostEqual(nlv1_reset, nlv2_reset)
+        self.assertAlmostEqual(nlv1, nlv1_reset)
 
     def test_grid_search(self):
         """

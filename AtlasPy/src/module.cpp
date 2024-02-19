@@ -134,8 +134,6 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::ASTNode>>(m_ast, "ASTNode");
     
     py::class_<Atlas::AST::StrategyBufferOpNode, Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode")
-        .def("enableCache", &Atlas::AST::StrategyBufferOpNode::enableCache,
-            py::arg("v") = true)
         .def("cache", &Atlas::AST::StrategyBufferOpNode::cache, py::return_value_policy::reference_internal);
     
     py::class_<Atlas::AST::AssetObserverNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetObserverNode>>(m_ast, "AssetObserverNode");
@@ -143,6 +141,7 @@ PYBIND11_MODULE(AtlasPy, m) {
 
     py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")
         .def("registerObserver", &Atlas::Exchange::registerObserver)
+        .def("enableNodeCache", &Atlas::Exchange::enableNodeCache)
         .def("getTimestamps", &Atlas::Exchange::getTimestamps)
         .def("getCovarianceNode", &Atlas::Exchange::getCovarianceNode)
         .def("getMarketReturns", &Atlas::Exchange::getMarketReturns,

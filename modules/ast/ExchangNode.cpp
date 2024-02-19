@@ -96,10 +96,17 @@ ExchangeViewNode::asSignal(bool v) noexcept
 	m_as_signal = v;
 }
 
+
 //============================================================================
 void
 ExchangeViewNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
+    if (m_take_from_cache)
+    {
+		target = cacheColumn();
+		return;
+	}
+
     assert(static_cast<size_t>(target.rows()) == getExchange().getAssetCount());
     assert(static_cast<size_t>(target.cols()) == 1);
 

@@ -24,6 +24,7 @@ export class Exchange
 	friend class ExchangeMap;
 	friend class AST::AssetReadNode;
 	friend class AST::TriggerNode;
+	friend class AST::StrategyBufferOpNode;
 private:
 	UniquePtr<ExchangeImpl> m_impl;
 	String m_name;
@@ -37,6 +38,7 @@ private:
 
 	[[nodiscard]] SharedPtr<AST::TriggerNode> registerTrigger(SharedPtr<AST::TriggerNode>&& trigger) noexcept;
 	void reset() noexcept;
+	void enableCache() noexcept;
 	void step(Int64 global_time) noexcept;
 	void cleanupCovarianceNodes() noexcept;
 	void cleanupTriggerNodes() noexcept;
@@ -95,6 +97,7 @@ public:
 	ATLAS_API size_t getAssetCount() const noexcept;
 	ATLAS_API Int64 getCurrentTimestamp() const noexcept;
 	ATLAS_API Vector<Int64> const& getTimestamps() const noexcept;
+	ATLAS_API void enableNodeCache(String const& name, SharedPtr<AST::StrategyBufferOpNode> p) noexcept;
 };
 
 }
