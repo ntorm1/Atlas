@@ -230,7 +230,6 @@ ATRNode::ATRNode(
 	);
 	m_atr.setZero();
 	m_close = m_exchange.getCloseIndex().value();
-	build();
 }
 
 
@@ -294,7 +293,30 @@ ATRNode::pyMake(
 	if (!high_idx || !low_idx) {
 		throw std::runtime_error("Invalid column name");
 	}
-	return ATRNode::make(*exchange, *high_idx, *low_idx, window);
+
+	auto node = ATRNode::make(*exchange, *high_idx, *low_idx, window);
+	auto same = exchange->getSameFromCache(node);
+	if (same)
+	{
+		return std::dynamic_pointer_cast<ATRNode>(*same);
+	}
+	node->build();
+	return node;
+}
+
+
+//============================================================================
+bool
+ATRNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+	if (other->getType() != NodeType::ASSET_ATR)
+	{
+		return false;
+	}
+	auto other_atr = static_cast<ATRNode*>(other.get());
+	return m_high == other_atr->getHigh() &&
+		m_low == other_atr->getLow() &&
+		m_window == other_atr->getWindow();
 }
 
 //============================================================================

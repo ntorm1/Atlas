@@ -2,7 +2,6 @@
 
 #include "AtlasXTypes.h"
 
-
 namespace AtlasX
 {
 
@@ -35,9 +34,17 @@ private:
 	AtlasXAppImpl* m_app;
 
 public:
+
 	AtlasXAssetPlotBuilder(AtlasXAppImpl* app) noexcept;
 	~AtlasXAssetPlotBuilder() noexcept;
 
+	HashMap<String, size_t> const& getExchangeHeaders(SharedPtr<Atlas::Exchange> exchange) noexcept;
+	Option<SharedPtr<Atlas::Exchange>> getParentExchange(String const& asset_name) noexcept;
+	Vector<Int64> const& getTimestamps(SharedPtr<Atlas::Exchange> exchange) noexcept;
+	Option<Vector<double>> getAssetSlice(
+		SharedPtr<Atlas::Exchange> exchange,
+		String const& asset_name
+	) const noexcept;
 };
 
 

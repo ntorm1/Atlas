@@ -183,10 +183,15 @@ public:
 		size_t window
 	);
 
+	size_t getHigh() const noexcept { return m_high; }
+	size_t getLow() const noexcept { return m_low; }
+	size_t getWindow() const noexcept { return m_window; }
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+	[[nodiscard]] size_t getWarmup() const noexcept override { return m_window; }
+
 	ATLAS_API ~ATRNode() noexcept;
 	ATLAS_API auto const& getATR() const noexcept { return m_atr; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
-	[[nodiscard]] size_t getWarmup() const noexcept override { return m_window; }
 };
 
 

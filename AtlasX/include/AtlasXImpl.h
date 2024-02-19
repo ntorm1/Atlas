@@ -102,7 +102,6 @@ public:
 	HashMap<String, size_t> getPortfolioIdxMap() const noexcept;
 	HashMap<String, size_t> const& getExchangeHeaders(SharedPtr<Atlas::Exchange> exchange) noexcept;
 	HashMap<String, size_t> getAssetMap(SharedPtr<Atlas::Exchange> e) noexcept;
-
 	Option<SharedPtr<GridState>> getStrategyGridState(String const& strategy_name) noexcept;
 	
 };

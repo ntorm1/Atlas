@@ -49,7 +49,7 @@ protected:
 
 public:
 	virtual ~StrategyBufferOpNode() = default;
-
+	virtual bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept { return false; }
 	virtual void reset() noexcept {}
 	virtual size_t refreshWarmup() noexcept {return 0;}
 	Option<AllocationBaseNode*> getAllocationNode() const noexcept;

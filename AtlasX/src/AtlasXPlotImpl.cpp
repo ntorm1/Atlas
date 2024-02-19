@@ -82,21 +82,40 @@ void AtlasPlot::setTitle(std::string title)
 
 //============================================================================
 void
-AtlasPlot::plot(std::span<const long long> x, std::span<const double> y, std::string name)
+AtlasPlot::plot(
+	Vector<Int64> const& x,
+	Vector<double> const& y,
+	std::string name,
+	size_t start_idx
+)
+{
+	auto x_span = std::span(x);
+	auto y_span = std::span(y);
+	plot(x_span, y_span, name, start_idx);
+}
+
+
+//============================================================================
+void
+AtlasPlot::plot(
+	std::span<const long long> x,
+	std::span<const double> y,
+	std::string name,
+	size_t start_idx
+)
 {
 	auto new_graph = addGraph();
-	auto fill_graph = addGraph();
 	auto q_name = QString::fromStdString(name);
 	new_graph->setName(q_name);
 
+	size_t stride = y.size() / x.size();
+
 	QVector<QCPGraphData> timeData(x.size());
-	QVector<QCPGraphData> fill(x.size());
 	for (int i = 0; i < x.size(); i++)
 	{
 		timeData[i].key = x[i] / static_cast<double>(1000000000);
-		timeData[i].value = y[i];
-		fill[i].key = x[i] / static_cast<double>(1000000000);
-		fill[i].value = y[0];
+		size_t y_idx = i * stride + start_idx;
+		timeData[i].value = y[y_idx];
 	}
 
 	QBrush brush;
@@ -104,14 +123,6 @@ AtlasPlot::plot(std::span<const long long> x, std::span<const double> y, std::st
 	QColor color = QColor(std::rand() % 245 + 10, std::rand() % 245 + 10, std::rand() % 245 + 10);
 	new_graph->setPen(QPen(color));
 	new_graph->data()->set(timeData, true);
-
-	if (name == "NLV")
-	{
-		new_graph->setBrush(QBrush(color.lighter(150)));
-		fill_graph->data()->set(fill, true);
-		new_graph->setPen(QPen(color));
-		new_graph->setChannelFillGraph(fill_graph);
-	}
 	rescaleAxes();
 	replot();
 }
@@ -336,6 +347,47 @@ AtlasStrategyPlot::contextMenuRequest(QPoint pos)
 
 //============================================================================
 void
+AtlasAssetPlot::contextMenuRequest(QPoint pos)
+{
+	if (!m_exchange)
+		return;
+
+	QMenu* menu = new QMenu(this);
+	menu->setAttribute(Qt::WA_DeleteOnClose);
+
+	if (this->legend->selectTest(pos, false) >= 0) // context menu on legend requested
+	{
+		menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignLeft));
+		menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignHCenter));
+		menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignRight));
+		menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom | Qt::AlignRight));
+		menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom | Qt::AlignLeft));
+	}
+	else {
+		auto const& headers = m_builder->getExchangeHeaders(m_exchange);
+		QMenu* moveSubMenu = menu->addMenu("Plot");
+		for (auto& [col_std, idx] : headers)
+		{
+			QString col = QString::fromStdString(col_std);
+			QAction* action = moveSubMenu->addAction(col);
+			connect(action, &QAction::triggered, this, [this, col]() {
+				this->addColumn(col);
+			});
+		}
+
+		moveSubMenu->addSeparator();
+
+		if (selectedGraphs().size() > 0)
+			menu->addAction("Remove selected graph", this, SLOT(removeSelectedGraph()));
+		if (graphCount() > 0)
+			menu->addAction("Remove all graphs", this, SLOT(removeAllGraphs()));
+	}
+	menu->popup(mapToGlobal(pos));
+}
+
+
+//============================================================================
+void
 AtlasStrategyPlot::addPlot(QString const& name)
 {
 	auto name_std = name.toStdString();
@@ -374,6 +426,29 @@ AtlasStrategyPlot::~AtlasStrategyPlot()
 
 
 //============================================================================
+void
+AtlasAssetPlot::addColumn(QString const& name)
+{
+	if (m_column_names.contains(name.toStdString()))
+	{
+		return;
+	}
+
+	auto const& headers = m_builder->getExchangeHeaders(m_exchange);
+	assert(headers.contains(name.toStdString()));
+	size_t col_idx = headers.at(name.toStdString());
+	auto const& x = m_builder->getTimestamps(m_exchange);
+	plot(
+		x,
+		m_asset_data,
+		name.toStdString(),
+		col_idx
+	);
+	m_column_names.insert(name.toStdString());
+}
+
+
+//============================================================================
 AtlasAssetPlot::AtlasAssetPlot(
 	QWidget* parent,
 	AtlasXAssetPlotBuilder* builder,
@@ -383,6 +458,16 @@ AtlasAssetPlot::AtlasAssetPlot(
 	m_builder(builder),
 	m_asset_name(asset_name)
 {
+	auto exchange = m_builder->getParentExchange(asset_name);
+	if (!exchange)
+	{
+		m_exchange = nullptr;
+	}
+	else
+	{
+		m_exchange = *exchange;
+		m_asset_data = m_builder->getAssetSlice(m_exchange, asset_name).value();
+	}
 }
 
 
@@ -392,10 +477,5 @@ AtlasAssetPlot::~AtlasAssetPlot() noexcept
 }
 
 
-//============================================================================
-void
-AtlasAssetPlot::contextMenuRequest(QPoint pos)
-{
-}
 
 }

@@ -488,6 +488,20 @@ Exchange::currentIdx() const noexcept
 
 
 //============================================================================
+Option<SharedPtr<AST::StrategyBufferOpNode>>
+Exchange::getSameFromCache(SharedPtr<AST::StrategyBufferOpNode> a) noexcept
+{
+	for (auto const& [name, node] : m_impl->ast_cache)
+	{
+		if (node->isSame(a))
+		{
+			return node;
+		}
+	}
+	return std::nullopt;
+}
+
+//============================================================================
 EigenMatrixXd const&
 Exchange::getData() const noexcept
 {
@@ -620,6 +634,19 @@ HashMap<String, size_t> const&
 Exchange::getHeaders() const noexcept
 {
 	return m_impl->headers;
+}
+
+
+//============================================================================
+HashMap<String, SharedPtr<AST::StrategyBufferOpNode>>
+Exchange::getNodeCache() const noexcept
+{
+	HashMap<String, SharedPtr<AST::StrategyBufferOpNode>> cache;
+	for (auto const& [name, node] : m_impl->ast_cache)
+	{
+		cache[name] = node;
+	}
+	return std::move(cache);
 }
 
 //============================================================================

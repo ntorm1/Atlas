@@ -102,4 +102,58 @@ AtlasXAssetPlotBuilder::~AtlasXAssetPlotBuilder() noexcept
 {
 }
 
+
+//==============================================================================
+HashMap<String, size_t> const&
+AtlasXAssetPlotBuilder::getExchangeHeaders(SharedPtr<Atlas::Exchange> exchange) noexcept
+{
+	return m_app->getExchangeHeaders(exchange);
+}
+
+//==============================================================================
+Option<SharedPtr<Atlas::Exchange>>
+AtlasXAssetPlotBuilder::getParentExchange(String const& asset_name) noexcept
+{
+	auto exchange_id = m_app->getParentExchangeName(asset_name);
+	if (!exchange_id)
+	{
+		return std::nullopt;
+	}
+	auto exchange = m_app->getExchange(*exchange_id);
+	if (!exchange)
+	{
+		return std::nullopt;
+	}
+	return *exchange;
+}
+
+
+//==============================================================================
+Vector<Int64> const&
+AtlasXAssetPlotBuilder::getTimestamps(SharedPtr<Atlas::Exchange> exchange) noexcept
+{
+	return m_app->getTimestamps(exchange);
+}
+
+
+//==============================================================================
+Option<Vector<double>>
+AtlasXAssetPlotBuilder::getAssetSlice(
+	SharedPtr<Atlas::Exchange> exchange,
+	String const& asset_name
+) const noexcept
+{
+	auto res = m_app->getAssetSlice(asset_name);
+	if (!res)
+	{
+		return std::nullopt;
+	}
+	Vector<double> vec;
+	for (int i = 0; i < res->size(); ++i)
+	{
+		vec.push_back((*res)(i));
+	}
+	return vec;
+}
+
 }

@@ -35,9 +35,16 @@ public:
 	~AtlasPlot();
 	void setTitle(std::string title);
 	void plot(
+		Vector<Int64> const& x,
+		Vector<double> const& y,
+		std::string name,
+		size_t start_idx = 0
+	);
+	void plot(
 		std::span<const Int64> x,
 		std::span<const double> y,
-		std::string name
+		std::string name,
+		size_t start_idx = 0
 	);
 };
 
@@ -74,6 +81,12 @@ class AtlasAssetPlot final : public AtlasPlot
 private:
 	AtlasXAssetPlotBuilder* m_builder = nullptr;
 	String m_asset_name;
+	SharedPtr<Atlas::Exchange> m_exchange;
+	Vector<double> m_asset_data;
+	Set<String> m_column_names;
+	Set<String> m_nodes;
+
+	void addColumn(QString const& name);
 
 protected slots:
 	void contextMenuRequest(QPoint pos) override;

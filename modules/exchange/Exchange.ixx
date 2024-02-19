@@ -71,6 +71,7 @@ public:
 	auto const& getSource() const noexcept{return m_source;}
 	size_t currentIdx() const noexcept;
 
+	Option<SharedPtr<AST::StrategyBufferOpNode>> getSameFromCache(SharedPtr<AST::StrategyBufferOpNode> a) noexcept;
 	EigenMatrixXd const& getData() const noexcept;
 	EigenVectorXd const& getReturnsScalar() const noexcept;
 	EigenBlockView<double> getMarketReturnsBlock(size_t start_idex, size_t end_idx) const noexcept;
@@ -94,6 +95,7 @@ public:
 	ATLAS_API Option<size_t> getAssetIndex(String const& asset) const noexcept;
 	ATLAS_API HashMap<String, size_t> const& getAssetMap() const noexcept;
 	ATLAS_API HashMap<String, size_t> const& getHeaders() const noexcept;
+	ATLAS_API HashMap<String, SharedPtr<AST::StrategyBufferOpNode>> getNodeCache() const noexcept;
 	ATLAS_API size_t getAssetCount() const noexcept;
 	ATLAS_API Int64 getCurrentTimestamp() const noexcept;
 	ATLAS_API Vector<Int64> const& getTimestamps() const noexcept;
