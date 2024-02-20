@@ -36,4 +36,11 @@ export namespace Atlas
 		LOWER_TRIANGULAR = 2
 	};
 
+	//============================================================================
+	export enum class LogicalType : unsigned int
+	{
+		AND = 0,
+		OR	= 1
+	};
+
 }

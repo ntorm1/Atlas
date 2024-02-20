@@ -52,6 +52,7 @@ public:
 	virtual bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept { return false; }
 	virtual void reset() noexcept {}
 	virtual size_t refreshWarmup() noexcept {return 0;}
+	[[nodiscard]] size_t getAssetCount() const noexcept;
 	[[nodiscard]] Option<AllocationBaseNode*> getAllocationNode() const noexcept;
 	[[nodiscard]] Exchange& getExchange() noexcept {return m_exchange;}
 

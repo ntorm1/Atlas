@@ -13,7 +13,7 @@ namespace AST
 
 //============================================================================
 size_t
-	AssetReadNode::size() const noexcept
+AssetReadNode::size() const noexcept
 {
 	return m_exchange.getAssetCount();
 }

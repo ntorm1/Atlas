@@ -57,7 +57,7 @@ public:
 	[[nodiscard]] size_t size() const noexcept;
 	[[nodiscard]] size_t getColumn() const noexcept { return m_column; }
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
-	ATLAS_API void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
 

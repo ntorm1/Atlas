@@ -98,6 +98,14 @@ StrategyBufferOpNode::getAssetCacheSlice(size_t asset_index) const noexcept
 	return std::move(slice);
 }
 
+
+//============================================================================
+size_t
+StrategyBufferOpNode::getAssetCount() const noexcept
+{
+	return m_exchange.getAssetCount();
+}
+
 }
 
 }
