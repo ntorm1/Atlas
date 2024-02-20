@@ -104,6 +104,13 @@ AtlasXAssetPlotBuilder::~AtlasXAssetPlotBuilder() noexcept
 
 
 //==============================================================================
+HashMap<String, SharedPtr<Atlas::AST::StrategyBufferOpNode>>
+AtlasXAssetPlotBuilder::getASTCache(SharedPtr<Atlas::Exchange> exchange) const noexcept
+{
+	return m_app->getASTCache(exchange);
+}
+
+//==============================================================================
 HashMap<String, size_t> const&
 AtlasXAssetPlotBuilder::getExchangeHeaders(SharedPtr<Atlas::Exchange> exchange) noexcept
 {
@@ -133,6 +140,14 @@ Vector<Int64> const&
 AtlasXAssetPlotBuilder::getTimestamps(SharedPtr<Atlas::Exchange> exchange) noexcept
 {
 	return m_app->getTimestamps(exchange);
+}
+
+
+//==============================================================================
+Option<Vector<double>>
+AtlasXAssetPlotBuilder::getCacheSlice(SharedPtr<Atlas::Exchange> exchange, String const& asset_name, SharedPtr<Atlas::AST::StrategyBufferOpNode> node) noexcept
+{
+	return m_app->getCacheSlice(exchange, asset_name, node);
 }
 
 

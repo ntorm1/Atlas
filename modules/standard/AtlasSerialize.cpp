@@ -103,6 +103,7 @@ serialize_exchange(
 {
 	auto exchange_id = exchange.getName();
 	auto source = exchange.getSource();
+	auto datetime_format = exchange.getDatetimeFormat();
 	rapidjson::Document j(rapidjson::kObjectType);
 
 	rapidjson::Value v_id(exchange_id.c_str(), allocator);
@@ -110,6 +111,12 @@ serialize_exchange(
 
 	rapidjson::Value v_source(source.c_str(), allocator);
 	j.AddMember("source_dir", v_source.Move(), allocator);
+
+	if (datetime_format)
+	{
+		rapidjson::Value v_datetime_format(datetime_format.value().c_str(), allocator);
+		j.AddMember("datetime_format", v_datetime_format.Move(), allocator);
+	}
 
 	return j;
 }
@@ -196,6 +203,11 @@ deserialize_exchange_map(
 	{
 		auto exchange_id = exchange.name.GetString();
 		auto source = exchange.value["source_dir"].GetString();
+		Option<String> datetime_format;
+		if (exchange.value.HasMember("datetime_format"))
+		{
+			datetime_format = exchange.value["datetime_format"].GetString();
+		}
 
 		// load in init symbol list if it exists
 		std::optional<std::vector<std::string>> _symbols;
@@ -214,7 +226,7 @@ deserialize_exchange_map(
 			_symbols = symbols_vec;
 		}
 
-		auto res = hydra->addExchange(exchange_id, source);
+		auto res = hydra->addExchange(exchange_id, source, datetime_format);
 		if (!res)
 		{
 			return std::unexpected(res.error());

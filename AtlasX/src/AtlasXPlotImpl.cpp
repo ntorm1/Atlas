@@ -2,6 +2,7 @@
 
 #include "../include/AtlasXPlotImpl.h"
 #include "../include/AtlasXPlotData.h"
+#include "../include/AtlasXMacros.h"
 
 
 namespace AtlasX
@@ -81,7 +82,7 @@ void AtlasPlot::setTitle(std::string title)
 
 
 //============================================================================
-void
+QCPGraph*
 AtlasPlot::plot(
 	Vector<Int64> const& x,
 	Vector<double> const& y,
@@ -91,12 +92,12 @@ AtlasPlot::plot(
 {
 	auto x_span = std::span(x);
 	auto y_span = std::span(y);
-	plot(x_span, y_span, name, start_idx);
+	return plot(x_span, y_span, name, start_idx);
 }
 
 
 //============================================================================
-void
+QCPGraph*
 AtlasPlot::plot(
 	std::span<const long long> x,
 	std::span<const double> y,
@@ -125,6 +126,7 @@ AtlasPlot::plot(
 	new_graph->data()->set(timeData, true);
 	rescaleAxes();
 	replot();
+	return new_graph;
 }
 
 
@@ -377,6 +379,16 @@ AtlasAssetPlot::contextMenuRequest(QPoint pos)
 
 		moveSubMenu->addSeparator();
 
+		auto const& ast_cache = m_builder->getASTCache(m_exchange);
+		for (auto& [ast_name, ast] : ast_cache)
+		{
+			QString col = QString::fromStdString(ast_name);
+			QAction* action = moveSubMenu->addAction(col);
+			connect(action, &QAction::triggered, this, [this, col, ast]() {
+				this->addNode(col, ast);
+			});
+		}
+
 		if (selectedGraphs().size() > 0)
 			menu->addAction("Remove selected graph", this, SLOT(removeSelectedGraph()));
 		if (graphCount() > 0)
@@ -427,7 +439,7 @@ AtlasStrategyPlot::~AtlasStrategyPlot()
 
 //============================================================================
 void
-AtlasAssetPlot::addColumn(QString const& name)
+AtlasAssetPlot::addColumn(QString const& name) noexcept
 {
 	if (m_column_names.contains(name.toStdString()))
 	{
@@ -438,13 +450,42 @@ AtlasAssetPlot::addColumn(QString const& name)
 	assert(headers.contains(name.toStdString()));
 	size_t col_idx = headers.at(name.toStdString());
 	auto const& x = m_builder->getTimestamps(m_exchange);
-	plot(
+	auto graph = plot(
 		x,
 		m_asset_data,
 		name.toStdString(),
 		col_idx
 	);
-	m_column_names.insert(name.toStdString());
+	m_column_names[name.toStdString()] =  graph;
+}
+
+
+//============================================================================
+void AtlasAssetPlot::addNode(
+	QString const& name,
+	SharedPtr<Atlas::AST::StrategyBufferOpNode> node
+) noexcept
+{
+	if (m_nodes.contains(name.toStdString()))
+	{
+		return;
+	}
+
+	auto y_opt = m_builder->getCacheSlice(m_exchange, m_asset_name, node);
+	if (!y_opt)
+	{
+		auto error_msg = std::format("No cache found for asset {} and node {}", m_asset_name, name.toStdString());
+		SHOW_ERROR_MESSAGE(error_msg.c_str());
+		return;
+	}
+	auto const& y = *y_opt;
+	auto const& x = m_builder->getTimestamps(m_exchange);
+	auto graph = plot(
+		x,
+		y,
+		name.toStdString()
+	);
+	m_nodes[name.toStdString()] = graph;
 }
 
 

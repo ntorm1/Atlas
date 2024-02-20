@@ -63,6 +63,18 @@ AtlasXExchangeManager::AtlasXExchangeManager(
         this, &AtlasXExchangeManager::selectExchange
     );
     tool_bar->addAction(select_exchange_action);
+
+    // add a remove exchange tool button
+    const QIcon remove_Exchange_icon = QIcon::fromTheme("document-new", QIcon("./styles/icons/remove.png"));
+    auto remove_exchange_action = new QAction(remove_Exchange_icon, tr("&Remove Exchange"), this);
+    remove_exchange_action->setStatusTip(tr("Remove an existing exchange"));
+    connect(
+		remove_exchange_action, &QAction::triggered,
+		this, &AtlasXExchangeManager::removeExchange
+	);
+    tool_bar->addAction(remove_exchange_action);
+
+
     addToolBar(Qt::TopToolBarArea, tool_bar);
     buildUI();
     buildSignals();
@@ -129,6 +141,13 @@ AtlasXExchangeManager::onExchangeSelected(
 
 //============================================================================
 void
+AtlasXExchangeManager::onExchangeRemove(String exchange_id)
+{
+}
+
+
+//============================================================================
+void
 AtlasXExchangeManager::connectExchange(AtlasXExchange* exchange_widget)
 {
     connect(
@@ -161,6 +180,57 @@ void AtlasXExchangeManager::onHydraReset()
 
 //============================================================================
 void
+AtlasXExchangeManager::removeExchange()
+{
+    // Create a new dialog window
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Remove Exchange"));
+
+    // Create widgets for the dialog
+    QLabel* nameLabel = new QLabel(tr("Exchange Name:"), this);
+
+    // Create a combo box for the exchanges
+    auto combo = new QComboBox(&dialog);
+    for (auto& exchange_id : m_impl->exchange_ids) {
+        combo->addItem(exchange_id.c_str());
+    }
+
+    // Create layout for the dialog
+    QFormLayout* formLayout = new QFormLayout(&dialog);
+    formLayout->addRow(nameLabel, combo);
+
+    // Add buttons to the dialog
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+    formLayout->addWidget(buttonBox);
+
+    // Connect the dialog buttons
+    connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    // Execute the dialog and handle user input
+    if (dialog.exec() == QDialog::Accepted) 
+    {
+        // Retrieve values from the dialog
+		QString exchangeName = combo->currentText();
+        auto res = m_app->removeExchange(exchangeName.toStdString());
+        if (!res) {
+			QMessageBox::critical(
+				&dialog,
+				tr("Error"),
+				tr("Failed to remove exchange: %1").arg(res.error().what())
+			);
+			dialog.reject();
+			return;
+		}
+
+		qDebug() << "Exchange removed: " << exchangeName;
+		//emit exchangeRemoved(exchangeName.toStdString());
+		dialog.accept();
+    }
+}
+
+//============================================================================
+void
 AtlasXExchangeManager::newExchange()
 {
     // Create a new dialog window
@@ -175,6 +245,18 @@ AtlasXExchangeManager::newExchange()
     QLineEdit* locationLineEdit = new QLineEdit(&dialog);
     QPushButton* browseButton = new QPushButton(tr("Browse"), &dialog);
 
+    QLabel* datetimeLabel = new QLabel(tr("Datetime Format:"));
+    static const QStringList formats = {
+        "",
+		"%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M:%S.%f",
+        "%Y-%m-%d %H:%M:%S%z",
+        "%Y-%m-%d",
+        "%Y/%m/%d %H:%M:%S"
+	};
+    QComboBox* formatComboBox = new QComboBox(&dialog);
+    formatComboBox->addItems(formats);
+
     // Create layout for the dialog
     QFormLayout* formLayout = new QFormLayout(&dialog);
     formLayout->addRow(nameLabel, nameLineEdit);
@@ -184,6 +266,8 @@ AtlasXExchangeManager::newExchange()
     locationLayout->addWidget(locationLineEdit);
     locationLayout->addWidget(browseButton);
     formLayout->addRow(locationLayout);
+
+    formLayout->addRow(datetimeLabel, formatComboBox);
 
     // Connect signals and slots
     connect(browseButton, &QPushButton::clicked, [&]() {
@@ -207,10 +291,16 @@ AtlasXExchangeManager::newExchange()
         // Retrieve values from the dialog
         QString exchangeName = nameLineEdit->text();
         QString exchangeLocation = locationLineEdit->text();
+        QString exchangeFormat = formatComboBox->currentText();
+        Option<String> exchange_format = std::nullopt;
+        if (!exchangeFormat.isEmpty()) {
+			exchange_format = exchangeFormat.toStdString();
+		}
 
         auto new_exchange_res = m_app->addExchange(
             exchangeName.toStdString(),
-            exchangeLocation.toStdString()
+            exchangeLocation.toStdString(),
+            exchange_format
         );
 
         if (!new_exchange_res) {

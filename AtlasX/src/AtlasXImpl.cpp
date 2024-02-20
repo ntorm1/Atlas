@@ -12,6 +12,7 @@ import ExchangeModule;
 import HydraModule;
 import OptimizeNodeModule;
 import StrategyModule;
+import StrategyBufferModule;
 import TracerModule;
 
 namespace AtlasX
@@ -51,9 +52,13 @@ AtlasXAppImpl::run() noexcept
 
 //============================================================================
 Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException>
-AtlasXAppImpl::addExchange(String name, String source) noexcept
+AtlasXAppImpl::addExchange(
+	String name,
+	String source,
+	Option<String> datetime_format
+) noexcept
 {
-	return hydra->addExchange(name, source);
+	return hydra->addExchange(name, source, datetime_format);
 }
 
 
@@ -91,12 +96,25 @@ AtlasXAppImpl::getExchange(String name) noexcept
 	return hydra->getExchange(name);
 }
 
+Result<bool, Atlas::AtlasException> AtlasXAppImpl::removeExchange(String name) noexcept
+{
+	return hydra->removeExchange(name);
+}
+
 
 //============================================================================
 HashMap<String, size_t>
 AtlasXAppImpl::getPortfolioIdxMap() const noexcept
 {
 	return hydra->getPortfolioIdxMap();
+}
+
+
+//============================================================================
+HashMap<String, SharedPtr<Atlas::AST::StrategyBufferOpNode>>
+AtlasXAppImpl::getASTCache(SharedPtr<Atlas::Exchange> exchange) const noexcept
+{
+	return exchange->getASTCache();
 }
 
 
@@ -180,6 +198,32 @@ AtlasXAppImpl::getAssetSlice(String const& asset_name) const noexcept
 	auto exchange = hydra->getExchange(parent_name.value()).value();
 	auto asset_index = exchange->getAssetIndex(asset_name);
 	return exchange->getAssetSlice(*asset_index);
+}
+
+
+//============================================================================
+Option<Vector<double>>
+AtlasXAppImpl::getCacheSlice(
+	SharedPtr<Atlas::Exchange> exchange,
+	String const& asset_name,
+	SharedPtr<Atlas::AST::StrategyBufferOpNode> node
+) noexcept
+{
+	auto asset_index_opt = exchange->getAssetIndex(asset_name);
+	if (!asset_index_opt)
+		return std::nullopt;
+	auto asset_index = asset_index_opt.value();
+	auto const& cache = node->cache();
+	if (asset_index >= cache.rows())
+		return std::nullopt;
+	if (cache.cols() <= 1)
+		return std::nullopt;
+	Vector<double> slice(cache.cols());
+	for (size_t i = 0; i < cache.cols(); ++i)
+	{
+		slice[i] = cache(asset_index, i);
+	}
+	return std::move(slice);
 }
 
 

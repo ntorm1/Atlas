@@ -30,7 +30,9 @@ public:
 	) noexcept;
 
 	ATLAS_API ~Portfolio() noexcept;
+	ATLAS_API void setExchange(Exchange* exchange) noexcept;
 	double getInitialCash() const noexcept;
+	Exchange* getExchange() const noexcept;
 	String const& getExchangeName() const noexcept;
 	auto const& getName() const noexcept { return m_name; }
 	auto const& getId() const noexcept { return m_id; }

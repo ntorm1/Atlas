@@ -32,6 +32,35 @@ ExchangeMap::build() noexcept
 	}
 }
 
+//============================================================================
+void
+ExchangeMap::removeExchange(String const& name) noexcept
+{
+	if (!m_impl->exchange_id_map.contains(name))
+	{
+		return;
+	}
+	auto idx = m_impl->exchange_id_map[name];
+	auto exchange = m_impl->exchanges[idx];
+	m_impl->exchanges.erase(m_impl->exchanges.begin() + idx);
+	m_impl->exchange_id_map.erase(name);
+	for (auto& [key, value]: m_impl->exchange_id_map)
+	{
+		if (value > idx)
+		{
+			--value;
+		}
+	}
+	auto asset_map = exchange->getAssetMap();
+	for (auto const& [key, value]: asset_map)
+	{
+		size_t index = value + exchange->getExchangeOffset();
+		assert(m_impl->asset_map.contains(index));
+		m_impl->asset_map.erase(value + exchange->getExchangeOffset());
+	}
+}
+
+
 
 //============================================================================
 void
@@ -97,6 +126,8 @@ ExchangeMap::getParentExchangeName(String const& asset_name) const noexcept
 }
 
 
+
+
 //============================================================================
 Result<SharedPtr<Exchange>, AtlasException>
 ExchangeMap::addExchange(
@@ -123,11 +154,11 @@ ExchangeMap::addExchange(
 
 	// copy over exchange's asset map and set the exchange's index offset equal to the asset map size
 	auto exchange_ptr = m_impl->exchanges.back();
+	exchange_ptr->setExchangeOffset(m_impl->asset_map.size());
 	for (auto const& asset : exchange_ptr->getAssetMap())
 	{
-		m_impl->asset_map[asset.second + m_impl->asset_map.size()] = asset.first ;
+		m_impl->asset_map[asset.second] = asset.first;
 	}
-	exchange_ptr->setExchangeOffset(m_impl->asset_map.size());
 	return exchange_ptr;
 }
 
@@ -184,5 +215,6 @@ ExchangeMap::cleanup() noexcept
 		exchange->cleanupTriggerNodes();
 	}
 }
+
 
 }

@@ -279,5 +279,8 @@
     <ClInclude Include="include\AtlasInter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\AtlasXMacros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

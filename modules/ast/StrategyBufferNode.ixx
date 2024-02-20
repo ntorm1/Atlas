@@ -52,8 +52,10 @@ public:
 	virtual bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept { return false; }
 	virtual void reset() noexcept {}
 	virtual size_t refreshWarmup() noexcept {return 0;}
-	Option<AllocationBaseNode*> getAllocationNode() const noexcept;
+	[[nodiscard]] Option<AllocationBaseNode*> getAllocationNode() const noexcept;
 	[[nodiscard]] Exchange& getExchange() noexcept {return m_exchange;}
+
+	ATLAS_API Option<Vector<double>> getAssetCacheSlice(size_t asset_index) const noexcept;
 	ATLAS_API auto const& cache() noexcept {return m_cache;}
 };
 

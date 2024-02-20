@@ -52,7 +52,7 @@ public:
 		Exchange& exchange,
 		double initial_cash
 	) noexcept;
-
+	ATLAS_API Result<bool, AtlasException> removeExchange(String const& name) noexcept;
 	ATLAS_API Result<bool, AtlasException> build();
 	ATLAS_API void step() noexcept;
 	ATLAS_API [[nodiscard]] Result<bool, AtlasException> run() noexcept;

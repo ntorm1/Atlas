@@ -33,17 +33,18 @@ signals:
 	void hydraReset();
 
 private slots:
-	//============================================================================
 	void onAddExchange(
 		SharedPtr<Atlas::Exchange> exchange,
 		String exchange_id
 	);
-
-	//============================================================================
 	void onExchangeSelected(
 		SharedPtr<Atlas::Exchange> exchange,
 		String exchange_id
 	);
+	void onExchangeRemove(
+		String exchange_id
+	);
+
 
 public slots:
 	void onHydraRestore();
@@ -54,6 +55,7 @@ private:
 	AtlasXAppImpl* m_app = nullptr;
 	AtlasXExchangeManagerImpl* m_impl = nullptr;
 
+	void removeExchange();
 	void newExchange();
 	void selectExchange();
 	void buildUI();

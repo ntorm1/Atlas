@@ -10,14 +10,14 @@ class PortfolioImpl
 {
 public:
 	double initial_cash;
-	Exchange& exchange;
+	Exchange* exchange;
 	PortfolioImpl(
-		Exchange& exchange,
+		Exchange& _exchange,
 		double cash
 	) noexcept
-		: initial_cash(cash), exchange(exchange)
+		: initial_cash(cash)
 	{
-
+		exchange = &_exchange;
 	}
 };
 
@@ -50,10 +50,26 @@ Portfolio::getInitialCash() const noexcept
 
 
 //============================================================================
+void
+Portfolio::setExchange(Exchange* exchange) noexcept
+{
+	m_impl->exchange = exchange;
+}
+
+
+//============================================================================
+Exchange*
+Portfolio::getExchange() const noexcept
+{
+	return m_impl->exchange;
+}
+
+
+//============================================================================
 String const&
 Portfolio::getExchangeName() const noexcept
 {
-	return m_impl->exchange.getName();
+	return m_impl->exchange->getName();
 }
 
 

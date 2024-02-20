@@ -153,10 +153,6 @@ ExchangeViewNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexc
 		}
         m_buffer = target;
     }
-    if (hasCache())
-	{
-        cacheColumn() = target;
-	}
 }
 
 }

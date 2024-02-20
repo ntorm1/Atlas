@@ -148,6 +148,44 @@ Hydra::addPortfolio(String name, Exchange& exchange, double initial_cash) noexce
 
 //============================================================================
 Result<bool, AtlasException>
+Hydra::removeExchange(String const& name) noexcept
+{
+	auto exchange_opt = getExchange(name);
+	if (!exchange_opt)
+	{
+		return Err("Exchange with name " + name + " does not exist");
+	}
+	auto& exchange = *exchange_opt;
+
+	for(auto const& strategy : m_impl->m_strategies)
+	{
+		if (&(strategy->getExchange()) == exchange.get())
+		{
+			return Err("Exchange " + name + " is used by strategy " + strategy->getName());
+		}
+	}
+
+	for (auto& portfolio : m_impl->m_portfolios)
+	{
+		if (portfolio->getExchange() == exchange.get())
+		{
+			return Err("Exchange " + name + " is used by portfolio " + portfolio->getName());
+		}
+	}
+
+	if (m_state == HydraState::RUNING)
+	{
+		return Err("Hydra must be in build or finished state to remove exchange");
+	}
+	m_impl->m_exchange_map.removeExchange(name);
+	reset();
+	build();
+	return true;
+}
+
+
+//============================================================================
+Result<bool, AtlasException>
 Hydra::build()
 {
 	m_impl->m_exchange_map.build();

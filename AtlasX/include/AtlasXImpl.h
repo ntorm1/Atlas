@@ -47,19 +47,19 @@ public:
 	[[nodiscard]] Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException> getExchange(
 		String name
 	) noexcept;
-	
-
+	[[nodiscard]] Result<bool, Atlas::AtlasException> removeExchange(
+		String name
+	) noexcept;
 	[[nodiscard]]  Result<SharedPtr<Atlas::Exchange>, Atlas::AtlasException> addExchange(
 		String name,
-		String source
+		String source,
+		Option<String> datetime_format
 	) noexcept;
 	[[nodiscard]]  Result<SharedPtr<Atlas::Portfolio>, Atlas::AtlasException> addPortfolio(
 		String name,
 		SharedPtr<Atlas::Exchange> exchange,
 		double intial_cash
 	) noexcept;
-
-	
 
 	
 	[[nodiscard]] Result<bool, Atlas::AtlasException> deserialize(
@@ -69,11 +69,9 @@ public:
 		String path
 	) noexcept;
 
-
 	
-	[[nodiscard]] Result<Atlas::LinAlg::EigenConstRowView<double>, Atlas::AtlasException>
-	getAssetSlice(String const& asset_name) const noexcept;
-
+	[[nodiscard]] Result<Atlas::LinAlg::EigenConstRowView<double>, Atlas::AtlasException> getAssetSlice(String const& asset_name) const noexcept;
+	[[nodiscard]] Option<Vector<double>> getCacheSlice(SharedPtr<Atlas::Exchange> exchange, String const& asset_name, SharedPtr<Atlas::AST::StrategyBufferOpNode> node) noexcept;
 	
 	HashMap<String, size_t> getExchangeIds() noexcept;
 	size_t* getCurrentIdxPtr() const noexcept;
@@ -100,6 +98,7 @@ public:
 		SharedPtr<Atlas::Strategy> strategy
 	) const noexcept;
 	HashMap<String, size_t> getPortfolioIdxMap() const noexcept;
+	HashMap<String, SharedPtr<Atlas::AST::StrategyBufferOpNode>> getASTCache(SharedPtr<Atlas::Exchange> exchange) const noexcept;
 	HashMap<String, size_t> const& getExchangeHeaders(SharedPtr<Atlas::Exchange> exchange) noexcept;
 	HashMap<String, size_t> getAssetMap(SharedPtr<Atlas::Exchange> e) noexcept;
 	Option<SharedPtr<GridState>> getStrategyGridState(String const& strategy_name) noexcept;

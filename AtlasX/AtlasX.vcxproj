@@ -209,6 +209,7 @@
     <QtMoc Include="include\AtlasXStrategyManager.h" />
     <QtMoc Include="include\AtlasXPortfolioManager.h" />
     <QtMoc Include="include\AtlasXPlot.h" />
+    <ClInclude Include="include\AtlasXMacros.h" />
     <ClInclude Include="include\AtlasXPlotData.h" />
     <ClInclude Include="include\AtlasXPy.h" />
     <QtMoc Include="include\AtlasXScene.h" />

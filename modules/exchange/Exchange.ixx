@@ -78,6 +78,7 @@ public:
 	EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;
 	Option<size_t> getColumnIndex(String const& column) const noexcept;
 	Option<size_t> getCloseIndex() const noexcept;
+	Option<String> getDatetimeFormat() const noexcept;
 	size_t getExchangeOffset() const noexcept;
 
 	// ======= PUBLIC API ======= //
@@ -89,6 +90,7 @@ public:
 	) noexcept;
 	
 	ATLAS_API SharedPtr<AST::AssetObserverNode> registerObserver(SharedPtr<AST::AssetObserverNode> observer) noexcept;
+	ATLAS_API HashMap<String, SharedPtr<AST::StrategyBufferOpNode>> getASTCache() const noexcept;
 	ATLAS_API EigenConstRowView<double> getAssetSlice(size_t asset_index) const noexcept;
 	ATLAS_API EigenConstColView<double> getMarketReturns(int row_offset = 0) const noexcept;
 	ATLAS_API String const& getName() const noexcept {return m_name;}

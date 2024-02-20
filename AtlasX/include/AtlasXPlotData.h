@@ -38,9 +38,15 @@ public:
 	AtlasXAssetPlotBuilder(AtlasXAppImpl* app) noexcept;
 	~AtlasXAssetPlotBuilder() noexcept;
 
+	HashMap<String, SharedPtr<Atlas::AST::StrategyBufferOpNode>> getASTCache(SharedPtr<Atlas::Exchange> exchange) const noexcept;
 	HashMap<String, size_t> const& getExchangeHeaders(SharedPtr<Atlas::Exchange> exchange) noexcept;
 	Option<SharedPtr<Atlas::Exchange>> getParentExchange(String const& asset_name) noexcept;
 	Vector<Int64> const& getTimestamps(SharedPtr<Atlas::Exchange> exchange) noexcept;
+	Option<Vector<double>> getCacheSlice(
+		SharedPtr<Atlas::Exchange> exchange,
+		String const& asset_name,
+		SharedPtr<Atlas::AST::StrategyBufferOpNode> node
+	) noexcept;
 	Option<Vector<double>> getAssetSlice(
 		SharedPtr<Atlas::Exchange> exchange,
 		String const& asset_name

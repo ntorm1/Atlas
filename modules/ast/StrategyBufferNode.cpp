@@ -78,6 +78,26 @@ StrategyBufferOpNode::cacheColumn() noexcept
 }
 
 
+//============================================================================
+Option<Vector<double>>
+StrategyBufferOpNode::getAssetCacheSlice(size_t asset_index) const noexcept
+{
+	if (asset_index >= static_cast<size_t>(m_cache.rows()))
+	{
+		return std::nullopt;
+	}
+	if (m_cache.cols() <= 1)
+	{
+		return std::nullopt;
+	}
+	Vector<double> slice(m_cache.cols());
+	for (int i = 0; i < m_cache.cols(); ++i)
+	{
+		slice.push_back(m_cache(asset_index, i));
+	}
+	return std::move(slice);
+}
+
 }
 
 }

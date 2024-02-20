@@ -48,16 +48,15 @@ public:
 	ExchangeMap& operator=(const ExchangeMap&) = delete;
 	ExchangeMap& operator=(ExchangeMap&&) = delete;
 
-	//============================================================================
 	Result<SharedPtr<const Exchange>, AtlasException> getExchangeConst(
 		String const& name
 	) const noexcept;
-
-	//============================================================================
 	Option<String> getParentExchangeName(
 		String const& asset_name
 	) const noexcept;
 
+	void removeExchange(String const& name) noexcept;
+	
 	//============================================================================
 	ATLAS_API HashMap<String, size_t> const& getExchangeIds() const noexcept;
 

@@ -203,39 +203,28 @@ Exchange::reset() noexcept
 	}
 
 	// Collect triggers to erase
-	Vector<SharedPtr<AST::TriggerNode>> triggersToErase;
-	for (auto& trigger : m_impl->registered_triggers)
-	{
-		assert(trigger);
-		if (trigger.use_count() == 1)
-		{
-			triggersToErase.push_back(trigger);
-		}
-		else
-		{
-			trigger->reset();
-		}
-	}
+	m_impl->registered_triggers.erase(
+		std::remove_if(
+			m_impl->registered_triggers.begin(),
+			m_impl->registered_triggers.end(),
+			[](const auto& trigger) {
+				if (trigger.use_count() == 1) {
+					trigger->reset();
+					return true;
+				}
+				return false;
+			}
+		),
+		m_impl->registered_triggers.end()
+	);
 
-	// Erase collected triggers
-	for (auto& trigger : triggersToErase)
-	{
-		m_impl->registered_triggers.erase(
-			std::remove(
-				m_impl->registered_triggers.begin(),
-				m_impl->registered_triggers.end(),
-				trigger
-			),
-			m_impl->registered_triggers.end()
-		);
-	}
-
-	// clear cached ast nodes
-	for (auto const& [name, node] : m_impl->ast_cache)
-	{
-		if (node.use_count() == 1)
-		{
-			m_impl->ast_cache.erase(name);
+	for (auto it = m_impl->ast_cache.begin(); it != m_impl->ast_cache.end(); /* no increment here */) {
+		auto const& [name, node] = *it;
+		if (node.use_count() == 1) {
+			it = m_impl->ast_cache.erase(it);
+		}
+		else {
+			++it;
 		}
 	}
 
@@ -330,6 +319,19 @@ Exchange::registerObserver(SharedPtr<AST::AssetObserverNode> observer) noexcept
 
 
 //============================================================================
+HashMap<String, SharedPtr<AST::StrategyBufferOpNode>>
+Exchange::getASTCache() const noexcept
+{
+	HashMap<String, SharedPtr<AST::StrategyBufferOpNode>> cache;
+	for (auto const& [name, node] : m_impl->ast_cache)
+	{
+		cache[name] = node;
+	}
+	return std::move(cache);
+}
+
+
+//============================================================================
 void
 Exchange::cleanupCovarianceNodes() noexcept
 {
@@ -417,6 +419,7 @@ Exchange::enableNodeCache(String const& name, SharedPtr<AST::StrategyBufferOpNod
 	{
 		step(m_impl->timestamps[i]);
 		node->evaluate(buffer);
+		node->cacheColumn() = buffer;
 	}
 	reset();
 }
@@ -444,6 +447,14 @@ Exchange::getCloseIndex() const noexcept
 		}
 	}
 	return close_index;
+}
+
+
+//============================================================================
+Option<String>
+Exchange::getDatetimeFormat() const noexcept
+{
+	return m_impl->datetime_format;
 }
 
 
