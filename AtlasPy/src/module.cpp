@@ -11,6 +11,7 @@ import PortfolioModule;
 
 import AllocationNodeModule;
 import AssetNodeModule;
+import AssetLogicalModule;
 import AtlasEnumsModule;
 import AtlasException;
 import AtlasLinAlg;
@@ -134,10 +135,10 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::ASTNode>>(m_ast, "ASTNode");
     
     py::class_<Atlas::AST::StrategyBufferOpNode, Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode")
+        .def("lag", &Atlas::AST::StrategyBufferOpNode::lag)
         .def("cache", &Atlas::AST::StrategyBufferOpNode::cache, py::return_value_policy::reference_internal);
     
     py::class_<Atlas::AST::AssetObserverNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetObserverNode>>(m_ast, "AssetObserverNode");
-
 
     py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")
         .def("registerObserver", &Atlas::Exchange::registerObserver)
@@ -187,6 +188,18 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("UPPER_TRIANGULAR", Atlas::GridType::UPPER_TRIANGULAR)
         .value("LOWER_TRIANGULAR", Atlas::GridType::LOWER_TRIANGULAR)
         .export_values();
+    py::enum_<Atlas::LogicalType>(m_ast, "LogicalType")
+        .value("AND", Atlas::LogicalType::AND)
+        .value("OR", Atlas::LogicalType::OR)
+        .export_values();
+    py::enum_<Atlas::AST::AssetCompType>(m_ast, "AssetCompType")
+        .value("EQUAL", Atlas::AST::AssetCompType::EQUAL)
+        .value("NOT_EQUAL", Atlas::AST::AssetCompType::NOT_EQUAL)
+        .value("GREATER", Atlas::AST::AssetCompType::GREATER)
+        .value("LESS", Atlas::AST::AssetCompType::LESS)
+        .value("GREATER_EQUAL", Atlas::AST::AssetCompType::GREATER_EQUAL)
+        .value("LESS_EQUAL", Atlas::AST::AssetCompType::LESS_EQUAL)
+        .export_values();
 
 
     py::class_<Atlas::AST::AssetReadNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNode")
@@ -195,8 +208,33 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::AssetMedianNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetMedianNode>>(m_ast, "AssetMedianNode")
         .def_static("make", &Atlas::AST::AssetMedianNode::pyMake);
 
+    py::class_<Atlas::AST::DummyNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::DummyNode>>(m_ast, "DummyNode")
+        .def(py::init<std::shared_ptr<Atlas::Exchange>>());
+
+    py::class_<Atlas::AST::LagNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::LagNode>>(m_ast, "LagNode");
+
+    py::class_<Atlas::AST::AssetIfNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetIfNode>>(m_ast, "AssetIfNode")
+        .def("swapRightEval", &Atlas::AST::AssetIfNode::swapRightEval)
+        .def("swapLeftEval", &Atlas::AST::AssetIfNode::swapLeftEval)
+        .def(py::init<
+            std::shared_ptr<Atlas::AST::StrategyBufferOpNode>,
+            Atlas::AST::AssetCompType,
+            std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>()
+        );
+
+    py::class_<Atlas::AST::AssetCompNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetCompNode>>(m_ast, "AssetCompNode")
+        .def("swapTrueEval", &Atlas::AST::AssetCompNode::swapTrueEval)
+        .def("swapFalseEval", &Atlas::AST::AssetCompNode::swapFalseEval)
+        .def(py::init<
+            std::shared_ptr<Atlas::AST::StrategyBufferOpNode>,
+            Atlas::LogicalType,
+            std::shared_ptr<Atlas::AST::StrategyBufferOpNode>,
+            std::shared_ptr<Atlas::AST::StrategyBufferOpNode>,
+            std::shared_ptr<Atlas::AST::StrategyBufferOpNode>
+            >()
+        );
+
     py::class_<Atlas::AST::ATRNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::ATRNode>>(m_ast, "ATRNode")
-        .def("getATR", &Atlas::AST::ATRNode::getATR, py::return_value_policy::reference_internal)
         .def_static("make", &Atlas::AST::ATRNode::pyMake);
 
     py::class_<Atlas::AST::AssetOpNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetOpNode>>(m_ast, "AssetOpNode")
@@ -204,10 +242,6 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getSwapRight", &Atlas::AST::AssetOpNode::getSwapRight)
         .def_static("make", &Atlas::AST::AssetOpNode::pyMake);
 
-
-    py::class_<Atlas::AST::ExchangeViewFilter, std::shared_ptr<Atlas::AST::ExchangeViewFilter>>(m_ast, "ExchangeViewFilter")
-        .def(py::init<Atlas::AST::ExchangeViewFilterType, double, Atlas::Option<double>>(
-        ));
     
     py::class_<Atlas::AST::ExchangeViewNode, Atlas::AST::StrategyBufferOpNode,  std::shared_ptr<Atlas::AST::ExchangeViewNode>>(m_ast, "ExchangeViewNode")
         .def_static("make", &Atlas::AST::ExchangeViewNode::make,

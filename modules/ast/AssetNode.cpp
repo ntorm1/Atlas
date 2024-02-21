@@ -224,11 +224,6 @@ ATRNode::ATRNode(
 	m_low(low),
 	m_window(window)
 {
-	m_atr.resize(
-		m_exchange.getAssetCount(),
-		m_exchange.getTimestamps().size()
-	);
-	m_atr.setZero();
 	m_close = m_exchange.getCloseIndex().value();
 }
 
@@ -237,44 +232,42 @@ ATRNode::ATRNode(
 void
 ATRNode::build() noexcept
 {
+	if (m_window > m_exchange.getTimestamps().size() || m_window == 0)
+	{
+		return;
+	}
+
+	enableCache();
 	auto const& data = m_exchange.getData();
 	size_t col_count = m_exchange.getHeaders().size();
 
-	// True Range holder for EMA
-	LinAlg::EigenMatrixXd tr(m_exchange.getAssetCount(), m_window);
-	tr.setZero();
 	size_t tr_idx = 0;
 	double alpha = 1 / static_cast<double>(m_window);
-
-	for (size_t i = 1; i < m_exchange.getTimestamps().size(); ++i)
+	size_t timestamp_count = m_exchange.getTimestamps().size();
+	Eigen::VectorXd tr0 = Eigen::VectorXd::Zero(timestamp_count);
+	Eigen::VectorXd tr1 = Eigen::VectorXd::Zero(timestamp_count);
+	Eigen::VectorXd tr2 = Eigen::VectorXd::Zero(timestamp_count);
+	for (size_t i = 1; i < timestamp_count; ++i)
 	{
 		size_t high_idx = i * col_count + m_high;
 		size_t low_idx = i * col_count + m_low;
 		size_t close_idx = i * col_count + m_close;
 
-		auto high_slice = data.col(high_idx);
-		auto low_slice = data.col(low_idx);
-		auto close_slice = data.col(close_idx);
-
-		auto tr0 = (high_slice - low_slice).cwiseAbs();
-		auto tr1 = (high_slice - data.col(close_idx-col_count)).cwiseAbs();
-		auto tr2 = (low_slice - data.col(close_idx-col_count)).cwiseAbs();
-		tr.col(tr_idx) = tr0.cwiseMax(tr1).cwiseMax(tr2);
-
-		if (i < m_window)
+		tr0 = (data.col(high_idx) - data.col(low_idx)).cwiseAbs();
+		tr1 = (data.col(high_idx) - data.col(close_idx - col_count)).cwiseAbs();
+		tr2 = (data.col(low_idx) - data.col(close_idx - col_count)).cwiseAbs();
+		if (i < (m_window - 1))
 		{
 			continue;
 		}
-		else if (i == m_window - 1)
+		else if (i == (m_window-1))
 		{
-			m_atr.col(i) = tr.rowwise().mean();
+			cacheColumn(i) = tr0.cwiseMax(tr1).cwiseMax(tr2);
 		}
-		else if (i > m_window - 1)
+		else
 		{
-			m_atr.col(i) = m_atr.col(i - 1) * (1 - alpha) + tr.col(tr_idx) * alpha;
+			cacheColumn(i) = alpha * tr0.cwiseMax(tr1).cwiseMax(tr2) + (1 - alpha) * cacheColumn(i - 1);
 		}
-		++tr_idx;
-		tr_idx %= m_window;
 	}
 }
 
@@ -329,7 +322,7 @@ ATRNode::~ATRNode() noexcept
 void
 ATRNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
-	target = m_atr.col(m_exchange.currentIdx());
+	target = cacheColumn(m_exchange.currentIdx());
 }
 
 }

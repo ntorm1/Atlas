@@ -12,8 +12,8 @@ namespace AST
 
 //============================================================================
 AssetIfNode::AssetIfNode(
-	AssetCompType comp_type,
 	SharedPtr<StrategyBufferOpNode> left_eval,
+	AssetCompType comp_type,
 	SharedPtr<StrategyBufferOpNode> right_eval
 ) noexcept :
 	StrategyBufferOpNode(NodeType::ASSET_IF, left_eval->getExchange(), left_eval.get()),
@@ -42,24 +42,27 @@ AssetIfNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 
     switch (m_comp_type) {
         case AssetCompType::EQUAL:
-			target = (target.array() == m_buffer.array()).select(target, NAN_DOUBLE);
+			target = (target.array() == m_buffer.array()).cast<double>();
 			break;
 		case AssetCompType::NOT_EQUAL:
-			target = (target.array() != m_buffer.array()).select(target, NAN_DOUBLE);
+			target = (target.array() != m_buffer.array()).cast<double>();
 			break;
 		case AssetCompType::GREATER:
-			target = (target.array() > m_buffer.array()).select(target, NAN_DOUBLE);
+			target = (target.array() > m_buffer.array()).cast<double>();
 			break;
 		case AssetCompType::GREATER_EQUAL:
-			target = (target.array() >= m_buffer.array()).select(target, NAN_DOUBLE);
+			target = (target.array() >= m_buffer.array()).cast<double>();
 			break;
 		case AssetCompType::LESS:
-			target = (target.array() < m_buffer.array()).select(target, NAN_DOUBLE);
+			target = (target.array() <= m_buffer.array()).cast<double>();
 			break;
 		case AssetCompType::LESS_EQUAL:
-			target = (target.array() <= m_buffer.array()).select(target, NAN_DOUBLE);
+			target = (target.array() <= m_buffer.array()).cast<double>();
 			break;
 	}
+
+	if (hasCache())
+		cacheColumn() = target;
 }
 
 
@@ -102,13 +105,15 @@ AssetCompNode::evaluate(
 	m_false_eval->evaluate(m_buffer.col(FALSE_EVAL_IDX));
 	switch (m_logical_type) {
 		case LogicalType::AND:
-			target = (!target.array().isNaN() && !m_buffer.col(RIGHT_EVAL_IDX).array().isNaN())
+			target = ((target.array() != 0) && (m_buffer.col(RIGHT_EVAL_IDX).array() !=0))
 				.select(m_buffer.col(TRUE_EVAL_IDX), m_buffer.col(FALSE_EVAL_IDX));
 		case LogicalType::OR:
-			target = (!target.array().isNaN() || !m_buffer.col(RIGHT_EVAL_IDX).array().isNaN())
+			target = ((target.array() != 0) || (m_buffer.col(RIGHT_EVAL_IDX).array() !=0))
 				.select(m_buffer.col(TRUE_EVAL_IDX), m_buffer.col(FALSE_EVAL_IDX));
 			break;
 	}
+	if (hasCache())
+		cacheColumn() = target;
 }
 
 

@@ -32,21 +32,23 @@ private:
 	SharedPtr<StrategyBufferOpNode> m_left_eval;
 
 public:
-	AssetIfNode(
-		AssetCompType comp_type,
+	ATLAS_API AssetIfNode(
 		SharedPtr<StrategyBufferOpNode> left_eval,
+		AssetCompType comp_type,
 		SharedPtr<StrategyBufferOpNode> right_eval
 	) noexcept;
-	~AssetIfNode() noexcept;
+	ATLAS_API ~AssetIfNode() noexcept;
+	ATLAS_API void swapRightEval(SharedPtr<StrategyBufferOpNode> right_eval) noexcept { m_right_eval = right_eval; }
+	ATLAS_API void swapLeftEval(SharedPtr<StrategyBufferOpNode> left_eval) noexcept { m_left_eval = left_eval; }
 
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 
 };
 
-constexpr size_t RIGHT_EVAL_IDX = 1;
-constexpr size_t TRUE_EVAL_IDX = 0;
-constexpr size_t FALSE_EVAL_IDX = 1;
+constexpr size_t RIGHT_EVAL_IDX = 0;
+constexpr size_t TRUE_EVAL_IDX = 1;
+constexpr size_t FALSE_EVAL_IDX = 2;
 
 //============================================================================
 export class AssetCompNode final
@@ -62,14 +64,16 @@ private:
 	SharedPtr<StrategyBufferOpNode> m_false_eval;
 
 public:
-	AssetCompNode(
+	ATLAS_API AssetCompNode(
 		SharedPtr<StrategyBufferOpNode> left_eval,
 		LogicalType logicial_type,
 		SharedPtr<StrategyBufferOpNode> right_eval,
 		SharedPtr<StrategyBufferOpNode> true_eval,
 		SharedPtr<StrategyBufferOpNode> false_eval
 	) noexcept;
-	~AssetCompNode() noexcept;
+	ATLAS_API ~AssetCompNode() noexcept;
+	ATLAS_API void swapTrueEval(SharedPtr<StrategyBufferOpNode> true_eval) noexcept { m_true_eval = true_eval; }
+	ATLAS_API void swapFalseEval(SharedPtr<StrategyBufferOpNode> false_eval) noexcept { m_false_eval = false_eval; }
 
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;

@@ -407,17 +407,21 @@ Exchange::setExchangeOffset(size_t _offset) noexcept
 void
 Exchange::enableNodeCache(String const& name, SharedPtr<AST::StrategyBufferOpNode> node) noexcept
 {
+	// resize the node's cache buffer to store evaluated target buffers
 	node->enableCache();
 	m_impl->ast_cache[name] = node;
 
 	assert(m_impl->current_index == 0);
-
 	LinAlg::EigenVectorXd buffer;
 	buffer.resize(m_impl->asset_id_map.size());
 	buffer.setZero();
 	for (size_t i = 0; i < m_impl->timestamps.size(); i++)
 	{
 		step(m_impl->timestamps[i]);
+		if (currentIdx() < node->getWarmup())
+		{
+			continue;
+		}
 		node->evaluate(buffer);
 		node->cacheColumn() = buffer;
 	}

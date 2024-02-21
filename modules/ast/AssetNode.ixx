@@ -158,8 +158,6 @@ private:
 	size_t m_high = 0;
 	size_t m_low = 0;
 	size_t m_close = 0;
-	LinAlg::EigenMatrixXd m_atr;
-
 	ATRNode(
 		Exchange& exchange,
 		size_t high,
@@ -190,7 +188,6 @@ public:
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_window; }
 
 	ATLAS_API ~ATRNode() noexcept;
-	ATLAS_API auto const& getATR() const noexcept { return m_atr; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
