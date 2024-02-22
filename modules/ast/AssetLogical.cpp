@@ -54,7 +54,7 @@ AssetIfNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 			target = (target.array() >= m_buffer.array()).cast<double>();
 			break;
 		case AssetCompType::LESS:
-			target = (target.array() <= m_buffer.array()).cast<double>();
+			target = (target.array() < m_buffer.array()).cast<double>();
 			break;
 		case AssetCompType::LESS_EQUAL:
 			target = (target.array() <= m_buffer.array()).cast<double>();
@@ -116,6 +116,41 @@ AssetCompNode::evaluate(
 		cacheColumn() = target;
 }
 
+
+//============================================================================
+void
+AssetIfNode::swapRightEval(SharedPtr<StrategyBufferOpNode> right_eval) noexcept
+{
+	m_right_eval = right_eval;
+	m_warmup = std::max(m_warmup, m_right_eval->getWarmup());
+}
+
+
+//============================================================================
+void
+AssetIfNode::swapLeftEval(SharedPtr<StrategyBufferOpNode> left_eval) noexcept
+{
+	m_left_eval = left_eval;
+	m_warmup = std::max(m_warmup, m_left_eval->getWarmup());
+}
+
+
+//============================================================================
+void
+AssetCompNode::swapFalseEval(SharedPtr<StrategyBufferOpNode> false_eval) noexcept
+{
+	m_false_eval = false_eval;
+	m_warmup = std::max(m_warmup, m_false_eval->getWarmup());
+}
+
+
+//============================================================================
+void
+AssetCompNode::swapTrueEval(SharedPtr<StrategyBufferOpNode> true_eval) noexcept
+{
+	m_true_eval = true_eval;
+	m_warmup = std::max(m_warmup, m_true_eval->getWarmup());
+}
 
 }
 

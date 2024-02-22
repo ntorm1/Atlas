@@ -38,8 +38,9 @@ public:
 		SharedPtr<StrategyBufferOpNode> right_eval
 	) noexcept;
 	ATLAS_API ~AssetIfNode() noexcept;
-	ATLAS_API void swapRightEval(SharedPtr<StrategyBufferOpNode> right_eval) noexcept { m_right_eval = right_eval; }
-	ATLAS_API void swapLeftEval(SharedPtr<StrategyBufferOpNode> left_eval) noexcept { m_left_eval = left_eval; }
+	
+	ATLAS_API void swapRightEval(SharedPtr<StrategyBufferOpNode> right_eval) noexcept;
+	ATLAS_API void swapLeftEval(SharedPtr<StrategyBufferOpNode> left_eval) noexcept;
 
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
@@ -72,8 +73,8 @@ public:
 		SharedPtr<StrategyBufferOpNode> false_eval
 	) noexcept;
 	ATLAS_API ~AssetCompNode() noexcept;
-	ATLAS_API void swapTrueEval(SharedPtr<StrategyBufferOpNode> true_eval) noexcept { m_true_eval = true_eval; }
-	ATLAS_API void swapFalseEval(SharedPtr<StrategyBufferOpNode> false_eval) noexcept { m_false_eval = false_eval; }
+	ATLAS_API void swapTrueEval(SharedPtr<StrategyBufferOpNode> true_eval) noexcept;
+	ATLAS_API void swapFalseEval(SharedPtr<StrategyBufferOpNode> false_eval) noexcept;
 
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;

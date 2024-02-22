@@ -247,27 +247,22 @@ ATRNode::build() noexcept
 	Eigen::VectorXd tr0 = Eigen::VectorXd::Zero(timestamp_count);
 	Eigen::VectorXd tr1 = Eigen::VectorXd::Zero(timestamp_count);
 	Eigen::VectorXd tr2 = Eigen::VectorXd::Zero(timestamp_count);
-	for (size_t i = 1; i < timestamp_count; ++i)
+	for (size_t i = 0; i < timestamp_count; ++i)
 	{
 		size_t high_idx = i * col_count + m_high;
 		size_t low_idx = i * col_count + m_low;
 		size_t close_idx = i * col_count + m_close;
 
+		if (i == 0)
+		{
+			cacheColumn(i) = (data.col(high_idx) - data.col(low_idx)).cwiseAbs();
+			continue;
+		}
+
 		tr0 = (data.col(high_idx) - data.col(low_idx)).cwiseAbs();
 		tr1 = (data.col(high_idx) - data.col(close_idx - col_count)).cwiseAbs();
 		tr2 = (data.col(low_idx) - data.col(close_idx - col_count)).cwiseAbs();
-		if (i < (m_window - 1))
-		{
-			continue;
-		}
-		else if (i == (m_window-1))
-		{
-			cacheColumn(i) = tr0.cwiseMax(tr1).cwiseMax(tr2);
-		}
-		else
-		{
-			cacheColumn(i) = alpha * tr0.cwiseMax(tr1).cwiseMax(tr2) + (1 - alpha) * cacheColumn(i - 1);
-		}
+		cacheColumn(i) = alpha * tr0.cwiseMax(tr1).cwiseMax(tr2) + (1 - alpha) * cacheColumn(i - 1);
 	}
 }
 

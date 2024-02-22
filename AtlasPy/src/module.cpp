@@ -201,6 +201,8 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("LESS_EQUAL", Atlas::AST::AssetCompType::LESS_EQUAL)
         .export_values();
 
+    py::class_<Atlas::AST::ExchangeViewFilter, std::shared_ptr<Atlas::AST::ExchangeViewFilter>>(m_ast, "ExchangeViewFilter")
+        .def(py::init<Atlas::AST::ExchangeViewFilterType, double, std::optional<double>>());
 
     py::class_<Atlas::AST::AssetReadNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetReadNode>>(m_ast, "AssetReadNode")
         .def_static("make", &Atlas::AST::AssetReadNode::pyMake);

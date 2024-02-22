@@ -234,6 +234,89 @@ class VectorBTCompare(unittest.TestCase):
         self.assertAlmostEqual(nlv1_reset, nlv2_reset)
         self.assertAlmostEqual(nlv1, nlv1_reset)
 
+    def test_supertrend(self):
+        multiplier = 3
+        close = AssetReadNode.make("Close", 0, self.exchange)
+        previous_close = AssetReadNode.make("Close", -1, self.exchange)
+
+        atr_node = ATRNode.make(
+            self.exchange,
+            "High",
+            "Low",
+            14
+        ) 
+        median_node = AssetMedianNode.make(
+            self.exchange,
+            "High",
+            "Low",
+        )
+
+        # ===== Lower Band =====
+        lower_band = AssetOpNode.make(
+            median_node,
+            AssetScalerNode(atr_node, AssetOpType.MULTIPLY, multiplier),
+            AssetOpType.SUBTRACT
+        )
+        lower_left_cond = AssetIfNode(
+            lower_band,
+            AssetCompType.GREATER,
+            DummyNode(self.exchange)
+        )
+        lower_right_cond = AssetIfNode(
+            previous_close,
+            AssetCompType.LESS, 
+            DummyNode(self.exchange)
+        )
+        final_lower_band = AssetCompNode(
+            lower_left_cond,
+            LogicalType.OR,
+            lower_right_cond,
+            lower_band,
+            DummyNode(self.exchange)
+        )
+        lagged_final_lower_band = final_lower_band.lag(1)
+        lower_left_cond.swapRightEval(lagged_final_lower_band)
+        lower_right_cond.swapRightEval(lagged_final_lower_band)
+        final_lower_band.swapFalseEval(lagged_final_lower_band)
+        # ======================
+
+        # ===== Upper Band =====
+        upper_band = AssetOpNode.make(
+            median_node,
+            AssetScalerNode(atr_node, AssetOpType.MULTIPLY, multiplier),
+            AssetOpType.ADD
+        )
+        upper_left_cond = AssetIfNode(
+            upper_band,
+            AssetCompType.LESS,
+            DummyNode(self.exchange)
+        )
+        upper_right_cond = AssetIfNode(
+            previous_close,
+            AssetCompType.GREATER, 
+            DummyNode(self.exchange)
+        )
+        final_upper_band = AssetCompNode(
+            upper_left_cond,
+            LogicalType.OR,
+            upper_right_cond,
+            upper_band,
+            DummyNode(self.exchange)
+        )
+        lagged_final_upper_band = final_upper_band.lag(1)
+        upper_left_cond.swapRightEval(lagged_final_upper_band)
+        upper_right_cond.swapRightEval(lagged_final_upper_band)
+        final_upper_band.swapFalseEval(lagged_final_upper_band)
+        # ======================
+
+        self.exchange.enableNodeCache("final_lower_band",final_lower_band)
+        self.exchange.enableNodeCache("final_upper_band",final_upper_band)
+        self.assertAlmostEqual(final_lower_band.cache()[0][-1], 40304.66724192)
+        self.assertAlmostEqual(final_upper_band.cache()[0][15], 16137.834342208951)
+        self.assertAlmostEqual(final_upper_band.cache()[0][16], 14852.429043211883)
+        self.assertAlmostEqual(final_upper_band.cache()[0][16], 14852.429043211883)
+
+
     def test_grid_search(self):
         """
         fast_n = 6
