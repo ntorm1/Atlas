@@ -244,9 +244,10 @@ ATRNode::build() noexcept
 	size_t tr_idx = 0;
 	double alpha = 1 / static_cast<double>(m_window);
 	size_t timestamp_count = m_exchange.getTimestamps().size();
-	Eigen::VectorXd tr0 = Eigen::VectorXd::Zero(timestamp_count);
-	Eigen::VectorXd tr1 = Eigen::VectorXd::Zero(timestamp_count);
-	Eigen::VectorXd tr2 = Eigen::VectorXd::Zero(timestamp_count);
+	size_t asset_count = m_exchange.getAssetCount();
+	Eigen::VectorXd tr0 = Eigen::VectorXd::Zero(asset_count);
+	Eigen::VectorXd tr1 = Eigen::VectorXd::Zero(asset_count);
+	Eigen::VectorXd tr2 = Eigen::VectorXd::Zero(asset_count);
 	for (size_t i = 0; i < timestamp_count; ++i)
 	{
 		size_t high_idx = i * col_count + m_high;

@@ -5,7 +5,7 @@ import unittest
 import pandas as pd
 import numpy as np
 
-atlas_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/x64/Debug"
+atlas_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/x64/Release"
 sys.path.append(atlas_path)
 
 
