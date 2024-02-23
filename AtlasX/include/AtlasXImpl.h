@@ -4,6 +4,7 @@
 
 #include "AtlasXTypes.h"
 #include "AtlasInter.h"
+#include "AtlasStruct.hpp"
 
 
 import AtlasException;
@@ -102,7 +103,8 @@ public:
 	HashMap<String, size_t> const& getExchangeHeaders(SharedPtr<Atlas::Exchange> exchange) noexcept;
 	HashMap<String, size_t> getAssetMap(SharedPtr<Atlas::Exchange> e) noexcept;
 	Option<SharedPtr<GridState>> getStrategyGridState(String const& strategy_name) noexcept;
-	
+	Option<size_t> getAssetIndex(String const& asset_name) noexcept;
+	Vector<Atlas::Order> getOrders(Option<String> asset_name, Option<String> strategy_name) noexcept;
 };
 
 

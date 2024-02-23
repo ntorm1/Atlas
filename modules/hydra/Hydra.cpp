@@ -360,6 +360,14 @@ Hydra::getTimestamps() const noexcept
 
 
 //============================================================================
+HashMap<String, size_t>
+Hydra::getStrategyIdxMap() const noexcept
+{
+	return m_impl->m_strategy_map;
+}
+
+
+//============================================================================
 Result<bool, AtlasException>
 Hydra::reset() noexcept
 {

@@ -85,9 +85,11 @@ private:
 	Vector<double> m_asset_data;
 	HashMap<String, QCPGraph*> m_column_names;
 	HashMap<String, QCPGraph*> m_nodes;
+	Option<QCPGraph*> m_orders = std::nullopt;
 
 	void addColumn(QString const& name) noexcept;
 	void addNode(QString const& name, SharedPtr<Atlas::AST::StrategyBufferOpNode>) noexcept;
+	void plotOrders() noexcept;
 
 protected slots:
 	void contextMenuRequest(QPoint pos) override;

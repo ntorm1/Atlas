@@ -61,13 +61,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <ExternalIncludePath>$(SolutionDir)AtlasX\external\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\Qt-Advanced-Docking-System\src;C:\Python312\include</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)include;$(SolutionDir)AtlasX\external\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\Qt-Advanced-Docking-System\src;C:\Python312\include</ExternalIncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)AtlasX\external\QScintilla\src\debug;C:\Python312\libs</LibraryPath>
     <ReferencePath>$(VC_ReferencesPath_x64);</ReferencePath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\external\QScintilla\src</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <ExternalIncludePath>$(SolutionDir)AtlasX\external\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\Qt-Advanced-Docking-System\src;C:\Python312\include</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)include;$(SolutionDir)AtlasX\external\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\Qt-Advanced-Docking-System\src;C:\Python312\include</ExternalIncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)AtlasX\external\QScintilla\src\release;C:\Python312\libs</LibraryPath>
     <ReferencePath>$(VC_ReferencesPath_x64);</ReferencePath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)AtlasX\external\QScintilla\src</IncludePath>

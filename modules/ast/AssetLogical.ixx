@@ -44,8 +44,8 @@ public:
 
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
-
 };
+
 
 constexpr size_t RIGHT_EVAL_IDX = 0;
 constexpr size_t TRUE_EVAL_IDX = 1;

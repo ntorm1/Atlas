@@ -424,4 +424,84 @@ AtlasXAppImpl::getStrategyGridState(String const& strategy_name) noexcept
 	);
 }
 
+
+//============================================================================
+Option<size_t>
+AtlasXAppImpl::getAssetIndex(String const& asset_name) noexcept
+{
+	Option<size_t> asset_id = std::nullopt;
+	auto parent_name = getParentExchangeName(asset_name);
+	if (!parent_name)
+	{
+		return std::nullopt;
+	}
+	auto exchange = hydra->getExchange(parent_name.value());
+	if (!exchange)
+	{
+		return std::nullopt;
+	}
+	asset_id = (*exchange)->getAssetIndex(asset_name);
+	if (!asset_id)
+	{
+		return std::nullopt;
+	}
+	return asset_id;
+}
+
+
+//============================================================================
+Vector<Atlas::Order>
+AtlasXAppImpl::getOrders(
+	Option<String> asset_name,
+	Option<String> strategy_name
+) noexcept
+{
+	Vector<Atlas::Order> orders;
+	auto strategy_map = hydra->getStrategyIdxMap();
+	if (strategy_name)
+	{
+		for (auto it = strategy_map.begin(); it != strategy_map.end();) {
+			if (it->first != *strategy_name) {
+				it = strategy_map.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+	}
+
+	Option<size_t> asset_id = std::nullopt;
+	if (asset_name)
+	{
+		asset_id = getAssetIndex(*asset_name);
+		if (!asset_id)
+		{
+			return orders;
+		}
+	}
+
+	for (auto const& [name, idx] : strategy_map)
+	{
+		auto strategy = hydra->getStrategy(name);
+		if (!strategy)
+		{
+			continue;
+		}
+		auto strategy_orders = (*strategy)->getTracer().getOrders();
+		if (!strategy_orders.size())
+		{
+			continue;
+		}
+		for (auto const& order : strategy_orders)
+		{
+			if (asset_id && order.asset_id != *asset_id)
+			{
+				continue;
+			}
+			orders.push_back(order);
+		}
+	}
+	return orders;
+}
+
 }

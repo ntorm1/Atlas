@@ -64,6 +64,7 @@ public:
 	ATLAS_API size_t getCurrentIdx() const noexcept;
 	ATLAS_API size_t* getCurrentIdxPtr() const noexcept;
 	ATLAS_API Vector<Int64> const& getTimestamps() const noexcept;
+	ATLAS_API HashMap<String, size_t> getStrategyIdxMap() const noexcept;
 	ATLAS_API HashMap<String, size_t> getPortfolioIdxMap() const noexcept;
 	ATLAS_API ExchangeMap const& getExchangeMap() const noexcept;
 	ATLAS_API Option<String> getParentExchangeName(

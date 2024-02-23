@@ -389,6 +389,16 @@ AtlasAssetPlot::contextMenuRequest(QPoint pos)
 			});
 		}
 
+		moveSubMenu->addSeparator();
+		QString col = QString::fromStdString("Orders");
+		QAction* action = moveSubMenu->addAction(col);
+		connect(action, &QAction::triggered, this, [this, col]() {
+			plotOrders();
+		});
+		col = QString::fromStdString("Trades");
+		action = moveSubMenu->addAction(col);
+
+
 		if (selectedGraphs().size() > 0)
 			menu->addAction("Remove selected graph", this, SLOT(removeSelectedGraph()));
 		if (graphCount() > 0)
@@ -486,6 +496,13 @@ void AtlasAssetPlot::addNode(
 		name.toStdString()
 	);
 	m_nodes[name.toStdString()] = graph;
+}
+
+
+//============================================================================
+void
+AtlasAssetPlot::plotOrders() noexcept
+{
 }
 
 
