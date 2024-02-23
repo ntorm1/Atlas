@@ -405,11 +405,20 @@ Exchange::setExchangeOffset(size_t _offset) noexcept
 
 //============================================================================
 void
-Exchange::enableNodeCache(String const& name, SharedPtr<AST::StrategyBufferOpNode> node) noexcept
+Exchange::enableNodeCache(
+	String const& name,
+	SharedPtr<AST::StrategyBufferOpNode> node,
+	bool eager
+) noexcept
 {
 	// resize the node's cache buffer to store evaluated target buffers
 	node->enableCache();
 	m_impl->ast_cache[name] = node;
+
+	if (!eager)
+	{
+		return;
+	}
 
 	assert(m_impl->current_index == 0);
 	LinAlg::EigenVectorXd buffer;

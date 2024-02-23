@@ -231,11 +231,11 @@ StructTracer::evaluate(
         // get the deviation from the previous weights
         LinAlg::EigenVectorXd deviation = weights - previous_weights;
         // scale weights by the nlv 
-        deviation *= m_tracer.m_nlv;
+        //deviation *= m_tracer.m_nlv;
         // fetch the current market prices
         auto close_prices = m_exchange.getSlice(close_index, 0);
         // scale the deviation by the market prices to get the units
-        deviation = deviation.cwiseQuotient(close_prices);
+        //deviation = deviation.cwiseQuotient(close_prices);
         // populate order struct where deviation is greater than 0
         Int64 current_time = m_exchange.getCurrentTimestamp();
         size_t exchange_offset = m_exchange.getExchangeOffset();

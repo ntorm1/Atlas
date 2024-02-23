@@ -142,10 +142,11 @@ ExchangeViewNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexc
                     target(i) = m_buffer(i);
                 }
             }
-            // else if previous signal not nan take that
+            // else if previous signal not nan take that. NOTE: assume that if the main ev signal
+            // evaluates to NaN we still are in the position untill the right signal fires.
             else if (!std::isnan(temp(i)))
 			{
-                if (target(i) * temp(i) > 0)
+                if (target(i) * temp(i) > 0 || std::isnan(target(i)))
                 {
                     target(i) = temp(i);
                 }
@@ -153,6 +154,8 @@ ExchangeViewNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexc
 		}
         m_buffer = target;
     }
+    if (hasCache())
+        cacheColumn() = target;
 }
 
 }

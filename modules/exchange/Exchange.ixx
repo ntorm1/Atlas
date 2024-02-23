@@ -101,7 +101,7 @@ public:
 	ATLAS_API size_t getAssetCount() const noexcept;
 	ATLAS_API Int64 getCurrentTimestamp() const noexcept;
 	ATLAS_API Vector<Int64> const& getTimestamps() const noexcept;
-	ATLAS_API void enableNodeCache(String const& name, SharedPtr<AST::StrategyBufferOpNode> p) noexcept;
+	ATLAS_API void enableNodeCache(String const& name, SharedPtr<AST::StrategyBufferOpNode> p, bool eager = false) noexcept;
 };
 
 }
