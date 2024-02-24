@@ -144,6 +144,14 @@ AtlasXAssetPlotBuilder::getTimestamps(SharedPtr<Atlas::Exchange> exchange) noexc
 
 
 //==============================================================================
+Vector<Atlas::Order>
+AtlasXAssetPlotBuilder::getOrders(Option<String> asset_name, Option<String> strategy_name) noexcept
+{
+	return m_app->getOrders(asset_name, strategy_name);
+}
+
+
+//==============================================================================
 Option<Vector<double>>
 AtlasXAssetPlotBuilder::getCacheSlice(SharedPtr<Atlas::Exchange> exchange, String const& asset_name, SharedPtr<Atlas::AST::StrategyBufferOpNode> node) noexcept
 {

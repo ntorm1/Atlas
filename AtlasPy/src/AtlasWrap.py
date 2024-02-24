@@ -181,8 +181,8 @@ class VectorBTCompare(unittest.TestCase):
         exchange_view_up = ExchangeViewNode.make(self.exchange, spread, spread_filter_up, exchange_view_down)
 
         exchange_view = ExchangeViewNode.make(self.exchange, spread, None)
-        self.exchange.enableNodeCache("ev", exchange_view)
-        self.exchange.enableNodeCache("ev_signal",exchange_view_up)
+        self.exchange.enableNodeCache("ev", exchange_view, False)
+        self.exchange.enableNodeCache("ev_signal",exchange_view_up, False)
 
         allocation = AllocationNode.make(
             exchange_view,
@@ -309,8 +309,8 @@ class VectorBTCompare(unittest.TestCase):
         final_upper_band.swapFalseEval(lagged_final_upper_band)
         # ======================
 
-        self.exchange.enableNodeCache("final_lower_band",final_lower_band)
-        self.exchange.enableNodeCache("final_upper_band",final_upper_band)
+        self.exchange.enableNodeCache("final_lower_band",final_lower_band, True)
+        self.exchange.enableNodeCache("final_upper_band",final_upper_band, True)
         self.assertAlmostEqual(final_lower_band.cache()[0][-1], 40304.66724192)
         self.assertAlmostEqual(final_upper_band.cache()[0][15], 16137.834342208951)
         self.assertAlmostEqual(final_upper_band.cache()[0][16], 14852.429043211883)

@@ -503,8 +503,45 @@ void AtlasAssetPlot::addNode(
 void
 AtlasAssetPlot::plotOrders() noexcept
 {
-}
+	if (m_orders)
+	{
+		return;
+	}
+	auto orders = m_builder->getOrders(m_asset_name, std::nullopt);
+	auto buys = addGraph();
+	auto sells = addGraph();
+	buys->setName(QString::fromStdString("Orders: Buy"));
+	sells->setName(QString::fromStdString("Orders: Sell"));
 
+	QVector<QCPGraphData> data_buys;
+	QVector<QCPGraphData> data_sells;
+
+	size_t buy_count = 0;
+	for (auto& order : orders)
+	{
+		if (order.quantity > 0) {
+			data_buys.push_back({ order.fill_time / static_cast<double>(1000000000), order.fill_price });
+			buy_count++;
+		}
+		else {
+			data_sells.push_back({ order.fill_time / static_cast<double>(1000000000), order.fill_price });
+		}
+	}
+	buys->setLineStyle(QCPGraph::lsNone);
+	buys->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssTriangle, 15));
+	buys->data()->set(data_buys, true);
+	QPen pen;
+	pen.setColor(QColor(0, 0, 255));
+	buys->setPen(pen);
+	sells->setLineStyle(QCPGraph::lsNone);
+	sells->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssTriangleInverted, 15));
+	sells->data()->set(data_sells, true);
+	pen.setColor(QColor(0, 128, 0));
+	sells->setPen(pen);
+	rescaleAxes();
+	replot();
+	m_orders = std::make_pair(buys, sells);
+}
 
 //============================================================================
 AtlasAssetPlot::AtlasAssetPlot(
