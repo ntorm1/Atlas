@@ -1,11 +1,14 @@
 module;
 #include "AtlasMacros.hpp"
+#include "AtlasFeature.hpp"
 #include <filesystem>
 #include <fstream>
 #include <cassert>
 #include <thread>
 #include <mutex>
+#ifdef ATLAS_HDF5
 #include <H5Cpp.h>
+#endif
 module ExchangeModule;
 
 import ExchangePrivateModule;
@@ -14,6 +17,7 @@ import AtlasTimeModule;
 namespace Atlas
 {
 
+#ifdef ATLAS_HDF5
 //============================================================================
 static void
 	loadH5(
@@ -52,6 +56,7 @@ static void
 	dataset.read(asset.data.data(), H5::PredType::NATIVE_DOUBLE, dataspace);
 	datasetIndex.read(asset.timestamps.data(), H5::PredType::NATIVE_INT64, dataspaceIndex);
 }
+#endif
 
 
 //============================================================================
@@ -221,6 +226,7 @@ Result<bool, AtlasException>
 		return initDir();
 	}
 
+#ifdef ATLAS_HDF5
 	// make sure the source file is an HDF5 file
 	if (path.extension() != ".h5") {
 		return Err("Exchange source is not an HDF5 file");
@@ -251,6 +257,9 @@ Result<bool, AtlasException>
 			return std::unexpected<AtlasException>("Error loading asset: Unknown error");
 		}
 	}
+#else
+	return std::unexpected<AtlasException>("HDF5 support is not enabled");
+#endif
 
 	return true;
 }
