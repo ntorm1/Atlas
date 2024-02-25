@@ -1,5 +1,5 @@
 # Atlas
-![alt text](https://github.com/ntorm1/Atlas/blob/main/util/AtlasX.png)
+![alt text](https://github.com/ntorm1/Atlas/blob/main/util/AtlasXV2.png)
 ## About
 Atlas is a high performance Algorthmic Trading Backtesting library written in C++23 with a Python wrapper build using pybind11 and a GUI based on QT. It is split into five parts
 
