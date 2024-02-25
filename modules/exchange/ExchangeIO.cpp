@@ -104,19 +104,26 @@ Asset::loadCSV(String const& datetime_format)
 			std::getline(ss, timestamp, ',');
 
 			// try to convert string to epoch time 
-			auto res = Time::strToEpoch(timestamp, datetime_format);
-			if (res)
-			{
-				if (res.value() < 0)
+			int64_t epoch_time = 0;
+			if (datetime_format != "") {
+				auto res = Time::strToEpoch(timestamp, datetime_format);
+				if (res && res.value() > 0)
 				{
-					return Err("Invalid timestamp: " + timestamp);
+					epoch_time = res.value();
 				}
-				timestamps[row_counter] = res.value();
 			}
 			else
 			{
-				timestamps[row_counter] = std::stoll(timestamp);
+				try {
+					epoch_time = std::stoll(timestamp);
+				}
+				catch (...) {
+				}
 			}
+			if (epoch_time == 0) {
+				return Err("Invalid timestamp: " + timestamp + ", epoch time is: " + std::to_string(epoch_time));
+			}
+			timestamps[row_counter] = epoch_time;
 
 			int col_idx = 0;
 			while (std::getline(ss, columnValue, ','))
