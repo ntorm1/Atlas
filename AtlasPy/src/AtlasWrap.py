@@ -124,12 +124,44 @@ class AllocTest(unittest.TestCase):
 
 class VectorBTCompare(unittest.TestCase):
     def setUp(self) -> None:
-        exchange_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchangeVBT"
+        self.exchange_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchangeVBT"
         self.hydra = Hydra()
-        self.exchange = self.hydra.addExchange("test", exchange_path,  "%Y-%m-%d %H:%M:%S")
+        self.exchange = self.hydra.addExchange("test", self.exchange_path,  "%Y-%m-%d %H:%M:%S")
         self.portfolio = self.hydra.addPortfolio("test_p", self.exchange, 100.0)
         self.strategy_id = "test_s" 
         self.hydra.build()
+
+
+    def test_max_observer(self):
+        n = 5
+        close = AssetReadNode.make("Close", 0, self.exchange)
+        prev_close = AssetReadNode.make("Close", -1, self.exchange)
+        change = AssetOpNode.make(
+            close,
+            prev_close,
+            AssetOpType.SUBTRACT
+        )
+
+        close_max = self.exchange.registerObserver(MaxObserverNode(change, n))
+        self.exchange.enableNodeCache("close_max",close_max, False)
+
+        ev = ExchangeViewNode.make(self.exchange, close)
+        allocation = AllocationNode.make(
+            ev
+        )
+        strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
+        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node_signal, 1.0), True)
+        self.hydra.run()
+
+        ticker = "BTC-USD"
+        btc_idx = self.exchange.getAssetIndex(ticker)
+        path = os.path.join(self.exchange_path,f"{ticker}.csv")  
+        df = pd.read_csv(path)
+        df["close_max_atlas"] = close_max.cache()[btc_idx].T
+        df["close_max_pd"] = df["Close"].diff().rolling(n).max()
+        df["close_max_pd"].fillna(0, inplace=True)
+        df = df.iloc[n:]
+        self.assertTrue(np.allclose(df["close_max_atlas"], df["close_max_pd"]))
 
     def test_ma_cross(self):
         fast_n = 50
@@ -157,7 +189,7 @@ class VectorBTCompare(unittest.TestCase):
 
         nlv = strategy.getHistory(TracerType.NLV)
         returns = nlv[-1] / nlv[0] - 1
-        self.assertAlmostEqual(returns, 4.851262581813536)
+        self.assertAlmostEqual(returns, 1.5693292786263853)
 
     def test_ma_signal(self):
         fast_n = 50

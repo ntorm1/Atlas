@@ -73,6 +73,7 @@ private:
 
 protected:
 	void setWarmup(size_t warmup) noexcept { m_warmup = warmup; }
+	void setObserverBuffer(double c) noexcept { m_buffer_matrix.setConstant(c); }
 	[[nodiscard]] size_t getBufferIdx() const noexcept { return m_buffer_idx; }
 	[[nodiscard]] auto const& getBufferMatrix() const noexcept { return m_buffer_matrix; }
 	[[nodiscard]] size_t getWindow() const noexcept { return m_window; }
@@ -168,6 +169,7 @@ public:
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
+	void reset() noexcept override;
 };
 
 

@@ -327,6 +327,9 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::MeanObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::MeanObserverNode>>(m_ast, "MeanObserverNode")
         .def(py::init<std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
 
+    py::class_<Atlas::AST::MaxObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::MaxObserverNode>>(m_ast, "MaxObserverNode")
+        .def(py::init<std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
+
     py::class_<Atlas::AST::StrategyGrid, std::shared_ptr<Atlas::AST::StrategyGrid>>(m_ast, "StrategyGrid")
         .def("enableTracerHistory", &Atlas::AST::StrategyGrid::enableTracerHistory)
         .def("getTracer", &Atlas::AST::StrategyGrid::getTracer)

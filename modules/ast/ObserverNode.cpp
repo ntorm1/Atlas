@@ -51,20 +51,23 @@ AssetObserverNode::resetBase() noexcept
 	reset();
 }
 
+
 //============================================================================
 void
 AssetObserverNode::cacheBase() noexcept
 {
+	if (m_exchange.currentIdx() < getWarmup())
+	{
+		m_buffer_idx = (m_buffer_idx + 1) % m_window;
+		return;
+	}
+
 	cacheObserver();
-	if (m_exchange.currentIdx() >= m_window)
+	if (m_exchange.currentIdx() >= (m_window-1))
 	{
 		if (m_parent->getType() != NodeType::ASSET_READ) {
 			onOutOfRange(m_buffer_matrix.col(m_buffer_idx));
-			m_buffer_idx++;
-			if ((m_buffer_idx % m_window) == 0)
-			{
-				m_buffer_idx = 0;
-			}
+			m_buffer_idx = (m_buffer_idx + 1) % m_window;
 		}
 		else {
 			auto node = static_cast<AssetReadNode*>(m_parent.get());
@@ -302,8 +305,10 @@ MaxObserverNode::MaxObserverNode(
 ) noexcept :
 	AssetObserverNode(parent, AssetObserverType::MAX, window)
 {
+	setWarmup(parent->getWarmup());
 	m_max.resize(m_exchange.getAssetCount());
-	m_max.setZero();
+	m_max.setConstant(-std::numeric_limits<double>::max());
+	setObserverBuffer(-std::numeric_limits<double>::max());
 }
 
 
@@ -345,11 +350,13 @@ MaxObserverNode::onOutOfRange(
 	size_t buffer_idx = getBufferIdx();
 	for (size_t i = 0; i < static_cast<size_t>(m_max.rows()); i++)
 	{
+		// Check if the column going out of range holds the max value for the row
 		if (buffer_old(i) != m_max(i))
 		{
 			continue;
 		}
 		
+		// loop over the buffer row and find the new max, skipping the expiring index
 		auto const& buffer_matrix = getBufferMatrix();
 		size_t columns = static_cast<size_t>(buffer_matrix.cols());
 		double max = -std::numeric_limits<double>::max();
@@ -384,6 +391,19 @@ MaxObserverNode::cacheObserver() noexcept
 	m_parent->evaluate(buffer_ref);
 	assert(buffer_ref.size() == m_max.size());
 	m_max = buffer_ref.cwiseMax(m_max);
+	if (hasCache())
+	{
+		cacheColumn() = m_max;
+	}
+}
+
+
+//============================================================================
+void
+MaxObserverNode::reset() noexcept
+{
+	m_max.setConstant(-std::numeric_limits<double>::max());
+	setObserverBuffer(-std::numeric_limits<double>::max());
 }
 
 

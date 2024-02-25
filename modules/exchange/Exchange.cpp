@@ -54,7 +54,6 @@ Exchange::validate() noexcept
 				);
 			}
 		}
-
 		//validate asset timestamps are in ascending order
 		auto const& timestamps = asset.timestamps;
 		if (timestamps.size() == 0)
@@ -228,13 +227,20 @@ Exchange::reset() noexcept
 		}
 	}
 
-	// reset cache of any asset observers
-	std::for_each(
-		m_impl->asset_observers.begin(),
-		m_impl->asset_observers.end(),
-		[](auto& observer) { observer.second->resetBase(); }
+	m_impl->asset_observers.erase(
+		std::remove_if(
+			m_impl->asset_observers.begin(),
+			m_impl->asset_observers.end(),
+			[](const auto& observer) {
+				if (observer.second.use_count() == 1) {
+					observer.second->reset();
+					return true;
+				}
+				return false;
+			}
+		),
+		m_impl->asset_observers.end()
 	);
-
 	cleanupCovarianceNodes();
 }
 
