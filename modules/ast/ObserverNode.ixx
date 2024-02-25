@@ -111,10 +111,10 @@ public:
 	[[nodiscard]] size_t hash() const noexcept override;
 	[[nodiscard]] size_t refreshWarmup() noexcept override { return getWarmup(); }
 
-	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept;
+	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
-	void cacheObserver() noexcept;
-	void reset() noexcept;
+	void cacheObserver() noexcept override;
+	void reset() noexcept override;
 
 	ATLAS_API SumObserverNode(
 		SharedPtr<StrategyBufferOpNode> parent,
@@ -134,10 +134,10 @@ private:
 
 public:
 	[[nodiscard]] size_t hash() const noexcept override;
-	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept;
+	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
-	void cacheObserver() noexcept;
-	void reset() noexcept;
+	void cacheObserver() noexcept override;
+	void reset() noexcept override;
 	[[nodiscard]] size_t refreshWarmup() noexcept override;
 
 	ATLAS_API MeanObserverNode(
