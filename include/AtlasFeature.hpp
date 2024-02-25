@@ -1,4 +1,4 @@
 #pragma once
 
 
-//#define ATLAS_HDF5 1
+#define ATLAS_HDF5 1

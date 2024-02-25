@@ -30,7 +30,8 @@ export enum class AssetObserverType : Uint8
 {
 	SUM = 0,
 	MEAN = 1,
-	ATR = 2
+	ATR = 2,
+	MAX = 3
 };
 
 
@@ -72,7 +73,7 @@ private:
 
 protected:
 	void setWarmup(size_t warmup) noexcept { m_warmup = warmup; }
-	size_t getWarmup() const noexcept override { return m_warmup; }
+	[[nodiscard]] size_t getWindow() const noexcept { return m_window; }
 
 public:
 	SharedPtr<StrategyBufferOpNode> m_parent;
@@ -80,12 +81,13 @@ public:
 
 	void resetBase() noexcept;
 	void cacheBase() noexcept;
+	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	[[nodiscard]] AssetObserverType observerType() const noexcept { return m_observer_type; }
 	[[nodiscard]] size_t window() const noexcept { return m_window; }
 	
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer() noexcept;
 	virtual void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept = 0;
-	virtual void cache() noexcept = 0;
+	virtual void cacheObserver() noexcept = 0;
 	virtual size_t hash() const noexcept = 0;
 	virtual void reset() noexcept = 0;
 
@@ -103,17 +105,15 @@ export class SumObserverNode final
 	: public AssetObserverNode
 {
 private:
-	size_t m_window;
 	LinAlg::EigenVectorXd m_sum;
 
 public:
 	[[nodiscard]] size_t hash() const noexcept override;
-	[[nodiscard]] size_t getWarmup() const noexcept override { return m_window; }
-	[[nodiscard]] size_t refreshWarmup() noexcept override { return m_window; }
+	[[nodiscard]] size_t refreshWarmup() noexcept override { return getWarmup(); }
 
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
-	void cache() noexcept;
+	void cacheObserver() noexcept;
 	void reset() noexcept;
 
 	ATLAS_API SumObserverNode(
@@ -129,16 +129,14 @@ export class MeanObserverNode final
 	: public AssetObserverNode
 {
 private:
-	size_t m_window;
 	SharedPtr<SumObserverNode> m_sum_observer;
 	SharedPtr<AssetScalerNode> m_scaler;
 
 public:
 	[[nodiscard]] size_t hash() const noexcept override;
-	[[nodiscard]] size_t getWarmup() const noexcept override { return m_window; }
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
-	void cache() noexcept;
+	void cacheObserver() noexcept;
 	void reset() noexcept;
 	[[nodiscard]] size_t refreshWarmup() noexcept override;
 
@@ -147,6 +145,23 @@ public:
 		size_t window
 	) noexcept;
 	ATLAS_API ~MeanObserverNode() noexcept;
+};
+
+
+//============================================================================
+export class MaxObserverNode final
+	: public AssetObserverNode
+{
+private:
+	LinAlg::EigenVectorXd m_max;
+
+public:
+
+	ATLAS_API MaxObserverNode(
+		SharedPtr<StrategyBufferOpNode> parent,
+		size_t window
+	) noexcept;
+	ATLAS_API ~MaxObserverNode() noexcept;
 };
 
 

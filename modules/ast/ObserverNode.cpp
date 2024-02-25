@@ -55,7 +55,7 @@ AssetObserverNode::resetBase() noexcept
 void
 AssetObserverNode::cacheBase() noexcept
 {
-	cache();
+	cacheObserver();
 	if (m_exchange.currentIdx() >= m_window)
 	{
 		if (m_parent->getType() != NodeType::ASSET_READ) {
@@ -100,8 +100,7 @@ SumObserverNode::SumObserverNode(
 	SharedPtr<StrategyBufferOpNode> parent,
 	size_t window
 ) noexcept:
-	AssetObserverNode(parent, AssetObserverType::SUM, window),
-	m_window(window)
+	AssetObserverNode(parent, AssetObserverType::SUM, window)
 {
 	m_sum.resize(m_exchange.getAssetCount());
 	m_sum.setZero();
@@ -116,7 +115,7 @@ SumObserverNode::~SumObserverNode() noexcept
 
 //============================================================================
 void
-SumObserverNode::cache() noexcept
+SumObserverNode::cacheObserver() noexcept
 {
 	auto buffer_ref = buffer();
 	m_parent->evaluate(buffer_ref);
@@ -139,7 +138,7 @@ size_t SumObserverNode::hash() const noexcept
 	size_t hash_value = 17; // Initialize with a prime number
 
 	// Combine hash with member variables
-	hash_value = hash_value * 31 + std::hash<Uint32>{}(static_cast<Uint32>(m_window));
+	hash_value = hash_value * 31 + std::hash<Uint32>{}(static_cast<Uint32>(getWindow()));
 	hash_value = hash_value * 31 + type_hash;
 
 	// Mix the bits to increase entropy
@@ -159,7 +158,7 @@ size_t MeanObserverNode::hash() const noexcept
 	size_t hash_value = 17; // Initialize with a prime number
 
 	// Combine hash with member variables
-	hash_value = hash_value * 31 + std::hash<Uint32>{}(static_cast<Uint32>(m_window));
+	hash_value = hash_value * 31 + std::hash<Uint32>{}(static_cast<Uint32>(getWindow()));
 	hash_value = hash_value * 31 + type_hash;
 
 	// Mix the bits to increase entropy
@@ -238,8 +237,7 @@ MeanObserverNode::MeanObserverNode(
 	SharedPtr<StrategyBufferOpNode> parent,
 	size_t window
 ) noexcept :
-	AssetObserverNode(parent, AssetObserverType::MEAN, window),
-	m_window(window)
+	AssetObserverNode(parent, AssetObserverType::MEAN, window)
 {
 	auto sum = std::make_shared<SumObserverNode>(parent, window);
 	m_sum_observer = std::dynamic_pointer_cast<SumObserverNode>(m_exchange.registerObserver(std::move(sum)));
@@ -274,9 +272,9 @@ MeanObserverNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexc
 
 //============================================================================
 void
-MeanObserverNode::cache() noexcept
+MeanObserverNode::cacheObserver() noexcept
 {
-	m_sum_observer->cache();
+	m_sum_observer->cacheObserver();
 }
 
 
@@ -295,6 +293,23 @@ MeanObserverNode::refreshWarmup() noexcept
 	setWarmup(m_sum_observer->refreshWarmup());
 	return getWarmup();
 }
+
+
+//============================================================================
+MaxObserverNode::MaxObserverNode(
+	SharedPtr<StrategyBufferOpNode> parent,
+	size_t window
+) noexcept :
+	AssetObserverNode(parent, AssetObserverType::MAX, window)
+{
+	m_max.resize(m_exchange.getAssetCount());
+	m_max.setZero();
+}
+
+MaxObserverNode::~MaxObserverNode() noexcept
+{
+}
+
 
 }
 
