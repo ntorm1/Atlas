@@ -23,6 +23,7 @@ AssetObserverNode::AssetObserverNode(
 	m_parent(parent),
 	m_window(window),
 	m_warmup(window),
+	m_observer_warmup(window),
 	m_observer_type(observer_type)
 {
 	if (parent->getType() != NodeType::ASSET_READ) {
@@ -56,7 +57,7 @@ AssetObserverNode::resetBase() noexcept
 void
 AssetObserverNode::cacheBase() noexcept
 {
-	if (m_exchange.currentIdx() < getWarmup())
+	if (m_exchange.currentIdx() < m_observer_warmup)
 	{
 		m_buffer_idx = (m_buffer_idx + 1) % m_window;
 		return;
@@ -305,7 +306,8 @@ MaxObserverNode::MaxObserverNode(
 ) noexcept :
 	AssetObserverNode(parent, AssetObserverType::MAX, window)
 {
-	setWarmup(parent->getWarmup());
+	setObserverWarmup(parent->getWarmup());
+	setWarmup(parent->getWarmup() + window);
 	m_max.resize(m_exchange.getAssetCount());
 	m_max.setConstant(-std::numeric_limits<double>::max());
 	setObserverBuffer(-std::numeric_limits<double>::max());
