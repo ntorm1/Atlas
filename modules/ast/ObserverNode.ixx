@@ -73,6 +73,8 @@ private:
 
 protected:
 	void setWarmup(size_t warmup) noexcept { m_warmup = warmup; }
+	[[nodiscard]] size_t getBufferIdx() const noexcept { return m_buffer_idx; }
+	[[nodiscard]] auto const& getBufferMatrix() const noexcept { return m_buffer_matrix; }
 	[[nodiscard]] size_t getWindow() const noexcept { return m_window; }
 
 public:
@@ -133,18 +135,18 @@ private:
 	SharedPtr<AssetScalerNode> m_scaler;
 
 public:
+	ATLAS_API MeanObserverNode(
+		SharedPtr<StrategyBufferOpNode> parent,
+		size_t window
+	) noexcept;
+	ATLAS_API ~MeanObserverNode() noexcept;
+
 	[[nodiscard]] size_t hash() const noexcept override;
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
 	[[nodiscard]] size_t refreshWarmup() noexcept override;
-
-	ATLAS_API MeanObserverNode(
-		SharedPtr<StrategyBufferOpNode> parent,
-		size_t window
-	) noexcept;
-	ATLAS_API ~MeanObserverNode() noexcept;
 };
 
 
@@ -156,12 +158,16 @@ private:
 	LinAlg::EigenVectorXd m_max;
 
 public:
-
 	ATLAS_API MaxObserverNode(
 		SharedPtr<StrategyBufferOpNode> parent,
 		size_t window
 	) noexcept;
 	ATLAS_API ~MaxObserverNode() noexcept;
+
+	[[nodiscard]] size_t hash() const noexcept override;
+	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void cacheObserver() noexcept override;
 };
 
 

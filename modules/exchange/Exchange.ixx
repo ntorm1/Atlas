@@ -70,7 +70,7 @@ public:
 	void registerStrategy(Strategy* strategy) noexcept;
 	auto const& getSource() const noexcept{return m_source;}
 	size_t currentIdx() const noexcept;
-
+	Option<SharedPtr<AST::AssetObserverNode>> getObserver(size_t hash) noexcept;
 	Option<SharedPtr<AST::StrategyBufferOpNode>> getSameFromCache(SharedPtr<AST::StrategyBufferOpNode> a) noexcept;
 	EigenMatrixXd const& getData() const noexcept;
 	EigenVectorXd const& getReturnsScalar() const noexcept;

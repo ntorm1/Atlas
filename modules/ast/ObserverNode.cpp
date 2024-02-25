@@ -306,8 +306,84 @@ MaxObserverNode::MaxObserverNode(
 	m_max.setZero();
 }
 
+
+//============================================================================
 MaxObserverNode::~MaxObserverNode() noexcept
 {
+}
+
+
+//============================================================================
+size_t
+MaxObserverNode::hash() const noexcept
+{
+	Uint8 type_hash = static_cast<Uint8>(m_observer_type);
+	size_t hash_value = 17; // Initialize with a prime number
+
+	// Combine hash with member variables
+	hash_value = hash_value * 31 + std::hash<Uint32>{}(static_cast<Uint32>(getWindow()));
+	hash_value = hash_value * 31 + type_hash;
+
+	// Mix the bits to increase entropy
+	hash_value ^= (hash_value >> 16);
+	hash_value *= 0x85ebca6b;
+	hash_value ^= (hash_value >> 13);
+	hash_value *= 0xc2b2ae35;
+	hash_value ^= (hash_value >> 16);
+
+	return hash_value;
+}
+
+
+//============================================================================
+void
+MaxObserverNode::onOutOfRange(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
+) noexcept
+{
+	assert(buffer_old.size() == m_max.size());
+	size_t buffer_idx = getBufferIdx();
+	for (size_t i = 0; i < static_cast<size_t>(m_max.rows()); i++)
+	{
+		if (buffer_old(i) != m_max(i))
+		{
+			continue;
+		}
+		
+		auto const& buffer_matrix = getBufferMatrix();
+		size_t columns = static_cast<size_t>(buffer_matrix.cols());
+		double max = -std::numeric_limits<double>::max();
+		for (size_t j = 0; j < columns; j++)
+		{
+			if (buffer_matrix(i, j) > max && j != buffer_idx)
+			{
+				max = buffer_matrix(i, j);
+			}
+		}
+		m_max(i) = max;
+	}	
+}
+
+
+//============================================================================
+void
+MaxObserverNode::evaluate(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
+) noexcept
+{
+	assert(target.size() == m_max.size());
+	target = m_max;
+}
+
+
+//============================================================================
+void
+MaxObserverNode::cacheObserver() noexcept
+{
+	auto buffer_ref = buffer();
+	m_parent->evaluate(buffer_ref);
+	assert(buffer_ref.size() == m_max.size());
+	m_max = buffer_ref.cwiseMax(m_max);
 }
 
 

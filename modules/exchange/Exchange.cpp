@@ -512,6 +512,19 @@ Exchange::currentIdx() const noexcept
 
 
 //============================================================================
+Option<SharedPtr<AST::AssetObserverNode>>
+Exchange::getObserver(size_t hash) noexcept
+{
+	auto it = m_impl->asset_observers.find(hash);
+	if (it == m_impl->asset_observers.end())
+	{
+		return std::nullopt;
+	}
+	return it->second;
+}
+
+
+//============================================================================
 Option<SharedPtr<AST::StrategyBufferOpNode>>
 Exchange::getSameFromCache(SharedPtr<AST::StrategyBufferOpNode> a) noexcept
 {
