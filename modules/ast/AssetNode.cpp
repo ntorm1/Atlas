@@ -38,7 +38,6 @@ AssetReadNode::AssetReadNode(size_t column, int row_offset, Exchange& exchange) 
 	: StrategyBufferOpNode(NodeType::ASSET_READ, exchange, std::nullopt),
 	m_column(column),
 	m_row_offset(row_offset),
-	m_exchange(exchange),
 	m_warmup(static_cast<size_t>(std::abs(m_row_offset))) 
 {}
 

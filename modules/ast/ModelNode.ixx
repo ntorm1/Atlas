@@ -18,16 +18,20 @@ namespace Atlas
 namespace AST
 {
 
+struct ModelNodeImpl;
+
 export class ModelNode final
 	: public StrategyBufferOpNode
 {
-
 private:
-
+	ModelNodeImpl* m_impl;
 public:
-
+	ModelNode(Exchange& exchange) noexcept;
+	~ModelNode() noexcept;
 
 };
+
+
 
 
 }

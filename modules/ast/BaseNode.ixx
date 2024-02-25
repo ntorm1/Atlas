@@ -28,7 +28,8 @@ export enum class NodeType : Uint8
 	STRATEGY = 13,
 	STRATEGY_RUNNER = 14,
 	TRADE_LIMIT = 15,
-	NOP = 16,
+	MODEL = 16,
+	NOP = 17,
 };
 
 

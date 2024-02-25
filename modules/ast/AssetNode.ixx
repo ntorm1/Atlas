@@ -28,8 +28,6 @@ private:
 	size_t m_column;
 	int m_row_offset;
 	size_t m_warmup;
-	size_t m_null_count = 0;
-	Exchange const& m_exchange;
 
 public:
 	AssetReadNode(size_t column, int row_offset, Exchange& exchange) noexcept;
@@ -53,7 +51,6 @@ public:
 	);
 	
 	[[nodiscard]] int getRowOffset() const noexcept { return m_row_offset; }
-	[[nodiscard]] size_t getNullCount() const noexcept { return m_null_count; }
 	[[nodiscard]] size_t size() const noexcept;
 	[[nodiscard]] size_t getColumn() const noexcept { return m_column; }
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
