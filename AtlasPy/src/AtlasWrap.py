@@ -142,7 +142,7 @@ class VectorBTCompare(unittest.TestCase):
             AssetOpType.SUBTRACT
         )
 
-        close_max = self.exchange.registerObserver(MaxObserverNode(change, n))
+        close_max = self.exchange.registerObserver(MaxObserverNode("change_max",change, n))
         self.exchange.enableNodeCache("close_max",close_max, False)
 
         ev = ExchangeViewNode.make(self.exchange, close)
@@ -168,12 +168,12 @@ class VectorBTCompare(unittest.TestCase):
         slow_n = 200
         close = AssetReadNode.make("Close", 0, self.exchange)
         fast_ma = AssetScalerNode(
-            self.exchange.registerObserver(SumObserverNode(close, fast_n)),
+            self.exchange.registerObserver(SumObserverNode("fast_sum",close, fast_n)),
             AssetOpType.DIVIDE,
             fast_n
         )
         slow_ma = AssetScalerNode(
-            self.exchange.registerObserver(SumObserverNode(close, slow_n)),
+            self.exchange.registerObserver(SumObserverNode("slow_sum",close, slow_n)),
             AssetOpType.DIVIDE,
             slow_n
         )
@@ -196,12 +196,12 @@ class VectorBTCompare(unittest.TestCase):
         slow_n = 200
         close = AssetReadNode.make("Close", 0, self.exchange)
         fast_ma = AssetScalerNode(
-            self.exchange.registerObserver(SumObserverNode(close, fast_n)),
+            self.exchange.registerObserver(SumObserverNode("fast_sum", close, fast_n)),
             AssetOpType.DIVIDE,
             fast_n
         )
         slow_ma = AssetScalerNode(
-            self.exchange.registerObserver(SumObserverNode(close, slow_n)),
+            self.exchange.registerObserver(SumObserverNode("slow_sum",close, slow_n)),
             AssetOpType.DIVIDE,
             slow_n
         )

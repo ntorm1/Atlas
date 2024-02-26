@@ -64,7 +64,8 @@ AssetObserverNode::cacheBase() noexcept
 		m_buffer_idx = (m_buffer_idx + 1) % m_window;
 		return;
 	}
-
+	auto buffer_ref = buffer();
+	m_parent->evaluate(buffer_ref);
 	cacheObserver();
 	if (m_exchange.currentIdx() >= (m_window-1))
 	{
@@ -124,9 +125,7 @@ SumObserverNode::~SumObserverNode() noexcept
 void
 SumObserverNode::cacheObserver() noexcept
 {
-	auto buffer_ref = buffer();
-	m_parent->evaluate(buffer_ref);
-	m_sum += buffer_ref;
+	m_sum += buffer();
 }
 
 
@@ -290,10 +289,7 @@ MaxObserverNode::evaluate(
 void
 MaxObserverNode::cacheObserver() noexcept
 {
-	auto buffer_ref = buffer();
-	m_parent->evaluate(buffer_ref);
-	assert(buffer_ref.size() == m_max.size());
-	m_max = buffer_ref.cwiseMax(m_max);
+	m_max = buffer().cwiseMax(m_max);
 	if (hasCache())
 	{
 		cacheColumn() = m_max;
@@ -307,28 +303,6 @@ MaxObserverNode::reset() noexcept
 {
 	m_max.setConstant(-std::numeric_limits<double>::max());
 	setObserverBuffer(-std::numeric_limits<double>::max());
-}
-
-
-//============================================================================
-TsArgMaxObserverNode::TsArgMaxObserverNode(
-	String id,
-	SharedPtr<StrategyBufferOpNode> parent,
-	size_t window
-) noexcept:
-	AssetObserverNode(std::move(id), parent, AssetObserverType::TS_ARGMAX, window)
-{
-	setObserverWarmup(parent->getWarmup());
-	setWarmup(parent->getWarmup() + window);
-	m_arg_max.resize(m_exchange.getAssetCount());
-	m_arg_max.setConstant(-std::numeric_limits<double>::max());
-	setObserverBuffer(-std::numeric_limits<double>::max());
-}
-
-
-//============================================================================
-TsArgMaxObserverNode::~TsArgMaxObserverNode() noexcept
-{
 }
 
 
@@ -360,6 +334,30 @@ TsArgMaxObserverNode::cacheObserver() noexcept
 //============================================================================
 void
 TsArgMaxObserverNode::reset() noexcept
+{
+	m_arg_max.setConstant(-std::numeric_limits<double>::max());
+	setObserverBuffer(-std::numeric_limits<double>::max());
+}
+
+
+//============================================================================
+TsArgMaxObserverNode::TsArgMaxObserverNode(
+	String id,
+	SharedPtr<StrategyBufferOpNode> parent,
+	size_t window
+) noexcept :
+	AssetObserverNode(std::move(id), parent, AssetObserverType::TS_ARGMAX, window)
+{
+	setObserverWarmup(parent->getWarmup());
+	setWarmup(parent->getWarmup() + window);
+	m_arg_max.resize(m_exchange.getAssetCount());
+	m_arg_max.setConstant(-std::numeric_limits<double>::max());
+	setObserverBuffer(-std::numeric_limits<double>::max());
+}
+
+
+//============================================================================
+TsArgMaxObserverNode::~TsArgMaxObserverNode() noexcept
 {
 }
 
