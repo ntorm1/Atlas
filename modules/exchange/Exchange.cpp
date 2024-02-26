@@ -314,12 +314,12 @@ Exchange::registerTrigger(SharedPtr<AST::TriggerNode>&& trigger) noexcept
 SharedPtr<AST::AssetObserverNode>
 Exchange::registerObserver(SharedPtr<AST::AssetObserverNode> observer) noexcept
 {
-	size_t observer_hash = observer->hash();
-	if (m_impl->asset_observers.count(observer_hash) > 0)
+	auto const& id = observer->getId();
+	if (m_impl->asset_observers.count(id) > 0)
 	{
-		return m_impl->asset_observers[observer_hash];
+		return m_impl->asset_observers[id];
 	}
-	m_impl->asset_observers[observer_hash] = observer;
+	m_impl->asset_observers[id] = observer;
 	return observer;
 }
 
@@ -519,9 +519,9 @@ Exchange::currentIdx() const noexcept
 
 //============================================================================
 Option<SharedPtr<AST::AssetObserverNode>>
-Exchange::getObserver(size_t hash) noexcept
+Exchange::getObserver(String const& id) noexcept
 {
-	auto it = m_impl->asset_observers.find(hash);
+	auto it = m_impl->asset_observers.find(id);
 	if (it == m_impl->asset_observers.end())
 	{
 		return std::nullopt;

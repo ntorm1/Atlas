@@ -31,28 +31,8 @@ export enum class AssetObserverType : Uint8
 	SUM = 0,
 	MEAN = 1,
 	ATR = 2,
-	MAX = 3
-};
-
-
-//============================================================================
-export class AssetScalerNode : public StrategyBufferOpNode
-{
-private:
-	AssetOpType m_op_type;
-	double m_scale;
-	SharedPtr<StrategyBufferOpNode> m_parent;
-
-public:
-	ATLAS_API AssetScalerNode(
-		SharedPtr<StrategyBufferOpNode> parent,
-		AssetOpType op_type,
-		double scale
-	) noexcept;
-	ATLAS_API ~AssetScalerNode() noexcept;
-
-	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
-	[[nodiscard]] size_t getWarmup() const noexcept override { return m_parent->getWarmup(); }
+	MAX = 3,
+	TS_ARGMAX = 4	
 };
 
 
@@ -64,6 +44,11 @@ export class AssetObserverNode
 	friend class GridDimensionObserver;
 	friend class StrategyGrid;
 private:
+	/// <summary>
+	///	Unqiue id of the observer 
+	/// </summary>
+	String m_id;
+
 	/// <summary>
 	/// Warmup of the base StrategyBufferOpNode type. Defines the first step in exchange
 	/// index where the node is valid
@@ -104,6 +89,7 @@ protected:
 
 public:
 	AssetObserverNode(
+		String const& id,
 		SharedPtr<StrategyBufferOpNode> parent,
 		AssetObserverType observer_type,
 		size_t window
@@ -143,11 +129,8 @@ public:
 	[[nodiscard]] size_t getWarmup() const noexcept final override { return m_warmup; }
 	[[nodiscard]] AssetObserverType observerType() const noexcept { return m_observer_type; }
 	[[nodiscard]] size_t window() const noexcept { return m_window; }
-
-	virtual size_t hash() const noexcept = 0;
+	[[nodiscard]] String const& getId() const noexcept { return m_id; }
 	virtual void reset() noexcept = 0;
-
-
 };
 
 
@@ -159,19 +142,21 @@ private:
 	LinAlg::EigenVectorXd m_sum;
 
 public:
-	[[nodiscard]] size_t hash() const noexcept override;
-	[[nodiscard]] size_t refreshWarmup() noexcept override { return getWarmup(); }
+	ATLAS_API SumObserverNode(
+		String id,
+		SharedPtr<StrategyBufferOpNode> parent,
+		size_t window
+	) noexcept;
+	ATLAS_API ~SumObserverNode() noexcept;
 
+
+	[[nodiscard]] size_t refreshWarmup() noexcept override { return getWarmup(); }
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
 
-	ATLAS_API SumObserverNode(
-		SharedPtr<StrategyBufferOpNode> parent,
-		size_t window
-	) noexcept;
-	ATLAS_API ~SumObserverNode() noexcept;
+
 };
 
 
@@ -185,12 +170,12 @@ private:
 
 public:
 	ATLAS_API MeanObserverNode(
+		String id,
 		SharedPtr<StrategyBufferOpNode> parent,
 		size_t window
 	) noexcept;
 	ATLAS_API ~MeanObserverNode() noexcept;
 
-	[[nodiscard]] size_t hash() const noexcept override;
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
@@ -208,12 +193,34 @@ private:
 
 public:
 	ATLAS_API MaxObserverNode(
+		String id,
 		SharedPtr<StrategyBufferOpNode> parent,
 		size_t window
 	) noexcept;
 	ATLAS_API ~MaxObserverNode() noexcept;
 
-	[[nodiscard]] size_t hash() const noexcept override;
+	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void cacheObserver() noexcept override;
+	void reset() noexcept override;
+};
+
+	
+//============================================================================
+export class TsArgMaxObserverNode final
+	: public AssetObserverNode
+{
+private:
+	LinAlg::EigenVectorXd m_arg_max;
+
+public:
+	ATLAS_API TsArgMaxObserverNode(
+		String id,
+		SharedPtr<StrategyBufferOpNode> parent,
+		size_t window
+	) noexcept;
+	ATLAS_API ~TsArgMaxObserverNode() noexcept;
+
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;

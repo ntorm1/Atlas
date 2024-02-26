@@ -185,6 +185,8 @@
     <ClCompile Include="modules\ast\HelperNodes.ixx" />
     <ClCompile Include="modules\ast\Model.cpp" />
     <ClCompile Include="modules\ast\ModelNode.ixx" />
+    <ClCompile Include="modules\ast\NodeFactor.cpp" />
+    <ClCompile Include="modules\ast\NodeFactory.ixx" />
     <ClCompile Include="modules\ast\ObserverNode.ixx" />
     <ClCompile Include="modules\ast\ObserverNode.cpp" />
     <ClCompile Include="modules\ast\Optimize.cpp" />

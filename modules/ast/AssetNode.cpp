@@ -320,6 +320,52 @@ ATRNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 	target = cacheColumn(m_exchange.currentIdx());
 }
 
+
+
+//============================================================================
+AssetScalerNode::AssetScalerNode(
+	SharedPtr<StrategyBufferOpNode> parent,
+	AssetOpType op_type,
+	double scale
+) noexcept :
+	StrategyBufferOpNode(NodeType::ASSET_SCALAR, parent->getExchange(), parent.get()),
+	m_op_type(op_type),
+	m_scale(scale),
+	m_parent(parent)
+{
+}
+
+
+//============================================================================
+AssetScalerNode::~AssetScalerNode() noexcept
+{
+}
+
+
+//============================================================================
+void
+AssetScalerNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
+{
+	m_parent->evaluate(target);
+	switch (m_op_type)
+	{
+	case AssetOpType::ADD:
+		target.array() += m_scale;
+		break;
+	case AssetOpType::SUBTRACT:
+		target.array() -= m_scale;
+		break;
+	case AssetOpType::MULTIPLY:
+		target.array() *= m_scale;
+		break;
+	case AssetOpType::DIVIDE:
+		target.array() /= m_scale;
+		break;
+	}
+}
+
+
+
 }
 
 }

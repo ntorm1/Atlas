@@ -189,6 +189,27 @@ public:
 };
 
 
+//============================================================================
+export class AssetScalerNode : public StrategyBufferOpNode
+{
+private:
+	AssetOpType m_op_type;
+	double m_scale;
+	SharedPtr<StrategyBufferOpNode> m_parent;
+
+public:
+	ATLAS_API AssetScalerNode(
+		SharedPtr<StrategyBufferOpNode> parent,
+		AssetOpType op_type,
+		double scale
+	) noexcept;
+	ATLAS_API ~AssetScalerNode() noexcept;
+
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	[[nodiscard]] size_t getWarmup() const noexcept override { return m_parent->getWarmup(); }
+};
+
+
 }
 
 

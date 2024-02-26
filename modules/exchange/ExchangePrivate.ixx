@@ -68,7 +68,7 @@ public:
 	Vector<Int64> timestamps;
 	Vector<SharedPtr<AST::TriggerNode>> registered_triggers;
 	FastMap<String,SharedPtr<AST::CovarianceNodeBase>> covariance_nodes;
-	FastMap<size_t,SharedPtr<AST::AssetObserverNode>> asset_observers;
+	FastMap<String,SharedPtr<AST::AssetObserverNode>> asset_observers;
 	FastMap<String,SharedPtr<AST::StrategyBufferOpNode>> ast_cache;
 	Vector<Strategy*> registered_strategies;
 	Int64 current_timestamp = 0;

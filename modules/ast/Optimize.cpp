@@ -151,13 +151,16 @@ StrategyGrid::builNodeDim(GridDimensionObserver* observer_dim) noexcept
 {
 	size_t size = observer_dim->size();
 	SharedPtr<AssetObserverNode> const& observer_node = observer_dim->getObserverBase();
+	auto id = observer_node->getId();
 	for (size_t i = 0; i < size; ++i)
 	{
+		auto node_id = std::format("{}_{}", id, i);
 		switch (observer_node->observerType())
 		{
 		case AssetObserverType::SUM:
 		{
 			SharedPtr<SumObserverNode> new_observer = std::make_shared<SumObserverNode>(
+				node_id,
 				observer_node->parent(),
 				static_cast<size_t>(observer_dim->get(i))
 			);
@@ -167,6 +170,7 @@ StrategyGrid::builNodeDim(GridDimensionObserver* observer_dim) noexcept
 		case AssetObserverType::MEAN:
 		{
 			SharedPtr<MeanObserverNode> new_observer = std::make_shared<MeanObserverNode>(
+				node_id,
 				observer_node->parent(),
 				static_cast<size_t>(observer_dim->get(i))
 			);
