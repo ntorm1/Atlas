@@ -300,7 +300,7 @@ PYBIND11_MODULE(AtlasPy, m) {
             py::arg("alloc_param") = py::none(),
             py::arg("epsilon") = 0.000f
         );
-
+    
     py::class_<Atlas::AST::AllocationWeightNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AllocationWeightNode>>(m_ast, "AllocationWeightNode");
 
     py::class_<Atlas::AST::InvVolWeight, Atlas::AST::AllocationWeightNode, std::shared_ptr<Atlas::AST::InvVolWeight>>(m_ast, "InvVolWeight")
@@ -328,6 +328,9 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
 
     py::class_<Atlas::AST::MaxObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::MaxObserverNode>>(m_ast, "MaxObserverNode")
+        .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
+
+    py::class_<Atlas::AST::TsArgMaxObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::TsArgMaxObserverNode>>(m_ast, "TsArgMaxObserverNode")
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
 
     py::class_<Atlas::AST::StrategyGrid, std::shared_ptr<Atlas::AST::StrategyGrid>>(m_ast, "StrategyGrid")

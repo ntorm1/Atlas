@@ -80,11 +80,12 @@ private:
 	SharedPtr<StrategyBufferOpNode> parent() noexcept { return m_parent; }
 
 protected:
+	LinAlg::EigenVectorXd m_signal_copy;
+
 	void setObserverWarmup(size_t warmup) noexcept { m_observer_warmup = warmup; }
 	void setWarmup(size_t warmup) noexcept { m_warmup = warmup; }
 	void setObserverBuffer(double c) noexcept { m_buffer_matrix.setConstant(c); }
 	[[nodiscard]] size_t getBufferIdx() const noexcept { return m_buffer_idx; }
-	[[nodiscard]] auto const& getBufferMatrix() const noexcept { return m_buffer_matrix; }
 	[[nodiscard]] size_t getWindow() const noexcept { return m_window; }
 
 public:
@@ -98,7 +99,9 @@ public:
 
 	SharedPtr<StrategyBufferOpNode> m_parent;
 	AssetObserverType m_observer_type;
-	
+
+	[[nodiscard]] auto const& getBufferMatrix() const noexcept { return m_buffer_matrix; }
+
 	/// <summary>
 	/// Zero out the buffer matrix and call reset on derived implementations
 	/// </summary>
@@ -108,6 +111,9 @@ public:
 	/// On exchange step method is called to update the observer with the new observation
 	/// </summary>
 	void cacheBase() noexcept;
+
+	void enableSignalCopy() noexcept;
+	auto const& getSignalCopy() const noexcept { return m_signal_copy; }
 
 	/// <summary>
 	/// Get a mutable ref into the observers buffer matrix at the current index
@@ -198,19 +204,20 @@ public:
 		size_t window
 	) noexcept;
 	ATLAS_API ~MaxObserverNode() noexcept;
-
+	
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
 };
 
-	
+
 //============================================================================
 export class TsArgMaxObserverNode final
 	: public AssetObserverNode
 {
 private:
+	SharedPtr<MaxObserverNode> m_max_observer;
 	LinAlg::EigenVectorXd m_arg_max;
 
 public:

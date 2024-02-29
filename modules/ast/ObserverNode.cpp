@@ -28,13 +28,7 @@ AssetObserverNode::AssetObserverNode(
 	m_observer_warmup(window),
 	m_observer_type(observer_type)
 {
-	if (parent->getType() != NodeType::ASSET_READ) {
-		m_buffer_matrix.resize(m_exchange.getAssetCount(), window);
-	}
-	else {
-		m_buffer_matrix.resize(m_exchange.getAssetCount(), 1);
-
-	}
+	m_buffer_matrix.resize(m_exchange.getAssetCount(), window);
 	m_buffer_matrix.setZero();
 }
 
@@ -69,36 +63,23 @@ AssetObserverNode::cacheBase() noexcept
 	cacheObserver();
 	if (m_exchange.currentIdx() >= (m_window-1))
 	{
-		if (m_parent->getType() != NodeType::ASSET_READ) {
-			onOutOfRange(m_buffer_matrix.col(m_buffer_idx));
-			m_buffer_idx = (m_buffer_idx + 1) % m_window;
-		}
-		else {
-			auto node = static_cast<AssetReadNode*>(m_parent.get());
-			int row_offset = -1 * static_cast<int>(m_window);
-			auto slice = m_exchange.getSlice(node->getColumn(), row_offset);
-			onOutOfRange(slice);
-		}
+
+
+		m_buffer_idx = (m_buffer_idx + 1) % m_window;
+		onOutOfRange(m_buffer_matrix.col(m_buffer_idx));
 	}
 }
+
+
+
 
 //============================================================================
 LinAlg::EigenRef<LinAlg::EigenVectorXd>
 AssetObserverNode::buffer() noexcept
 {
 	size_t col = 0;
-	if (m_parent->getType() != NodeType::ASSET_READ) {
-		if (m_buffer_idx == 0)
-		{
-			col = m_window - 1;
-		}
-		else
-		{
-			col = m_buffer_idx - 1;
-		}
-	}
-	assert(col < static_cast<size_t>(m_buffer_matrix.cols()));
-	return m_buffer_matrix.col(col);
+	assert(m_buffer_idx < static_cast<size_t>(m_buffer_matrix.cols()));
+	return m_buffer_matrix.col(m_buffer_idx);
 }
 
 
@@ -113,6 +94,16 @@ SumObserverNode::SumObserverNode(
 	m_sum.resize(m_exchange.getAssetCount());
 	m_sum.setZero();
 }
+
+
+//============================================================================
+void
+AssetObserverNode::enableSignalCopy() noexcept
+{
+	m_signal_copy.resize(m_exchange.getAssetCount());
+	m_signal_copy.setConstant(-std::numeric_limits<double>::max());
+}
+
 
 
 //============================================================================
@@ -250,6 +241,10 @@ MaxObserverNode::onOutOfRange(
 {
 	assert(buffer_old.size() == m_max.size());
 	size_t buffer_idx = getBufferIdx();
+	if (m_signal_copy.size() > 0)
+	{
+		m_signal_copy = m_max;
+	}
 	for (size_t i = 0; i < static_cast<size_t>(m_max.rows()); i++)
 	{
 		// Check if the column going out of range holds the max value for the row
@@ -308,31 +303,6 @@ MaxObserverNode::reset() noexcept
 
 //============================================================================
 void
-TsArgMaxObserverNode::onOutOfRange(
-	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
-) noexcept
-{
-}
-
-
-//============================================================================
-void
-TsArgMaxObserverNode::evaluate(
-	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
-) noexcept
-{
-}
-
-
-//============================================================================
-void
-TsArgMaxObserverNode::cacheObserver() noexcept
-{
-}
-
-
-//============================================================================
-void
 TsArgMaxObserverNode::reset() noexcept
 {
 	m_arg_max.setConstant(-std::numeric_limits<double>::max());
@@ -348,17 +318,88 @@ TsArgMaxObserverNode::TsArgMaxObserverNode(
 ) noexcept :
 	AssetObserverNode(std::move(id), parent, AssetObserverType::TS_ARGMAX, window)
 {
+	auto max_id = id + "_max_";
+	auto max = std::make_shared<MaxObserverNode>(max_id, parent, window);
+	m_max_observer = std::dynamic_pointer_cast<MaxObserverNode>(m_exchange.registerObserver(std::move(max)));
+	m_max_observer->enableSignalCopy();
 	setObserverWarmup(parent->getWarmup());
 	setWarmup(parent->getWarmup() + window);
 	m_arg_max.resize(m_exchange.getAssetCount());
-	m_arg_max.setConstant(-std::numeric_limits<double>::max());
-	setObserverBuffer(-std::numeric_limits<double>::max());
+	m_arg_max.setConstant(0);
+	setObserverBuffer(0);
 }
+
+
+
 
 
 //============================================================================
 TsArgMaxObserverNode::~TsArgMaxObserverNode() noexcept
 {
+}
+
+
+//============================================================================
+void
+TsArgMaxObserverNode::cacheObserver() noexcept
+{
+	auto const& buffer_matrix = m_max_observer->getBufferMatrix();
+	auto v = static_cast<double>(getWindow());
+	m_arg_max = (
+		buffer_matrix.col(getBufferIdx()).array() == m_max_observer->getSignalCopy().array()
+		).select(v, m_arg_max.array()-1);
+	if (hasCache())
+		cacheColumn() = m_arg_max;
+}
+
+
+//============================================================================
+void
+TsArgMaxObserverNode::onOutOfRange(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
+) noexcept
+{
+	size_t buffer_idx = getBufferIdx();
+	size_t window = getWindow();
+	auto const& buffer_matrix = m_max_observer->getBufferMatrix();
+	size_t columns = static_cast<size_t>(buffer_matrix.cols());
+	for (size_t i = 0; i < static_cast<size_t>(m_arg_max.rows()); i++)
+	{
+		auto const& row = buffer_matrix.row(i);
+		// Column going out of range is the argmax if the value is equal to the window, 
+		// otherwise it is not the argmax and we can skip it
+		auto old = m_arg_max(i);
+		if (old > 1)
+		{
+			continue;
+		}
+
+		// get the max coefficient from the buffer row
+		double max = -std::numeric_limits<double>::max();
+		size_t max_idx = 0;
+		for (size_t j = 0; j < columns; j++)
+		{
+			if (row(j) > max)
+			{
+				max = row(j);
+				max_idx = j;
+			}
+		}
+		max_idx = (max_idx - buffer_idx + window) % window;
+		max_idx += 1;
+		m_arg_max(i) = static_cast<double>(max_idx);
+		cacheColumn()(i) = m_arg_max(i);
+	}
+}
+
+
+//============================================================================
+void
+TsArgMaxObserverNode::evaluate(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
+) noexcept
+{
+	target = m_arg_max;
 }
 
 
