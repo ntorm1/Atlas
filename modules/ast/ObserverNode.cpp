@@ -63,8 +63,6 @@ AssetObserverNode::cacheBase() noexcept
 	cacheObserver();
 	if (m_exchange.currentIdx() >= (m_window-1))
 	{
-
-
 		m_buffer_idx = (m_buffer_idx + 1) % m_window;
 		onOutOfRange(m_buffer_matrix.col(m_buffer_idx));
 	}
