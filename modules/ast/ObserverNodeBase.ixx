@@ -33,6 +33,7 @@ export enum class AssetObserverType : Uint8
 	MAX = 3,
 	TS_ARGMAX = 4,
 	VARIANCE = 5,
+	COVARIANCE= 6,
 };
 
 

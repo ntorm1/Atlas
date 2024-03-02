@@ -129,6 +129,32 @@ public:
 };
 
 
+//============================================================================
+export class CovarianceObserverNode final
+	: public AssetObserverNode
+{
+private:
+	SharedPtr<StrategyBufferOpNode> m_right_parent;
+	SharedPtr<SumObserverNode> m_left_sum_observer;
+	SharedPtr<SumObserverNode> m_right_sum_observer;
+	SharedPtr<SumObserverNode> m_cross_sum_observer;
+public:
+	ATLAS_API CovarianceObserverNode(
+		Option<String> id,
+		SharedPtr<StrategyBufferOpNode> left_parent,
+		SharedPtr<StrategyBufferOpNode> right_parent,
+		size_t window
+	) noexcept;
+	ATLAS_API ~CovarianceObserverNode() noexcept;
+
+	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void cacheObserver() noexcept override;
+	void reset() noexcept override;
+
+};
+
+
 }
 
 }

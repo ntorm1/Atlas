@@ -69,7 +69,12 @@ AssetObserverNode::cacheBase() noexcept
 	}
 	auto buffer_ref = buffer();
 	m_parent->evaluate(buffer_ref);
+	
 	cacheObserver();
+	
+	if (hasCache() && m_exchange.currentIdx() >= (m_window - 1))
+		cacheColumn() = m_signal;
+
 	m_buffer_idx = (m_buffer_idx + 1) % m_window;
 	
 	if (m_signal_copy.size() > 0)
