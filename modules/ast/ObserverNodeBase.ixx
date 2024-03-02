@@ -6,7 +6,6 @@ module;
 #else
 #define ATLAS_API  __declspec(dllimport)
 #endif
-#include <Eigen/Dense>
 export module ObserverNodeBaseModule;
 
 
@@ -86,7 +85,7 @@ protected:
 
 	void setObserverWarmup(size_t warmup) noexcept { m_observer_warmup = warmup; }
 	void setWarmup(size_t warmup) noexcept { m_warmup = warmup; }
-	void setObserverBuffer(double c) noexcept { m_buffer_matrix.setConstant(c); }
+	void setObserverBuffer(double c) noexcept;
 	[[nodiscard]] size_t getBufferIdx() const noexcept { return m_buffer_idx; }
 	[[nodiscard]] size_t getWindow() const noexcept { return m_window; }
 

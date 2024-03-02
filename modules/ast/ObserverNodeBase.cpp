@@ -41,7 +41,15 @@ AssetObserverNode::~AssetObserverNode() noexcept
 
 //============================================================================
 void
-	AssetObserverNode::resetBase() noexcept
+AssetObserverNode::setObserverBuffer(double c) noexcept
+{
+	m_buffer_matrix.setConstant(c);
+}
+
+
+//============================================================================
+void
+AssetObserverNode::resetBase() noexcept
 {
 	m_buffer_matrix.setZero();
 	m_buffer_idx = 0;
