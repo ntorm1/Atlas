@@ -49,9 +49,9 @@ protected:
 
 public:
 	virtual ~StrategyBufferOpNode() = default;
-	virtual bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept { return false; }
 	virtual void reset() noexcept {}
 	virtual size_t refreshWarmup() noexcept {return 0;}
+	virtual [[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept = 0;
 	[[nodiscard]] size_t getAssetCount() const noexcept;
 	[[nodiscard]] Option<AllocationBaseNode*> getAllocationNode() const noexcept;
 	[[nodiscard]] Exchange& getExchange() noexcept {return m_exchange;}
@@ -71,6 +71,7 @@ public:
 	ATLAS_API ~DummyNode() noexcept {}
 
 	[[nodiscard]] size_t getWarmup() const noexcept override { return 0; }
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override { return false; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override {}
 };
 
@@ -89,6 +90,7 @@ public:
 	ATLAS_API ~LagNode() noexcept {}
 
 	ATLAS_API [[nodiscard]] size_t getWarmup() const noexcept override;
+	ATLAS_API [[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 	ATLAS_API void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 

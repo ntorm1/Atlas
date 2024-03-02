@@ -232,8 +232,8 @@ Exchange::reset() noexcept
 			m_impl->asset_observers.begin(),
 			m_impl->asset_observers.end(),
 			[](const auto& observer) {
-				if (observer.second.use_count() > 1) {
-					observer.second->reset();
+				if (observer.use_count() > 1) {
+					observer->reset();
 					return false;
 				}
 				return true;
@@ -284,7 +284,7 @@ Exchange::step(Int64 global_time) noexcept
 	std::for_each(
 		m_impl->asset_observers.begin(),
 		m_impl->asset_observers.end(), 
-		[](auto& observer) { observer.second->cacheBase(); }
+		[](auto& observer) { observer->cacheBase(); }
 	);
 
 	// cache the scalar returns used for evaluating portfolio
@@ -315,11 +315,14 @@ SharedPtr<AST::AssetObserverNode>
 Exchange::registerObserver(SharedPtr<AST::AssetObserverNode> observer) noexcept
 {
 	auto const& id = observer->getId();
-	if (m_impl->asset_observers.count(id) > 0)
+	for (auto const& node : m_impl->asset_observers)
 	{
-		return m_impl->asset_observers[id];
+		if (node->isSame(observer))
+		{
+			return observer;
+		}
 	}
-	m_impl->asset_observers[id] = observer;
+	m_impl->asset_observers.push_back(observer);
 	return observer;
 }
 
@@ -521,12 +524,14 @@ Exchange::currentIdx() const noexcept
 Option<SharedPtr<AST::AssetObserverNode>>
 Exchange::getObserver(String const& id) noexcept
 {
-	auto it = m_impl->asset_observers.find(id);
-	if (it == m_impl->asset_observers.end())
+	for (auto const& node : m_impl->asset_observers)
 	{
-		return std::nullopt;
+		if (node->getId() == id)
+		{
+			return node;
+		}
 	}
-	return it->second;
+	return std::nullopt;
 }
 
 

@@ -53,6 +53,7 @@ public:
 	[[nodiscard]] int getRowOffset() const noexcept { return m_row_offset; }
 	[[nodiscard]] size_t size() const noexcept;
 	[[nodiscard]] size_t getColumn() const noexcept { return m_column; }
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
@@ -72,6 +73,7 @@ private:
 public:
 	auto& getLeft() noexcept { return m_asset_op_left; }
 	auto& getRight() noexcept { return m_asset_op_right; }
+	auto& getOpType() noexcept { return m_op_type; }
 
 	virtual ~AssetOpNode() noexcept = default;
 
@@ -114,6 +116,7 @@ public:
 	ATLAS_API static void swapRight(SharedPtr<ASTNode> asset_op, SharedPtr<StrategyBufferOpNode>& right) noexcept;
 	ATLAS_API uintptr_t getSwapLeft() const noexcept { return reinterpret_cast<uintptr_t>(&AssetOpNode::swapLeft);}
 	ATLAS_API uintptr_t getSwapRight() const noexcept { return reinterpret_cast<uintptr_t>(&AssetOpNode::swapRight);}
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
@@ -125,10 +128,12 @@ export class AssetMedianNode
 private:
 	size_t m_col_1;
 	size_t m_col_2;
-
 	AssetMedianNode(SharedPtr<Exchange> exchange, size_t col_1, size_t col_2) noexcept;
 
 public:
+	size_t getCol1() const noexcept { return m_col_1; }
+	size_t getCol2() const noexcept { return m_col_2; }
+
 	template<typename ...Arg> SharedPtr<AssetMedianNode>
 	static make(Arg&&...arg) {
 		struct EnableMakeShared : public AssetMedianNode {
@@ -141,8 +146,8 @@ public:
 	ATLAS_API ~AssetMedianNode() noexcept;
 
 	[[nodiscard]] size_t getWarmup() const noexcept override { return 0; }
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
-
 };
 
 
@@ -206,6 +211,35 @@ public:
 	ATLAS_API ~AssetScalerNode() noexcept;
 
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	[[nodiscard]] auto const& getParent() const noexcept { return m_parent; }
+	[[nodiscard]] AssetOpType getOpType() const noexcept { return m_op_type; }
+	[[nodiscard]] double getScale() const noexcept { return m_scale; }
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+	[[nodiscard]] size_t getWarmup() const noexcept override { return m_parent->getWarmup(); }
+};
+
+
+//============================================================================
+export class AssetFunctionNode : public StrategyBufferOpNode
+{
+private:
+	AssetFunctionType m_func_type;
+	SharedPtr<StrategyBufferOpNode> m_parent;
+	Option<double> m_func_param;	
+
+public:
+	ATLAS_API AssetFunctionNode(
+		SharedPtr<StrategyBufferOpNode> parent,
+		AssetFunctionType func_type,
+		Option<double> m_func_param = std::nullopt
+	) noexcept;
+	ATLAS_API ~AssetFunctionNode() noexcept;
+
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	[[nodiscard]] auto const& getParent() const noexcept { return m_parent; }
+	[[nodiscard]] AssetFunctionType getFuncType() const noexcept { return m_func_type; }
+	[[nodiscard]] Option<double> getFuncParam() const noexcept { return m_func_param; }
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_parent->getWarmup(); }
 };
 

@@ -15,7 +15,7 @@ namespace AST
 
 //============================================================================
 AssetObserverNode::AssetObserverNode(
-	String const& id,
+	Option<String> name,
 	SharedPtr<StrategyBufferOpNode> parent,
 	AssetObserverType observer_type,
 	size_t window
@@ -24,7 +24,7 @@ AssetObserverNode::AssetObserverNode(
 	m_parent(parent),
 	m_window(window),
 	m_warmup(window),
-	m_id(id),
+	m_id(name),
 	m_observer_warmup(window),
 	m_observer_type(observer_type)
 {
@@ -63,15 +63,14 @@ AssetObserverNode::cacheBase() noexcept
 {
 	if (m_exchange.currentIdx() < m_observer_warmup)
 	{
-		m_buffer_idx = (m_buffer_idx + 1) % m_window;
 		return;
 	}
 	auto buffer_ref = buffer();
 	m_parent->evaluate(buffer_ref);
 	cacheObserver();
+	m_buffer_idx = (m_buffer_idx + 1) % m_window;
 	if (m_exchange.currentIdx() >= (m_window - 1))
 	{
-		m_buffer_idx = (m_buffer_idx + 1) % m_window;
 		onOutOfRange(m_buffer_matrix.col(m_buffer_idx));
 	}
 }
@@ -86,6 +85,22 @@ AssetObserverNode::buffer() noexcept
 	size_t col = 0;
 	assert(m_buffer_idx < static_cast<size_t>(m_buffer_matrix.cols()));
 	return m_buffer_matrix.col(m_buffer_idx);
+}
+
+
+//============================================================================
+bool
+AssetObserverNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+	if (other->getType() != NodeType::ASSET_OBSERVER)
+	{
+		return false;
+	}
+	auto ptr = static_cast<AssetObserverNode*>(other.get());
+
+	return m_parent == other &&
+		m_observer_type == ptr->getObserverType() &&
+		m_window == ptr->getWindow();
 }
 
 

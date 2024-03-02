@@ -34,6 +34,17 @@ AssetIfNode::~AssetIfNode() noexcept
 
 
 //============================================================================
+bool
+AssetIfNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+	if (other->getType() != NodeType::ASSET_IF)
+		return false;
+	auto ptr = static_cast<AssetIfNode*>(other.get());
+	return m_left_eval->isSame(ptr->m_left_eval) && m_right_eval->isSame(ptr->m_right_eval) && m_comp_type == ptr->m_comp_type;
+}
+
+
+//============================================================================
 void
 AssetIfNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
@@ -114,6 +125,23 @@ AssetCompNode::evaluate(
 	}
 	if (hasCache())
 		cacheColumn() = target;
+}
+
+
+//============================================================================
+bool
+AssetCompNode::isSame(
+	SharedPtr<StrategyBufferOpNode> other
+) const noexcept
+{
+	if (other->getType() != NodeType::ASSET_COMP)
+		return false;
+	auto ptr = static_cast<AssetCompNode*>(other.get());
+	return m_left_eval->isSame(ptr->getLeftEval()) &&
+		m_right_eval->isSame(ptr->getRightEval()) &&
+		m_true_eval->isSame(ptr->getTrueEval()) &&
+		m_false_eval->isSame(ptr->getFalseEval()) &&
+		m_logical_type == ptr->getLogicalType();
 }
 
 

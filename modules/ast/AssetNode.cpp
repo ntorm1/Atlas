@@ -12,11 +12,34 @@ namespace AST
 {
 
 //============================================================================
+AssetReadNode::AssetReadNode(size_t column, int row_offset, Exchange& exchange) noexcept
+	: StrategyBufferOpNode(NodeType::ASSET_READ, exchange, std::nullopt),
+	m_column(column),
+	m_row_offset(row_offset),
+	m_warmup(static_cast<size_t>(std::abs(m_row_offset)))
+{}
+
+
+//============================================================================
 size_t
 AssetReadNode::size() const noexcept
 {
 	return m_exchange.getAssetCount();
 }
+
+
+//============================================================================
+bool
+AssetReadNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+	if (other->getType() != NodeType::ASSET_READ)
+	{
+		return false;
+	}
+	auto node = static_cast<AssetReadNode*>(other.get());
+	return m_column == node->getColumn() && m_row_offset == node->getRowOffset();
+}
+
 
 //============================================================================
 void
@@ -31,15 +54,6 @@ AssetReadNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 	assert(static_cast<size_t>(target.cols()) == 1);
 	target = slice;
 }
-
-
-//============================================================================
-AssetReadNode::AssetReadNode(size_t column, int row_offset, Exchange& exchange) noexcept
-	: StrategyBufferOpNode(NodeType::ASSET_READ, exchange, std::nullopt),
-	m_column(column),
-	m_row_offset(row_offset),
-	m_warmup(static_cast<size_t>(std::abs(m_row_offset))) 
-{}
 
 
 //============================================================================
@@ -143,6 +157,20 @@ AssetOpNode::refreshWarmup() noexcept
 }
 
 
+//============================================================================
+bool
+AssetOpNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+	if (other->getType() != NodeType::ASSET_OP)
+	{
+		return false;
+	}
+	auto other_asset_op = static_cast<AssetOpNode*>(other.get());
+	return m_op_type == other_asset_op->getOpType() &&
+		m_asset_op_left->isSame(other_asset_op->getLeft()) &&
+		m_asset_op_right->isSame(other_asset_op->getRight());
+}
+
 void
 AssetOpNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
@@ -198,6 +226,19 @@ AssetMedianNode::pyMake(SharedPtr<Exchange> exchange, String const& col_1, Strin
 //============================================================================
 AssetMedianNode::~AssetMedianNode() noexcept
 {
+}
+
+
+//============================================================================
+bool
+AssetMedianNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+	if (other->getType() != NodeType::ASSET_MEDIAN)
+	{
+		return false;
+	}
+	auto other_median = static_cast<AssetMedianNode*>(other.get());
+	return m_col_1 == other_median->getCol1() && m_col_2 == other_median->getCol2();
 }
 
 
@@ -364,6 +405,83 @@ AssetScalerNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexce
 	}
 }
 
+
+//============================================================================
+bool
+AssetScalerNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+	if (other->getType() != NodeType::ASSET_SCALAR)
+	{
+		return false;
+	}
+	auto other_scaler = static_cast<AssetScalerNode*>(other.get());
+	return m_op_type == other_scaler->getOpType() &&
+		m_scale == other_scaler->getScale() &&
+		m_parent->isSame(other_scaler->getParent());
+}
+
+
+//============================================================================
+AssetFunctionNode::AssetFunctionNode(
+	SharedPtr<StrategyBufferOpNode> parent,
+	AssetFunctionType func_type,
+	Option<double> func_param
+) noexcept :
+	StrategyBufferOpNode(NodeType::ASSET_FUNCTION, parent->getExchange(), parent.get()),
+	m_func_type(func_type),
+	m_parent(parent),
+	m_func_param(func_param)
+{
+}
+
+
+//============================================================================
+AssetFunctionNode::~AssetFunctionNode() noexcept
+{
+}
+
+
+//============================================================================
+void
+AssetFunctionNode::evaluate(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
+) noexcept
+{
+	m_parent->evaluate(target);
+	switch (m_func_type)
+	{
+	case AssetFunctionType::ABS:
+		target = target.array().abs();
+		break;
+	case AssetFunctionType::SIGN:
+		target = target.array().sign();
+		break;
+	case AssetFunctionType::POWER:
+		assert(m_func_param);
+		target = target.array().pow(m_func_param.value());
+		break;
+	case AssetFunctionType::LOG:
+		target = target.array().log();
+		break;
+	}
+	if (hasCache())
+		cacheColumn() = target;
+}
+
+
+//============================================================================
+bool
+AssetFunctionNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+	if (other->getType() != NodeType::ASSET_FUNCTION)
+	{
+		return false;
+	}
+	auto other_func = static_cast<AssetFunctionNode*>(other.get());
+	return m_func_type == other_func->getFuncType() &&
+		m_func_param == other_func->getFuncParam() &&
+		m_parent->isSame(other_func->getParent());
+}
 
 
 }

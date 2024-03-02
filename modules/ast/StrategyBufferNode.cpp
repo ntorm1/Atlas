@@ -126,12 +126,13 @@ LagNode::LagNode(
 	StrategyBufferOpNode* parent,
 	size_t lag
 ) noexcept :
-	StrategyBufferOpNode(NodeType::NOP, parent->getExchange(), parent),
+	StrategyBufferOpNode(NodeType::LAG, parent->getExchange(), parent),
 	m_lag(lag),
 	m_parent(parent)
 {
 	assert(parent->cache().cols() > 1);
 }
+
 
 
 //============================================================================
@@ -153,6 +154,19 @@ size_t
 LagNode::getWarmup() const noexcept
 {
 	return m_parent->getWarmup() + m_lag;
+}
+
+
+//============================================================================
+bool
+LagNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+	if (other->getType() != NodeType::LAG)
+	{
+		return false;
+	}
+	auto other_lag = static_cast<LagNode*>(other.get());
+	return m_lag == other_lag->m_lag;
 }
 
 

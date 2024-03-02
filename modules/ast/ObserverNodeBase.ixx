@@ -31,7 +31,8 @@ export enum class AssetObserverType : Uint8
 	MEAN = 1,
 	ATR = 2,
 	MAX = 3,
-	TS_ARGMAX = 4
+	TS_ARGMAX = 4,
+	VARIANCE = 5,
 };
 
 
@@ -45,10 +46,7 @@ export class AssetObserverNode
 	friend class GridDimensionObserver;
 	friend class StrategyGrid;
 private:
-	/// <summary>
-	///	Unqiue id of the observer 
-	/// </summary>
-	String m_id;
+	Option<String> m_id = std::nullopt;
 
 	/// <summary>
 	/// Warmup of the base StrategyBufferOpNode type. Defines the first step in exchange
@@ -91,7 +89,7 @@ protected:
 
 public:
 	AssetObserverNode(
-		String const& id,
+		Option<String> name,
 		SharedPtr<StrategyBufferOpNode> parent,
 		AssetObserverType observer_type,
 		size_t window
@@ -114,6 +112,7 @@ public:
 	void cacheBase() noexcept;
 
 	void enableSignalCopy() noexcept;
+
 	auto const& getSignalCopy() const noexcept { return m_signal_copy; }
 
 	/// <summary>
@@ -133,11 +132,16 @@ public:
 	/// </summary>
 	virtual void cacheObserver() noexcept = 0;
 
-	[[nodiscard]] size_t getWarmup() const noexcept final override { return m_warmup; }
-	[[nodiscard]] AssetObserverType observerType() const noexcept { return m_observer_type; }
-	[[nodiscard]] size_t window() const noexcept { return m_window; }
-	[[nodiscard]] String const& getId() const noexcept { return m_id; }
+	/// <summary>
+	/// Pur virtual method defining the observer's reset method called on exchange reset
+	/// </summary>
 	virtual void reset() noexcept = 0;
+
+	[[nodiscard]] auto const& getId() const noexcept { return m_id; }
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept final override;
+	[[nodiscard]] size_t getWarmup() const noexcept final override { return m_warmup; }
+	[[nodiscard]] AssetObserverType getObserverType() const noexcept { return m_observer_type; }
+	[[nodiscard]] size_t window() const noexcept { return m_window; }
 };
 
 

@@ -43,6 +43,7 @@ public:
 	ATLAS_API void swapLeftEval(SharedPtr<StrategyBufferOpNode> left_eval) noexcept;
 
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
@@ -76,7 +77,13 @@ public:
 	ATLAS_API void swapTrueEval(SharedPtr<StrategyBufferOpNode> true_eval) noexcept;
 	ATLAS_API void swapFalseEval(SharedPtr<StrategyBufferOpNode> false_eval) noexcept;
 
+	[[nodiscard]] auto const& getRightEval() const noexcept { return m_right_eval; }
+	[[nodiscard]] auto const& getLeftEval() const noexcept { return m_left_eval; }
+	[[nodiscard]] auto const& getTrueEval() const noexcept { return m_true_eval; }
+	[[nodiscard]] auto const& getFalseEval() const noexcept { return m_false_eval; }
+	[[nodiscard]] LogicalType getLogicalType() const noexcept { return m_logical_type; }
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 

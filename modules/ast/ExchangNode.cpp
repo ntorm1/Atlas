@@ -53,6 +53,14 @@ ExchangeViewNode::refreshWarmup() noexcept
 
 
 //============================================================================
+bool
+ExchangeViewNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+    return false; //TODO 
+}
+
+
+//============================================================================
 void
 ExchangeViewNode::filter(LinAlg::EigenRef<LinAlg::EigenVectorXd> view) const noexcept
 {

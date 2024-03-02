@@ -31,7 +31,7 @@ private:
 
 public:
 	ATLAS_API SumObserverNode(
-		String id,
+		Option<String> id,
 		SharedPtr<StrategyBufferOpNode> parent,
 		size_t window
 	) noexcept;
@@ -43,8 +43,6 @@ public:
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
-
-
 };
 
 
@@ -58,7 +56,7 @@ private:
 
 public:
 	ATLAS_API MeanObserverNode(
-		String id,
+		Option<String> id,
 		SharedPtr<StrategyBufferOpNode> parent,
 		size_t window
 	) noexcept;
@@ -81,7 +79,7 @@ private:
 
 public:
 	ATLAS_API MaxObserverNode(
-		String id,
+		Option<String> id,
 		SharedPtr<StrategyBufferOpNode> parent,
 		size_t window
 	) noexcept;
@@ -104,11 +102,36 @@ private:
 
 public:
 	ATLAS_API TsArgMaxObserverNode(
-		String id,
+		Option<String> id,
 		SharedPtr<StrategyBufferOpNode> parent,
 		size_t window
 	) noexcept;
 	ATLAS_API ~TsArgMaxObserverNode() noexcept;
+
+	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void cacheObserver() noexcept override;
+	void reset() noexcept override;
+};
+
+
+//============================================================================
+export class VarianceObserverNode final
+	: public AssetObserverNode
+{
+private:
+	SharedPtr<MeanObserverNode> m_mean_observer;
+	SharedPtr<SumObserverNode> m_sum_squared_observer;
+	LinAlg::EigenVectorXd m_variance;
+	LinAlg::EigenVectorXd m_sum_squared_cache;
+
+public:
+	ATLAS_API VarianceObserverNode(
+		Option<String> id,
+		SharedPtr<StrategyBufferOpNode> parent,
+		size_t window
+	) noexcept;
+	ATLAS_API ~VarianceObserverNode() noexcept;
 
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;

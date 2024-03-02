@@ -161,6 +161,13 @@ PYBIND11_MODULE(AtlasPy, m) {
         .value("ORDERS_EAGER", Atlas::TracerType::ORDERS_EAGER)
         .export_values();
 
+    py::enum_<Atlas::AST::AssetFunctionType>(m_ast, "AssetFunctionType")
+        .value("SIGN", Atlas::AST::AssetFunctionType::SIGN)
+        .value("POWER", Atlas::AST::AssetFunctionType::POWER)
+        .value("ABS", Atlas::AST::AssetFunctionType::ABS)
+        .value("LOG", Atlas::AST::AssetFunctionType::LOG)
+        .export_values();
+
     // ======= AST API ======= //
     py::enum_<Atlas::AST::ExchangeViewFilterType>(m_ast, "ExchangeViewFilterType")
         .value("GREATER_THAN", Atlas::AST::ExchangeViewFilterType::GREATER_THAN)
@@ -322,6 +329,9 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::AssetScalerNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetScalerNode>>(m_ast, "AssetScalerNode")
        .def(py::init<std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, Atlas::AST::AssetOpType, double>());
 
+    py::class_<Atlas::AST::AssetFunctionNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetFunctionNode>>(m_ast, "AssetFunctionNode")
+        .def(py::init<std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, Atlas::AST::AssetFunctionType, std::optional<double>>());
+
     py::class_<Atlas::AST::SumObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::SumObserverNode>>(m_ast, "SumObserverNode")
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
 
@@ -332,6 +342,10 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
 
     py::class_<Atlas::AST::TsArgMaxObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::TsArgMaxObserverNode>>(m_ast, "TsArgMaxObserverNode")
+        .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
+
+
+    py::class_<Atlas::AST::VarianceObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::VarianceObserverNode>>(m_ast, "VarianceObserverNode")
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
 
     py::class_<Atlas::AST::StrategyGrid, std::shared_ptr<Atlas::AST::StrategyGrid>>(m_ast, "StrategyGrid")

@@ -149,9 +149,10 @@ public:
 		SharedPtr<CovarianceNodeBase> covariance,
 		Option<double> vol_target = std::nullopt
 	) noexcept;
-	
+
 	size_t getWarmup() const noexcept override { return m_covariance->getWarmup(); }
-	void evaluate( LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override { return false; }
 };
 
 

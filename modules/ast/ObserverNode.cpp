@@ -18,14 +18,16 @@ namespace AST
 
 //============================================================================
 SumObserverNode::SumObserverNode(
-	String id,
+	Option<String> id,
 	SharedPtr<StrategyBufferOpNode> parent,
 	size_t window
 ) noexcept:
-	AssetObserverNode(std::move(id),parent, AssetObserverType::SUM, window)
+	AssetObserverNode(id, parent, AssetObserverType::SUM, window)
 {
 	m_sum.resize(m_exchange.getAssetCount());
 	m_sum.setZero();
+	setObserverWarmup(parent->getWarmup());
+	setWarmup(parent->getWarmup() + window - 1);
 }
 
 
@@ -41,6 +43,8 @@ void
 SumObserverNode::cacheObserver() noexcept
 {
 	m_sum += buffer();
+	if (hasCache() && m_exchange.currentIdx() >= (getWindow() - 1))
+		cacheColumn() = m_sum;
 }
 
 
@@ -56,6 +60,8 @@ SumObserverNode::reset() noexcept
 void
 SumObserverNode::onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept
 {
+	if (m_signal_copy.size())
+		m_signal_copy = m_sum;
 	m_sum -= buffer_old;
 }
 
@@ -80,7 +86,6 @@ MeanObserverNode::~MeanObserverNode() noexcept
 void
 MeanObserverNode::onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept
 {
-	m_sum_observer->onOutOfRange(buffer_old);
 }
 
 
@@ -95,7 +100,6 @@ MeanObserverNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexc
 void
 MeanObserverNode::cacheObserver() noexcept
 {
-	m_sum_observer->cacheObserver();
 }
 
 
@@ -118,13 +122,17 @@ MeanObserverNode::refreshWarmup() noexcept
 
 //============================================================================
 MeanObserverNode::MeanObserverNode(
-	String id,
+	Option<String> id,
 	SharedPtr<StrategyBufferOpNode> parent,
 	size_t window
 ) noexcept :
-	AssetObserverNode(std::move(id), parent, AssetObserverType::MEAN, window)
+	AssetObserverNode(id, parent, AssetObserverType::MEAN, window)
 {
-	auto sum_id = id + "_sum";
+	Option<String> sum_id = std::nullopt;
+	if (id.has_value())
+	{
+		sum_id = id.value() + "_sum_";
+	}
 	auto sum = std::make_shared<SumObserverNode>(sum_id, parent, window);
 	m_sum_observer = std::dynamic_pointer_cast<SumObserverNode>(m_exchange.registerObserver(std::move(sum)));
 	m_scaler = std::make_shared<AssetScalerNode>(
@@ -137,11 +145,11 @@ MeanObserverNode::MeanObserverNode(
 
 //============================================================================
 MaxObserverNode::MaxObserverNode(
-	String id,
+	Option<String> id,
 	SharedPtr<StrategyBufferOpNode> parent,
 	size_t window
 ) noexcept :
-	AssetObserverNode(std::move(id),parent, AssetObserverType::MAX, window)
+	AssetObserverNode(id, parent, AssetObserverType::MAX, window)
 {
 	setObserverWarmup(parent->getWarmup());
 	setWarmup(parent->getWarmup() + window);
@@ -166,9 +174,7 @@ MaxObserverNode::onOutOfRange(
 	assert(buffer_old.size() == m_max.size());
 	size_t buffer_idx = getBufferIdx();
 	if (m_signal_copy.size() > 0)
-	{
 		m_signal_copy = m_max;
-	}
 	for (size_t i = 0; i < static_cast<size_t>(m_max.rows()); i++)
 	{
 		// Check if the column going out of range holds the max value for the row
@@ -210,9 +216,7 @@ MaxObserverNode::cacheObserver() noexcept
 {
 	m_max = buffer().cwiseMax(m_max);
 	if (hasCache())
-	{
 		cacheColumn() = m_max;
-	}
 }
 
 
@@ -236,18 +240,23 @@ TsArgMaxObserverNode::reset() noexcept
 
 //============================================================================
 TsArgMaxObserverNode::TsArgMaxObserverNode(
-	String id,
+	Option<String> id,
 	SharedPtr<StrategyBufferOpNode> parent,
 	size_t window
 ) noexcept :
-	AssetObserverNode(std::move(id), parent, AssetObserverType::TS_ARGMAX, window)
+	AssetObserverNode(id, parent, AssetObserverType::TS_ARGMAX, window)
 {
-	auto max_id = id + "_max_";
+	Option<String> max_id = std::nullopt;
+	if (id.has_value())
+	{
+		max_id = id.value() + "_sum_";
+	}
 	auto max = std::make_shared<MaxObserverNode>(max_id, parent, window);
 	m_max_observer = std::dynamic_pointer_cast<MaxObserverNode>(m_exchange.registerObserver(std::move(max)));
 	m_max_observer->enableSignalCopy();
 	setObserverWarmup(parent->getWarmup());
 	setWarmup(parent->getWarmup() + window);
+
 	m_arg_max.resize(m_exchange.getAssetCount());
 	m_arg_max.setConstant(0);
 	setObserverBuffer(0);
@@ -324,6 +333,93 @@ TsArgMaxObserverNode::evaluate(
 ) noexcept
 {
 	target = m_arg_max;
+}
+
+
+//============================================================================
+VarianceObserverNode::VarianceObserverNode(
+	Option<String> id,
+	SharedPtr<StrategyBufferOpNode> parent,
+	size_t window
+) noexcept:
+	AssetObserverNode(id, parent, AssetObserverType::VARIANCE, window)
+{
+	Option<String> sum_id = std::nullopt;
+	if (id.has_value())
+		sum_id = id.value() + "_mean";
+	auto mean = std::make_shared<MeanObserverNode>(sum_id, parent, window);
+	m_mean_observer = std::dynamic_pointer_cast<MeanObserverNode>(m_exchange.registerObserver(std::move(mean)));
+	m_mean_observer->enableSignalCopy();
+
+	Option<String> sum_sq_id = std::nullopt;
+	if (id.has_value())
+		sum_sq_id = id.value() + "_sum_sq";
+	auto squared_node = std::make_shared<AssetFunctionNode>(
+		parent,
+		AssetFunctionType::POWER,
+		2.0f
+	);
+	auto sum_sq = std::make_shared<SumObserverNode>(
+		std::move(sum_sq_id),
+		std::move(squared_node),
+		window
+	);
+	m_sum_squared_observer = std::dynamic_pointer_cast<SumObserverNode>(m_exchange.registerObserver(std::move(sum_sq)));
+	m_sum_squared_observer->enableSignalCopy();
+	m_variance.resize(m_exchange.getAssetCount());
+	m_variance.setConstant(0);
+	m_sum_squared_cache.resize(m_exchange.getAssetCount());
+	m_sum_squared_cache.setConstant(0);
+	setObserverWarmup(parent->getWarmup());
+	setWarmup(parent->getWarmup() + window);
+}
+
+
+//============================================================================
+VarianceObserverNode::~VarianceObserverNode() noexcept
+{
+}
+
+
+//============================================================================
+void
+VarianceObserverNode::onOutOfRange(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
+) noexcept
+{
+}
+
+
+//============================================================================
+void 
+VarianceObserverNode::evaluate(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
+) noexcept
+{
+	target = m_variance;
+}
+
+
+//============================================================================
+void
+VarianceObserverNode::cacheObserver() noexcept
+{
+	m_mean_observer->evaluate(m_variance);
+	m_sum_squared_observer->evaluate(m_sum_squared_cache);
+	m_variance = m_sum_squared_cache - (getWindow() * m_variance.cwiseProduct(m_variance));
+	if (getWindow() > 1)
+		m_variance /= static_cast<double>(getWindow() - 1);
+	if (hasCache())
+		cacheColumn() = m_variance;
+}
+
+
+//============================================================================
+void
+VarianceObserverNode::reset() noexcept
+{
+	m_variance.setConstant(0);
+	m_sum_squared_cache.setConstant(0);
 }
 
 

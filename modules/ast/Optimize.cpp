@@ -154,7 +154,7 @@ StrategyGrid::builNodeDim(GridDimensionObserver* observer_dim) noexcept
 	auto id = observer_node->getId();
 	for (size_t i = 0; i < size; ++i)
 	{
-		auto node_id = std::format("{}_{}", id, i);
+		//auto node_id = std::format("{}_{}", id, i);
 		//switch (observer_node->observerType())
 		//{
 		//case AssetObserverType::SUM:

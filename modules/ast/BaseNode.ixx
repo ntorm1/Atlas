@@ -17,19 +17,21 @@ export enum class NodeType : Uint8
 	ASSET_OP = 2,
 	ASSET_COMP = 3,
 	ASSET_IF = 4,
-	ASSET_MEDIAN = 5,
-	ASSET_READ = 6,
-	ASSET_OBSERVER = 7,
-	ASSET_SCALAR = 8,
-	ASSET_ATR = 9,
-	COVARIANCE = 10,
-	EXCHANGE_VIEW = 11,
-	RANK_NODE = 12,
-	STRATEGY = 13,
-	STRATEGY_RUNNER = 14,
-	TRADE_LIMIT = 15,
-	MODEL = 16,
-	NOP = 17,
+	ASSET_FUNCTION = 5,
+	ASSET_MEDIAN = 6,
+	ASSET_READ = 7,
+	ASSET_OBSERVER = 8,
+	ASSET_SCALAR = 9,
+	ASSET_ATR = 10,
+	COVARIANCE = 11,
+	EXCHANGE_VIEW = 12,
+	RANK_NODE = 13,
+	STRATEGY = 14,
+	STRATEGY_RUNNER = 15,
+	TRADE_LIMIT = 16,
+	MODEL = 17,
+	LAG = 18,
+	NOP = 19,
 };
 
 
@@ -40,6 +42,16 @@ export enum class AssetOpType : Uint8
 	SUBTRACT = 1,
 	MULTIPLY = 2,
 	DIVIDE = 3,
+};
+
+
+//============================================================================
+export enum class AssetFunctionType : Uint8
+{
+	SIGN = 0,
+	POWER = 1,
+	ABS = 3,
+	LOG = 4
 };
 
 
