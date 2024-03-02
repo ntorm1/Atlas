@@ -26,9 +26,6 @@ namespace AST
 export class SumObserverNode final
 	: public AssetObserverNode
 {
-private:
-	LinAlg::EigenVectorXd m_sum;
-
 public:
 	ATLAS_API SumObserverNode(
 		Option<String> id,
@@ -74,9 +71,6 @@ public:
 export class MaxObserverNode final
 	: public AssetObserverNode
 {
-private:
-	LinAlg::EigenVectorXd m_max;
-
 public:
 	ATLAS_API MaxObserverNode(
 		Option<String> id,
@@ -98,8 +92,6 @@ export class TsArgMaxObserverNode final
 {
 private:
 	SharedPtr<MaxObserverNode> m_max_observer;
-	LinAlg::EigenVectorXd m_arg_max;
-
 public:
 	ATLAS_API TsArgMaxObserverNode(
 		Option<String> id,
@@ -122,9 +114,6 @@ export class VarianceObserverNode final
 private:
 	SharedPtr<MeanObserverNode> m_mean_observer;
 	SharedPtr<SumObserverNode> m_sum_squared_observer;
-	LinAlg::EigenVectorXd m_variance;
-	LinAlg::EigenVectorXd m_sum_squared_cache;
-
 public:
 	ATLAS_API VarianceObserverNode(
 		Option<String> id,

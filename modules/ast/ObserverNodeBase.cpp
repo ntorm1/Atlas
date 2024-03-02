@@ -30,6 +30,8 @@ AssetObserverNode::AssetObserverNode(
 {
 	m_buffer_matrix.resize(m_exchange.getAssetCount(), window);
 	m_buffer_matrix.setZero();
+	m_signal.resize(m_exchange.getAssetCount());
+	m_signal.setZero();
 }
 
 
@@ -69,10 +71,12 @@ AssetObserverNode::cacheBase() noexcept
 	m_parent->evaluate(buffer_ref);
 	cacheObserver();
 	m_buffer_idx = (m_buffer_idx + 1) % m_window;
+	
+	if (m_signal_copy.size() > 0)
+		m_signal_copy = m_signal;
+
 	if (m_exchange.currentIdx() >= (m_window - 1))
-	{
 		onOutOfRange(m_buffer_matrix.col(m_buffer_idx));
-	}
 }
 
 

@@ -33,7 +33,6 @@ import RiskNodeModule;
 import TradeNodeModule;
 import TracerModule;
 
-
 namespace py = pybind11;
 
 // Wrapper for the Order struct

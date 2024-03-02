@@ -79,6 +79,7 @@ private:
 	SharedPtr<StrategyBufferOpNode> parent() const noexcept { return m_parent; }
 
 protected:
+	LinAlg::EigenVectorXd m_signal;
 	LinAlg::EigenVectorXd m_signal_copy;
 
 	void setObserverWarmup(size_t warmup) noexcept { m_observer_warmup = warmup; }
@@ -111,8 +112,16 @@ public:
 	/// </summary>
 	void cacheBase() noexcept;
 
+	/// <summary>
+	/// Enable signal copy of observer has child observer that needs to copy the signal before 
+	/// out of range is called 
+	/// </summary>
 	void enableSignalCopy() noexcept;
 
+	/// <summary>
+	/// Get const ref to the signal copy
+	/// </summary>
+	/// <returns></returns>
 	auto const& getSignalCopy() const noexcept { return m_signal_copy; }
 
 	/// <summary>
@@ -136,6 +145,7 @@ public:
 	/// Pur virtual method defining the observer's reset method called on exchange reset
 	/// </summary>
 	virtual void reset() noexcept = 0;
+
 
 	[[nodiscard]] auto const& getId() const noexcept { return m_id; }
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept final override;

@@ -24,8 +24,6 @@ SumObserverNode::SumObserverNode(
 ) noexcept:
 	AssetObserverNode(id, parent, AssetObserverType::SUM, window)
 {
-	m_sum.resize(m_exchange.getAssetCount());
-	m_sum.setZero();
 	setObserverWarmup(parent->getWarmup());
 	setWarmup(parent->getWarmup() + window - 1);
 }
@@ -42,9 +40,9 @@ SumObserverNode::~SumObserverNode() noexcept
 void
 SumObserverNode::cacheObserver() noexcept
 {
-	m_sum += buffer();
+	m_signal += buffer();
 	if (hasCache() && m_exchange.currentIdx() >= (getWindow() - 1))
-		cacheColumn() = m_sum;
+		cacheColumn() = m_signal;
 }
 
 
@@ -52,7 +50,7 @@ SumObserverNode::cacheObserver() noexcept
 void
 SumObserverNode::reset() noexcept
 {
-	m_sum.setZero();
+	m_signal.setZero();
 }
 
 
@@ -61,8 +59,8 @@ void
 SumObserverNode::onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept
 {
 	if (m_signal_copy.size())
-		m_signal_copy = m_sum;
-	m_sum -= buffer_old;
+		m_signal_copy = m_signal;
+	m_signal -= buffer_old;
 }
 
 
@@ -72,7 +70,7 @@ SumObserverNode::evaluate(
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
 ) noexcept 
 {
-	target = m_sum;
+	target = m_signal;
 }
 
 
@@ -153,8 +151,8 @@ MaxObserverNode::MaxObserverNode(
 {
 	setObserverWarmup(parent->getWarmup());
 	setWarmup(parent->getWarmup() + window);
-	m_max.resize(m_exchange.getAssetCount());
-	m_max.setConstant(-std::numeric_limits<double>::max());
+	m_signal.resize(m_exchange.getAssetCount());
+	m_signal.setConstant(-std::numeric_limits<double>::max());
 	setObserverBuffer(-std::numeric_limits<double>::max());
 }
 
@@ -171,14 +169,12 @@ MaxObserverNode::onOutOfRange(
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
 ) noexcept
 {
-	assert(buffer_old.size() == m_max.size());
+	assert(buffer_old.size() == m_signal.size());
 	size_t buffer_idx = getBufferIdx();
-	if (m_signal_copy.size() > 0)
-		m_signal_copy = m_max;
-	for (size_t i = 0; i < static_cast<size_t>(m_max.rows()); i++)
+	for (size_t i = 0; i < static_cast<size_t>(m_signal.rows()); i++)
 	{
 		// Check if the column going out of range holds the max value for the row
-		if (buffer_old(i) != m_max(i))
+		if (buffer_old(i) != m_signal(i))
 		{
 			continue;
 		}
@@ -194,7 +190,7 @@ MaxObserverNode::onOutOfRange(
 				max = buffer_matrix(i, j);
 			}
 		}
-		m_max(i) = max;
+		m_signal(i) = max;
 	}	
 }
 
@@ -205,8 +201,8 @@ MaxObserverNode::evaluate(
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
 ) noexcept
 {
-	assert(target.size() == m_max.size());
-	target = m_max;
+	assert(target.size() == m_signal.size());
+	target = m_signal;
 }
 
 
@@ -214,9 +210,9 @@ MaxObserverNode::evaluate(
 void
 MaxObserverNode::cacheObserver() noexcept
 {
-	m_max = buffer().cwiseMax(m_max);
+	m_signal = buffer().cwiseMax(m_signal);
 	if (hasCache())
-		cacheColumn() = m_max;
+		cacheColumn() = m_signal;
 }
 
 
@@ -224,7 +220,7 @@ MaxObserverNode::cacheObserver() noexcept
 void
 MaxObserverNode::reset() noexcept
 {
-	m_max.setConstant(-std::numeric_limits<double>::max());
+	m_signal.setConstant(-std::numeric_limits<double>::max());
 	setObserverBuffer(-std::numeric_limits<double>::max());
 }
 
@@ -233,7 +229,7 @@ MaxObserverNode::reset() noexcept
 void
 TsArgMaxObserverNode::reset() noexcept
 {
-	m_arg_max.setConstant(-std::numeric_limits<double>::max());
+	m_signal.setConstant(-std::numeric_limits<double>::max());
 	setObserverBuffer(-std::numeric_limits<double>::max());
 }
 
@@ -257,8 +253,8 @@ TsArgMaxObserverNode::TsArgMaxObserverNode(
 	setObserverWarmup(parent->getWarmup());
 	setWarmup(parent->getWarmup() + window);
 
-	m_arg_max.resize(m_exchange.getAssetCount());
-	m_arg_max.setConstant(0);
+	m_signal.resize(m_exchange.getAssetCount());
+	m_signal.setConstant(0);
 	setObserverBuffer(0);
 }
 
@@ -278,11 +274,11 @@ TsArgMaxObserverNode::cacheObserver() noexcept
 {
 	auto const& buffer_matrix = m_max_observer->getBufferMatrix();
 	auto v = static_cast<double>(getWindow());
-	m_arg_max = (
+	m_signal = (
 		buffer_matrix.col(getBufferIdx()).array() == m_max_observer->getSignalCopy().array()
-		).select(v, m_arg_max.array()-1);
+		).select(v, m_signal.array()-1);
 	if (hasCache())
-		cacheColumn() = m_arg_max;
+		cacheColumn() = m_signal;
 }
 
 
@@ -296,12 +292,12 @@ TsArgMaxObserverNode::onOutOfRange(
 	size_t window = getWindow();
 	auto const& buffer_matrix = m_max_observer->getBufferMatrix();
 	size_t columns = static_cast<size_t>(buffer_matrix.cols());
-	for (size_t i = 0; i < static_cast<size_t>(m_arg_max.rows()); i++)
+	for (size_t i = 0; i < static_cast<size_t>(m_signal.rows()); i++)
 	{
 		auto const& row = buffer_matrix.row(i);
 		// Column going out of range is the argmax if the value is equal to the window, 
 		// otherwise it is not the argmax and we can skip it
-		auto old = m_arg_max(i);
+		auto old = m_signal(i);
 		if (old > 1)
 		{
 			continue;
@@ -320,8 +316,8 @@ TsArgMaxObserverNode::onOutOfRange(
 		}
 		max_idx = (max_idx - buffer_idx + window) % window;
 		max_idx += 1;
-		m_arg_max(i) = static_cast<double>(max_idx);
-		cacheColumn()(i) = m_arg_max(i);
+		m_signal(i) = static_cast<double>(max_idx);
+		cacheColumn()(i) = m_signal(i);
 	}
 }
 
@@ -332,7 +328,7 @@ TsArgMaxObserverNode::evaluate(
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
 ) noexcept
 {
-	target = m_arg_max;
+	target = m_signal;
 }
 
 
@@ -366,10 +362,6 @@ VarianceObserverNode::VarianceObserverNode(
 	);
 	m_sum_squared_observer = std::dynamic_pointer_cast<SumObserverNode>(m_exchange.registerObserver(std::move(sum_sq)));
 	m_sum_squared_observer->enableSignalCopy();
-	m_variance.resize(m_exchange.getAssetCount());
-	m_variance.setConstant(0);
-	m_sum_squared_cache.resize(m_exchange.getAssetCount());
-	m_sum_squared_cache.setConstant(0);
 	setObserverWarmup(parent->getWarmup());
 	setWarmup(parent->getWarmup() + window);
 }
@@ -396,7 +388,7 @@ VarianceObserverNode::evaluate(
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
 ) noexcept
 {
-	target = m_variance;
+	target = m_signal;
 }
 
 
@@ -404,13 +396,13 @@ VarianceObserverNode::evaluate(
 void
 VarianceObserverNode::cacheObserver() noexcept
 {
-	m_mean_observer->evaluate(m_variance);
-	m_sum_squared_observer->evaluate(m_sum_squared_cache);
-	m_variance = m_sum_squared_cache - (getWindow() * m_variance.cwiseProduct(m_variance));
+	m_mean_observer->evaluate(m_signal);
+	auto sum_squared_cache = m_sum_squared_observer->getSignalCopy();
+	m_signal = sum_squared_cache - (getWindow() * m_signal.cwiseProduct(m_signal));
 	if (getWindow() > 1)
-		m_variance /= static_cast<double>(getWindow() - 1);
+		m_signal /= static_cast<double>(getWindow() - 1);
 	if (hasCache())
-		cacheColumn() = m_variance;
+		cacheColumn() = m_signal;
 }
 
 
@@ -418,8 +410,7 @@ VarianceObserverNode::cacheObserver() noexcept
 void
 VarianceObserverNode::reset() noexcept
 {
-	m_variance.setConstant(0);
-	m_sum_squared_cache.setConstant(0);
+	m_signal.setConstant(0);
 }
 
 
