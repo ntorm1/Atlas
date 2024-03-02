@@ -9,7 +9,7 @@ import AtlasUtilsModule;
 import AtlasTimeModule;
 import HelperNodesModule;
 import RiskNodeModule;
-import ObserverNodeModule;
+import ObserverNodeBaseModule;
 import StrategyBufferModule;
 
 namespace Atlas
@@ -207,11 +207,11 @@ Exchange::reset() noexcept
 			m_impl->registered_triggers.begin(),
 			m_impl->registered_triggers.end(),
 			[](const auto& trigger) {
-				if (trigger.use_count() == 1) {
+				if (trigger.use_count() > 1) {
 					trigger->reset();
-					return true;
+					return false;
 				}
-				return false;
+				return true;
 			}
 		),
 		m_impl->registered_triggers.end()
@@ -232,11 +232,11 @@ Exchange::reset() noexcept
 			m_impl->asset_observers.begin(),
 			m_impl->asset_observers.end(),
 			[](const auto& observer) {
-				if (observer.second.use_count() == 1) {
+				if (observer.second.use_count() > 1) {
 					observer.second->reset();
-					return true;
+					return false;
 				}
-				return false;
+				return true;
 			}
 		),
 		m_impl->asset_observers.end()

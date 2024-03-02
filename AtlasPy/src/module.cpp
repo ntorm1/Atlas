@@ -24,6 +24,7 @@ import HelperNodesModule;
 import HydraModule;
 import OptimizeNodeModule;
 import ObserverNodeModule;
+import ObserverNodeBaseModule;
 import RankNodeModule;
 import StrategyModule;
 import StrategyNodeModule;

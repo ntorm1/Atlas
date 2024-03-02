@@ -6,7 +6,7 @@ module OptimizeNodeModule;
 import ExchangeModule;
 import TracerModule;
 import StrategyModule;
-import ObserverNodeModule;
+import ObserverNodeBaseModule;
 
 namespace Atlas
 {
@@ -155,31 +155,31 @@ StrategyGrid::builNodeDim(GridDimensionObserver* observer_dim) noexcept
 	for (size_t i = 0; i < size; ++i)
 	{
 		auto node_id = std::format("{}_{}", id, i);
-		switch (observer_node->observerType())
-		{
-		case AssetObserverType::SUM:
-		{
-			SharedPtr<SumObserverNode> new_observer = std::make_shared<SumObserverNode>(
-				node_id,
-				observer_node->parent(),
-				static_cast<size_t>(observer_dim->get(i))
-			);
-			observer_dim->addObserver(std::move(new_observer), i);
-			break;
-		}
-		case AssetObserverType::MEAN:
-		{
-			SharedPtr<MeanObserverNode> new_observer = std::make_shared<MeanObserverNode>(
-				node_id,
-				observer_node->parent(),
-				static_cast<size_t>(observer_dim->get(i))
-			);
-			observer_dim->addObserver(std::move(new_observer), i);
-			break;
-		}
-		default:
-			assert(false);
-		}
+		//switch (observer_node->observerType())
+		//{
+		//case AssetObserverType::SUM:
+		//{
+		//	SharedPtr<SumObserverNode> new_observer = std::make_shared<SumObserverNode>(
+		//		node_id,
+		//		observer_node->parent(),
+		//		static_cast<size_t>(observer_dim->get(i))
+		//	);
+		//	observer_dim->addObserver(std::move(new_observer), i);
+		//	break;
+		//}
+		//case AssetObserverType::MEAN:
+		//{
+		//	SharedPtr<MeanObserverNode> new_observer = std::make_shared<MeanObserverNode>(
+		//		node_id,
+		//		observer_node->parent(),
+		//		static_cast<size_t>(observer_dim->get(i))
+		//	);
+		//	observer_dim->addObserver(std::move(new_observer), i);
+		//	break;
+		//}
+		//default:
+		//	assert(false);
+		//}
 	}
 }
 
