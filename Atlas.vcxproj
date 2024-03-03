@@ -183,8 +183,6 @@
     <ClCompile Include="modules\ast\AssetLogical.ixx" />
     <ClCompile Include="modules\ast\HelperNodes.cpp" />
     <ClCompile Include="modules\ast\HelperNodes.ixx" />
-    <ClCompile Include="modules\ast\Model.cpp" />
-    <ClCompile Include="modules\ast\ModelNode.ixx" />
     <ClCompile Include="modules\ast\NodeFactor.cpp" />
     <ClCompile Include="modules\ast\NodeFactory.ixx" />
     <ClCompile Include="modules\ast\ObserverNode.ixx" />
@@ -228,6 +226,10 @@
     <ClCompile Include="modules\interpreter\AtlasParser.ixx" />
     <ClCompile Include="modules\interpreter\AtlasSymbol.ixx" />
     <ClCompile Include="modules\interpreter\AtlasToken.ixx" />
+    <ClCompile Include="modules\model\LinearRegression.cpp" />
+    <ClCompile Include="modules\model\LinearRegression.ixx" />
+    <ClCompile Include="modules\model\ModelBase.cpp" />
+    <ClCompile Include="modules\model\ModelBase.ixx" />
     <ClCompile Include="modules\portfolio\Portfolio.cpp" />
     <ClCompile Include="modules\portfolio\Portfolio.ixx" />
     <ClCompile Include="modules\standard\AtlasCore.ixx" />

@@ -191,12 +191,6 @@
     <ClCompile Include="modules\ast\AssetLogical.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ast\ModelNode.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\Model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ast\NodeFactory.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -231,6 +225,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\ast\ObserverNodeBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\model\ModelBase.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\model\ModelBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\model\LinearRegression.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\model\LinearRegression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
