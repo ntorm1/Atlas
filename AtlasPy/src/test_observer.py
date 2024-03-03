@@ -124,6 +124,27 @@ class SimpleObserverTest(unittest.TestCase):
         df.replace(np.nan, 0, inplace=True)
         self.assertTrue(np.allclose(df["close_change_squared_atlas"], df["close_change_squared_pd"]))
 
+    def test_cov_observer(self):
+        window = 5
+        close = AssetReadNode.make("Close", 0, self.exchange)
+        open_node = AssetReadNode.make("Open", 0, self.exchange)
+        cov = self.exchange.registerObserver(CovarianceObserverNode("cov", close, open_node, window))
+        self.exchange.enableNodeCache("cov",cov, False)
+        ev = ExchangeViewNode.make(self.exchange, cov)
+        allocation = AllocationNode.make(ev)
+        strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
+        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node_signal, 1.0), True)
+        self.hydra.run()
+
+        df = self.get_df()
+        btc_idx = self.exchange.getAssetIndex("BTC-USD")
+        df["close_open_cov_atlas"] = cov.cache()[btc_idx].T
+        df["close_open_cov_pd"] = df["Close"].rolling(window).cov(df["Open"])
+        df = df[['close_open_cov_atlas', 'close_open_cov_pd']]
+        df.replace(np.nan, 0, inplace=True)
+        self.assertTrue(np.allclose(df["close_open_cov_atlas"], df["close_open_cov_pd"]))
+
+
 
 if __name__ == "__main__":
     unittest.main()

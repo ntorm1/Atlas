@@ -343,6 +343,8 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::TsArgMaxObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::TsArgMaxObserverNode>>(m_ast, "TsArgMaxObserverNode")
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
 
+    py::class_<Atlas::AST::CovarianceObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::CovarianceObserverNode>>(m_ast, "CovarianceObserverNode")
+        .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());
 
     py::class_<Atlas::AST::VarianceObserverNode, Atlas::AST::AssetObserverNode, std::shared_ptr<Atlas::AST::VarianceObserverNode>>(m_ast, "VarianceObserverNode")
         .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>, size_t>());

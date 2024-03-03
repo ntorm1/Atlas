@@ -474,6 +474,7 @@ CovarianceObserverNode::cacheObserver() noexcept
 	auto const& right_sum_cache = m_right_sum_observer->getSignalCopy();
 	auto const& cross_sum_cache = m_cross_sum_observer->getSignalCopy();
 	m_signal = cross_sum_cache - (left_sum_cache.cwiseProduct(right_sum_cache) / static_cast<double>(getWindow()));
+	m_signal /= static_cast<double>(getWindow() - 1);
 }
 
 
