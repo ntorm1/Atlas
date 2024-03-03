@@ -1,4 +1,5 @@
 module;
+#include <Eigen/Dense>
 module ModelBaseModule;
 
 import ExchangeModule;
@@ -51,11 +52,19 @@ ModelBase::ModelBase(
 	m_exchange(config->exchange)
 {
 	m_asset_count = m_exchange->getAssetCount();
+	m_signal.resize(m_asset_count);
+	m_signal.setZero();
 	m_impl= new ModelBaseImpl(
 		std::move(id),
 		std::move(features),
 		std::move(target)
 	);
+
+	for (auto const& feature : m_impl->m_features)
+	{
+		m_feature_warmup = std::max(m_feature_warmup, feature->getWarmup());
+	}
+	m_warmup = m_feature_warmup + m_config->training_window;
 }
 
 
@@ -63,6 +72,22 @@ ModelBase::ModelBase(
 ModelBase::~ModelBase() noexcept
 {
 	delete m_impl;
+}
+
+
+//============================================================================
+size_t
+ModelBase::getWarmup() const noexcept
+{
+	return m_warmup;
+}
+
+
+//============================================================================
+void
+ModelBase::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
+{
+	target = m_signal;
 }
 
 

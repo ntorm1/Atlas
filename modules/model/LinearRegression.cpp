@@ -99,6 +99,30 @@ LinearRegressionModel::step() noexcept
 	m_buffer_idx += m_asset_count;
 }
 
+
+//============================================================================
+void
+LinearRegressionModel::predict() noexcept
+{
+	bool loop_idx = false;
+	if (m_buffer_idx == static_cast<size_t>(m_X.rows()))
+	{
+		m_buffer_idx -= m_asset_count;
+		loop_idx = true;
+	}
+
+	auto x_block = m_X(
+		Eigen::seq(m_buffer_idx, m_buffer_idx + m_asset_count),
+		Eigen::seq(0, getFeatures().size())
+	);
+
+	m_signal = x_block * m_theta;
+
+	if (loop_idx)
+		m_buffer_idx = 0;
+}
+
+
 }
 
 }

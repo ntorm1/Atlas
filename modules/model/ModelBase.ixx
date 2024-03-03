@@ -48,6 +48,9 @@ private:
 
 protected:
 	size_t m_asset_count;
+	size_t m_feature_warmup = 0;
+	size_t m_warmup = 0;
+	LinAlg::EigenVectorXd m_signal;
 	SharedPtr<ModelConfig> m_config;
 	Vector<SharedPtr<AST::StrategyBufferOpNode>> const& getFeatures() const noexcept;
 
@@ -60,10 +63,12 @@ public:
 	) noexcept;
 	~ModelBase() noexcept;
 
+	[[nodiscard]] size_t getWarmup() const noexcept final override;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept final override;
+	
 	virtual void train() noexcept = 0;
-	virtual void reset() noexcept = 0;
 	virtual void step() noexcept = 0;
-
+	virtual void predict() noexcept = 0;
 };
 
 

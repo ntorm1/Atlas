@@ -68,10 +68,10 @@ public:
 	) noexcept;
 	~LinearRegressionModel() noexcept;
 
-	virtual void train() noexcept override;
-	virtual void reset() noexcept override;
-	virtual void step() noexcept override;
-
+	void train() noexcept override;
+	void reset() noexcept override;
+	void step() noexcept override;
+	void predict() noexcept override;
 };
 
 }
