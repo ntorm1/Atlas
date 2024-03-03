@@ -33,13 +33,13 @@ LinearRegressionModel::LinearRegressionModel(
 	ModelBase(std::move(id), std::move(features), std::move(target), config->m_base_config),
 	m_lr_config(config)
 {
-	size_t row_count = m_config->training_window * getAssetCount();
+	size_t row_count = m_config->training_window * m_asset_count;
 	size_t feature_count = getFeatures().size();
 	if (m_lr_config->m_fit_intercept)
 	{
 		m_X.resize(row_count, feature_count + 1);
 		m_X.setZero();
-		m_X.col(0).setOnes();
+		m_X.col(feature_count).setOnes();
 	}
 	else
 	{
@@ -80,6 +80,23 @@ LinearRegressionModel::reset() noexcept
 	m_X.setZero();
 	m_y.setZero();
 	m_theta.setZero();
+}
+
+
+//============================================================================
+void
+LinearRegressionModel::step() noexcept
+{
+	auto x_block = m_X(
+		Eigen::seq(m_buffer_idx, m_buffer_idx + m_asset_count),
+		Eigen::seq(0, getFeatures().size())
+	);
+	auto const& features = getFeatures();
+	for (size_t i = 0; i < m_asset_count; ++i)
+	{
+		features[i]->evaluate(x_block.col(i));
+	}
+	m_buffer_idx += m_asset_count;
 }
 
 }

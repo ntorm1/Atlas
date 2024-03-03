@@ -64,6 +64,7 @@ public:
 	[[nodiscard]] SharedPtr<ExchangeViewNode> getExchangeView() const noexcept { return m_ev; }
 	[[nodiscard]] size_t getWarmup() const noexcept override;
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+	void reset() noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 

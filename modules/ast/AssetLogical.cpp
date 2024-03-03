@@ -78,6 +78,28 @@ AssetIfNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 
 
 //============================================================================
+void
+AssetIfNode::reset() noexcept
+{
+	m_left_eval->reset();
+	m_right_eval->reset();
+	m_buffer.setZero();
+}
+
+
+//============================================================================
+void
+AssetCompNode::reset() noexcept
+{
+	m_left_eval->reset();
+	m_right_eval->reset();
+	m_true_eval->reset();
+	m_false_eval->reset();
+	m_buffer.setZero();
+}
+
+
+//============================================================================
 AssetCompNode::AssetCompNode(
 	SharedPtr<StrategyBufferOpNode> left_eval,
 	LogicalType logicial_type,

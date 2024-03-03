@@ -233,7 +233,7 @@ Exchange::reset() noexcept
 			m_impl->asset_observers.end(),
 			[](const auto& observer) {
 				if (observer.use_count() > 1) {
-					observer->reset();
+					observer->resetBase();
 					return false;
 				}
 				return true;

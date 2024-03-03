@@ -56,8 +56,6 @@ SumObserverNode::reset() noexcept
 void
 SumObserverNode::onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept
 {
-	if (m_signal_copy.size())
-		m_signal_copy = m_signal;
 	m_signal -= buffer_old;
 }
 
@@ -68,7 +66,7 @@ SumObserverNode::evaluate(
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
 ) noexcept 
 {
-	target = m_signal;
+	target = m_signal_copy;
 }
 
 
@@ -200,7 +198,7 @@ MaxObserverNode::evaluate(
 ) noexcept
 {
 	assert(target.size() == m_signal.size());
-	target = m_signal;
+	target = m_signal_copy;
 }
 
 
@@ -245,7 +243,6 @@ TsArgMaxObserverNode::TsArgMaxObserverNode(
 	}
 	auto max = std::make_shared<MaxObserverNode>(max_id, parent, window);
 	m_max_observer = std::static_pointer_cast<MaxObserverNode>(m_exchange.registerObserver(std::move(max)));
-	m_max_observer->enableSignalCopy();
 	setObserverWarmup(parent->getWarmup());
 	setWarmup(parent->getWarmup() + window);
 
@@ -319,7 +316,7 @@ TsArgMaxObserverNode::evaluate(
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
 ) noexcept
 {
-	target = m_signal;
+	target = m_signal_copy;
 }
 
 
@@ -336,7 +333,6 @@ VarianceObserverNode::VarianceObserverNode(
 		sum_id = id.value() + "_mean";
 	auto mean = std::make_shared<MeanObserverNode>(sum_id, parent, window);
 	m_mean_observer = std::static_pointer_cast<MeanObserverNode>(m_exchange.registerObserver(std::move(mean)));
-	m_mean_observer->enableSignalCopy();
 
 	Option<String> sum_sq_id = std::nullopt;
 	if (id.has_value())
@@ -352,7 +348,6 @@ VarianceObserverNode::VarianceObserverNode(
 		window
 	);
 	m_sum_squared_observer = std::static_pointer_cast<SumObserverNode>(m_exchange.registerObserver(std::move(sum_sq)));
-	m_sum_squared_observer->enableSignalCopy();
 	setObserverWarmup(parent->getWarmup());
 	setWarmup(parent->getWarmup() + window);
 }
@@ -379,7 +374,7 @@ VarianceObserverNode::evaluate(
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
 ) noexcept
 {
-	target = m_signal;
+	target = m_signal_copy;
 }
 
 
@@ -418,14 +413,12 @@ CovarianceObserverNode::CovarianceObserverNode(
 		left_sum_id = id.value() + "_left_sum";
 	auto left_sum = std::make_shared<SumObserverNode>(left_sum_id, left_parent, window);
 	m_left_sum_observer = std::static_pointer_cast<SumObserverNode>(m_exchange.registerObserver(std::move(left_sum)));
-	m_left_sum_observer->enableSignalCopy();
 
 	Option<String> right_sum_id = std::nullopt;
 	if (id.has_value())
 		right_sum_id = id.value() + "_right_sum";
 	auto right_sum = std::make_shared<SumObserverNode>(right_sum_id, right_parent, window);
 	m_right_sum_observer = std::static_pointer_cast<SumObserverNode>(m_exchange.registerObserver(std::move(right_sum)));
-	m_right_sum_observer->enableSignalCopy();
 
 	Option<String> cross_sum_id = std::nullopt;
 	if (id.has_value())
@@ -437,7 +430,6 @@ CovarianceObserverNode::CovarianceObserverNode(
 	);
 	auto cross_sum = std::make_shared<SumObserverNode>(cross_sum_id, product_node, window);
 	m_cross_sum_observer = std::static_pointer_cast<SumObserverNode>(m_exchange.registerObserver(std::move(cross_sum)));
-	m_cross_sum_observer->enableSignalCopy();
 
 	size_t parent_warmup = std::max(left_parent->getWarmup(), right_parent->getWarmup());
 	setObserverWarmup(parent_warmup);
@@ -462,7 +454,7 @@ CovarianceObserverNode::onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buf
 void
 CovarianceObserverNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
-	target = m_signal;
+	target = m_signal_copy;
 }
 
 

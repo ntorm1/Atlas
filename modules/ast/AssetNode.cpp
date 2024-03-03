@@ -171,6 +171,17 @@ AssetOpNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
 		m_asset_op_right->isSame(other_asset_op->getRight());
 }
 
+
+//============================================================================
+void
+AssetOpNode::reset() noexcept
+{
+	m_asset_op_left->reset();
+	m_asset_op_right->reset();
+	m_right_buffer.setZero();
+}
+
+
 void
 AssetOpNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
@@ -407,6 +418,14 @@ AssetScalerNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexce
 
 
 //============================================================================
+void
+AssetScalerNode::reset() noexcept
+{
+	m_parent->reset();
+}
+
+
+//============================================================================
 bool
 AssetScalerNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
 {
@@ -440,6 +459,13 @@ AssetFunctionNode::~AssetFunctionNode() noexcept
 {
 }
 
+
+//============================================================================
+void
+AssetFunctionNode::reset() noexcept
+{
+	m_parent->reset();
+}
 
 //============================================================================
 void

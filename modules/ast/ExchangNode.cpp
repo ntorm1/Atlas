@@ -107,6 +107,18 @@ ExchangeViewNode::asSignal(bool v) noexcept
 
 //============================================================================
 void
+ExchangeViewNode::reset() noexcept
+{
+	m_asset_op_node->reset();
+	if (m_left_view)
+	{
+		(*m_left_view)->reset();
+	}
+    m_buffer.setZero();
+}
+
+//============================================================================
+void
 ExchangeViewNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
     if (m_take_from_cache)

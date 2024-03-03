@@ -120,6 +120,7 @@ public:
 	[[nodiscard]] size_t getViewSize() const noexcept { return m_view_size; }
 	[[nodiscard]] auto& getExchange() { return m_exchange; }
 	[[nodiscard]] bool isSignal() const noexcept { return m_as_signal; }
+	void reset() noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd>) noexcept override;
 	void filter(LinAlg::EigenRef<LinAlg::EigenVectorXd> v) const noexcept;
 	ATLAS_API void asSignal(bool v = true) noexcept;

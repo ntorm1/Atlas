@@ -149,6 +149,16 @@ LagNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 	target = m_parent->cache().col(col_idx - m_lag);
 }
 
+
+//============================================================================
+void
+LagNode::reset() noexcept
+{
+	m_parent->reset();
+
+}
+
+
 //============================================================================
 size_t
 LagNode::getWarmup() const noexcept

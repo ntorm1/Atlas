@@ -32,6 +32,8 @@ AssetObserverNode::AssetObserverNode(
 	m_buffer_matrix.setZero();
 	m_signal.resize(m_exchange.getAssetCount());
 	m_signal.setZero();
+	m_signal_copy.resize(m_exchange.getAssetCount());
+	m_signal_copy.setConstant(-std::numeric_limits<double>::max());
 }
 
 
@@ -77,8 +79,7 @@ AssetObserverNode::cacheBase() noexcept
 
 	m_buffer_idx = (m_buffer_idx + 1) % m_window;
 	
-	if (m_signal_copy.size() > 0)
-		m_signal_copy = m_signal;
+	m_signal_copy = m_signal;
 
 	if (m_exchange.currentIdx() >= (m_window - 1))
 		onOutOfRange(m_buffer_matrix.col(m_buffer_idx));
@@ -111,16 +112,6 @@ AssetObserverNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
 		m_observer_type == ptr->getObserverType() &&
 		m_window == ptr->getWindow();
 }
-
-
-//============================================================================
-void
-AssetObserverNode::enableSignalCopy() noexcept
-{
-	m_signal_copy.resize(m_exchange.getAssetCount());
-	m_signal_copy.setConstant(-std::numeric_limits<double>::max());
-}
-
 
 
 }

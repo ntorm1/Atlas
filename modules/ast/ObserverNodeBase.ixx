@@ -114,12 +114,6 @@ public:
 	void cacheBase() noexcept;
 
 	/// <summary>
-	/// Enable signal copy of observer has child observer that needs to copy the signal before 
-	/// out of range is called 
-	/// </summary>
-	void enableSignalCopy() noexcept;
-
-	/// <summary>
 	/// Get const ref to the signal copy
 	/// </summary>
 	/// <returns></returns>

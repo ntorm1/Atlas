@@ -9,7 +9,7 @@ export module ModelBaseModule;
 
 
 import AtlasCore;
-
+import StrategyBufferModule;
 
 namespace Atlas
 {
@@ -40,16 +40,15 @@ public:
 
 
 //============================================================================
-export class ModelBase
+export class ModelBase : public AST::StrategyBufferOpNode
 {
 private:
 	ModelBaseImpl* m_impl;
+	SharedPtr<Exchange> m_exchange;
 
 protected:
-	SharedPtr<Exchange> m_exchange;
+	size_t m_asset_count;
 	SharedPtr<ModelConfig> m_config;
-
-	size_t getAssetCount() const noexcept;
 	Vector<SharedPtr<AST::StrategyBufferOpNode>> const& getFeatures() const noexcept;
 
 public:
@@ -63,6 +62,7 @@ public:
 
 	virtual void train() noexcept = 0;
 	virtual void reset() noexcept = 0;
+	virtual void step() noexcept = 0;
 
 };
 

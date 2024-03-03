@@ -134,6 +134,7 @@ public:
 	) noexcept;
 	
 	virtual void evaluate( LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept = 0;
+	void reset() noexcept final override {}
 	bool getIsCached() const noexcept { return m_covariance->getIsCached(); }
 };
 

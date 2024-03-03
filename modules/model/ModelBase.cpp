@@ -32,14 +32,6 @@ struct ModelBaseImpl
 
 
 //============================================================================
-size_t
-ModelBase::getAssetCount() const noexcept
-{
-	return m_exchange->getAssetCount();
-}
-
-
-//============================================================================
 Vector<SharedPtr<AST::StrategyBufferOpNode>> const&
 ModelBase::getFeatures() const noexcept
 {
@@ -54,9 +46,11 @@ ModelBase::ModelBase(
 	SharedPtr<AST::StrategyBufferOpNode> target,
 	SharedPtr<ModelConfig> config
 ) noexcept:
+	AST::StrategyBufferOpNode(AST::NodeType::MODEL, *config->exchange, std::nullopt),
 	m_config(config),
 	m_exchange(config->exchange)
 {
+	m_asset_count = m_exchange->getAssetCount();
 	m_impl= new ModelBaseImpl(
 		std::move(id),
 		std::move(features),

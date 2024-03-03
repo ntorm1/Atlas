@@ -142,6 +142,18 @@ EVRankNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
 
 //============================================================================
 void
+EVRankNode::reset() noexcept
+{
+    m_ev->reset();
+    for (auto& pair : m_view)
+	{
+		pair.second = 0.0;
+	}
+}
+
+
+//============================================================================
+void
 EVRankNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
 	// before executing cross sectional rank, execute the parent exchange 

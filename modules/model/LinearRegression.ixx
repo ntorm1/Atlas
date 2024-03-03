@@ -52,6 +52,7 @@ public:
 export class LinearRegressionModel : public ModelBase
 {
 private:
+	size_t m_buffer_idx = 0;
 	LinearRegressionModelImpl* m_impl;
 	LinAlg::EigenMatrixXd m_X;
 	LinAlg::EigenMatrixXd m_y;
@@ -69,6 +70,7 @@ public:
 
 	virtual void train() noexcept override;
 	virtual void reset() noexcept override;
+	virtual void step() noexcept override;
 
 };
 

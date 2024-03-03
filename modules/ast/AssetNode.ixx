@@ -55,6 +55,7 @@ public:
 	[[nodiscard]] size_t getColumn() const noexcept { return m_column; }
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
+	void reset() noexcept override {};
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
@@ -117,6 +118,7 @@ public:
 	ATLAS_API uintptr_t getSwapLeft() const noexcept { return reinterpret_cast<uintptr_t>(&AssetOpNode::swapLeft);}
 	ATLAS_API uintptr_t getSwapRight() const noexcept { return reinterpret_cast<uintptr_t>(&AssetOpNode::swapRight);}
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+	void reset() noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
@@ -147,6 +149,7 @@ public:
 
 	[[nodiscard]] size_t getWarmup() const noexcept override { return 0; }
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+	void reset() noexcept override {}
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
@@ -190,6 +193,7 @@ public:
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_window; }
 
 	ATLAS_API ~ATRNode() noexcept;
+	void reset() noexcept override {}
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 };
 
@@ -211,6 +215,7 @@ public:
 	ATLAS_API ~AssetScalerNode() noexcept;
 
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void reset() noexcept override;
 	[[nodiscard]] auto const& getParent() const noexcept { return m_parent; }
 	[[nodiscard]] AssetOpType getOpType() const noexcept { return m_op_type; }
 	[[nodiscard]] double getScale() const noexcept { return m_scale; }
@@ -235,6 +240,7 @@ public:
 	) noexcept;
 	ATLAS_API ~AssetFunctionNode() noexcept;
 
+	void reset() noexcept override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	[[nodiscard]] auto const& getParent() const noexcept { return m_parent; }
 	[[nodiscard]] AssetFunctionType getFuncType() const noexcept { return m_func_type; }
