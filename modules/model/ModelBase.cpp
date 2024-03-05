@@ -15,12 +15,12 @@ struct ModelBaseImpl
 {
 	String m_id;
 	Vector<SharedPtr<AST::StrategyBufferOpNode>> m_features;
-	SharedPtr<AST::StrategyBufferOpNode> m_target;
+	SharedPtr<ModelTarget> m_target;
 
 	ModelBaseImpl(
 		String model_id,
 		Vector<SharedPtr<AST::StrategyBufferOpNode>> features,
-		SharedPtr<AST::StrategyBufferOpNode> target
+		SharedPtr<ModelTarget> target
 	) noexcept
 	{
 		m_id = model_id;
@@ -65,10 +65,26 @@ ModelBase::stepBase() noexcept
 
 
 //============================================================================
+SharedPtr<ModelTarget> const &
+ModelBase::getTarget() const noexcept
+{
+	return m_impl->m_target;
+}
+
+
+//============================================================================
 Vector<SharedPtr<AST::StrategyBufferOpNode>> const&
 ModelBase::getFeatures() const noexcept
 {
 	return m_impl->m_features;
+}
+
+
+//============================================================================
+size_t
+ModelBase::getCurrentIdx() const noexcept
+{
+	return m_exchange->currentIdx();
 }
 
 
@@ -153,16 +169,6 @@ ModelTarget::~ModelTarget() noexcept
 
 
 //============================================================================
-void
-ModelTarget::cacheTarget() noexcept
-{
-	auto const col_slice = m_target_buffer.col(m_buffer_idx);
-	m_target->evaluate(col_slice);
-	m_buffer_idx = (m_buffer_idx + 1) % m_lookforward;
-}
-
-
-//============================================================================
 bool
 ModelTarget::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
 {
@@ -181,15 +187,22 @@ ModelTarget::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
 void
 ModelTarget::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
+	assert(target.rows() == m_target_buffer.rows());
+	auto const col_slice = m_target_buffer.col(m_buffer_idx);
+	m_target->evaluate(col_slice);
+
 	switch (m_type)
 	{
 	case ModelTargetType::ABSOLUTE:
+		target = col_slice;
 		break;
 	case ModelTargetType::DELTA:
 		break;
 		case ModelTargetType::PERCENTAGE_CHANGE:
 		break;
 	}
+
+
 }
 
 
@@ -200,6 +213,7 @@ ModelTarget::reset() noexcept
 	m_buffer_idx = 0;
 	m_target_buffer.setZero();
 	m_target->reset();
+	m_in_lookforward = false;
 }
 
 

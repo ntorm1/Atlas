@@ -183,13 +183,16 @@ class SimpleObserverTest(unittest.TestCase):
         )
         self.exchange.registerModel(lr_model)
 
-        for i in range(3):
+        for i in range(4):
             self.hydra.step()
 
         x = lr_model.getX()
+        y = lr_model.getY()
         df = self.get_df()
         df["feat_1"] = df["Close"] - df["Close"].shift(1)
         df["feat_2"] = df["Close"] - df["Open"]
+        df["target"] = df["Close"].shift(-2)
+        self.assertAlmostEqual(y[0], df["target"].iloc[1])
         self.assertAlmostEqual(x[0,0], df["feat_1"].iloc[1])
         self.assertAlmostEqual(x[0,1], df["feat_2"].iloc[1])
         self.assertAlmostEqual(x[1,0], df["feat_1"].iloc[2])

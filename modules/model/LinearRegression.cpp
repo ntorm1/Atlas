@@ -46,7 +46,7 @@ LinearRegressionModel::LinearRegressionModel(
 		m_X.resize(row_count, feature_count);
 		m_X.setZero();
 	};
-	m_y.resize(row_count, 1);
+	m_y.resize(row_count);
 	m_y.setZero();
 	m_theta.setZero();
 }
@@ -88,6 +88,7 @@ void
 LinearRegressionModel::step() noexcept
 {
 	auto const& features = getFeatures();
+	auto const& target = getTarget();
 	auto x_block = m_X.block(
 		m_buffer_idx,
 		0,
@@ -99,6 +100,19 @@ LinearRegressionModel::step() noexcept
 		features[i]->evaluate(x_block.col(i));
 	}
 	m_buffer_idx += m_asset_count;
+	size_t look_forward = target->getLookForward();
+	if (getCurrentIdx() > look_forward)
+	{
+		assert(m_buffer_idx >= m_asset_count * (look_forward + 1));
+		size_t y_block_row_start = m_buffer_idx - m_asset_count * (look_forward + 1);
+		auto y_block = m_y.block(
+			y_block_row_start,
+			0,
+			m_asset_count,
+			1
+		);
+		target->evaluate(y_block);
+	}
 }
 
 
@@ -113,11 +127,12 @@ LinearRegressionModel::predict() noexcept
 		loop_idx = true;
 	}
 
-	auto x_block = m_X(
-		Eigen::seq(m_buffer_idx, m_buffer_idx + m_asset_count),
-		Eigen::seq(0, getFeatures().size())
+	auto x_block = m_X.block(
+		m_buffer_idx,
+		0,
+		m_asset_count,
+		m_theta.size()
 	);
-
 	m_signal = x_block * m_theta;
 	if (loop_idx)
 		m_buffer_idx = 0;

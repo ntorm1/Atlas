@@ -46,6 +46,7 @@ private:
 	ModelTargetType m_type;
 	size_t m_lookforward;
 	size_t m_buffer_idx = 0;
+	bool m_in_lookforward = false;
 
 public:
 	ATLAS_API ModelTarget(
@@ -55,7 +56,6 @@ public:
 	) noexcept;
 	ATLAS_API ~ModelTarget() noexcept;
 
-	void cacheTarget() noexcept;
 
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 	[[nodiscard]] size_t getWarmup() const noexcept { return m_lookforward; }
@@ -102,8 +102,9 @@ protected:
 	size_t m_warmup = 0;
 	LinAlg::EigenVectorXd m_signal;
 	SharedPtr<ModelConfig> m_config;
-	Vector<SharedPtr<AST::StrategyBufferOpNode>> const& getFeatures() const noexcept;
-
+	[[nodiscard]] SharedPtr<ModelTarget> const& getTarget() const noexcept;
+	[[nodiscard]] Vector<SharedPtr<AST::StrategyBufferOpNode>> const& getFeatures() const noexcept;
+	[[nodiscard]] size_t getCurrentIdx() const noexcept;
 public:
 	ATLAS_API ModelBase(
 		String id,

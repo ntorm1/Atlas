@@ -64,6 +64,7 @@ static void bindLinearRegressionModel(py::module& m) {
             py::arg("target"),
             py::arg("config"))
         .def("getX", &LinearRegressionModel::getX, py::return_value_policy::reference_internal)
+        .def("getY", &LinearRegressionModel::getY, py::return_value_policy::reference_internal)
         .def("getTheta", &LinearRegressionModel::getTheta, py::return_value_policy::reference_internal);
 }
 

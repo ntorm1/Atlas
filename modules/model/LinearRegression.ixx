@@ -71,6 +71,7 @@ public:
 
 	ATLAS_API auto const& getTheta() const noexcept  { return m_theta; }
 	ATLAS_API auto const& getX() const noexcept { return m_X; }
+	ATLAS_API auto const& getY() const noexcept { return m_y; }
 
 	void train() noexcept override;
 	void reset() noexcept override;
