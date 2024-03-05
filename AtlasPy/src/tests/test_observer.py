@@ -14,7 +14,7 @@ sys.path.append(atlas_path)
 
 from AtlasPy.core import Hydra, Portfolio, Strategy
 from AtlasPy.ast import *
-
+from AtlasPy.model import *
 
 exchange_path_sp500_ma = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/test/data_sp500_ma.h5"
 exchange_path = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasTest/scripts/data.h5"
@@ -144,6 +144,56 @@ class SimpleObserverTest(unittest.TestCase):
         df.replace(np.nan, 0, inplace=True)
         self.assertTrue(np.allclose(df["close_open_cov_atlas"], df["close_open_cov_pd"]))
 
+    def test_lr(self):
+        close = AssetReadNode.make("Close", 0, self.exchange)
+        open = AssetReadNode.make("Open", 0, self.exchange)
+        prev_close = AssetReadNode.make("Close", -1, self.exchange)
+
+        feat1 = AssetOpNode.make(
+            close,
+            prev_close,
+            AssetOpType.SUBTRACT
+        )
+        feat2 = AssetOpNode.make(
+            close,
+            open,
+            AssetOpType.SUBTRACT
+        )
+        target = ModelTarget(
+            close,
+            ModelTargetType.ABSOLUTE,
+            2
+        )
+        config = ModelConfig(
+            training_window = 5,
+            walk_forward_window = 3,
+            model_type = ModelType.LINEAR_REGRESSION,
+            exchange = self.exchange,
+        )
+        lr_config = LinearRegressionModelConfig(
+            config,
+            LinearRegressionSolver.LDLT,
+            True
+        )
+        lr_model = LinearRegressionModel(
+            "lr_model",
+            [feat1, feat2],
+            target,
+            lr_config
+        )
+        self.exchange.registerModel(lr_model)
+
+        for i in range(3):
+            self.hydra.step()
+
+        x = lr_model.getX()
+        df = self.get_df()
+        df["feat_1"] = df["Close"] - df["Close"].shift(1)
+        df["feat_2"] = df["Close"] - df["Open"]
+        self.assertAlmostEqual(x[0,0], df["feat_1"].iloc[1])
+        self.assertAlmostEqual(x[0,1], df["feat_2"].iloc[1])
+        self.assertAlmostEqual(x[1,0], df["feat_1"].iloc[2])
+        self.assertAlmostEqual(x[1,1], df["feat_2"].iloc[2])
 
 
 if __name__ == "__main__":

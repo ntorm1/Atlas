@@ -68,6 +68,7 @@ public:
 	Vector<Int64> timestamps;
 	Vector<SharedPtr<AST::TriggerNode>> registered_triggers;
 	Vector<SharedPtr<AST::AssetObserverNode>> asset_observers;
+	FastMap<String, SharedPtr<Model::ModelBase>> models;
 	FastMap<String,SharedPtr<AST::CovarianceNodeBase>> covariance_nodes;
 	FastMap<String,SharedPtr<AST::StrategyBufferOpNode>> ast_cache;
 	Vector<Strategy*> registered_strategies;

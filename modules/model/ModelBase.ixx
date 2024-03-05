@@ -24,8 +24,46 @@ struct ModelBaseImpl;
 //============================================================================
 export enum ModelType
 {
-	LinearRegression,
+	LINEAR_REGRESSION,
 };
+
+
+//============================================================================//==
+export enum ModelTargetType
+{
+	ABSOLUTE,
+	DELTA,
+	PERCENTAGE_CHANGE
+};
+
+
+//============================================================================
+export class ModelTarget final : public AST::StrategyBufferOpNode
+{
+private:
+	SharedPtr<AST::StrategyBufferOpNode> m_target;
+	LinAlg::EigenMatrixXd m_target_buffer;
+	ModelTargetType m_type;
+	size_t m_lookforward;
+	size_t m_buffer_idx = 0;
+
+public:
+	ATLAS_API ModelTarget(
+		SharedPtr<AST::StrategyBufferOpNode> target,
+		ModelTargetType type,
+		size_t lookforward
+	) noexcept;
+	ATLAS_API ~ModelTarget() noexcept;
+
+	void cacheTarget() noexcept;
+
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+	[[nodiscard]] size_t getWarmup() const noexcept { return m_lookforward; }
+	[[nodiscard]] size_t getLookForward() const noexcept { return m_lookforward; }
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void reset() noexcept override;
+};
+
 
 
 //============================================================================
@@ -36,15 +74,27 @@ public:
 	size_t walk_forward_window;
 	ModelType type;
 	SharedPtr<Exchange> exchange;
+
+	ModelConfig() = delete;
+	ATLAS_API ModelConfig(
+		size_t training_window,
+		size_t walk_forward_window,
+		ModelType model_type,
+		SharedPtr<Exchange> exchange
+	) noexcept;
+	ATLAS_API ~ModelConfig() noexcept = default;
 };
 
 
 //============================================================================
 export class ModelBase : public AST::StrategyBufferOpNode
 {
+	friend class Exchange;
 private:
 	ModelBaseImpl* m_impl;
 	SharedPtr<Exchange> m_exchange;
+
+	void stepBase() noexcept;
 
 protected:
 	size_t m_asset_count;
@@ -55,14 +105,15 @@ protected:
 	Vector<SharedPtr<AST::StrategyBufferOpNode>> const& getFeatures() const noexcept;
 
 public:
-	ModelBase(
+	ATLAS_API ModelBase(
 		String id,
 		Vector<SharedPtr<AST::StrategyBufferOpNode>> features,
-		SharedPtr<AST::StrategyBufferOpNode> target,
+		SharedPtr<ModelTarget> target,
 		SharedPtr<ModelConfig> config
 	) noexcept;
-	~ModelBase() noexcept;
+	ATLAS_API virtual ~ModelBase() noexcept;
 
+	[[nodiscard]] String const& getId() const noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept final override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept final override;
 	
@@ -70,7 +121,6 @@ public:
 	virtual void step() noexcept = 0;
 	virtual void predict() noexcept = 0;
 };
-
 
 
 }

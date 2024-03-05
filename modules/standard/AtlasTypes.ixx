@@ -66,6 +66,13 @@ export namespace Atlas
 	class CommisionManager;
 	class Hydra;
 
+
+	namespace Model
+	{
+		class ModelBase;
+		class LinearRegressionModel;
+	}
+
 	namespace AST
 	{
 		class AssetReadNode;

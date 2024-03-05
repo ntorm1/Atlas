@@ -39,11 +39,12 @@ private:
 	bool m_fit_intercept = true;
 
 public:
-	LinearRegressionModelConfig(
+	ATLAS_API LinearRegressionModelConfig(
 		SharedPtr<ModelConfig> base_config,
 		LinearRegressionSolver solver = LinearRegressionSolver::LDLT,
 		bool fit_intercept = true
 	) noexcept;
+	ATLAS_API ~LinearRegressionModelConfig() noexcept = default;
 };
 
 
@@ -55,23 +56,27 @@ private:
 	size_t m_buffer_idx = 0;
 	LinearRegressionModelImpl* m_impl;
 	LinAlg::EigenMatrixXd m_X;
-	LinAlg::EigenMatrixXd m_y;
+	LinAlg::EigenVectorXd m_y;
 	LinAlg::EigenVectorXd m_theta;
 	SharedPtr<const LinearRegressionModelConfig> m_lr_config;
 
 public:
-	LinearRegressionModel(
+	ATLAS_API LinearRegressionModel(
 		String id,
 		Vector<SharedPtr<AST::StrategyBufferOpNode>> features,
-		SharedPtr<AST::StrategyBufferOpNode> target,
+		SharedPtr<ModelTarget> target,
 		SharedPtr<const LinearRegressionModelConfig> config
 	) noexcept;
-	~LinearRegressionModel() noexcept;
+	ATLAS_API ~LinearRegressionModel() noexcept;
+
+	ATLAS_API auto const& getTheta() const noexcept  { return m_theta; }
+	ATLAS_API auto const& getX() const noexcept { return m_X; }
 
 	void train() noexcept override;
 	void reset() noexcept override;
 	void step() noexcept override;
 	void predict() noexcept override;
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 };
 
 }

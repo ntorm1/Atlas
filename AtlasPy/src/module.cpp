@@ -5,9 +5,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
-#include "AtlasStruct.hpp"
 
-import PortfolioModule;
 
 import AllocationNodeModule;
 import AssetNodeModule;
@@ -18,103 +16,51 @@ import AtlasLinAlg;
 import AtlasCore;
 import BaseNodeModule;
 import CommissionsModule;
-import ExchangeModule;
 import ExchangeNodeModule;
+import ExchangeModule;
 import HelperNodesModule;
 import HydraModule;
 import OptimizeNodeModule;
 import ObserverNodeModule;
 import ObserverNodeBaseModule;
+import PortfolioModule;
 import RankNodeModule;
 import StrategyModule;
 import StrategyNodeModule;
 import StrategyBufferModule;
-import RiskNodeModule;
 import TradeNodeModule;
 import TracerModule;
+import RiskNodeModule;
 
-namespace py = pybind11;
-
-// Wrapper for the Order struct
-void wrap_order(py::module& m) {
-    py::class_<Atlas::Order>(m, "Order")
-        .def(py::init<size_t, size_t, long long, double, double>())
-        .def_readonly("asset_id", &Atlas::Order::asset_id)
-        .def_readonly("strategy_id", &Atlas::Order::strategy_id)
-        .def_readonly("fill_time", &Atlas::Order::fill_time)
-        .def_readonly("quantity", &Atlas::Order::quantity)
-        .def_readonly("fill_price", &Atlas::Order::fill_price)
-        .def("to_dict", 
-            [](const Atlas::Order& order) {
-                py::dict d;
-                d["asset_id"] = order.asset_id;
-                d["strategy_id"] = order.strategy_id;
-                d["fill_time"] = order.fill_time;
-                d["quantity"] = order.quantity;
-                d["fill_price"] = order.fill_price;
-                return d;
-            });
-}
-
-// Wrapper for the Trade struct
-void wrap_trade(py::module& m) {
-    py::class_<Atlas::Trade>(m, "Trade")
-        .def(py::init<size_t, size_t, long long, long long, double, double, double>())
-        .def_readonly("asset_id", &Atlas::Trade::asset_id)
-        .def_readonly("strategy_id", &Atlas::Trade::strategy_id)
-        .def_readonly("open_time", &Atlas::Trade::open_time)
-        .def_readonly("close_time", &Atlas::Trade::close_time)
-        .def_readonly("quantity", &Atlas::Trade::quantity)
-        .def_readonly("open_price", &Atlas::Trade::open_price)
-        .def_readonly("close_price", &Atlas::Trade::close_price)
-        .def("to_dict",
-			[](const Atlas::Trade& trade) {
-				py::dict d;
-				d["asset_id"] = trade.asset_id;
-				d["strategy_id"] = trade.strategy_id;
-				d["open_time"] = trade.open_time;
-				d["close_time"] = trade.close_time;
-				d["quantity"] = trade.quantity;
-				d["open_price"] = trade.open_price;
-				d["close_price"] = trade.close_price;
-				return d;
-			});
-}
+#include "module_struct.h"
+#include "module_base.h"
+#include "module_model.h"
 
 
 PYBIND11_MODULE(AtlasPy, m) {
     auto m_core = m.def_submodule("core");
     auto m_ast = m.def_submodule("ast");
+    auto m_model = m.def_submodule("model");
+
+    py::class_<Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::ASTNode>>(m_ast, "ASTNode");
+
+    py::class_<Atlas::AST::StrategyBufferOpNode, Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode")
+        .def("lag", &Atlas::AST::StrategyBufferOpNode::lag)
+        .def("cache", &Atlas::AST::StrategyBufferOpNode::cache, py::return_value_policy::reference_internal);
 
     wrap_order(m_core);
     wrap_trade(m_core);
+    wrap_base(m_core);
+    wrap_model(m_model);
 
-    // ======= PYTHON API ======= //
-    py::class_<Atlas::Portfolio, std::shared_ptr<Atlas::Portfolio>>(m_core, "Portfolio")
-        .def(
-            "getName",
-            &Atlas::Portfolio::getName,
-            "get unique id of the portfolio"
-        );
-    py::class_<Atlas::Hydra, std::shared_ptr<Atlas::Hydra>>(m_core, "Hydra")
-        .def("build", &Atlas::Hydra::pyBuild)
-        .def("run", &Atlas::Hydra::pyRun)
-        .def("step", &Atlas::Hydra::step)
-        .def("removeStrategy", &Atlas::Hydra::removeStrategy)
-        .def("reset", &Atlas::Hydra::pyReset)
-        .def("addExchange", &Atlas::Hydra::pyAddExchange,
-            py::arg("name"),
-            py::arg("source"),
-            py::arg("datetime_format") = std::nullopt
-        )
-        .def("getExchange", &Atlas::Hydra::pyGetExchange)
-        .def("addStrategy", &Atlas::Hydra::pyAddStrategy,
-            py::arg("strategy"),
-			py::arg("replace_if_exists") = false
-        )
-        .def("addPortfolio", &Atlas::Hydra::pyAddPortfolio)
-        .def("getPortfolio", &Atlas::Hydra::pyGetPortfolio)
-        .def(py::init<>());
+
+    py::enum_<Atlas::CovarianceType>(m_ast, "CovarianceType")
+        .value("FULL", Atlas::CovarianceType::FULL)
+        .value("INCREMENTAL", Atlas::CovarianceType::INCREMENTAL)
+        .export_values();
+
+    py::class_<Atlas::AST::AssetObserverNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetObserverNode>>(m_ast, "AssetObserverNode");
+
 
     py::class_<Atlas::AST::CovarianceNodeBase, std::shared_ptr<Atlas::AST::CovarianceNodeBase>>(m_ast, "CovarianceNodeBase")
         .def("getCovarianceMatrix", &Atlas::AST::CovarianceNodeBase::getCovariance, py::return_value_policy::reference_internal);
@@ -122,36 +68,6 @@ PYBIND11_MODULE(AtlasPy, m) {
     py::class_<Atlas::AST::CovarianceNode, Atlas::AST::CovarianceNodeBase, std::shared_ptr<Atlas::AST::CovarianceNode>>(m_ast, "CovarianceNode");
 
     py::class_<Atlas::AST::IncrementalCovarianceNode, Atlas::AST::CovarianceNodeBase, std::shared_ptr<Atlas::AST::IncrementalCovarianceNode>>(m_ast, "IncrementalCovarianceNode");
-
-    py::class_<Atlas::CommisionManager, std::shared_ptr<Atlas::CommisionManager>>(m, "CommisionManager")
-        .def("setCommissionPct", &Atlas::CommisionManager::setCommissionPct)
-        .def("setFixedCommission", &Atlas::CommisionManager::setFixedCommission);
-
-    py::enum_<Atlas::CovarianceType>(m_ast, "CovarianceType")
-        .value("FULL", Atlas::CovarianceType::FULL)
-        .value("INCREMENTAL", Atlas::CovarianceType::INCREMENTAL)
-        .export_values();
-
-    py::class_<Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::ASTNode>>(m_ast, "ASTNode");
-    
-    py::class_<Atlas::AST::StrategyBufferOpNode, Atlas::AST::ASTNode, std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(m_ast, "StrategyBufferOpNode")
-        .def("lag", &Atlas::AST::StrategyBufferOpNode::lag)
-        .def("cache", &Atlas::AST::StrategyBufferOpNode::cache, py::return_value_policy::reference_internal);
-    
-    py::class_<Atlas::AST::AssetObserverNode, Atlas::AST::StrategyBufferOpNode, std::shared_ptr<Atlas::AST::AssetObserverNode>>(m_ast, "AssetObserverNode");
-
-    py::class_<Atlas::Exchange, std::shared_ptr<Atlas::Exchange>>(m_core, "Exchange")
-        .def("registerObserver", &Atlas::Exchange::registerObserver)
-        .def("enableNodeCache", &Atlas::Exchange::enableNodeCache)
-        .def("getTimestamps", &Atlas::Exchange::getTimestamps)
-        .def("getCovarianceNode", &Atlas::Exchange::getCovarianceNode)
-        .def("getMarketReturns", &Atlas::Exchange::getMarketReturns,
-            py::arg("row_offset") = 0,
-            py::return_value_policy::reference_internal)
-        .def("getAssetMap", &Atlas::Exchange::getAssetMap)
-        .def("getAssetIndex", &Atlas::Exchange::getAssetIndex)
-        .def("getCurrentTimestamp", &Atlas::Exchange::getCurrentTimestamp)
-        .def("getName",&Atlas::Exchange::getName,"get unique id of the exchange");
 
     py::enum_<Atlas::TracerType>(m_ast, "TracerType")
         .value("NLV", Atlas::TracerType::NLV)

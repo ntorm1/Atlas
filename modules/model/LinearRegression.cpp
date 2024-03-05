@@ -27,7 +27,7 @@ LinearRegressionModelConfig::LinearRegressionModelConfig(
 LinearRegressionModel::LinearRegressionModel(
 	String id,
 	Vector<SharedPtr<AST::StrategyBufferOpNode>> features,
-	SharedPtr<AST::StrategyBufferOpNode> target,
+	SharedPtr<ModelTarget> target,
 	SharedPtr<const LinearRegressionModelConfig> config
 ) noexcept:
 	ModelBase(std::move(id), std::move(features), std::move(target), config->m_base_config),
@@ -68,7 +68,7 @@ LinearRegressionModel::train() noexcept
 			m_theta = (m_X.transpose() * m_X).ldlt().solve(m_X.transpose() * m_y);
 			break;
 		case LinearRegressionSolver::ColPivHouseholderQR:
-			m_theta = m_X.householderQr().solve(m_y);
+			m_theta = m_X.colPivHouseholderQr().solve(m_y);
 			break;
 	}
 }
@@ -87,12 +87,14 @@ LinearRegressionModel::reset() noexcept
 void
 LinearRegressionModel::step() noexcept
 {
-	auto x_block = m_X(
-		Eigen::seq(m_buffer_idx, m_buffer_idx + m_asset_count),
-		Eigen::seq(0, getFeatures().size())
-	);
 	auto const& features = getFeatures();
-	for (size_t i = 0; i < m_asset_count; ++i)
+	auto x_block = m_X.block(
+		m_buffer_idx,
+		0,
+		m_asset_count,
+		features.size()
+	);
+	for (size_t i = 0; i < features.size(); ++i)
 	{
 		features[i]->evaluate(x_block.col(i));
 	}
@@ -117,11 +119,17 @@ LinearRegressionModel::predict() noexcept
 	);
 
 	m_signal = x_block * m_theta;
-
 	if (loop_idx)
 		m_buffer_idx = 0;
 }
 
+
+//============================================================================
+bool
+LinearRegressionModel::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
+{
+	return false;
+}
 
 }
 

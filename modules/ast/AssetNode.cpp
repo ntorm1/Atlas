@@ -182,11 +182,16 @@ AssetOpNode::reset() noexcept
 }
 
 
+//============================================================================
 void
 AssetOpNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
 {
-	assert(static_cast<size_t>(target.rows()) == getExchange().getAssetCount());
+#ifdef _DEBUG
+	size_t target_rows = static_cast<size_t>(target.rows());
+	size_t asset_count = getExchange().getAssetCount();
+	assert(target_rows == asset_count);
 	assert(static_cast<size_t>(target.cols()) == 1);
+#endif
 
 	m_asset_op_left->evaluate(target);
 	m_asset_op_right->evaluate(m_right_buffer);

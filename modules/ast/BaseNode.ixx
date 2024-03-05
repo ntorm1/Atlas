@@ -31,7 +31,8 @@ export enum class NodeType : Uint8
 	TRADE_LIMIT = 16,
 	MODEL = 17,
 	LAG = 18,
-	NOP = 19,
+	TARGET = 19,
+	NOP = 20,
 };
 
 

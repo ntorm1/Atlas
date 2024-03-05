@@ -16,7 +16,6 @@ namespace Atlas
 
 struct ExchangeImpl;
 
-using namespace LinAlg;
 
 //============================================================================
 export class Exchange
@@ -72,10 +71,10 @@ public:
 	size_t currentIdx() const noexcept;
 	Option<SharedPtr<AST::AssetObserverNode>> getObserver(String const& id) noexcept;
 	Option<SharedPtr<AST::StrategyBufferOpNode>> getSameFromCache(SharedPtr<AST::StrategyBufferOpNode> a) noexcept;
-	EigenMatrixXd const& getData() const noexcept;
-	EigenVectorXd const& getReturnsScalar() const noexcept;
-	EigenBlockView<double> getMarketReturnsBlock(size_t start_idex, size_t end_idx) const noexcept;
-	EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;
+	LinAlg::EigenMatrixXd const& getData() const noexcept;
+	LinAlg::EigenVectorXd const& getReturnsScalar() const noexcept;
+	LinAlg::EigenBlockView<double> getMarketReturnsBlock(size_t start_idex, size_t end_idx) const noexcept;
+	LinAlg::EigenConstColView<double> getSlice(size_t column, int row_offset) const noexcept;
 	Option<size_t> getColumnIndex(String const& column) const noexcept;
 	Option<size_t> getCloseIndex() const noexcept;
 	Option<String> getDatetimeFormat() const noexcept;
@@ -88,11 +87,12 @@ public:
 		size_t lookback,
 		CovarianceType type
 	) noexcept;
-	
+
+	ATLAS_API void registerModel(SharedPtr<Model::ModelBase> model) noexcept;
 	ATLAS_API SharedPtr<AST::AssetObserverNode> registerObserver(SharedPtr<AST::AssetObserverNode> observer) noexcept;
 	ATLAS_API HashMap<String, SharedPtr<AST::StrategyBufferOpNode>> getASTCache() const noexcept;
-	ATLAS_API EigenConstRowView<double> getAssetSlice(size_t asset_index) const noexcept;
-	ATLAS_API EigenConstColView<double> getMarketReturns(int row_offset = 0) const noexcept;
+	ATLAS_API LinAlg::EigenConstRowView<double> getAssetSlice(size_t asset_index) const noexcept;
+	ATLAS_API LinAlg::EigenConstColView<double> getMarketReturns(int row_offset = 0) const noexcept;
 	ATLAS_API String const& getName() const noexcept {return m_name;}
 	ATLAS_API Option<size_t> getAssetIndex(String const& asset) const noexcept;
 	ATLAS_API HashMap<String, size_t> const& getAssetMap() const noexcept;

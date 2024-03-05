@@ -3,14 +3,16 @@ module;
 #include <Eigen/Dense>
 module ExchangeModule;
 
-import ExchangePrivateModule;
-import StrategyModule;
 import AtlasUtilsModule;
 import AtlasTimeModule;
+import ExchangePrivateModule;
 import HelperNodesModule;
-import RiskNodeModule;
+import ModelBaseModule;
 import ObserverNodeBaseModule;
+import RiskNodeModule;
 import StrategyBufferModule;
+import StrategyModule;
+
 
 namespace Atlas
 {
@@ -241,6 +243,22 @@ Exchange::reset() noexcept
 		),
 		m_impl->asset_observers.end()
 	);
+
+	m_impl->models.erase(
+		std::remove_if(
+			m_impl->models.begin(),
+			m_impl->models.end(),
+			[](const auto& model) {
+				if (model.second.use_count() > 1) {
+					model.second->reset();
+					return false;
+				}
+				return true;
+			}
+		),
+		m_impl->models.end()
+	);
+
 	cleanupCovarianceNodes();
 }
 
@@ -286,6 +304,11 @@ Exchange::step(Int64 global_time) noexcept
 		m_impl->asset_observers.end(), 
 		[](auto& observer) { observer->cacheBase(); }
 	);
+	std::for_each(
+		m_impl->models.begin(),
+		m_impl->models.end(),
+		[](auto& observer) { observer.second->stepBase(); }
+	);
 
 	// cache the scalar returns used for evaluating portfolio
 	LinAlg::EigenConstColView<double> market_returns = getMarketReturns();
@@ -307,6 +330,15 @@ Exchange::registerTrigger(SharedPtr<AST::TriggerNode>&& trigger) noexcept
 	}
 	m_impl->registered_triggers.push_back(trigger);
 	return trigger;
+}
+
+
+//============================================================================
+void
+Exchange::registerModel(SharedPtr<Model::ModelBase> model) noexcept
+{
+	auto const& id = model->getId();
+	m_impl->models[id] = model;
 }
 
 
@@ -550,14 +582,14 @@ Exchange::getSameFromCache(SharedPtr<AST::StrategyBufferOpNode> a) noexcept
 }
 
 //============================================================================
-EigenMatrixXd const&
+LinAlg::EigenMatrixXd const&
 Exchange::getData() const noexcept
 {
 	return m_impl->data;
 }
 
 //============================================================================
-Eigen::VectorXd const&
+LinAlg::EigenVectorXd const&
 Exchange::getReturnsScalar() const noexcept
 {
 	return m_impl->returns_scalar;
@@ -601,7 +633,7 @@ Exchange::getCovarianceNode(
 }
 
 //============================================================================
-EigenConstRowView<double>
+LinAlg::EigenConstRowView<double>
 Exchange::getAssetSlice(size_t asset_index) const noexcept
 {
 	assert(asset_index < static_cast<size_t>(m_impl->data.rows()));
@@ -610,7 +642,7 @@ Exchange::getAssetSlice(size_t asset_index) const noexcept
 
 
 //============================================================================
-EigenConstColView<double>
+LinAlg::EigenConstColView<double>
 Exchange::getMarketReturns(int offset) const noexcept
 {
 	assert(m_impl->current_index > 0);
@@ -622,7 +654,7 @@ Exchange::getMarketReturns(int offset) const noexcept
 
 
 //============================================================================
-EigenBlockView<double>
+LinAlg::EigenBlockView<double>
 Exchange::getMarketReturnsBlock(
 	size_t start_idx,
 	size_t end_idx) const noexcept
