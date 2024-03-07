@@ -48,6 +48,7 @@ LinearRegressionModel::LinearRegressionModel(
 	};
 	m_y.resize(row_count);
 	m_y.setZero();
+	m_theta.resize(feature_count + m_lr_config->m_fit_intercept);
 	m_theta.setZero();
 }
 
@@ -62,13 +63,48 @@ LinearRegressionModel::~LinearRegressionModel() noexcept
 void 
 LinearRegressionModel::train() noexcept
 {
+	// have to adjust the training block to exclude samples whose target
+	// is not available
+	size_t train_start_idx = 0;
+	size_t train_end_idx = m_buffer_idx - m_asset_count * getTarget()->getLookForward();
+	size_t train_block_size = train_end_idx - train_start_idx;
+	auto x_block = m_X.block(
+		train_start_idx,
+		0,
+		train_block_size,
+		m_theta.size()
+	);
+	auto y_block = m_y.block(
+		train_start_idx,
+		0,
+		train_block_size,
+		1
+	);
+
+	// copy x block and y block into std vectors
+	std::vector<std::vector<double>> x_data;
+	for (size_t i = 0; i < x_block.rows(); ++i)
+	{
+		std::vector<double> row;
+		for (size_t j = 0; j < x_block.cols(); ++j)
+		{
+			row.push_back(x_block(i, j));
+		}
+		x_data.push_back(row);
+	}
+	std::vector<double> y_data;
+	for (size_t i = 0; i < y_block.rows(); ++i)
+	{
+		y_data.push_back(y_block(i, 0));
+	}
+
 	switch (m_lr_config->m_solver)
 	{
 		case LinearRegressionSolver::LDLT:
-			m_theta = (m_X.transpose() * m_X).ldlt().solve(m_X.transpose() * m_y);
+			m_theta = (x_block.transpose() * x_block).ldlt().solve(x_block.transpose() * y_block);
 			break;
 		case LinearRegressionSolver::ColPivHouseholderQR:
-			m_theta = m_X.colPivHouseholderQr().solve(m_y);
+			m_theta = x_block.colPivHouseholderQr().solve(y_block);
 			break;
 	}
 }

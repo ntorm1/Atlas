@@ -4,6 +4,7 @@ import time
 import unittest
 import pandas as pd
 import numpy as np
+import statsmodels.api as sm
 
 # show pandas columns with 3 points of precision
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
@@ -198,6 +199,14 @@ class SimpleObserverTest(unittest.TestCase):
         self.assertAlmostEqual(x[1,0], df["feat_1"].iloc[2])
         self.assertAlmostEqual(x[1,1], df["feat_2"].iloc[2])
 
+        self.hydra.step()
+        self.hydra.step()
+
+        x = lr_model.getX()
+        y = lr_model.getY()
+        model = sm.OLS(y[:-2], x[:-2,:]).fit()
+        params = np.array(model.params)
+        self.assertTrue(np.allclose(params, lr_model.getTheta()))
 
 if __name__ == "__main__":
     unittest.main()
