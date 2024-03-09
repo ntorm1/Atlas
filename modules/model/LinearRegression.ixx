@@ -53,10 +53,7 @@ public:
 export class LinearRegressionModel : public ModelBase
 {
 private:
-	size_t m_buffer_idx = 0;
 	LinearRegressionModelImpl* m_impl;
-	LinAlg::EigenMatrixXd m_X;
-	LinAlg::EigenVectorXd m_y;
 	LinAlg::EigenVectorXd m_theta;
 	SharedPtr<const LinearRegressionModelConfig> m_lr_config;
 
@@ -75,7 +72,6 @@ public:
 
 	void train() noexcept override;
 	void reset() noexcept override;
-	void step() noexcept override;
 	void predict() noexcept override;
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 };

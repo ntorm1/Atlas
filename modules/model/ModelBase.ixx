@@ -93,6 +93,7 @@ export class ModelBase : public AST::StrategyBufferOpNode
 private:
 	ModelBaseImpl* m_impl;
 	SharedPtr<Exchange> m_exchange;
+	size_t m_buffer_idx = 0;
 
 	void stepBase() noexcept;
 
@@ -101,11 +102,19 @@ protected:
 	size_t m_asset_count;
 	size_t m_feature_warmup = 0;
 	size_t m_warmup = 0;
+	LinAlg::EigenMatrixXd m_X;
+	LinAlg::EigenVectorXd m_y;
 	LinAlg::EigenVectorXd m_signal;
 	SharedPtr<ModelConfig> m_config;
+
+	void copyBlocks(
+		LinAlg::EigenRef<LinAlg::EigenMatrixXd> x_train,
+		LinAlg::EigenRef<LinAlg::EigenVectorXd> y_train
+	) const noexcept;
 	[[nodiscard]] SharedPtr<ModelTarget> const& getTarget() const noexcept;
 	[[nodiscard]] Vector<SharedPtr<AST::StrategyBufferOpNode>> const& getFeatures() const noexcept;
 	[[nodiscard]] size_t getCurrentIdx() const noexcept;
+	[[nodiscard]] size_t getBufferIdx() const noexcept { return m_buffer_idx; }
 public:
 	ATLAS_API ModelBase(
 		String id,
@@ -118,9 +127,9 @@ public:
 	[[nodiscard]] String const& getId() const noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept final override;
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept final override;
-	
+	void step() noexcept;
+
 	virtual void train() noexcept = 0;
-	virtual void step() noexcept = 0;
 	virtual void predict() noexcept = 0;
 };
 
