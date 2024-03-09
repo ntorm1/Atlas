@@ -97,6 +97,7 @@ private:
 	void stepBase() noexcept;
 
 protected:
+	bool m_buffer_looped = false;
 	size_t m_asset_count;
 	size_t m_feature_warmup = 0;
 	size_t m_warmup = 0;

@@ -208,5 +208,16 @@ class SimpleObserverTest(unittest.TestCase):
         params = np.array(model.params)
         self.assertTrue(np.allclose(params, lr_model.getTheta()))
 
+        self.hydra.step()
+        x = lr_model.getX()
+        y = lr_model.getY()
+        x_pandas = df[["feat_1", "feat_2"]].iloc[2:5].values
+        y_pandas = df["target"].iloc[2:5].values
+        self.assertTrue(np.allclose(x_pandas, x[1:4,:-1]))
+        self.assertTrue(np.allclose(y_pandas, y[1:4]))
+        model = sm.OLS(y[1:4], x[1:4,:]).fit()
+        params = np.array(model.params)
+        self.assertTrue(np.allclose(params, lr_model.getTheta()))
+
 if __name__ == "__main__":
     unittest.main()
