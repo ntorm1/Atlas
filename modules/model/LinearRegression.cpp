@@ -81,23 +81,6 @@ LinearRegressionModel::train() noexcept
 		1
 	);
 
-	// copy x block and y block into std vectors
-	std::vector<std::vector<double>> x_data;
-	for (size_t i = 0; i < x_block.rows(); ++i)
-	{
-		std::vector<double> row;
-		for (size_t j = 0; j < x_block.cols(); ++j)
-		{
-			row.push_back(x_block(i, j));
-		}
-		x_data.push_back(row);
-	}
-	std::vector<double> y_data;
-	for (size_t i = 0; i < y_block.rows(); ++i)
-	{
-		y_data.push_back(y_block(i, 0));
-	}
-
 	switch (m_lr_config->m_solver)
 	{
 		case LinearRegressionSolver::LDLT:

@@ -57,9 +57,15 @@ ModelBase::stepBase() noexcept
 	}
 
 	step();
-	if (current_idx > 0 && current_idx % m_config->training_window == 0)
+	if (current_idx >= m_config->training_window)
 	{
-		train();
+		if (
+			current_idx == m_config->training_window ||
+			current_idx % m_config->walk_forward_window == 0
+			)
+		{
+			train();
+		}
 	}
 }
 
