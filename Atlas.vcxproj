@@ -73,13 +73,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CodeAnalysisRuleSet>MixedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <IncludePath>$(ProjectDir)include;$(ProjectDir)external;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath)</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <IncludePath>$(ProjectDir)include;$(ProjectDir)external;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath)</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -229,6 +229,8 @@
     <ClCompile Include="modules\model\LinearRegression.ixx" />
     <ClCompile Include="modules\model\ModelBase.cpp" />
     <ClCompile Include="modules\model\ModelBase.ixx" />
+    <ClCompile Include="modules\model\XGBoost.cpp" />
+    <ClCompile Include="modules\model\XGBoost.ixx" />
     <ClCompile Include="modules\portfolio\Portfolio.cpp" />
     <ClCompile Include="modules\portfolio\Portfolio.ixx" />
     <ClCompile Include="modules\standard\AtlasCore.ixx" />

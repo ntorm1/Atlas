@@ -236,5 +236,11 @@
     <ClCompile Include="modules\model\LinearRegression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\model\XGBoost.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\model\XGBoost.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

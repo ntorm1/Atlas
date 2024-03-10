@@ -17,7 +17,6 @@ namespace Atlas
 namespace Model
 {
 
-struct LinearRegressionModelImpl;
 class LinearRegressionModel;
 
 //============================================================================
@@ -53,7 +52,6 @@ public:
 export class LinearRegressionModel : public ModelBase
 {
 private:
-	LinearRegressionModelImpl* m_impl;
 	LinAlg::EigenVectorXd m_theta;
 	SharedPtr<const LinearRegressionModelConfig> m_lr_config;
 

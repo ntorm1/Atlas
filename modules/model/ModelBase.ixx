@@ -25,6 +25,7 @@ struct ModelBaseImpl;
 export enum ModelType
 {
 	LINEAR_REGRESSION,
+	XGBOOST,
 };
 
 

@@ -1,3 +1,6 @@
 [submodule "AtlasX/external/QScintilla"]
 	path = AtlasX/external/QScintilla
 	url = https://github.com/ntorm1/QScintilla.git
+[submodule "external/xgboost"]
+	path = external/xgboost
+	url = https://github.com/dmlc/xgboost.git

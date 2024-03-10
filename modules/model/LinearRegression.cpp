@@ -41,12 +41,6 @@ LinearRegressionModel::LinearRegressionModel(
 		m_X.setZero();
 		m_X.col(feature_count).setOnes();
 	}
-	else
-	{
-		m_X.resize(row_count, feature_count);
-		m_X.setZero();
-	};
-	m_y.resize(row_count);
 	m_y.setZero();
 	m_theta.resize(feature_count + m_lr_config->m_fit_intercept);
 	m_theta.setZero();

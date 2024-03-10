@@ -11,6 +11,7 @@ namespace Atlas
 namespace Model
 {
 
+//============================================================================
 struct ModelBaseImpl
 {
 	String m_id;
@@ -44,6 +45,49 @@ ModelConfig::ModelConfig(
 	exchange(exchange)
 {
 }
+
+
+//============================================================================
+ModelBase::ModelBase(
+	String id,
+	Vector<SharedPtr<AST::StrategyBufferOpNode>> features,
+	SharedPtr<ModelTarget> target,
+	SharedPtr<ModelConfig> config
+) noexcept :
+	AST::StrategyBufferOpNode(AST::NodeType::MODEL, *config->exchange, std::nullopt),
+	m_config(config),
+	m_exchange(config->exchange)
+{
+	m_asset_count = m_exchange->getAssetCount();
+	m_signal.resize(m_asset_count);
+	m_signal.setZero();
+	m_impl = new ModelBaseImpl(
+		std::move(id),
+		std::move(features),
+		std::move(target)
+	);
+
+	for (auto const& feature : m_impl->m_features)
+	{
+		m_feature_warmup = std::max(m_feature_warmup, feature->getWarmup());
+	}
+	m_warmup = m_feature_warmup + m_config->training_window;
+
+	size_t row_count = m_config->training_window * m_asset_count;
+	size_t feature_count = getFeatures().size();
+	m_X.resize(row_count, feature_count);
+	m_X.setZero();
+	m_y.resize(row_count);
+	m_y.setZero();
+}
+
+
+//============================================================================
+ModelBase::~ModelBase() noexcept
+{
+	delete m_impl;
+}
+
 
 
 //============================================================================
@@ -187,41 +231,6 @@ size_t
 ModelBase::getCurrentIdx() const noexcept
 {
 	return m_exchange->currentIdx();
-}
-
-
-//============================================================================
-ModelBase::ModelBase(
-	String id,
-	Vector<SharedPtr<AST::StrategyBufferOpNode>> features,
-	SharedPtr<ModelTarget> target,
-	SharedPtr<ModelConfig> config
-) noexcept:
-	AST::StrategyBufferOpNode(AST::NodeType::MODEL, *config->exchange, std::nullopt),
-	m_config(config),
-	m_exchange(config->exchange)
-{
-	m_asset_count = m_exchange->getAssetCount();
-	m_signal.resize(m_asset_count);
-	m_signal.setZero();
-	m_impl= new ModelBaseImpl(
-		std::move(id),
-		std::move(features),
-		std::move(target)
-	);
-
-	for (auto const& feature : m_impl->m_features)
-	{
-		m_feature_warmup = std::max(m_feature_warmup, feature->getWarmup());
-	}
-	m_warmup = m_feature_warmup + m_config->training_window;
-}
-
-
-//============================================================================
-ModelBase::~ModelBase() noexcept
-{
-	delete m_impl;
 }
 
 
