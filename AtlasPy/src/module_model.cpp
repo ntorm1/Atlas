@@ -52,10 +52,21 @@ static void bindLinearRegressionModel(py::module& m) {
         .value("ColPivHouseholderQR", LinearRegressionSolver::ColPivHouseholderQR);
 
     py::class_<LinearRegressionModelConfig, std::shared_ptr<LinearRegressionModelConfig>>(m, "LinearRegressionModelConfig")
-        .def(py::init<std::shared_ptr<ModelConfig>, LinearRegressionSolver, bool>(),
+        .def(py::init<std::shared_ptr<ModelConfig>, LinearRegressionSolver>(),
             py::arg("base_config"),
-            py::arg("solver") = LinearRegressionSolver::LDLT,
-            py::arg("fit_intercept") = true);
+            py::arg("solver") = LinearRegressionSolver::LDLT)
+        .def_readwrite("fit_intercept", &LinearRegressionModelConfig::m_fit_intercept)
+        .def_readwrite("orthogonalize_features", &LinearRegressionModelConfig::m_orthogonalize_features);
+
+    py::class_<LassoRegressionModelConfig, LinearRegressionModelConfig, std::shared_ptr<LassoRegressionModelConfig>>(m, "LassoRegressionModelConfig")
+        .def(py::init<std::shared_ptr<ModelConfig>, double, double, size_t>(),
+            py::arg("base_config"),
+            py::arg("alpha") = 1.0,
+            py::arg("epsilon") = 1e-4,
+            py::arg("max_iter") = 1000)
+        .def_readwrite("alpha", &LassoRegressionModelConfig::m_alpha)
+        .def_readwrite("epsilon", &LassoRegressionModelConfig::m_epsilon)
+        .def_readwrite("max_iter", &LassoRegressionModelConfig::m_max_iter);
 
     py::class_<LinearRegressionModel, ModelBase, std::shared_ptr<LinearRegressionModel>>(m, "LinearRegressionModel")
         .def(py::init<std::string, std::vector<std::shared_ptr<StrategyBufferOpNode>>, std::shared_ptr<ModelTarget>, std::shared_ptr<const LinearRegressionModelConfig>>(),

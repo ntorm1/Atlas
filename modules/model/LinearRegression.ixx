@@ -33,19 +33,34 @@ export enum LinearRegressionSolver
 //============================================================================
 export class LinearRegressionModelConfig
 {
-	friend class LinearRegressionModel;
-private:
+public:
 	SharedPtr<ModelConfig> m_base_config;
 	LinearRegressionSolver m_solver;
 	bool m_fit_intercept = true;
+	bool m_orthogonalize_features = false;
 
-public:
 	ATLAS_API LinearRegressionModelConfig(
 		SharedPtr<ModelConfig> base_config,
-		LinearRegressionSolver solver = LinearRegressionSolver::LDLT,
-		bool fit_intercept = true
+		LinearRegressionSolver solver = LinearRegressionSolver::LDLT
 	) noexcept;
 	ATLAS_API ~LinearRegressionModelConfig() noexcept = default;
+};
+
+
+//============================================================================
+export class LassoRegressionModelConfig : public LinearRegressionModelConfig
+{
+public:
+	double m_alpha = 1.0;
+	double m_epsilon = 1e-4;
+	size_t m_max_iter = 1000;
+	ATLAS_API LassoRegressionModelConfig(
+		SharedPtr<ModelConfig> base_config,
+		double alpha = 1.0,
+		double epsilon = 1e-4,
+		size_t max_iter = 1000
+	) noexcept;
+	ATLAS_API ~LassoRegressionModelConfig() noexcept = default;
 };
 
 
@@ -76,6 +91,7 @@ public:
 	void predict() noexcept override;
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 };
+
 
 }
 

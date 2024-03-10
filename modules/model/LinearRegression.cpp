@@ -94,16 +94,13 @@ calculateRSquared(
 
 
 //============================================================================
-static LinAlg::EigenMatrixXd
+static void
 gramSchmidtOrthogonalization(
-	LinAlg::EigenMatrixXd const& A
+	LinAlg::EigenMatrixXd& A
 ) {
 	// Number of rows and columns in the matrix
 	int numRows = static_cast<int>(A.rows());
 	int numCols = static_cast<int>(A.cols());
-
-	// Create a matrix to store the orthogonalized columns
-	LinAlg::EigenMatrixXd orthoMatrix(numRows, numCols);
 
 	// Iterate through each column of the input matrix
 	for (int j = 0; j < numCols; ++j) {
@@ -124,11 +121,9 @@ gramSchmidtOrthogonalization(
 		}
 
 		// Store the normalized and orthogonalized vector in the result matrix
-		orthoMatrix.col(j) = v;
+		A.col(j) = v;
 	}
-	return orthoMatrix;
 }
-
 
 //============================================================================
 static LinAlg::EigenVectorXd
@@ -210,14 +205,28 @@ ridgeRegression(
 //============================================================================
 LinearRegressionModelConfig::LinearRegressionModelConfig(
 	SharedPtr<ModelConfig> base_config,
-	LinearRegressionSolver solver,
-	bool fit_intercept 
+	LinearRegressionSolver solver
 ) noexcept:
 	m_solver(solver),
-	m_base_config(std::move(base_config)),
-	m_fit_intercept(fit_intercept)
+	m_base_config(std::move(base_config))
 {
 }
+
+
+//============================================================================
+LassoRegressionModelConfig::LassoRegressionModelConfig(
+	SharedPtr<ModelConfig> base_config,
+	double alpha,
+	double epsilon,
+	size_t max_iter
+) noexcept: 
+	LinearRegressionModelConfig(std::move(base_config), LinearRegressionSolver::Lasso),
+	m_alpha(alpha),
+	m_epsilon(epsilon),
+	m_max_iter(max_iter)
+{
+}
+
 
 
 //============================================================================
@@ -260,6 +269,9 @@ LinearRegressionModel::train() noexcept
 	LinAlg::EigenVectorXd m_y_train(training_window - look_forward);
 	copyBlocks<double, LinAlg::EigenMatrixXd, LinAlg::EigenVectorXd>(m_X_train, m_y_train);
 
+	if (m_lr_config->m_orthogonalize_features)
+		gramSchmidtOrthogonalization(m_X_train);
+
 	switch (m_lr_config->m_solver)
 	{
 		case LinearRegressionSolver::LDLT:
@@ -267,6 +279,11 @@ LinearRegressionModel::train() noexcept
 			break;
 		case LinearRegressionSolver::ColPivHouseholderQR:
 			m_theta = m_X_train.colPivHouseholderQr().solve(m_y_train);
+			break;
+		case LinearRegressionSolver::Lasso: {
+			auto config = static_cast<LassoRegressionModelConfig const*>(m_lr_config.get());
+			m_theta = lassoRegression(m_X_train, m_y_train, config->m_alpha, config->m_epsilon, config->m_max_iter);
+		}
 			break;
 	}
 	if (m_pvalues.size())

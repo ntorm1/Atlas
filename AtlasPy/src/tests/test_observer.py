@@ -175,9 +175,9 @@ class SimpleObserverTest(unittest.TestCase):
         )
         lr_config = LinearRegressionModelConfig(
             config,
-            LinearRegressionSolver.LDLT,
-            True
+            LinearRegressionSolver.LDLT
         )
+        lr_config.fit_intercept = True
         lr_model = LinearRegressionModel(
             "lr_model",
             [feat1, feat2],
