@@ -26,7 +26,7 @@ private:
 
 	char getNextChar() noexcept;
 	char peekNextChar() noexcept;
-	Token getNextToken() noexcept;
+	Option<Token> getNextToken() noexcept;
 
 public:
 	Lexer() noexcept;

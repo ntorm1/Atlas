@@ -1,4 +1,5 @@
 module;
+#include <boost/math/distributions/students_t.hpp>
 #include <Eigen/Dense>
 module LinearRegressionModule;
 
@@ -71,6 +72,33 @@ LinearRegressionModel::train() noexcept
 		case LinearRegressionSolver::ColPivHouseholderQR:
 			m_theta = m_X_train.colPivHouseholderQr().solve(m_y_train);
 			break;
+	}
+	if (m_pvalues.size())
+	{
+		calculatePValues(m_X_train, m_y_train);
+	}
+}
+
+
+//============================================================================
+void
+LinearRegressionModel::calculatePValues(
+	LinAlg::EigenMatrixXd const& X,
+	LinAlg::EigenVectorXd const& y
+) noexcept
+{
+	auto residuals = y - X * m_theta;
+	auto rss = residuals.squaredNorm();
+	auto df = static_cast<int>(X.rows() - X.cols());
+	auto sigma = rss / (df);
+	auto sigma2 = sigma * sigma;
+	auto XTX = (X.transpose() * X).inverse();
+	auto se = sigma2 * XTX.diagonal().cwiseSqrt();
+	auto t_values = m_theta.cwiseQuotient(se);
+	boost::math::students_t dist(df);
+	for (int i = 0; i < m_theta.size(); i++)
+	{
+		m_pvalues[i] = 2 * (1 - boost::math::cdf(dist, std::abs(t_values[i])));
 	}
 }
 

@@ -32,7 +32,7 @@ Lexer::peekNextChar() noexcept
 
 
 //============================================================================
-Token
+Option<Token>
 Lexer::getNextToken() noexcept
 {
     // Skip any whitespace.
@@ -50,8 +50,6 @@ Lexer::getNextToken() noexcept
 
         if (identifier_str == "if")
             return Token(tok_if, m_current - size, size);
-        if (identifier_str == "fn")
-            return Token(tok_fn, m_current - size, size);
         if (identifier_str == "then")
             return Token(tok_then, m_current - size, size);
         if (identifier_str == "else")
@@ -70,16 +68,6 @@ Lexer::getNextToken() noexcept
         return Token(tok_number, m_current - size, size);
     }
 
-    if (last_char == '#') {
-        // Comment until end of line.
-        do
-            last_char = getNextChar();
-        while (last_char != '\n' && last_char != '\r');
-
-        if (last_char != -1)
-            return getNextToken();
-    }
-
     // Check for end of file.  Don't eat the EOF.
     if (last_char == '\0')
         return Token(tok_eof, m_current, 0);
@@ -93,44 +81,19 @@ Lexer::getNextToken() noexcept
         last_char = getNextChar();
         return Token(tok_close_paren, pos, 1);
     }
-    if (last_char == '{') {
-        last_char = getNextChar();
-        return Token(tok_open_brace, pos, 1);
-    }
-    if (last_char == '}') {
-        last_char = getNextChar();
-        return Token(tok_close_brace, pos, 1);
-    }
-    if (last_char == ';') {
-        last_char = getNextChar();
-        return Token(tok_semicolon, pos, 1);
-    }
     if (last_char == ':') {
         last_char = getNextChar();
         return Token(tok_colon, pos, 1);
-    }
-    if (last_char == '=') {
-        last_char = getNextChar();
-        return Token(tok_equal, pos, 1);
     }
     if (last_char == ',') {
         last_char = getNextChar();
         return Token(tok_comma, pos, 1);
     }
-    if (last_char == '-')
-    {
-        if (peekNextChar() == '>') {
-            last_char = getNextChar();
-            last_char = getNextChar();
-            return Token(tok_arrow, pos, 2);
-        }
-    }
     if (last_char == '+' || last_char == '-' || last_char == '*' || last_char == '/') {
         last_char = getNextChar();
         return Token(tok_bin_op, pos, 1);
     }
-    assert(false && "Unknown token");
-    std::unreachable();
+    return std::nullopt;
 }
 
 
@@ -155,7 +118,11 @@ Lexer::tokenize(String const& source) noexcept
         return Err("No source to parse");
     }
     do {
-        m_tokens.push_back(getNextToken());
+        auto token = getNextToken();
+        if (!token) {
+           return Err("Failed to tokenize");
+        }
+        m_tokens.push_back(token.value());
         current_token = &m_tokens.back();
     } while (
         current_token->getType() != tok_eof

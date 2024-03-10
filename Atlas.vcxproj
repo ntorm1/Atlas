@@ -227,7 +227,6 @@
     <ClCompile Include="modules\interpreter\AtlasLexer.ixx" />
     <ClCompile Include="modules\interpreter\AtlasParser.cpp" />
     <ClCompile Include="modules\interpreter\AtlasParser.ixx" />
-    <ClCompile Include="modules\interpreter\AtlasSymbol.ixx" />
     <ClCompile Include="modules\interpreter\AtlasToken.ixx" />
     <ClCompile Include="modules\model\LinearRegression.cpp" />
     <ClCompile Include="modules\model\LinearRegression.ixx" />

@@ -104,6 +104,7 @@ XGBoostModel::train() noexcept
 		m_y_train.size()
 	);
 	assert(res == 0);
+	XGBoosterCreate(&m_impl->dmatrix, 1, &m_impl->booster);
 	assert(!(XGBoosterSetParam(m_impl->booster, "booster", "gblinear")));
 	assert(!(XGBoosterSetParam(m_impl->booster, "max_depth", "3")));
 	assert(!(XGBoosterSetParam(m_impl->booster, "eta", "0.1")));
@@ -141,13 +142,24 @@ XGBoostModel::predict() noexcept
 	char const config[] =
 		"{\"training\": false, \"type\": 0, "
 		"\"iteration_begin\": 0, \"iteration_end\": 0, \"strict_shape\": false}";
-	/* Shape of output prediction */
+	
+	// Shape of output prediction
 	uint64_t const* out_shape;
-	/* Dimension of output prediction */
+	
+	//Dimension of output prediction
 	uint64_t out_dim;
-	/* Pointer to a thread local contiguous array, assigned in prediction function. */
-	float const* out_result = NULL;
+	
+	// Pointer to a thread local contiguous array, assigned in prediction function.
+	float const* out_result = nullptr;
 	XGBoosterPredictFromDMatrix(m_impl->booster, m_impl->dmatrix, config, &out_shape, &out_dim, &out_result);
+	
+	// copy prediction into signal buffer
+	assert(out_dim == 1);
+	assert(out_shape[0] == m_signal.rows());
+	double* signal_buffer = m_signal.data();
+	for (int i = 0; i < m_signal.rows(); ++i) {
+		signal_buffer[i] = static_cast<double>(out_result[i]);
+	}
 }
 
 

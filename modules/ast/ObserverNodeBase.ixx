@@ -139,12 +139,16 @@ public:
 	virtual void cacheObserver() noexcept = 0;
 
 	/// <summary>
-	/// Pur virtual method defining the observer's reset method called on exchange reset
+	/// Pure virtual method defining the observer's reset method called on exchange reset
 	/// </summary>
 	virtual void reset() noexcept = 0;
 
+	/// <summary>
+	/// Actual evaluation of the observer, copies the signal buffer into the target. Optionally allows
+	/// override if observer is a managed view of another observer.
+	/// </summary>
+	/// <param name="target"></param>
 	virtual void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept;
-
 
 	[[nodiscard]] auto const& getId() const noexcept { return m_id; }
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept final override;
