@@ -35,6 +35,7 @@ export enum class AssetObserverType : Uint8
 	VARIANCE = 5,
 	COVARIANCE= 6,
 	CORRELATION = 7,
+	LINEAR_DECAY = 8,
 };
 
 
@@ -141,6 +142,8 @@ public:
 	/// Pur virtual method defining the observer's reset method called on exchange reset
 	/// </summary>
 	virtual void reset() noexcept = 0;
+
+	virtual void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept;
 
 
 	[[nodiscard]] auto const& getId() const noexcept { return m_id; }

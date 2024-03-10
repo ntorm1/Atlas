@@ -37,7 +37,6 @@ public:
 
 	[[nodiscard]] size_t refreshWarmup() noexcept override { return getWarmup(); }
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
-	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
 };
@@ -80,7 +79,6 @@ public:
 	ATLAS_API ~MaxObserverNode() noexcept;
 	
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
-	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
 };
@@ -101,7 +99,6 @@ public:
 	ATLAS_API ~TsArgMaxObserverNode() noexcept;
 
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
-	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
 };
@@ -123,7 +120,6 @@ public:
 	ATLAS_API ~VarianceObserverNode() noexcept;
 
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
-	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
 };
@@ -148,7 +144,6 @@ public:
 	ATLAS_API ~CovarianceObserverNode() noexcept;
 
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
-	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
 };
@@ -174,7 +169,28 @@ public:
 	ATLAS_API ~CorrelationObserverNode() noexcept;
 
 	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
-	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void cacheObserver() noexcept override;
+	void reset() noexcept override;
+};
+
+
+//============================================================================
+export class LinearDecayNode final
+	: public AssetObserverNode
+{
+private:
+	bool is_first_step = true;
+	double m_alpha;
+	LinAlg::EigenVectorXd m_decay_buffer;
+public:
+	ATLAS_API LinearDecayNode(
+		Option<String> id,
+		SharedPtr<StrategyBufferOpNode> parent,
+		size_t window
+	) noexcept;
+	ATLAS_API ~LinearDecayNode() noexcept;
+
+	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
 };

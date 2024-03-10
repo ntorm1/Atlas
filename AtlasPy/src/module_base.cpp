@@ -1,7 +1,8 @@
+#define _SILENCE_CXX23_DENORM_DEPRECATION_WARNING
 #include "module_base.h"
 
 #include <pybind11/stl.h>
-
+#include <pybind11/eigen.h>
 
 import AtlasEnumsModule;
 import CommissionsModule;

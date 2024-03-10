@@ -61,16 +61,6 @@ SumObserverNode::onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
 
 
 //============================================================================
-void
-SumObserverNode::evaluate(
-	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
-) noexcept 
-{
-	target = m_signal_copy;
-}
-
-
-//============================================================================
 MeanObserverNode::~MeanObserverNode() noexcept
 {
 }
@@ -193,17 +183,6 @@ MaxObserverNode::onOutOfRange(
 
 //============================================================================
 void
-MaxObserverNode::evaluate(
-	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
-) noexcept
-{
-	assert(target.size() == m_signal.size());
-	target = m_signal_copy;
-}
-
-
-//============================================================================
-void
 MaxObserverNode::cacheObserver() noexcept
 {
 	m_signal = buffer().cwiseMax(m_signal);
@@ -311,16 +290,6 @@ TsArgMaxObserverNode::onOutOfRange(
 
 
 //============================================================================
-void
-TsArgMaxObserverNode::evaluate(
-	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
-) noexcept
-{
-	target = m_signal_copy;
-}
-
-
-//============================================================================
 VarianceObserverNode::VarianceObserverNode(
 	Option<String> id,
 	SharedPtr<StrategyBufferOpNode> parent,
@@ -365,16 +334,6 @@ VarianceObserverNode::onOutOfRange(
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
 ) noexcept
 {
-}
-
-
-//============================================================================
-void 
-VarianceObserverNode::evaluate(
-	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
-) noexcept
-{
-	target = m_signal_copy;
 }
 
 
@@ -454,16 +413,6 @@ CovarianceObserverNode::onOutOfRange(
 
 //============================================================================
 void
-CovarianceObserverNode::evaluate(
-	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
-) noexcept
-{
-	target = m_signal_copy;
-}
-
-
-//============================================================================
-void
 CovarianceObserverNode::cacheObserver() noexcept
 {
 	auto const& left_sum_cache = m_left_sum_observer->getSignalCopy();
@@ -527,14 +476,6 @@ CorrelationObserverNode::~CorrelationObserverNode() noexcept
 
 
 //============================================================================
-void
-CorrelationObserverNode::evaluate(
-	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
-) noexcept
-{
-}
-
-
 //============================================================================
 void
 CorrelationObserverNode::cacheObserver() noexcept
@@ -561,6 +502,60 @@ CorrelationObserverNode::onOutOfRange(
 	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
 ) noexcept
 {
+}
+
+
+//============================================================================
+LinearDecayNode::LinearDecayNode(
+	Option<String> id,
+	SharedPtr<StrategyBufferOpNode> parent,
+	size_t window
+) noexcept:
+	AssetObserverNode(id, parent, AssetObserverType::LINEAR_DECAY, window)
+{
+	m_decay_buffer.resize(m_exchange.getAssetCount());
+	m_decay_buffer.setZero();
+	m_alpha = 1.0 / static_cast<double>(window);
+}
+
+
+//============================================================================
+LinearDecayNode::~LinearDecayNode() noexcept
+{
+}
+
+
+//============================================================================
+void
+LinearDecayNode::onOutOfRange(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
+) noexcept
+{
+}
+
+
+//============================================================================
+void
+LinearDecayNode::cacheObserver() noexcept
+{
+	if (is_first_step)
+	{
+		m_decay_buffer = buffer();
+		is_first_step = false;
+	}
+	else
+	{
+		m_decay_buffer = (1.0 - m_alpha) * m_decay_buffer + m_alpha * buffer();
+	}
+}
+
+
+//============================================================================
+void
+LinearDecayNode::reset() noexcept
+{
+	m_decay_buffer.setZero();
+	is_first_step = true;
 }
 
 

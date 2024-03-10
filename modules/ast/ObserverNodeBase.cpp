@@ -99,6 +99,17 @@ AssetObserverNode::buffer() noexcept
 
 
 //============================================================================
+void 
+AssetObserverNode::evaluate(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
+) noexcept
+{
+	assert(target.size() == m_signal_copy.size());
+	target = m_signal_copy;
+}
+
+
+//============================================================================
 bool
 AssetObserverNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
 {
