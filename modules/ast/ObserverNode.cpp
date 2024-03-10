@@ -445,14 +445,18 @@ CovarianceObserverNode::~CovarianceObserverNode() noexcept
 
 //============================================================================
 void
-CovarianceObserverNode::onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept
+CovarianceObserverNode::onOutOfRange(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
+) noexcept
 {
 }
 
 
 //============================================================================
 void
-CovarianceObserverNode::evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept
+CovarianceObserverNode::evaluate(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
+) noexcept
 {
 	target = m_signal_copy;
 }
@@ -475,6 +479,88 @@ void
 CovarianceObserverNode::reset() noexcept
 {
 	m_signal.setConstant(0);
+}
+
+
+//============================================================================
+CorrelationObserverNode::CorrelationObserverNode(
+	Option<String> id,
+	SharedPtr<StrategyBufferOpNode> left_parent,
+	SharedPtr<StrategyBufferOpNode> right_parent,
+	size_t window
+) noexcept :
+	AssetObserverNode(id, left_parent, AssetObserverType::CORRELATION, window),
+	m_right_parent(right_parent)
+{
+	Option<String> left_sum_id = std::nullopt;
+	if (id.has_value())
+		left_sum_id = id.value() + "_left_var";
+	m_left_var_observer = std::make_shared<VarianceObserverNode>(left_sum_id, left_parent, window);
+	m_left_var_observer = std::static_pointer_cast<VarianceObserverNode>(m_exchange.registerObserver(std::move(m_left_var_observer)));
+
+	Option<String> right_sum_id = std::nullopt;
+	if (id.has_value())
+		right_sum_id = id.value() + "_right_var";
+	m_right_var_observer = std::make_shared<VarianceObserverNode>(right_sum_id, right_parent, window);
+	m_right_var_observer = std::static_pointer_cast<VarianceObserverNode>(m_exchange.registerObserver(std::move(m_right_var_observer)));
+
+	Option<String> cov_id = std::nullopt;
+	if (id.has_value())
+		cov_id = id.value() + "_covar";
+	m_cov_observer = std::make_shared<CovarianceObserverNode>(
+		cov_id,
+		left_parent,
+		right_parent,
+		window
+	);
+	m_cov_observer = std::static_pointer_cast<CovarianceObserverNode>(m_exchange.registerObserver(std::move(m_cov_observer)));
+	size_t parent_warmup = std::max(left_parent->getWarmup(), right_parent->getWarmup());
+	setObserverWarmup(parent_warmup);
+	setWarmup(parent_warmup + window);
+}
+
+
+//============================================================================
+CorrelationObserverNode::~CorrelationObserverNode() noexcept
+{
+}
+
+
+//============================================================================
+void
+CorrelationObserverNode::evaluate(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> target
+) noexcept
+{
+}
+
+
+//============================================================================
+void
+CorrelationObserverNode::cacheObserver() noexcept
+{
+	auto const& left_variance_cache = m_left_var_observer->getSignalCopy();
+	auto const& right_variance_cache = m_right_var_observer->getSignalCopy();
+	auto const& covariance_cache = m_cov_observer->getSignalCopy();
+	m_signal = covariance_cache.cwiseQuotient((left_variance_cache.cwiseSqrt() * right_variance_cache.cwiseSqrt()));
+}
+
+
+//============================================================================
+void CorrelationObserverNode::reset() noexcept
+{
+	m_cov_observer->reset();
+	m_left_var_observer->reset();
+	m_right_var_observer->reset();
+}
+
+
+//============================================================================
+void
+CorrelationObserverNode::onOutOfRange(
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old
+) noexcept
+{
 }
 
 

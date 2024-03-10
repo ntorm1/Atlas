@@ -151,7 +151,32 @@ public:
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	void cacheObserver() noexcept override;
 	void reset() noexcept override;
+};
 
+
+//============================================================================
+export class CorrelationObserverNode final
+	: public AssetObserverNode
+{
+private:
+	SharedPtr<StrategyBufferOpNode> m_right_parent;
+	SharedPtr<CovarianceObserverNode> m_cov_observer;
+	SharedPtr<VarianceObserverNode> m_left_var_observer;
+	SharedPtr<VarianceObserverNode> m_right_var_observer;
+
+public:
+	ATLAS_API CorrelationObserverNode(
+		Option<String> id,
+		SharedPtr<StrategyBufferOpNode> left_parent,
+		SharedPtr<StrategyBufferOpNode> right_parent,
+		size_t window
+	) noexcept;
+	ATLAS_API ~CorrelationObserverNode() noexcept;
+
+	void onOutOfRange(LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept override;
+	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
+	void cacheObserver() noexcept override;
+	void reset() noexcept override;
 };
 
 
