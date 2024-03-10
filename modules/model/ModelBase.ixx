@@ -38,6 +38,14 @@ export enum ModelTargetType
 };
 
 
+//============================================================================//==
+export enum ModelScalingType
+{
+	STANDARD,
+	MINMAX
+};
+
+
 //============================================================================
 export class ModelTarget final : public AST::StrategyBufferOpNode
 {
@@ -75,6 +83,7 @@ public:
 	size_t walk_forward_window;
 	ModelType type;
 	SharedPtr<Exchange> exchange;
+	Option<ModelScalingType> scaling_type = std::nullopt;
 
 	ModelConfig() = delete;
 	ATLAS_API ModelConfig(
@@ -113,11 +122,13 @@ protected:
 		LinAlg::EigenRef<EigenMatrixType> x_train,
 		LinAlg::EigenRef<EigenVectorType> y_train
 	) const noexcept;
+
 	[[nodiscard]] SharedPtr<ModelTarget> const& getTarget() const noexcept;
 	[[nodiscard]] Vector<SharedPtr<AST::StrategyBufferOpNode>> const& getFeatures() const noexcept;
 	[[nodiscard]] size_t getCurrentIdx() const noexcept;
 	[[nodiscard]] size_t getBufferIdx() const noexcept { return m_buffer_idx; }
 	[[nodiscard]] LinAlg::EigenBlock getXPredictionBlock() const noexcept;
+	
 public:
 	ATLAS_API ModelBase(
 		String id,

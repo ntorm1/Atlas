@@ -22,7 +22,8 @@ bindModelEnum(py::module& m) {
         .value("PERCENTAGE_CHANGE", ModelTargetType::PERCENTAGE_CHANGE);
 
     py::enum_<ModelType>(m, "ModelType")
-        .value("LINEAR_REGRESSION", ModelType::LINEAR_REGRESSION);
+        .value("LINEAR_REGRESSION", ModelType::LINEAR_REGRESSION)
+        .value("XGBOOST", ModelType::XGBOOST);
 }
 
 
@@ -34,6 +35,10 @@ bindModelHelpers(py::module& m) {
             py::arg("target"),
             py::arg("type"),
             py::arg("lookforward"));
+
+    py::enum_<ModelScalingType>(m, "ModelScalingType")
+        .value("STANDARD", ModelScalingType::STANDARD)
+        .value("MINMAX", ModelScalingType::MINMAX);
 
     py::class_<ModelConfig, std::shared_ptr<ModelConfig>>(m, "ModelConfig")
         .def(py::init<size_t, size_t, ModelType, std::shared_ptr<Atlas::Exchange>>(), py::arg("training_window"), py::arg("walk_forward_window"), py::arg("model_type"), py::arg("exchange"))

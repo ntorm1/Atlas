@@ -12,6 +12,37 @@ namespace Model
 {
 
 //============================================================================
+template<typename Matrix>
+static void
+applyScaler(
+	LinAlg::EigenRef<Matrix> X,
+	ModelScalingType scaling_type
+) noexcept
+{
+	switch (scaling_type)
+	{
+		case ModelScalingType::MINMAX: {
+			auto const& min = X.colwise().minCoeff();
+			auto const& max = X.colwise().maxCoeff();
+			auto const& range = max - min;
+			X = (X.array() - min.array()) / range.array();
+			break;
+		}
+		case ModelScalingType::STANDARD: {
+			auto const& mean = X.colwise().mean();
+			int numCols = static_cast<int>(X.cols());
+			Matrix stdv(1,numCols);
+			for (int i = 0; i < numCols; ++i) {
+				stdv(0,i) = std::sqrt((X.col(i).array() - X.col(i).mean()).square().sum() / (X.rows() - 1));
+			}
+			X = (X.array() - mean.array()) / stdv.row(0).array();
+			break;
+		}
+	}
+}
+
+
+//============================================================================
 struct ModelBaseImpl
 {
 	String m_id;
@@ -177,6 +208,12 @@ ModelBase::copyBlocks(
 			x_train = m_X.block(train_start_idx, 0, train_block_size, buffer_col_size);
 			y_train = m_y.block(train_start_idx, 0, train_block_size, 1);
 		}
+	}
+
+	if (m_config->scaling_type)
+	{
+		applyScaler<EigenMatrixType>(x_train, *m_config->scaling_type);
+		applyScaler<EigenVectorType>(y_train, *m_config->scaling_type);
 	}
 }
 
