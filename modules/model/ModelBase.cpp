@@ -86,50 +86,52 @@ ModelBase::copyBlocks(
 	// then copy from the back starting at the end of the buffer offset by the number of rows remaining in the training window.
 	if (m_buffer_looped && m_buffer_idx > m_asset_count * (look_forward + 1))
 	{
+		// get the end of front portion of buffer offset by the look forward window
+		size_t front_end_idx = m_buffer_idx - m_asset_count * (look_forward);
 		x_train.block(
 			0,
 			0,
-			m_buffer_idx,
+			front_end_idx,
 			buffer_col_size
 		) = m_X.block(
 			0,
 			0,
-			m_buffer_idx,
+			front_end_idx,
 			buffer_col_size
 		);
 		y_train.block(
 			0,
 			0,
-			m_buffer_idx,
+			front_end_idx,
 			1
 		) = m_y.block(
 			0,
 			0,
-			m_buffer_idx,
+			front_end_idx,
 			1
 		);
-		size_t remaining_rows = look_forward - m_buffer_idx / m_asset_count;
+		size_t remaining_rows = training_window - (front_end_idx / m_asset_count) - look_forward;
 		size_t remaining_start = m_X.rows() - m_asset_count * remaining_rows;
 		x_train.block(
-			m_buffer_idx,
+			front_end_idx,
 			0,
 			remaining_rows,
 			buffer_col_size
 		) = m_X.block(
 			remaining_start,
 			0,
-			remaining_rows * m_asset_count,
+			remaining_rows,
 			buffer_col_size
 		);
 		y_train.block(
-			m_buffer_idx,
+			front_end_idx,
 			0,
 			remaining_rows,
 			1
 		) = m_y.block(
 			remaining_start,
 			0,
-			remaining_rows * m_asset_count,
+			remaining_rows,
 			1
 		);
 	}
@@ -161,6 +163,19 @@ ModelBase::copyBlocks(
 			1
 		);
 	}
+
+	Vector<Vector<double>> x_train_vec;
+	for (size_t i = 0; i < x_train.rows(); ++i)
+	{
+		Vector<double> row;
+		row.resize(x_train.cols());
+		for (size_t j = 0; j < x_train.cols(); ++j)
+		{
+			row[j] = x_train(i, j);
+		}
+		x_train_vec.push_back(row);
+	}
+	auto x = 2;
 }
 
 

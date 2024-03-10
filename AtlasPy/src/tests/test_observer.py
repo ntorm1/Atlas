@@ -146,6 +146,7 @@ class SimpleObserverTest(unittest.TestCase):
         self.assertTrue(np.allclose(df["close_open_cov_atlas"], df["close_open_cov_pd"]))
 
     def test_lr(self):
+        walk_forward_window = 3
         close = AssetReadNode.make("Close", 0, self.exchange)
         open = AssetReadNode.make("Open", 0, self.exchange)
         prev_close = AssetReadNode.make("Close", -1, self.exchange)
@@ -167,7 +168,7 @@ class SimpleObserverTest(unittest.TestCase):
         )
         config = ModelConfig(
             training_window = 5,
-            walk_forward_window = 3,
+            walk_forward_window = walk_forward_window,
             model_type = ModelType.LINEAR_REGRESSION,
             exchange = self.exchange,
         )
@@ -216,6 +217,18 @@ class SimpleObserverTest(unittest.TestCase):
         self.assertTrue(np.allclose(x_pandas, x[1:4,:-1]))
         self.assertTrue(np.allclose(y_pandas, y[1:4]))
         model = sm.OLS(y[1:4], x[1:4,:]).fit()
+        params = np.array(model.params)
+        self.assertTrue(np.allclose(params, lr_model.getTheta()))
+
+        for i in range(walk_forward_window):
+            self.hydra.step()
+        x = lr_model.getX()
+        y = lr_model.getY()
+        x_pandas = df[["feat_2", "feat_1"]].iloc[5:8].values
+        x_pandas = sm.add_constant(x_pandas)
+        x_pandas = x_pandas[:, [2, 1, 0]]
+        y_pandas = df["target"].iloc[5:8].values
+        model = sm.OLS(y_pandas, x_pandas).fit()
         params = np.array(model.params)
         self.assertTrue(np.allclose(params, lr_model.getTheta()))
 
