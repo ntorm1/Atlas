@@ -56,10 +56,6 @@ private:
 	LinAlg::EigenVectorXd m_pvalues;
 	SharedPtr<const LinearRegressionModelConfig> m_lr_config;
 
-	void calculatePValues(
-		LinAlg::EigenMatrixXd const& X,
-		LinAlg::EigenVectorXd const& y
-	) noexcept;
 
 public:
 	ATLAS_API LinearRegressionModel(

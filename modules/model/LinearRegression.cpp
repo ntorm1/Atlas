@@ -12,6 +12,54 @@ namespace Model
 
 
 //============================================================================
+static void
+calculatePValues(
+		LinAlg::EigenMatrixXd const& X,
+		LinAlg::EigenVectorXd const& y,
+		LinAlg::EigenVectorXd const& theta,
+		LinAlg::EigenVectorXd& p_values
+	) noexcept
+{
+	// Calculate residuals
+	auto residuals = y - X * theta;
+
+	// Calculate residual sum of squares (RSS)
+	auto rss = residuals.squaredNorm();
+
+	// Calculate degrees of freedom
+	auto df = static_cast<int>(X.rows() - X.cols());
+
+	// Calculate estimate of error variance (sigma^2)
+	auto sigma = rss / (df);
+
+	// Calculate squared sigma
+	auto sigma2 = sigma * sigma;
+
+	// Calculate (X^T * X)^{-1}
+	auto XTX = (X.transpose() * X).inverse();
+
+	// Calculate standard errors of coefficients
+	auto se = sigma2 * XTX.diagonal().cwiseSqrt();
+
+	// Calculate t-values
+	auto t_values = theta.cwiseQuotient(se);
+
+	// Initialize Student's t-distribution with degrees of freedom
+	boost::math::students_t dist(df);
+
+	// Ensure the size of p_values matches the size of theta
+	assert(p_values.size() == theta.size());
+
+	// Calculate p-values for each coefficient
+	for (int i = 0; i < theta.size(); i++)
+	{
+		// Calculate p-value using cumulative distribution function of Student's t-distribution
+		p_values[i] = 2 * (1 - boost::math::cdf(dist, std::abs(t_values[i])));
+	}
+}
+
+
+//============================================================================
 LinearRegressionModelConfig::LinearRegressionModelConfig(
 	SharedPtr<ModelConfig> base_config,
 	LinearRegressionSolver solver,
@@ -75,32 +123,10 @@ LinearRegressionModel::train() noexcept
 	}
 	if (m_pvalues.size())
 	{
-		calculatePValues(m_X_train, m_y_train);
+		calculatePValues(m_X_train, m_y_train, m_theta, m_pvalues);
 	}
 }
 
-
-//============================================================================
-void
-LinearRegressionModel::calculatePValues(
-	LinAlg::EigenMatrixXd const& X,
-	LinAlg::EigenVectorXd const& y
-) noexcept
-{
-	auto residuals = y - X * m_theta;
-	auto rss = residuals.squaredNorm();
-	auto df = static_cast<int>(X.rows() - X.cols());
-	auto sigma = rss / (df);
-	auto sigma2 = sigma * sigma;
-	auto XTX = (X.transpose() * X).inverse();
-	auto se = sigma2 * XTX.diagonal().cwiseSqrt();
-	auto t_values = m_theta.cwiseQuotient(se);
-	boost::math::students_t dist(df);
-	for (int i = 0; i < m_theta.size(); i++)
-	{
-		m_pvalues[i] = 2 * (1 - boost::math::cdf(dist, std::abs(t_values[i])));
-	}
-}
 
 //============================================================================
 void
