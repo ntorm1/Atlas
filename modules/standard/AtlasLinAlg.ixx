@@ -8,14 +8,18 @@ namespace Atlas
 namespace LinAlg
 {
 
-	export using Eigen::VectorXf = Eigen::VectorXf;
-	export using Eigen::MatrixXf = Eigen::MatrixXf;
+export using EigenVectorXd = Eigen::VectorXd;
+export using EigenMatrixXd = Eigen::MatrixXd;
+export using EigenVectorXf = Eigen::VectorXf;
+export using EigenMatrixXf = Eigen::MatrixXf;
 
 export template<typename T>
 using EigenMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
 export template<typename T>
 using EigenVector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
+
+export using EigenBlock = const Eigen::Block<const Eigen::Matrix<double, -1, -1, 0, -1, -1>, -1, -1, false>;
 
 export template<typename T>
 using EigenMap = Eigen::Map<T>;

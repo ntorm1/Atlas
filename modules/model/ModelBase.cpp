@@ -116,15 +116,17 @@ ModelBase::stepBase() noexcept
 
 
 //============================================================================
+template <typename FloatType, typename EigenMatrixType, typename EigenVectorType>
 void
 ModelBase::copyBlocks(
-	LinAlg::EigenRef<LinAlg::EigenMatrixXd> x_train,
-	LinAlg::EigenRef<LinAlg::EigenVectorXd> y_train
+	LinAlg::EigenRef<EigenMatrixType> x_train,
+	LinAlg::EigenRef<EigenVectorType> y_train
 ) const noexcept
 {
 	size_t look_forward = getTarget()->getLookForward();
 	size_t training_window = m_config->training_window;
 	size_t buffer_col_size = static_cast<size_t>(m_X.cols());
+
 	// if the buffer has looped around then we have to copy the features and target into the training
 	// blocks in two steps. First we copy the features and target from 0 to the buffer index for the newest features,
 	// then copy from the back starting at the end of the buffer offset by the number of rows remaining in the training window.
@@ -132,52 +134,23 @@ ModelBase::copyBlocks(
 	{
 		// get the end of front portion of buffer offset by the look forward window
 		size_t front_end_idx = m_buffer_idx - m_asset_count * (look_forward);
-		x_train.block(
-			0,
-			0,
-			front_end_idx,
-			buffer_col_size
-		) = m_X.block(
-			0,
-			0,
-			front_end_idx,
-			buffer_col_size
-		);
-		y_train.block(
-			0,
-			0,
-			front_end_idx,
-			1
-		) = m_y.block(
-			0,
-			0,
-			front_end_idx,
-			1
-		);
 		size_t remaining_rows = training_window - (front_end_idx / m_asset_count) - look_forward;
 		size_t remaining_start = m_X.rows() - m_asset_count * remaining_rows;
-		x_train.block(
-			front_end_idx,
-			0,
-			remaining_rows,
-			buffer_col_size
-		) = m_X.block(
-			remaining_start,
-			0,
-			remaining_rows,
-			buffer_col_size
-		);
-		y_train.block(
-			front_end_idx,
-			0,
-			remaining_rows,
-			1
-		) = m_y.block(
-			remaining_start,
-			0,
-			remaining_rows,
-			1
-		);
+
+		if constexpr (std::is_same_v<FloatType, float>) 
+		{
+			x_train.block(0, 0, front_end_idx, buffer_col_size) = m_X.block(0, 0, front_end_idx, buffer_col_size).cast<FloatType>();
+			y_train.block(0, 0, front_end_idx, 1) = m_y.block(0, 0, front_end_idx, 1).cast<FloatType>();
+			x_train.block(front_end_idx, 0, remaining_rows, buffer_col_size) = m_X.block(remaining_start, 0, remaining_rows, buffer_col_size).cast<FloatType>();
+			y_train.block(front_end_idx, 0, remaining_rows, 1) = m_y.block(remaining_start, 0, remaining_rows, 1).cast<FloatType>();
+		}	
+		else
+		{
+			x_train.block(0, 0, front_end_idx, buffer_col_size) = m_X.block(0, 0, front_end_idx, buffer_col_size);
+			y_train.block(0, 0, front_end_idx, 1) = m_y.block(0, 0, front_end_idx, 1);
+			x_train.block(front_end_idx, 0, remaining_rows, buffer_col_size) = m_X.block(remaining_start, 0, remaining_rows, buffer_col_size);
+			y_train.block(front_end_idx, 0, remaining_rows, 1) = m_y.block(remaining_start, 0, remaining_rows, 1);
+		}
 	}
 	else
 	{
@@ -194,20 +167,29 @@ ModelBase::copyBlocks(
 		}
 		size_t train_start_idx = train_end_idx - m_asset_count * (training_window - look_forward);
 		size_t train_block_size = train_end_idx - train_start_idx;
-		x_train = m_X.block(
-			train_start_idx,
-			0,
-			train_block_size,
-			buffer_col_size
-		);
-		y_train = m_y.block(
-			train_start_idx,
-			0,
-			train_block_size,
-			1
-		);
+		if constexpr (std::is_same_v<FloatType, float>)
+		{
+			x_train = m_X.block(train_start_idx, 0, train_block_size, buffer_col_size).cast<FloatType>();
+			y_train = m_y.block(train_start_idx, 0, train_block_size, 1).cast<FloatType>();
+		}
+		else
+		{
+			x_train = m_X.block(train_start_idx, 0, train_block_size, buffer_col_size);
+			y_train = m_y.block(train_start_idx, 0, train_block_size, 1);
+		}
 	}
 }
+
+template void ModelBase::copyBlocks<double, LinAlg::EigenMatrixXd, LinAlg::EigenVectorXd>(
+	LinAlg::EigenRef<LinAlg::EigenMatrixXd> x_train,
+	LinAlg::EigenRef<LinAlg::EigenVectorXd> y_train
+) const noexcept;
+
+
+template void ModelBase::copyBlocks<float, LinAlg::EigenMatrixXf, LinAlg::EigenVectorXf>(
+	LinAlg::EigenRef<LinAlg::EigenMatrixXf> x_train,
+	LinAlg::EigenRef<LinAlg::EigenVectorXf> y_train
+) const noexcept;
 
 
 //============================================================================
@@ -231,6 +213,19 @@ size_t
 ModelBase::getCurrentIdx() const noexcept
 {
 	return m_exchange->currentIdx();
+}
+
+
+//============================================================================
+LinAlg::EigenBlock
+ModelBase::getXPredictionBlock() const noexcept
+{
+	return m_X.block(
+		getBufferIdx() - m_asset_count,
+		0,
+		m_asset_count,
+		m_X.cols()
+	);
 }
 
 

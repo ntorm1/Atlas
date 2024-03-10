@@ -108,14 +108,16 @@ protected:
 	LinAlg::EigenVectorXd m_signal;
 	SharedPtr<ModelConfig> m_config;
 
+	template <typename FloatType, typename EigenMatrixType, typename EigenVectorType>
 	void copyBlocks(
-		LinAlg::EigenRef<LinAlg::EigenMatrixXd> x_train,
-		LinAlg::EigenRef<LinAlg::EigenVectorXd> y_train
+		LinAlg::EigenRef<EigenMatrixType> x_train,
+		LinAlg::EigenRef<EigenVectorType> y_train
 	) const noexcept;
 	[[nodiscard]] SharedPtr<ModelTarget> const& getTarget() const noexcept;
 	[[nodiscard]] Vector<SharedPtr<AST::StrategyBufferOpNode>> const& getFeatures() const noexcept;
 	[[nodiscard]] size_t getCurrentIdx() const noexcept;
 	[[nodiscard]] size_t getBufferIdx() const noexcept { return m_buffer_idx; }
+	[[nodiscard]] LinAlg::EigenBlock getXPredictionBlock() const noexcept;
 public:
 	ATLAS_API ModelBase(
 		String id,

@@ -61,7 +61,7 @@ LinearRegressionModel::train() noexcept
 	size_t training_window = m_config->training_window;
 	LinAlg::EigenMatrixXd m_X_train(training_window - look_forward, m_theta.size());
 	LinAlg::EigenVectorXd m_y_train(training_window - look_forward);
-	copyBlocks(m_X_train, m_y_train);
+	copyBlocks<double, LinAlg::EigenMatrixXd, LinAlg::EigenVectorXd>(m_X_train, m_y_train);
 
 	switch (m_lr_config->m_solver)
 	{
@@ -88,19 +88,7 @@ LinearRegressionModel::reset() noexcept
 void
 LinearRegressionModel::predict() noexcept
 {
-	size_t buffer_idx = getBufferIdx();
-	if (buffer_idx == static_cast<size_t>(m_X.rows()))
-	{
-		buffer_idx -= m_asset_count;
-	}
-
-	auto x_block = m_X.block(
-		buffer_idx,
-		0,
-		m_asset_count,
-		m_theta.size()
-	);
-	m_signal = x_block * m_theta;
+	m_signal = getXPredictionBlock() * m_theta;
 }
 
 

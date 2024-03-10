@@ -6,8 +6,11 @@ module;
 #define ATLAS_API  __declspec(dllimport)
 #endif
 
+#include "AtlasFeature.hpp"
 
 export module XGBoostModule;
+
+#ifdef ATLAS_XGBOOST
 
 import ModelBaseModule;
 import AtlasLinAlg;
@@ -53,7 +56,13 @@ public:
 	) noexcept;
 	ATLAS_API ~XGBoostModel() noexcept;
 
+	void train() noexcept override;
+	void reset() noexcept override;
+	void predict() noexcept override;
+	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 };
+
+#endif
 
 
 }
