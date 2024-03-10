@@ -104,7 +104,6 @@ XGBoostModel::train() noexcept
 		m_y_train.size()
 	);
 	assert(res == 0);
-
 	assert(!(XGBoosterSetParam(m_impl->booster, "booster", "gblinear")));
 	assert(!(XGBoosterSetParam(m_impl->booster, "max_depth", "3")));
 	assert(!(XGBoosterSetParam(m_impl->booster, "eta", "0.1")));
@@ -120,6 +119,8 @@ XGBoostModel::train() noexcept
 void
 XGBoostModel::reset() noexcept
 {
+	XGBoosterFree(m_impl->booster);
+	m_impl->booster = BoosterHandle();
 }
 
 
@@ -127,6 +128,26 @@ XGBoostModel::reset() noexcept
 void
 XGBoostModel::predict() noexcept
 {
+	auto x_block = getXPredictionBlock();
+	LinAlg::EigenMatrixXf x_block_float = x_block.cast<float>();
+	auto res = XGDMatrixCreateFromMat(
+		x_block_float.data(),
+		x_block_float.rows(),
+		x_block_float.cols(),
+		0,
+		&m_impl->dmatrix
+	);
+	assert(res == 0);
+	char const config[] =
+		"{\"training\": false, \"type\": 0, "
+		"\"iteration_begin\": 0, \"iteration_end\": 0, \"strict_shape\": false}";
+	/* Shape of output prediction */
+	uint64_t const* out_shape;
+	/* Dimension of output prediction */
+	uint64_t out_dim;
+	/* Pointer to a thread local contiguous array, assigned in prediction function. */
+	float const* out_result = NULL;
+	XGBoosterPredictFromDMatrix(m_impl->booster, m_impl->dmatrix, config, &out_shape, &out_dim, &out_result);
 }
 
 
