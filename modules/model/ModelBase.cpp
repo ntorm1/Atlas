@@ -163,19 +163,6 @@ ModelBase::copyBlocks(
 			1
 		);
 	}
-
-	Vector<Vector<double>> x_train_vec;
-	for (size_t i = 0; i < x_train.rows(); ++i)
-	{
-		Vector<double> row;
-		row.resize(x_train.cols());
-		for (size_t j = 0; j < x_train.cols(); ++j)
-		{
-			row[j] = x_train(i, j);
-		}
-		x_train_vec.push_back(row);
-	}
-	auto x = 2;
 }
 
 
