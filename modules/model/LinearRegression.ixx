@@ -24,6 +24,8 @@ export enum LinearRegressionSolver
 {
 	LDLT,
 	ColPivHouseholderQR,
+	Lasso,
+	Ridge
 };
 
 
@@ -55,7 +57,6 @@ private:
 	LinAlg::EigenVectorXd m_theta;
 	LinAlg::EigenVectorXd m_pvalues;
 	SharedPtr<const LinearRegressionModelConfig> m_lr_config;
-
 
 public:
 	ATLAS_API LinearRegressionModel(
