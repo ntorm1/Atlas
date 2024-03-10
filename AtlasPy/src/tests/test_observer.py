@@ -147,6 +147,7 @@ class SimpleObserverTest(unittest.TestCase):
 
     def test_lr(self):
         walk_forward_window = 3
+        training_window = 5
         close = AssetReadNode.make("Close", 0, self.exchange)
         open = AssetReadNode.make("Open", 0, self.exchange)
         prev_close = AssetReadNode.make("Close", -1, self.exchange)
@@ -167,7 +168,7 @@ class SimpleObserverTest(unittest.TestCase):
             2
         )
         config = ModelConfig(
-            training_window = 5,
+            training_window = training_window,
             walk_forward_window = walk_forward_window,
             model_type = ModelType.LINEAR_REGRESSION,
             exchange = self.exchange,
@@ -185,7 +186,7 @@ class SimpleObserverTest(unittest.TestCase):
         )
         self.exchange.registerModel(lr_model)
 
-        for i in range(4):
+        for i in range(training_window-1):
             self.hydra.step()
 
         x = lr_model.getX()

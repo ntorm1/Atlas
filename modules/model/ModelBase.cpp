@@ -84,7 +84,7 @@ ModelBase::copyBlocks(
 	// if the buffer has looped around then we have to copy the features and target into the training
 	// blocks in two steps. First we copy the features and target from 0 to the buffer index for the newest features,
 	// then copy from the back starting at the end of the buffer offset by the number of rows remaining in the training window.
-	if (m_buffer_looped && m_buffer_idx > m_asset_count * (look_forward + 1))
+	if (m_buffer_looped && m_buffer_idx >= m_asset_count * (look_forward + 1))
 	{
 		// get the end of front portion of buffer offset by the look forward window
 		size_t front_end_idx = m_buffer_idx - m_asset_count * (look_forward);
