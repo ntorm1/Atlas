@@ -8,6 +8,7 @@ import ExchangeModule;
 import LinearRegressionModule;
 import ModelBaseModule;
 import StrategyBufferModule;
+import TorchModule;
 
 using namespace Atlas::AST;
 using namespace Atlas::Model;
@@ -23,7 +24,8 @@ bindModelEnum(py::module& m) {
 
     py::enum_<ModelType>(m, "ModelType")
         .value("LINEAR_REGRESSION", ModelType::LINEAR_REGRESSION)
-        .value("XGBOOST", ModelType::XGBOOST);
+        .value("XGBOOST", ModelType::XGBOOST)
+        .value("TORCH", ModelType::TORCH);
 }
 
 
@@ -85,9 +87,27 @@ static void bindLinearRegressionModel(py::module& m) {
 }
 
 
+//============================================================================
+static void bindTorchModel(py::module& m) {
+    py::class_<TorchModelConfig, std::shared_ptr<TorchModelConfig>>(m, "TorchModelConfig")
+        .def(py::init<std::shared_ptr<ModelConfig>, std::string>(),
+            py::arg("base_config"),
+            py::arg("torch_script_file"));
+
+    py::class_<TorchModel, ModelBase, std::shared_ptr<TorchModel>>(m, "TorchModel")
+        .def(py::init<std::string, std::vector<std::shared_ptr<StrategyBufferOpNode>>, std::shared_ptr<ModelTarget>, std::shared_ptr<const TorchModelConfig>>(),
+            py::arg("id"),
+            py::arg("features"),
+            py::arg("target"),
+            py::arg("config"))
+        .def("getNamedParameters", &TorchModel::namedParameters);
+}
+
+
 void wrap_model(py::module& m_model)
 {
     bindModelEnum(m_model);
     bindModelHelpers(m_model);
     bindLinearRegressionModel(m_model);
+    bindTorchModel(m_model);
 }

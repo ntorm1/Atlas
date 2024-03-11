@@ -10,6 +10,8 @@ import statsmodels.api as sm
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
 atlas_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/x64/Debug"
+torch_path = "C:/libtorch/lib"
+os.add_dll_directory(torch_path)
 sys.path.append(atlas_path)
 
 

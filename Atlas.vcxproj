@@ -73,16 +73,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CodeAnalysisRuleSet>MixedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch\include;C:\libtorch\include\torch\csrc\api\include</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch\include;C:\libtorch\include\torch\csrc\api\include</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -139,7 +139,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);xgboost.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);xgboost.lib;torch_cpu.lib;c10.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -170,7 +170,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);xgboost.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);xgboost.lib;torch_cpu.lib;c10.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -178,6 +178,7 @@
     <ClInclude Include="include\AtlasFeature.hpp" />
     <ClInclude Include="include\AtlasMacros.hpp" />
     <ClInclude Include="include\AtlasStruct.hpp" />
+    <ClInclude Include="modules\model\TorchModelImpl.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -232,6 +233,9 @@
     <ClCompile Include="modules\model\LinearRegression.ixx" />
     <ClCompile Include="modules\model\ModelBase.cpp" />
     <ClCompile Include="modules\model\ModelBase.ixx" />
+    <ClCompile Include="modules\model\TorchModel.cpp" />
+    <ClCompile Include="modules\model\TorchModel.ixx" />
+    <ClCompile Include="modules\model\TorchModelImpl.cpp" />
     <ClCompile Include="modules\model\XGBoost.cpp" />
     <ClCompile Include="modules\model\XGBoost.ixx" />
     <ClCompile Include="modules\portfolio\Portfolio.cpp" />

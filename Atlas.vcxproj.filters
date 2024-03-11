@@ -27,6 +27,9 @@
     <ClInclude Include="include\AtlasFeature.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="modules\model\TorchModelImpl.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -237,6 +240,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\model\XGBoost.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\model\TorchModel.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\model\TorchModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\model\TorchModelImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

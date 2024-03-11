@@ -7,6 +7,8 @@ import numpy as np
 
 atlas_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/x64/Debug"
 sys.path.append(atlas_path)
+torch_path = "C:/libtorch/lib"
+os.add_dll_directory(torch_path)
 
 
 from AtlasPy.core import Hydra, Portfolio, Strategy
