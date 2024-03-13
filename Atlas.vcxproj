@@ -73,16 +73,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CodeAnalysisRuleSet>MixedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch\include;C:\libtorch\include\torch\csrc\api\include</IncludePath>
+    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch\lib</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch_$(Configuration)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch\include;C:\libtorch\include\torch\csrc\api\include</IncludePath>
+    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch\lib</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch_$(Configuration)\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

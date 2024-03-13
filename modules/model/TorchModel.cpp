@@ -127,4 +127,6 @@ TorchModel::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept
 
 }
 
-#endif 
+#else
+module TorchModule;
+#endif

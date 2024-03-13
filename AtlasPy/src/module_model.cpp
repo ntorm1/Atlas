@@ -1,6 +1,12 @@
 #define  _SILENCE_CXX23_DENORM_DEPRECATION_WARNING
 
 #include "module_model.h"
+
+#ifndef ATLAS_TORCH
+void wrap_model(py::module& m_model)
+{}
+#else
+
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
 
@@ -111,3 +117,5 @@ void wrap_model(py::module& m_model)
     bindLinearRegressionModel(m_model);
     bindTorchModel(m_model);
 }
+
+#endif

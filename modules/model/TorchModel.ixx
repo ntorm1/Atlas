@@ -67,9 +67,10 @@ public:
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
 };
 
+
+
+}
+
+}
+
 #endif
-
-
-}
-
-}

@@ -16,6 +16,7 @@ import HelperNodesModule;
 import RiskNodeModule;
 
 
+
 void wrap_base(py::module& m_core)
 {
     py::class_<Atlas::Portfolio, std::shared_ptr<Atlas::Portfolio>>(m_core, "Portfolio")
