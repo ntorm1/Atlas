@@ -69,7 +69,6 @@ public:
 	void registerStrategy(Strategy* strategy) noexcept;
 	auto const& getSource() const noexcept{return m_source;}
 	size_t currentIdx() const noexcept;
-	Option<SharedPtr<AST::AssetObserverNode>> getObserver(String const& id) noexcept;
 	Option<SharedPtr<AST::StrategyBufferOpNode>> getSameFromCache(SharedPtr<AST::StrategyBufferOpNode> a) noexcept;
 	LinAlg::EigenMatrixXd const& getData() const noexcept;
 	LinAlg::EigenVectorXd const& getReturnsScalar() const noexcept;
@@ -89,6 +88,7 @@ public:
 	) noexcept;
 
 	ATLAS_API void registerModel(SharedPtr<Model::ModelBase> model) noexcept;
+	ATLAS_API Option<SharedPtr<AST::AssetObserverNode>> getObserver(String const& id) noexcept;
 	ATLAS_API SharedPtr<AST::AssetObserverNode> registerObserver(SharedPtr<AST::AssetObserverNode> observer) noexcept;
 	ATLAS_API HashMap<String, SharedPtr<AST::StrategyBufferOpNode>> getASTCache() const noexcept;
 	ATLAS_API LinAlg::EigenConstRowView<double> getAssetSlice(size_t asset_index) const noexcept;

@@ -6,7 +6,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 ATLAS_CORE_PATH = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/x64/Debug"
 sys.path.append(ATLAS_CORE_PATH)
 
-from AtlasPy.core import Hydra
+import AtlasPy
 
 from .parser import Parser
 

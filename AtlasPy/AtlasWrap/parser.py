@@ -1,10 +1,12 @@
 import logging
 import os
 import sys
+import importlib
 from typing import *
 import tomllib
 
-from AtlasPy.core import Hydra
+from AtlasPy.core import Hydra, Exchange, Portfolio
+import AtlasPy
 
 class Parser:
     _hydra: Hydra = None
@@ -51,6 +53,68 @@ class Parser:
         
         self._load_exchanges()
         self._load_portfolios()
+        self._hydra.build()
+        self._load_strategies()
+
+    def _load_strategies(
+            self
+        ) -> None:
+        sys.path.insert(0, self._hydra_config_dir)
+        strategy_dirs = [d for d in os.listdir(self._hydra_config_dir) if os.path.isdir(os.path.join(self._hydra_config_dir, d))]
+        if len(strategy_dirs) == 0:
+            raise FileNotFoundError(f"no strategy dirs found in: {self._hydra_config_dir}")
+        for strategy_dir in strategy_dirs:
+            logging.info(f"loading strategy: {strategy_dir}")
+            strategy_path = os.path.join(self._hydra_config_dir, strategy_dir, "strategy.py")
+            strategy_toml = os.path.join(self._hydra_config_dir, strategy_dir, "strategy.toml")
+            with open(strategy_toml, 'rb') as f:
+                strategy_toml = tomllib.load(f)
+
+            strategy_id = strategy_toml.get("strategy")["id"]
+            portfolio_id = strategy_toml.get("portfolio")["id"]
+            exchange_id = strategy_toml.get("exchange")["id"]
+            if not strategy_id or not portfolio_id or not exchange_id:
+                raise ValueError(f"strategy: {strategy_dir} missing id, portfolio_id, or exchange_id")
+            
+            exchange = self._hydra.getExchange(exchange_id)
+            portfolio = self._hydra.getPortfolio(portfolio_id)
+
+            # check that strategy_path exists
+            if not os.path.isfile(strategy_path):
+                raise FileNotFoundError(f"missing strategy.py: {strategy_path}")
+            module_name = f"{strategy_dir}.strategy"
+            strategy_module = importlib.import_module(module_name)
+
+            # check that strategy_path defines a function called ast
+            if not hasattr(strategy_module, 'ast') or not callable(getattr(strategy_module, 'ast')):
+                raise TypeError(f"missing function 'ast' in: {strategy_path}")
+
+            # check that ast function has type hints and accepts exchange and portfolio
+            ast_function = getattr(strategy_module, 'ast')
+            if hasattr(ast_function, '__annotations__'):
+                annotations = ast_function.__annotations__
+                print(annotations)
+                if 'exchange' not in annotations or annotations['exchange'] != Exchange:
+                    logging.error(f"annotations: {annotations}")
+                    raise TypeError("Function 'ast' must accept 'exchange' keyword argument of type Exchange")
+            else:
+                logging.error(f"annotations: {annotations}")
+                raise TypeError("Function 'ast' must have type hints")
+            
+            # check function returns an AllocationNode
+            if not hasattr(ast_function, '__annotations__') or 'return' not in ast_function.__annotations__ or ast_function.__annotations__['return'] != AtlasPy.ast.AllocationNode:
+                logging.error(f"annotations: {annotations}")
+                raise TypeError("Function 'ast' must return an AtlasPy.ast.AllocationNode")
+
+            # build the allocation node
+            allocation = ast_function(
+                exchange=exchange
+            )  
+
+            # register the strategy
+            strategy_node_signal = AtlasPy.ast.StrategyNode.make(allocation, portfolio)
+            _ = self._hydra.addStrategy(AtlasPy.core.Strategy(strategy_id, strategy_node_signal, 1.0), True)
+            logging.info(f"loaded strategy: {strategy_dir}")
 
     def _load_portfolios(
             self
