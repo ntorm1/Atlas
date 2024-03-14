@@ -1,68 +1,64 @@
-import sys
-import os
-import time
 import unittest
+import os
+
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 
-# show pandas columns with 3 points of precision
-pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
-atlas_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/x64/Debug"
-torch_path = "C:/libtorch/lib"
-os.add_dll_directory(torch_path)
-sys.path.append(atlas_path)
-
-
-from AtlasPy.core import Hydra, Portfolio, Strategy
-from AtlasPy.ast import *
+import context
+from AtlasWrap import *
+from AtlasWrap import AtlasPy
 from AtlasPy.model import *
 
-exchange_path_sp500_ma = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/test/data_sp500_ma.h5"
-exchange_path = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasTest/scripts/data.h5"
-exchange_csv = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchange1"
+HYDRA_DIR = "files/hydra1"
+TEST_FILE_1 = "test_strategy_1.toml"
+PORTFOLIO_ID = "test_portfolio_1"
+STRATEGY_ID = "test_strategy_1"
+EXCHANGE_ID = "test_exchange_1"
+
+EXCHANGE_CSV = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchangeVBT"
 
 
-
-class SimpleObserverTest(unittest.TestCase):
+class TestParser(unittest.TestCase):
     def setUp(self) -> None:
-        self.exchange_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchangeVBT"
-        self.hydra = Hydra()
-        self.exchange = self.hydra.addExchange("test", self.exchange_path,  "%Y-%m-%d %H:%M:%S")
-        self.portfolio = self.hydra.addPortfolio("test_p", self.exchange, 100.0)
-        self.strategy_id = "test_s" 
-        self.hydra.build()
-
+        hydra_path = os.path.join(os.path.dirname(__file__),HYDRA_DIR)
+        parser = Parser(hydra_path)
+        self.hydra = parser.getHydra()
+        self.exchange = self.hydra.getExchange(EXCHANGE_ID)
+        self.portfolio = self.hydra.getPortfolio(PORTFOLIO_ID)
 
     def get_df(self):
         ticker = "BTC-USD"
-        path = os.path.join(self.exchange_path,f"{ticker}.csv")  
+        path = os.path.join(EXCHANGE_CSV,f"{ticker}.csv")  
         df = pd.read_csv(path)
         df["Date"] = pd.to_datetime(df["Date"]) 
         df = df.set_index("Date")
         return df
 
-    def test_max_observer(self):
+    def test_parse(self):
         window = 5
-        close = AssetReadNode.make("Close", 0, self.exchange)
-        prev_close = AssetReadNode.make("Close", -1, self.exchange)
-        change = AssetOpNode.make(
+        self.hydra.getExchange(EXCHANGE_ID)
+        self.hydra.getPortfolio(PORTFOLIO_ID)
+        window = 5
+        close =AssetReadNode.make("Close", 0, self.exchange)
+        prev_close =AssetReadNode.make("Close", -1, self.exchange)
+        change =AssetOpNode.make(
             close,
             prev_close,
-            AssetOpType.SUBTRACT
+           AssetOpType.SUBTRACT
         )
         close_arg_max = self.exchange.registerObserver(TsArgMaxObserverNode("arg_max", change, window))
         close_max = self.exchange.registerObserver(MaxObserverNode("max", change, window))
         self.exchange.enableNodeCache("close_arg_max",close_arg_max, False)
         self.exchange.enableNodeCache("close_max",close_max, False)
 
-        ev = ExchangeViewNode.make(self.exchange, close)
-        allocation = AllocationNode.make(
+        ev =ExchangeViewNode.make(self.exchange, close)
+        allocation =AllocationNode.make(
             ev
         )
         strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
-        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node_signal, 1.0), True)
+        _ = self.hydra.addStrategy(Strategy(STRATEGY_ID, strategy_node_signal, 1.0), True)
         self.hydra.run()
 
         df = self.get_df()
@@ -83,7 +79,7 @@ class SimpleObserverTest(unittest.TestCase):
         ev = ExchangeViewNode.make(self.exchange, sum_node)
         allocation = AllocationNode.make(ev)
         strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
-        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node_signal, 1.0), True)
+        strategy = self.hydra.addStrategy(Strategy(STRATEGY_ID, strategy_node_signal, 1.0), True)
 
         self.hydra.run()
         df = self.get_df()
@@ -114,7 +110,7 @@ class SimpleObserverTest(unittest.TestCase):
         ev = ExchangeViewNode.make(self.exchange, change_squared_sum)
         allocation = AllocationNode.make(ev)
         strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
-        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node_signal, 1.0), True)
+        strategy = self.hydra.addStrategy(Strategy(STRATEGY_ID, strategy_node_signal, 1.0), True)
         self.hydra.run()
 
         df = self.get_df()
@@ -136,7 +132,7 @@ class SimpleObserverTest(unittest.TestCase):
         ev = ExchangeViewNode.make(self.exchange, cov)
         allocation = AllocationNode.make(ev)
         strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
-        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node_signal, 1.0), True)
+        strategy = self.hydra.addStrategy(Strategy(STRATEGY_ID, strategy_node_signal, 1.0), True)
         self.hydra.run()
 
         df = self.get_df()
@@ -234,6 +230,6 @@ class SimpleObserverTest(unittest.TestCase):
         model = sm.OLS(y_pandas, x_pandas).fit()
         params = np.array(model.params)
         self.assertTrue(np.allclose(params, lr_model.getTheta()))
-
-if __name__ == "__main__":
+    
+if __name__ == '__main__':
     unittest.main()

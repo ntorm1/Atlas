@@ -2,11 +2,6 @@
 
 #include "module_model.h"
 
-#ifndef ATLAS_TORCH
-void wrap_model(py::module& m_model)
-{}
-#else
-
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
 
@@ -92,6 +87,7 @@ static void bindLinearRegressionModel(py::module& m) {
         .def("getTheta", &LinearRegressionModel::getTheta, py::return_value_policy::reference_internal);
 }
 
+#ifdef ATLAS_TORCH
 
 //============================================================================
 static void bindTorchModel(py::module& m) {
@@ -108,6 +104,7 @@ static void bindTorchModel(py::module& m) {
             py::arg("config"))
         .def("getNamedParameters", &TorchModel::namedParameters);
 }
+#endif
 
 
 void wrap_model(py::module& m_model)
@@ -115,7 +112,9 @@ void wrap_model(py::module& m_model)
     bindModelEnum(m_model);
     bindModelHelpers(m_model);
     bindLinearRegressionModel(m_model);
+#ifdef ATLAS_TORCH
+
     bindTorchModel(m_model);
+#endif
 }
 
-#endif

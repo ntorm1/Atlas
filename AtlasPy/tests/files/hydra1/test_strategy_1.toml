@@ -1,8 +1,0 @@
-[strategy]
-id = "test_strategy_1"
-
-[exchange]
-id = "test_exchange_1"
-
-[portfolio]
-id = "test_portfolio_1"

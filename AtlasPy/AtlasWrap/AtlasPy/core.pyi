@@ -1,4 +1,4 @@
-import stubs.ast
+import AtlasPy.ast
 from __future__ import annotations
 import numpy
 import typing
@@ -25,6 +25,8 @@ class Exchange:
         """
         get unique id of the exchange
         """
+    def getObserver(self, arg0: str) -> ... | None:
+        ...
     def getTimestamps(self) -> list[int]:
         ...
     def registerModel(self, arg0: ...) -> None:
@@ -98,7 +100,7 @@ class Strategy:
         ...
     def initCommissionManager(self) -> CommisionManager:
         ...
-    def setGridDimmensions(self, dimensions: tuple[any, ...], grid_type: AtlasPy.ast.GridType | None = None) -> AtlasPy.ast.StrategyGrid:
+    def setGridDimmensions(self, dimensions: tuple[..., ...], grid_type: AtlasPy.ast.GridType | None = None) -> AtlasPy.ast.StrategyGrid:
         ...
     def setVolTracer(self, arg0: AtlasPy.ast.CovarianceNodeBase) -> None:
         ...
