@@ -33,6 +33,7 @@ export enum class NodeType : Uint8
 	LAG = 18,
 	TARGET = 19,
 	NOP = 20,
+  ASSET_PCA = 21,
 };
 
 

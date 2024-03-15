@@ -233,6 +233,8 @@
     <ClCompile Include="modules\model\LinearRegression.ixx" />
     <ClCompile Include="modules\model\ModelBase.cpp" />
     <ClCompile Include="modules\model\ModelBase.ixx" />
+    <ClCompile Include="modules\ast\PCA.cpp" />
+    <ClCompile Include="modules\ast\PCA.ixx" />
     <ClCompile Include="modules\model\TorchModel.cpp" />
     <ClCompile Include="modules\model\TorchModel.ixx" />
     <ClCompile Include="modules\model\TorchModelImpl.cpp" />
