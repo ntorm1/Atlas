@@ -1,0 +1,13 @@
+[hydra]
+
+
+[[exchanges]]
+id = "test_exchange_1"
+path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchange1"
+datetime_format = "%Y-%m-%d"
+
+
+[[portfolios]]
+id = "test_portfolio_1"
+exchange_id = "test_exchange_1"
+starting_cash = 100.0

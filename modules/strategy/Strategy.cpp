@@ -77,6 +77,9 @@ double Strategy::getNLV() const noexcept { return m_impl->m_tracer->getNLV(); }
 //============================================================================
 [[nodiscard]] Result<bool, AtlasException>
 Strategy::enableTracerHistory(TracerType t) noexcept {
+  if (!m_impl->m_ast) {
+    return Err("ast not build yet");
+  }
   switch (t) {
   case TracerType::ORDERS_EAGER:
     m_impl->m_ast->enableCopyWeightsBuffer();

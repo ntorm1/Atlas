@@ -1,32 +1,14 @@
-import unittest
-import logging
-import os
-
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 
 
-import context
-from AtlasWrap import *
-from AtlasWrap import AtlasPy
-from AtlasWrap.strategy import ImmediateStrategy
-from AtlasPy.model import *
-
-HYDRA_DIR = "files/hydra1"
-TEST_FILE_1 = "test_strategy_1.toml"
-PORTFOLIO_ID = "test_portfolio_1"
-STRATEGY_ID = "test_strategy_1"
-EXCHANGE_ID = "test_exchange_1"
+from context import *
 
 EXCHANGE_CSV = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchangeVBT"
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
 
-
-class TestParser(unittest.TestCase):
+class TestObserver(unittest.TestCase):
     def setUp(self) -> None:
         hydra_path = os.path.join(os.path.dirname(__file__), HYDRA_DIR)
         parser = Parser(hydra_path)
@@ -43,7 +25,6 @@ class TestParser(unittest.TestCase):
         return df
 
     def test_parse(self):
-        logging.info("Testing parse")
         window = 5
         self.hydra.getExchange(EXCHANGE_ID)
         self.hydra.getPortfolio(PORTFOLIO_ID)
@@ -80,10 +61,8 @@ class TestParser(unittest.TestCase):
         df = df.iloc[window:]
         self.assertTrue(np.allclose(df["close_max_atlas"], df["close_max_pd"]))
         self.assertTrue(np.allclose(df["close_arg_max_atlas"], df["close_arg_max_pd"]))
-        logging.info("Parse test complete")
 
     def test_sum_observer(self):
-        logging.info("Testing sum observer")
         window = 2
         close = AssetReadNode.make("Close", 0, self.exchange)
         sum_node = self.exchange.registerObserver(SumObserverNode("sum", close, window))
@@ -104,10 +83,8 @@ class TestParser(unittest.TestCase):
         df["close_sum_pd"] = df["Close"].rolling(window).sum()
         df.replace(np.nan, 0, inplace=True)
         self.assertTrue(np.allclose(df["close_sum_atlas"], df["close_sum_pd"]))
-        logging.info("Sum observer test complete")
 
     def test_var_observer(self):
-        logging.info("Testing var observer")
         window = 3
         close = AssetReadNode.make("Close", 0, self.exchange)
         prev_close = AssetReadNode.make("Close", -1, self.exchange)
@@ -147,10 +124,8 @@ class TestParser(unittest.TestCase):
         self.assertTrue(
             np.allclose(df["close_change_squared_atlas"], df["close_change_squared_pd"])
         )
-        logging.info("Var observer test complete")
 
     def test_cov_observer(self):
-        logging.info("Testing cov observer")
         window = 5
         close = AssetReadNode.make("Close", 0, self.exchange)
         open_node = AssetReadNode.make("Open", 0, self.exchange)
@@ -176,10 +151,8 @@ class TestParser(unittest.TestCase):
         self.assertTrue(
             np.allclose(df["close_open_cov_atlas"], df["close_open_cov_pd"])
         )
-        logging.info("Cov observer test complete")
 
     def test_lr(self):
-        logging.info("Testing linear regression")
         walk_forward_window = 3
         training_window = 5
         close = AssetReadNode.make("Close", 0, self.exchange)
@@ -246,7 +219,6 @@ class TestParser(unittest.TestCase):
         model = sm.OLS(y_pandas, x_pandas).fit()
         params = np.array(model.params)
         self.assertTrue(np.allclose(params, lr_model.getTheta()))
-        logging.info("Linear regression test complete")
 
 
 if __name__ == "__main__":
