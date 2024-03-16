@@ -4,8 +4,8 @@ import logging
 from abc import ABC, abstractmethod
 
 
-import AtlasPy
-from AtlasPy.core import Hydra, Exchange, Portfolio, Strategy
+import atlas_internal
+from atlas_internal.core import Hydra, Exchange, Portfolio, Strategy
 
 
 class PyStrategy(Strategy):
@@ -24,12 +24,12 @@ class PyStrategy(Strategy):
         self.portfolio = portfolio
 
     @abstractmethod
-    def loadAST(self) -> AtlasPy.ast.StrategyBufferOpNode:
+    def loadAST(self) -> atlas_internal.ast.StrategyBufferOpNode:
         pass
 
 
 class ImmediateStrategy(PyStrategy):
-    ast: AtlasPy.ast.StrategyBufferOpNode = None
+    ast: atlas_internal.ast.StrategyBufferOpNode = None
 
     def __init__(
         self,
@@ -37,7 +37,7 @@ class ImmediateStrategy(PyStrategy):
         portfolio,
         name: str,
         portfolio_weight: float,
-        ast: AtlasPy.ast.StrategyBufferOpNode,
+        ast: atlas_internal.ast.StrategyBufferOpNode,
     ) -> None:
         super().__init__(
             exchange=exchange,
@@ -49,5 +49,5 @@ class ImmediateStrategy(PyStrategy):
         self.portfolio = portfolio
         self.ast = ast
 
-    def loadAST(self) -> AtlasPy.ast.StrategyBufferOpNode:
+    def loadAST(self) -> atlas_internal.ast.StrategyBufferOpNode:
         return self.ast

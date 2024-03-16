@@ -51,7 +51,7 @@ public:
 };
 
 
-PYBIND11_MODULE(AtlasPy, m) {
+PYBIND11_MODULE(atlas_internal, m) {
     auto m_core = m.def_submodule("core");
     auto m_ast = m.def_submodule("ast");
     auto m_model = m.def_submodule("model");

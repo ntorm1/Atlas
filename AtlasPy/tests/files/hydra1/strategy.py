@@ -9,8 +9,8 @@ sys.path.insert(
     ),
 )
 
-from AtlasWrap import AtlasPy
-from AtlasWrap.strategy import *
+from AtlasPy import atlas_internal
+from AtlasPy.strategy import *
 
 
 class ObserverTestStrategy(PyStrategy):
@@ -23,22 +23,22 @@ class ObserverTestStrategy(PyStrategy):
     ) -> None:
         super().__init__(exchange, portfolio, name, portfolio_weight)
 
-    def loadAST(self) -> AtlasPy.ast.AllocationNode:
+    def loadAST(self) -> atlas_internal.ast.AllocationNode:
         window = 5
-        close = AtlasPy.ast.AssetReadNode.make("Close", 0, self.exchange)
-        prev_close = AtlasPy.ast.AssetReadNode.make("Close", -1, self.exchange)
-        change = AtlasPy.ast.AssetOpNode.make(
-            close, prev_close, AtlasPy.ast.AssetOpType.SUBTRACT
+        close = atlas_internal.ast.AssetReadNode.make("Close", 0, self.exchange)
+        prev_close = atlas_internal.ast.AssetReadNode.make("Close", -1, self.exchange)
+        change = atlas_internal.ast.AssetOpNode.make(
+            close, prev_close, atlas_internal.ast.AssetOpType.SUBTRACT
         )
         close_arg_max = self.exchange.registerObserver(
-            AtlasPy.ast.TsArgMaxObserverNode("arg_max", change, window)
+            atlas_internal.ast.TsArgMaxObserverNode("arg_max", change, window)
         )
         close_max = self.exchange.registerObserver(
-            AtlasPy.ast.MaxObserverNode("max", change, window)
+            atlas_internal.ast.MaxObserverNode("max", change, window)
         )
         self.exchange.enableNodeCache("close_arg_max", close_arg_max, False)
         self.exchange.enableNodeCache("close_max", close_max, False)
 
-        ev = AtlasPy.ast.exchangeViewNode.make(self.exchange, close)
-        allocation = AtlasPy.ast.AllocationNode.make(ev)
-        return AtlasPy.ast.StrategyNode.make(allocation, self.portfolio)
+        ev = atlas_internal.ast.exchangeViewNode.make(self.exchange, close)
+        allocation = atlas_internal.ast.AllocationNode.make(ev)
+        return atlas_internal.ast.StrategyNode.make(allocation, self.portfolio)

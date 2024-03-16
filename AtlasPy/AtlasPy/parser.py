@@ -5,7 +5,7 @@ import importlib
 from typing import *
 import tomllib
 
-from AtlasPy.core import Hydra, Exchange, Portfolio
+from atlas_internal.core import Hydra, Exchange, Portfolio
 
 
 class Parser:

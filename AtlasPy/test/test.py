@@ -4,7 +4,7 @@ import time
 atlas_py_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/x64/Release"
 sys.path.append(atlas_py_path)
 
-import AtlasWrap
+import AtlasPy
 from AtlasPy.core import Hydra, Portfolio, Strategy
 from AtlasPy.ast import *
 
