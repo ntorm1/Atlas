@@ -86,8 +86,9 @@ static void deMean(Eigen::Ref<Eigen::VectorXd> data,
   }
   if (scale) {
     variance = meansSquared - means.cwiseProduct(means);
+    variance = variance.cwiseSqrt();
     for (int i = 0; i < rows; ++i) {
-      data(i) /= std::sqrt(variance(cluster(i)));
+      data(i) /= variance(cluster(i));
     }
   }
 }
