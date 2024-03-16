@@ -72,10 +72,12 @@ Hydra::addStrategy(SharedPtr<Strategy> strategy,
     }
     // find the strategy and replace it in the vector
     auto idx = m_impl->m_strategy_map[strategy->getName()];
+    strategy->load();
     m_impl->m_strategies[idx] = std::move(strategy);
     return m_impl->m_strategies[idx].get();
   }
   strategy->setID(m_impl->m_strategies.size());
+  strategy->load();
   m_impl->m_strategy_map[strategy->getName()] = m_impl->m_strategies.size();
   m_impl->m_strategies.push_back(std::move(strategy));
   return m_impl->m_strategies.back().get();

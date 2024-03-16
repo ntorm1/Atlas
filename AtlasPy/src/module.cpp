@@ -37,6 +37,20 @@ import RiskNodeModule;
 #include "module_model.h"
 
 
+class PyStrategy : public Atlas::Strategy {
+public:
+  using Atlas::Strategy::Strategy;
+
+  std::shared_ptr<Atlas::AST::StrategyNode> loadAST() noexcept override {
+    PYBIND11_OVERLOAD_PURE(
+				std::shared_ptr<Atlas::AST::StrategyNode>, /* Return type */
+				Atlas::Strategy,             /* Parent class */
+				loadAST,                     /* Name of function in C++ (must match Python name) */
+		);
+   }
+};
+
+
 PYBIND11_MODULE(AtlasPy, m) {
     auto m_core = m.def_submodule("core");
     auto m_ast = m.def_submodule("ast");
@@ -272,7 +286,9 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("cols", &Atlas::AST::StrategyGrid::cols)
         .def("meanReturn", &Atlas::AST::StrategyGrid::meanReturn);
 
-    py::class_<Atlas::Strategy, std::shared_ptr<Atlas::Strategy>>(m_core, "Strategy")
+    py::class_<Atlas::Strategy, PyStrategy, std::shared_ptr<Atlas::Strategy>>(
+        m_core, "Strategy")
+        .def("loadAST", &Atlas::Strategy::loadAST)
         .def("getNLV", &Atlas::Strategy::getNLV)
         .def("getName", &Atlas::Strategy::getName)
         .def("enableTracerHistory", &Atlas::Strategy::pyEnableTracerHistory)
@@ -286,7 +302,7 @@ PYBIND11_MODULE(AtlasPy, m) {
         .def("getAllocationBuffer", &Atlas::Strategy::getAllocationBuffer, py::return_value_policy::reference_internal)
         .def("getHistory", &Atlas::Strategy::getHistory, py::return_value_policy::reference_internal)
         .def("getWeightHistory", &Atlas::Strategy::getWeightHistory, py::return_value_policy::reference_internal)
-        .def(py::init<std::string, std::shared_ptr<Atlas::AST::StrategyNode>, double>());
+        .def(py::init<std::string, double>());
 
     py::class_<Atlas::AST::GridDimension, std::shared_ptr<Atlas::AST::GridDimension>>(m_ast, "GridDimension");
 

@@ -10,6 +10,7 @@ import statsmodels.api as sm
 import context
 from AtlasWrap import *
 from AtlasWrap import AtlasPy
+from AtlasWrap.strategy import ImmediateStrategy
 from AtlasPy.model import *
 
 HYDRA_DIR = "files/hydra1"
@@ -27,13 +28,11 @@ logging.basicConfig(
 
 class TestParser(unittest.TestCase):
     def setUp(self) -> None:
-        logging.info("Setting up test")
         hydra_path = os.path.join(os.path.dirname(__file__), HYDRA_DIR)
         parser = Parser(hydra_path)
         self.hydra = parser.getHydra()
         self.exchange = self.hydra.getExchange(EXCHANGE_ID)
         self.portfolio = self.hydra.getPortfolio(PORTFOLIO_ID)
-        logging.info("Setup complete")
 
     def get_df(self):
         ticker = "BTC-USD"
@@ -64,9 +63,10 @@ class TestParser(unittest.TestCase):
         ev = ExchangeViewNode.make(self.exchange, close)
         allocation = AllocationNode.make(ev)
         strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
-        _ = self.hydra.addStrategy(
-            Strategy(STRATEGY_ID, strategy_node_signal, 1.0), True
+        strategy = ImmediateStrategy(
+            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node_signal
         )
+        _ = self.hydra.addStrategy(strategy, True)
         self.hydra.run()
 
         df = self.get_df()
@@ -91,9 +91,10 @@ class TestParser(unittest.TestCase):
         ev = ExchangeViewNode.make(self.exchange, sum_node)
         allocation = AllocationNode.make(ev)
         strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
-        strategy = self.hydra.addStrategy(
-            Strategy(STRATEGY_ID, strategy_node_signal, 1.0), True
+        strategy = ImmediateStrategy(
+            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node_signal
         )
+        _ = self.hydra.addStrategy(strategy, True)
 
         self.hydra.run()
         df = self.get_df()
@@ -120,9 +121,10 @@ class TestParser(unittest.TestCase):
         ev = ExchangeViewNode.make(self.exchange, change_squared_sum)
         allocation = AllocationNode.make(ev)
         strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
-        strategy = self.hydra.addStrategy(
-            Strategy(STRATEGY_ID, strategy_node_signal, 1.0), True
+        strategy = ImmediateStrategy(
+            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node_signal
         )
+        _ = self.hydra.addStrategy(strategy, True)
         self.hydra.run()
 
         df = self.get_df()
@@ -159,9 +161,10 @@ class TestParser(unittest.TestCase):
         ev = ExchangeViewNode.make(self.exchange, cov)
         allocation = AllocationNode.make(ev)
         strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
-        strategy = self.hydra.addStrategy(
-            Strategy(STRATEGY_ID, strategy_node_signal, 1.0), True
+        strategy = ImmediateStrategy(
+            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node_signal
         )
+        _ = self.hydra.addStrategy(strategy, True)
         self.hydra.run()
 
         df = self.get_df()
