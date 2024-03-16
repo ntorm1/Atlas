@@ -79,8 +79,8 @@ AssetOpNode::AssetOpNode(SharedPtr<StrategyBufferOpNode> asset_op_left,
       std::max(m_asset_op_left->getWarmup(), m_asset_op_right->getWarmup());
   m_right_buffer.resize(getExchange().getAssetCount());
   m_right_buffer.setZero();
-  asset_op_right->addChild(this);
-  asset_op_left->addChild(this);
+  m_asset_op_left->addChild(this);
+  m_asset_op_right->addChild(this);
 }
 
 //============================================================================

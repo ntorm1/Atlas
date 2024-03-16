@@ -54,6 +54,7 @@ static void calculatePValues(LinAlg::EigenMatrixXd const &X,
 //============================================================================
 static double calculateRSquared(const LinAlg::EigenVectorXd &y,
                                 const LinAlg::EigenVectorXd &y_hat,
+                                int n_features,
                                 bool use_adjusted = false) noexcept {
   // Calculate total sum of squares (TSS)
   double y_mean = y.mean();
@@ -64,15 +65,14 @@ static double calculateRSquared(const LinAlg::EigenVectorXd &y,
 
   // Calculate number of observations and number of predictors
   int n = static_cast<int>(y.size());
-  int p = 1; // assuming only one predictor for simplicity
 
   // Calculate R-squared
   double r_squared = 1.0 - (rss / tss);
 
   // If adjusted R-squared is requested and there are predictors
-  if (use_adjusted && p > 0) {
+  if (use_adjusted && n_features > 0) {
     // Calculate adjusted R-squared
-    double adj_r_squared = 1.0 - ((1.0 - r_squared) * (n - 1) / (n - p - 1));
+    double adj_r_squared = 1.0 - ((1.0 - r_squared) * (n - 1) / (n - n_features - 1));
     return adj_r_squared;
   } else {
     return r_squared;

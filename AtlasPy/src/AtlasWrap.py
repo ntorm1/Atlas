@@ -15,26 +15,30 @@ from AtlasPy.core import Hydra, Portfolio, Strategy
 from AtlasPy.ast import *
 
 
-exchange_path_sp500_ma = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/test/data_sp500_ma.h5"
+exchange_path_sp500_ma = (
+    r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/test/data_sp500_ma.h5"
+)
 exchange_path = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasTest/scripts/data.h5"
 exchange_csv = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchange1"
 
 
 class AllocTest(unittest.TestCase):
-    
+
     def setUp(self) -> None:
         self.hydra = Hydra()
         self.intial_cash = 100.0
         self.exchange = self.hydra.addExchange("test", exchange_csv, "%Y-%m-%d")
-        self.portfolio = self.hydra.addPortfolio("test_p", self.exchange, self.intial_cash)
+        self.portfolio = self.hydra.addPortfolio(
+            "test_p", self.exchange, self.intial_cash
+        )
         self.strategy_id = "test_s"
         self.asset_id1 = "asset1"
         self.asset_id2 = "asset2"
         self.asset1_index = self.exchange.getAssetIndex(self.asset_id1)
         self.asset2_index = self.exchange.getAssetIndex(self.asset_id2)
 
-        self.asset1_close = [101,103,105,106];
-        self.asset2_close = [101.5,99,97,101.5,101.5,96];
+        self.asset1_close = [101, 103, 105, 106]
+        self.asset2_close = [101.5, 99, 97, 101.5, 101.5, 96]
 
     def testBuild(self) -> None:
         timestamps = self.exchange.getTimestamps()
@@ -43,36 +47,39 @@ class AllocTest(unittest.TestCase):
     def testSimpleAlloc(self) -> None:
         read_close = AssetReadNode.make("close", 0, self.exchange)
         exchange_view = ExchangeViewNode.make(self.exchange, read_close)
-        allocation = AllocationNode.make(
-            exchange_view,
-            AllocationType.UNIFORM,
-            0.0
-        )
-        
+        allocation = AllocationNode.make(exchange_view, AllocationType.UNIFORM, 0.0)
+
         # build final strategy and insert into hydra
         strategy_node = StrategyNode.make(allocation, self.portfolio)
         self.hydra.build()
-        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0))
+        strategy = self.hydra.addStrategy(
+            Strategy(self.strategy_id, strategy_node, 1.0)
+        )
         self.hydra.step()
         nlv = strategy.getNLV()
         assert nlv == self.intial_cash
         self.hydra.step()
 
-        asset_2_return = (self.asset2_close[1] - self.asset2_close[0]) / self.asset2_close[0];
+        asset_2_return = (
+            self.asset2_close[1] - self.asset2_close[0]
+        ) / self.asset2_close[0]
         nlv = self.intial_cash * (1 + asset_2_return)
         assert strategy.getNLV() == nlv
-        
-        self.hydra.step()
-        asset_2_return2 = (self.asset2_close[2] - self.asset2_close[1]) / self.asset2_close[1]
-        asset_1_return2 = (self.asset1_close[1] - self.asset1_close[0]) / self.asset1_close[0]
-        avg_return = (.5 * asset_2_return2) + (.5 * asset_1_return2)
-        nlv *= (1.0 + avg_return)
-        assert strategy.getNLV() == nlv
 
+        self.hydra.step()
+        asset_2_return2 = (
+            self.asset2_close[2] - self.asset2_close[1]
+        ) / self.asset2_close[1]
+        asset_1_return2 = (
+            self.asset1_close[1] - self.asset1_close[0]
+        ) / self.asset1_close[0]
+        avg_return = (0.5 * asset_2_return2) + (0.5 * asset_1_return2)
+        nlv *= 1.0 + avg_return
+        assert strategy.getNLV() == nlv
 
     def testFixedAlloc(self) -> None:
         alloc = [(self.asset_id1, 0.3), (self.asset_id2, 0.7)]
-        allocation = FixedAllocationNode.make( alloc, self.exchange, 0.0)
+        allocation = FixedAllocationNode.make(alloc, self.exchange, 0.0)
         strategy_node = StrategyNode.make(allocation, self.portfolio)
 
         trigger_node = PeriodicTriggerNode.make(self.exchange, 2)
@@ -80,14 +87,16 @@ class AllocTest(unittest.TestCase):
         strategy_node.setWarmupOverride(1)
 
         self.hydra.build()
-        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0))
+        strategy = self.hydra.addStrategy(
+            Strategy(self.strategy_id, strategy_node, 1.0)
+        )
         commission_manager = strategy.initCommissionManager()
         fixed_commission = 1.0
         pct_commission = 0.001
         commission_manager.setFixedCommission(fixed_commission)
         commission_manager.setCommissionPct(pct_commission)
 
-        # test warmup override 
+        # test warmup override
         self.hydra.step()
         allocation = strategy.getAllocationBuffer()
         self.assertTrue(np.allclose(allocation, np.zeros_like(allocation)))
@@ -111,7 +120,7 @@ class AllocTest(unittest.TestCase):
         weights_2 = np.copy(strategy.getAllocationBuffer())
 
         # fixed alloc forced rebalance, should have two fixed commissions and two pct commissions
-	    # proportional to the size of the rebalance
+        # proportional to the size of the rebalance
         nlv = strategy.getNLV()
         self.hydra.step()
         returns = self.exchange.getMarketReturns()
@@ -126,38 +135,39 @@ class AllocTest(unittest.TestCase):
 
 class VectorBTCompare(unittest.TestCase):
     def setUp(self) -> None:
-        self.exchange_path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchangeVBT"
+        self.exchange_path = (
+            "C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchangeVBT"
+        )
         self.hydra = Hydra()
-        self.exchange = self.hydra.addExchange("test", self.exchange_path,  "%Y-%m-%d %H:%M:%S")
+        self.exchange = self.hydra.addExchange(
+            "test", self.exchange_path, "%Y-%m-%d %H:%M:%S"
+        )
         self.portfolio = self.hydra.addPortfolio("test_p", self.exchange, 100.0)
-        self.strategy_id = "test_s" 
+        self.strategy_id = "test_s"
         self.hydra.build()
-
 
     def test_max_observer(self):
         n = 5
         close = AssetReadNode.make("Close", 0, self.exchange)
         prev_close = AssetReadNode.make("Close", -1, self.exchange)
-        change = AssetOpNode.make(
-            close,
-            prev_close,
-            AssetOpType.SUBTRACT
-        )
+        change = AssetOpNode.make(close, prev_close, AssetOpType.SUBTRACT)
 
-        close_max = self.exchange.registerObserver(MaxObserverNode("change_max",change, n))
-        self.exchange.enableNodeCache("close_max",close_max, False)
+        close_max = self.exchange.registerObserver(
+            MaxObserverNode("change_max", change, n)
+        )
+        self.exchange.enableNodeCache("close_max", close_max, False)
 
         ev = ExchangeViewNode.make(self.exchange, close)
-        allocation = AllocationNode.make(
-            ev
-        )
+        allocation = AllocationNode.make(ev)
         strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
-        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node_signal, 1.0), True)
+        strategy = self.hydra.addStrategy(
+            Strategy(self.strategy_id, strategy_node_signal, 1.0), True
+        )
         self.hydra.run()
 
         ticker = "BTC-USD"
         btc_idx = self.exchange.getAssetIndex(ticker)
-        path = os.path.join(self.exchange_path,f"{ticker}.csv")  
+        path = os.path.join(self.exchange_path, f"{ticker}.csv")
         df = pd.read_csv(path)
         df["close_max_atlas"] = close_max.cache()[btc_idx].T
         df["close_max_pd"] = df["Close"].diff().rolling(n).max()
@@ -170,28 +180,32 @@ class VectorBTCompare(unittest.TestCase):
         slow_n = 200
         close = AssetReadNode.make("Close", 0, self.exchange)
         fast_ma = AssetScalerNode(
-            self.exchange.registerObserver(SumObserverNode("fast_sum",close, fast_n)),
+            self.exchange.registerObserver(SumObserverNode("fast_sum", close, fast_n)),
             AssetOpType.DIVIDE,
-            fast_n
+            fast_n,
         )
         slow_ma = AssetScalerNode(
-            self.exchange.registerObserver(SumObserverNode("slow_sum",close, slow_n)),
+            self.exchange.registerObserver(SumObserverNode("slow_sum", close, slow_n)),
             AssetOpType.DIVIDE,
-            slow_n
+            slow_n,
         )
         spread = AssetOpNode.make(fast_ma, slow_ma, AssetOpType.SUBTRACT)
-        spread_filter = ExchangeViewFilter(ExchangeViewFilterType.GREATER_THAN, 0.0, None)
+        spread_filter = ExchangeViewFilter(
+            ExchangeViewFilterType.GREATER_THAN, 0.0, None
+        )
         exchange_view = ExchangeViewNode.make(self.exchange, spread, spread_filter)
 
         allocation = AllocationNode.make(exchange_view)
         strategy_node = StrategyNode.make(allocation, self.portfolio)
-        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0), True)
+        strategy = self.hydra.addStrategy(
+            Strategy(self.strategy_id, strategy_node, 1.0), True
+        )
         strategy.enableTracerHistory(TracerType.NLV)
         self.hydra.run()
 
         nlv = strategy.getHistory(TracerType.NLV)
         returns = nlv[-1] / nlv[0] - 1
-        #self.assertAlmostEqual(returns, 1.5693292786263853)
+        # self.assertAlmostEqual(returns, 1.5693292786263853)
 
     def test_ma_signal(self):
         fast_n = 50
@@ -200,39 +214,47 @@ class VectorBTCompare(unittest.TestCase):
         fast_ma = AssetScalerNode(
             self.exchange.registerObserver(SumObserverNode("fast_sum", close, fast_n)),
             AssetOpType.DIVIDE,
-            fast_n
+            fast_n,
         )
         slow_ma = AssetScalerNode(
-            self.exchange.registerObserver(SumObserverNode("slow_sum",close, slow_n)),
+            self.exchange.registerObserver(SumObserverNode("slow_sum", close, slow_n)),
             AssetOpType.DIVIDE,
-            slow_n
+            slow_n,
         )
         spread = AssetOpNode.make(fast_ma, slow_ma, AssetOpType.SUBTRACT)
 
-        spread_filter_up = ExchangeViewFilter(ExchangeViewFilterType.GREATER_THAN, 0.0, None)
-        spread_filter_down = ExchangeViewFilter(ExchangeViewFilterType.LESS_THAN, 0.0, None)
-        exchange_view_down = ExchangeViewNode.make(self.exchange, spread, spread_filter_down)
-        exchange_view_up = ExchangeViewNode.make(self.exchange, spread, spread_filter_up, exchange_view_down)
+        spread_filter_up = ExchangeViewFilter(
+            ExchangeViewFilterType.GREATER_THAN, 0.0, None
+        )
+        spread_filter_down = ExchangeViewFilter(
+            ExchangeViewFilterType.LESS_THAN, 0.0, None
+        )
+        exchange_view_down = ExchangeViewNode.make(
+            self.exchange, spread, spread_filter_down
+        )
+        exchange_view_up = ExchangeViewNode.make(
+            self.exchange, spread, spread_filter_up, exchange_view_down
+        )
 
         exchange_view = ExchangeViewNode.make(self.exchange, spread, None)
         self.exchange.enableNodeCache("ev", exchange_view, False)
-        self.exchange.enableNodeCache("ev_signal",exchange_view_up, False)
+        self.exchange.enableNodeCache("ev_signal", exchange_view_up, False)
 
         allocation = AllocationNode.make(
-            exchange_view,
-            AllocationType.CONDITIONAL_SPLIT,
-            0.0
+            exchange_view, AllocationType.CONDITIONAL_SPLIT, 0.0
         )
         allocation_signal = AllocationNode.make(
-            exchange_view_up,
-            AllocationType.CONDITIONAL_SPLIT,
-            0.0
+            exchange_view_up, AllocationType.CONDITIONAL_SPLIT, 0.0
         )
 
         strategy_node = StrategyNode.make(allocation, self.portfolio)
         strategy_node_signal = StrategyNode.make(allocation_signal, self.portfolio)
-        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0), True)
-        strategy_signal = self.hydra.addStrategy(Strategy(self.strategy_id + "_signal", strategy_node_signal, 1.0), True)
+        strategy = self.hydra.addStrategy(
+            Strategy(self.strategy_id, strategy_node, 1.0), True
+        )
+        strategy_signal = self.hydra.addStrategy(
+            Strategy(self.strategy_id + "_signal", strategy_node_signal, 1.0), True
+        )
         strategy.enableTracerHistory(TracerType.NLV)
         strategy.enableTracerHistory(TracerType.ORDERS_EAGER)
         strategy_signal.enableTracerHistory(TracerType.NLV)
@@ -243,7 +265,7 @@ class VectorBTCompare(unittest.TestCase):
         cache = exchange_view.cache()
         cache_signal = exchange_view_up.cache()
         # signal only update when opposite ev is triggered so cache is not equal
-        self.assertFalse(np.allclose(cache, cache_signal))      
+        self.assertFalse(np.allclose(cache, cache_signal))
 
         tracer1 = strategy.getTracer()
         tracer2 = strategy_signal.getTracer()
@@ -259,7 +281,7 @@ class VectorBTCompare(unittest.TestCase):
         nlv1 = strategy.getHistory(TracerType.NLV)[-1]
         nlv2 = strategy_signal.getHistory(TracerType.NLV)[-1]
         self.assertAlmostEqual(nlv1, nlv2)
-        
+
         self.hydra.reset()
         self.hydra.run()
 
@@ -273,12 +295,7 @@ class VectorBTCompare(unittest.TestCase):
         close = AssetReadNode.make("Close", 0, self.exchange)
         previous_close = AssetReadNode.make("Close", -1, self.exchange)
 
-        atr_node = ATRNode.make(
-            self.exchange,
-            "High",
-            "Low",
-            14
-        ) 
+        atr_node = ATRNode.make(self.exchange, "High", "Low", 14)
         median_node = AssetMedianNode.make(
             self.exchange,
             "High",
@@ -289,24 +306,20 @@ class VectorBTCompare(unittest.TestCase):
         lower_band = AssetOpNode.make(
             median_node,
             AssetScalerNode(atr_node, AssetOpType.MULTIPLY, multiplier),
-            AssetOpType.SUBTRACT
+            AssetOpType.SUBTRACT,
         )
         lower_left_cond = AssetIfNode(
-            lower_band,
-            AssetCompType.GREATER,
-            DummyNode(self.exchange)
+            lower_band, AssetCompType.GREATER, DummyNode(self.exchange)
         )
         lower_right_cond = AssetIfNode(
-            previous_close,
-            AssetCompType.LESS, 
-            DummyNode(self.exchange)
+            previous_close, AssetCompType.LESS, DummyNode(self.exchange)
         )
         final_lower_band = AssetCompNode(
             lower_left_cond,
             LogicalType.OR,
             lower_right_cond,
             lower_band,
-            DummyNode(self.exchange)
+            DummyNode(self.exchange),
         )
         lagged_final_lower_band = final_lower_band.lag(1)
         lower_left_cond.swapRightEval(lagged_final_lower_band)
@@ -318,24 +331,20 @@ class VectorBTCompare(unittest.TestCase):
         upper_band = AssetOpNode.make(
             median_node,
             AssetScalerNode(atr_node, AssetOpType.MULTIPLY, multiplier),
-            AssetOpType.ADD
+            AssetOpType.ADD,
         )
         upper_left_cond = AssetIfNode(
-            upper_band,
-            AssetCompType.LESS,
-            DummyNode(self.exchange)
+            upper_band, AssetCompType.LESS, DummyNode(self.exchange)
         )
         upper_right_cond = AssetIfNode(
-            previous_close,
-            AssetCompType.GREATER, 
-            DummyNode(self.exchange)
+            previous_close, AssetCompType.GREATER, DummyNode(self.exchange)
         )
         final_upper_band = AssetCompNode(
             upper_left_cond,
             LogicalType.OR,
             upper_right_cond,
             upper_band,
-            DummyNode(self.exchange)
+            DummyNode(self.exchange),
         )
         lagged_final_upper_band = final_upper_band.lag(1)
         upper_left_cond.swapRightEval(lagged_final_upper_band)
@@ -343,13 +352,12 @@ class VectorBTCompare(unittest.TestCase):
         final_upper_band.swapFalseEval(lagged_final_upper_band)
         # ======================
 
-        self.exchange.enableNodeCache("final_lower_band",final_lower_band, True)
-        self.exchange.enableNodeCache("final_upper_band",final_upper_band, True)
+        self.exchange.enableNodeCache("final_lower_band", final_lower_band, True)
+        self.exchange.enableNodeCache("final_upper_band", final_upper_band, True)
         self.assertAlmostEqual(final_lower_band.cache()[0][-1], 40304.66724192)
         self.assertAlmostEqual(final_upper_band.cache()[0][15], 16137.834342208951)
         self.assertAlmostEqual(final_upper_band.cache()[0][16], 14852.429043211883)
         self.assertAlmostEqual(final_upper_band.cache()[0][16], 14852.429043211883)
-
 
     def test_grid_search(self):
         """
@@ -417,6 +425,7 @@ class VectorBTCompare(unittest.TestCase):
         """
         return
 
+
 class RiskTest(unittest.TestCase):
 
     def setUp(self) -> None:
@@ -429,7 +438,7 @@ class RiskTest(unittest.TestCase):
         self.strategy_id = "test_s"
 
     def testInit(self):
-        self.assertEqual(self.exchange.getName(),"test")
+        self.assertEqual(self.exchange.getName(), "test")
 
     # helper function to run to a specific date
     def runTo(self, date):
@@ -442,13 +451,10 @@ class RiskTest(unittest.TestCase):
     def testCovariance(self):
         monthly_trigger_node = StrategyMonthlyRunnerNode.make(self.exchange)
         covariance_node = self.exchange.getCovarianceNode(
-            "30_PERIOD_COV",
-            monthly_trigger_node,
-            30,
-            CovarianceType.FULL
+            "30_PERIOD_COV", monthly_trigger_node, 30, CovarianceType.FULL
         )
 
-        # data starts 2010-01-04, and the first day of february will not 
+        # data starts 2010-01-04, and the first day of february will not
         # have 20 days of data to calculate covariance, so the first trigger date
         # will be 2010-03-01
         self.hydra.build()
@@ -464,46 +470,48 @@ class RiskTest(unittest.TestCase):
         # and the first row should be 21 rows before that
         end_idx = self.data.index.get_loc("2010-03-01")
         start_idx = end_idx - 30
-        matrix_subset = self.data.iloc[start_idx:end_idx+1,:]
-        ordered_columns = sorted(matrix_subset.columns, key=lambda x: self.exchange.getAssetMap()[x])
+        matrix_subset = self.data.iloc[start_idx : end_idx + 1, :]
+        ordered_columns = sorted(
+            matrix_subset.columns, key=lambda x: self.exchange.getAssetMap()[x]
+        )
         matrix_subset = matrix_subset[ordered_columns]
         matrix_subset = matrix_subset.pct_change().dropna().cov(ddof=1)
 
         # assert all values are within 1e-6
-        cov_matrix_df = pd.DataFrame(cov_matrix, columns=ordered_columns, index=ordered_columns)
-        #print(cov_matrix_df)
-        #print(matrix_subset)
+        cov_matrix_df = pd.DataFrame(
+            cov_matrix, columns=ordered_columns, index=ordered_columns
+        )
+        # print(cov_matrix_df)
+        # print(matrix_subset)
         self.assertTrue(np.allclose(cov_matrix, matrix_subset, atol=1e-8))
 
     def testRankNode(self):
         monthly_trigger_node = StrategyMonthlyRunnerNode.make(self.exchange)
-        
+
         asset_read_node = AssetReadNode.make("close", 0, self.exchange)
         asser_read_previouse_node = AssetReadNode.make("close", -1, self.exchange)
-        spread = AssetOpNode.make(asset_read_node, asser_read_previouse_node, AssetOpType.DIVIDE)
+        spread = AssetOpNode.make(
+            asset_read_node, asser_read_previouse_node, AssetOpType.DIVIDE
+        )
         exchange_view = ExchangeViewNode.make(self.exchange, spread)
 
         # rank assets by 1 period return, flag the bottom 2 and top 2
-        rank_node = EVRankNode.make(
-            exchange_view,
-            EVRankType.NEXTREME,
-            2
-        )
-        
+        rank_node = EVRankNode.make(exchange_view, EVRankType.NEXTREME, 2)
+
         # short the bottom 2 assets, long the top 2
         allocation = AllocationNode.make(
-            rank_node,
-            AllocationType.CONDITIONAL_SPLIT,
-            0.0
+            rank_node, AllocationType.CONDITIONAL_SPLIT, 0.0
         )
-        
+
         # build final strategy and insert into hydra
         strategy_node = StrategyNode.make(allocation, self.portfolio)
         strategy_node.setTrigger(monthly_trigger_node)
         self.hydra.build()
-        strategy = self.hydra.addStrategy(Strategy(self.strategy_id, strategy_node, 1.0))
+        strategy = self.hydra.addStrategy(
+            Strategy(self.strategy_id, strategy_node, 1.0)
+        )
         self.runTo("2010-02-01")
-        
+
         allocation = strategy.getAllocationBuffer()
         self.assertTrue(np.allclose(allocation, np.zeros_like(allocation)))
 
@@ -513,7 +521,9 @@ class RiskTest(unittest.TestCase):
         # get data from current time including the previous day
         data = self.data.loc[:current_time]
         returns = data.pct_change().iloc[-1]
-        ordered_columns = sorted(data.columns, key=lambda x: self.exchange.getAssetMap()[x])
+        ordered_columns = sorted(
+            data.columns, key=lambda x: self.exchange.getAssetMap()[x]
+        )
         returns = returns[ordered_columns]
         # flip the two largest to 1 and the two smallest to -1, rest to 0
         largest_indices = returns.nlargest(2).index
@@ -525,6 +535,7 @@ class RiskTest(unittest.TestCase):
         returns /= np.abs(returns).sum()
         allocation = strategy.getAllocationBuffer()
         self.assertTrue(np.allclose(allocation, returns))
+
 
 if __name__ == "__main__":
     unittest.main()

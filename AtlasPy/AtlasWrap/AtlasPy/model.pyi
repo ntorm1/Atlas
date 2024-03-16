@@ -1,5 +1,5 @@
-import AtlasPy.ast
-import AtlasPy.core
+import internal.ast
+import internal.core
 from __future__ import annotations
 import numpy
 import typing
@@ -11,7 +11,7 @@ class LassoRegressionModelConfig(LinearRegressionModelConfig):
     def __init__(self, base_config: ModelConfig, alpha: float = 1.0, epsilon: float = 0.0001, max_iter: int = 1000) -> None:
         ...
 class LinearRegressionModel(ModelBase):
-    def __init__(self, id: str, features: list[AtlasPy.ast.StrategyBufferOpNode], target: ModelTarget, config: LinearRegressionModelConfig) -> None:
+    def __init__(self, id: str, features: list[internal.ast.StrategyBufferOpNode], target: ModelTarget, config: LinearRegressionModelConfig) -> None:
         ...
     def getTheta(self) -> numpy.ndarray[numpy.float64[m, 1]]:
         ...
@@ -61,13 +61,13 @@ class LinearRegressionSolver:
     @property
     def value(self) -> int:
         ...
-class ModelBase(AtlasPy.ast.StrategyBufferOpNode):
+class ModelBase(internal.ast.StrategyBufferOpNode):
     pass
 class ModelConfig:
     training_window: int
     type: ModelType
     walk_forward_window: int
-    def __init__(self, training_window: int, walk_forward_window: int, model_type: ModelType, exchange: AtlasPy.core.Exchange) -> None:
+    def __init__(self, training_window: int, walk_forward_window: int, model_type: ModelType, exchange: internal.core.Exchange) -> None:
         ...
 class ModelScalingType:
     """
@@ -106,8 +106,8 @@ class ModelScalingType:
     @property
     def value(self) -> int:
         ...
-class ModelTarget(AtlasPy.ast.StrategyBufferOpNode):
-    def __init__(self, target: AtlasPy.ast.StrategyBufferOpNode, type: ModelTargetType, lookforward: int) -> None:
+class ModelTarget(internal.ast.StrategyBufferOpNode):
+    def __init__(self, target: internal.ast.StrategyBufferOpNode, type: ModelTargetType, lookforward: int) -> None:
         ...
 class ModelTargetType:
     """

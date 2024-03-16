@@ -1,4 +1,4 @@
-import AtlasPy.core
+import internal.core
 from __future__ import annotations
 import numpy
 import typing
@@ -7,7 +7,7 @@ class ASTNode:
     pass
 class ATRNode(StrategyBufferOpNode):
     @staticmethod
-    def make(arg0: AtlasPy.core.Exchange, arg1: str, arg2: str, arg3: int) -> ATRNode:
+    def make(arg0: internal.core.Exchange, arg1: str, arg2: str, arg3: int) -> ATRNode:
         ...
 class AllocationBaseNode:
     def getTradeLimitNode(self) -> TradeLimitNode | None:
@@ -170,7 +170,7 @@ class AssetIfNode(StrategyBufferOpNode):
         ...
 class AssetMedianNode(StrategyBufferOpNode):
     @staticmethod
-    def make(arg0: AtlasPy.core.Exchange, arg1: str, arg2: str) -> AssetMedianNode:
+    def make(arg0: internal.core.Exchange, arg1: str, arg2: str) -> AssetMedianNode:
         ...
 class AssetObserverNode(StrategyBufferOpNode):
     pass
@@ -227,7 +227,7 @@ class AssetOpType:
         ...
 class AssetReadNode(StrategyBufferOpNode):
     @staticmethod
-    def make(arg0: str, arg1: int, arg2: AtlasPy.core.Exchange) -> AssetReadNode:
+    def make(arg0: str, arg1: int, arg2: internal.core.Exchange) -> AssetReadNode:
         ...
 class AssetScalerNode(StrategyBufferOpNode):
     def __init__(self, arg0: StrategyBufferOpNode, arg1: AssetOpType, arg2: float) -> None:
@@ -278,7 +278,7 @@ class CovarianceType:
     def value(self) -> int:
         ...
 class DummyNode(StrategyBufferOpNode):
-    def __init__(self, arg0: AtlasPy.core.Exchange) -> None:
+    def __init__(self, arg0: internal.core.Exchange) -> None:
         ...
 class EVRankNode(StrategyBufferOpNode):
     @staticmethod
@@ -366,11 +366,11 @@ class ExchangeViewFilterType:
         ...
 class ExchangeViewNode(StrategyBufferOpNode):
     @staticmethod
-    def make(exchange: AtlasPy.core.Exchange, asset_op_node: StrategyBufferOpNode, filter: ExchangeViewFilter | None = None, left_view: ExchangeViewNode | None = None) -> ExchangeViewNode:
+    def make(exchange: internal.core.Exchange, asset_op_node: StrategyBufferOpNode, filter: ExchangeViewFilter | None = None, left_view: ExchangeViewNode | None = None) -> ExchangeViewNode:
         ...
 class FixedAllocationNode(AllocationBaseNode):
     @staticmethod
-    def make(arg0: list[tuple[str, float]], arg1: AtlasPy.core.Exchange, arg2: float) -> FixedAllocationNode:
+    def make(arg0: list[tuple[str, float]], arg1: internal.core.Exchange, arg2: float) -> FixedAllocationNode:
         ...
 class GridDimension:
     pass
@@ -471,7 +471,7 @@ class MeanObserverNode(AssetObserverNode):
         ...
 class PeriodicTriggerNode(TriggerNode):
     @staticmethod
-    def make(exchange: AtlasPy.core.Exchange, frequency: int) -> TriggerNode:
+    def make(exchange: internal.core.Exchange, frequency: int) -> TriggerNode:
         ...
 class StrategyBufferOpNode(ASTNode):
     def cache(self) -> numpy.ndarray[numpy.float64[m, n]]:
@@ -491,11 +491,11 @@ class StrategyGrid:
         ...
 class StrategyMonthlyRunnerNode(TriggerNode):
     @staticmethod
-    def make(exchange: AtlasPy.core.Exchange, eom_trigger: bool = False) -> TriggerNode:
+    def make(exchange: internal.core.Exchange, eom_trigger: bool = False) -> TriggerNode:
         ...
 class StrategyNode:
     @staticmethod
-    def make(allocation: AllocationBaseNode, portfolio: AtlasPy.core.Portfolio) -> StrategyNode:
+    def make(allocation: AllocationBaseNode, portfolio: internal.core.Portfolio) -> StrategyNode:
         ...
     def setTrigger(self, arg0: TriggerNode) -> None:
         ...
@@ -507,7 +507,7 @@ class SumObserverNode(AssetObserverNode):
 class Tracer:
     def getHistory(self, arg0: TracerType) -> numpy.ndarray[numpy.float64[m, 1]]:
         ...
-    def getOrders(self) -> list[AtlasPy.core.Order]:
+    def getOrders(self) -> list[internal.core.Order]:
         ...
 class TracerType:
     """

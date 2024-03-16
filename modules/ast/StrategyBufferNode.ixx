@@ -45,9 +45,7 @@ public:
   virtual size_t refreshWarmup() noexcept { return 0; }
   virtual [[nodiscard]] bool
   isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept = 0;
-  void addChild(StrategyBufferOpNode *child) noexcept {
-    m_children.push_back(child);
-  }
+  void addChild(StrategyBufferOpNode *child) noexcept;
   [[nodiscard]] size_t getAssetCount() const noexcept;
   [[nodiscard]] size_t getCurrentIdx() const noexcept;
   [[nodiscard]] Option<AllocationBaseNode *> getAllocationNode() const noexcept;

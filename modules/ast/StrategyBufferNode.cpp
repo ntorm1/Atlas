@@ -97,6 +97,11 @@ size_t StrategyBufferOpNode::getCurrentIdx() const noexcept {
 }
 
 //============================================================================
+void StrategyBufferOpNode::addChild(StrategyBufferOpNode *child) noexcept {
+  m_children.push_back(std::move(child));
+}
+
+//============================================================================
 LagNode::LagNode(StrategyBufferOpNode *parent, size_t lag) noexcept
     : StrategyBufferOpNode(NodeType::LAG, parent->getExchange(), parent),
       m_lag(lag), m_parent(parent) {
