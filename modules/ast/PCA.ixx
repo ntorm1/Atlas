@@ -22,21 +22,26 @@ class PCAModel;
 export class PCAModel : public StrategyBufferOpNode {
 private:
   String m_id;
+  size_t m_last_index;
+  size_t m_warmup;
   Vector<SharedPtr<AST::StrategyBufferOpNode>> m_features;
   size_t m_components;
-  SharedPtr<CovarianceNodeBase> m_cov = nullptr;
   LinAlg::EigenMatrixXd m_data;
   LinAlg::EigenMatrixXd m_components_data;
 
 public:
   PCAModel(String id, Vector<SharedPtr<AST::StrategyBufferOpNode>> features,
-           SharedPtr<CovarianceNodeBase> cov, size_t components) noexcept;
+           size_t components) noexcept;
   ~PCAModel() noexcept;
 
+  [[nodiscard]] bool
+  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
   void
   evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
-
+  void build() noexcept;
   void reset() noexcept override;
+  [[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
+  auto const &getFeatures() const noexcept { return m_features; }
 };
 
 } // namespace AST

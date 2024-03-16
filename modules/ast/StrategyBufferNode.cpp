@@ -92,6 +92,11 @@ size_t StrategyBufferOpNode::getAssetCount() const noexcept {
 }
 
 //============================================================================
+size_t StrategyBufferOpNode::getCurrentIdx() const noexcept {
+  return m_exchange.currentIdx();
+}
+
+//============================================================================
 LagNode::LagNode(StrategyBufferOpNode *parent, size_t lag) noexcept
     : StrategyBufferOpNode(NodeType::LAG, parent->getExchange(), parent),
       m_lag(lag), m_parent(parent) {

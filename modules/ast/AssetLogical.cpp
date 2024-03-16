@@ -17,6 +17,8 @@ AssetIfNode::AssetIfNode(SharedPtr<StrategyBufferOpNode> left_eval,
   m_warmup = std::max({left_eval->getWarmup(), right_eval->getWarmup()});
   m_buffer.resize(m_left_eval->getAssetCount());
   m_buffer.setZero();
+  left_eval->addChild(this);
+  right_eval->addChild(this);
 }
 
 //============================================================================
@@ -93,6 +95,10 @@ AssetCompNode::AssetCompNode(
                        true_eval->getWarmup(), false_eval->getWarmup()});
   m_buffer.resize(m_left_eval->getAssetCount(), 3);
   m_buffer.setZero();
+  left_eval->addChild(this);
+  right_eval->addChild(this);
+  true_eval->addChild(this);
+  false_eval->addChild(this);
 }
 
 //============================================================================

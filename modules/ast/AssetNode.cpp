@@ -79,6 +79,8 @@ AssetOpNode::AssetOpNode(SharedPtr<StrategyBufferOpNode> asset_op_left,
       std::max(m_asset_op_left->getWarmup(), m_asset_op_right->getWarmup());
   m_right_buffer.resize(getExchange().getAssetCount());
   m_right_buffer.setZero();
+  asset_op_right->addChild(this);
+  asset_op_left->addChild(this);
 }
 
 //============================================================================
@@ -286,7 +288,9 @@ AssetScalerNode::AssetScalerNode(SharedPtr<StrategyBufferOpNode> parent,
                                  AssetOpType op_type, double scale) noexcept
     : StrategyBufferOpNode(NodeType::ASSET_SCALAR, parent->getExchange(),
                            parent.get()),
-      m_op_type(op_type), m_scale(scale), m_parent(parent) {}
+      m_op_type(op_type), m_scale(scale), m_parent(parent) {
+  parent->addChild(this);
+}
 
 //============================================================================
 AssetScalerNode::~AssetScalerNode() noexcept {}
@@ -332,7 +336,9 @@ AssetFunctionNode::AssetFunctionNode(SharedPtr<StrategyBufferOpNode> parent,
                                      Option<double> func_param) noexcept
     : StrategyBufferOpNode(NodeType::ASSET_FUNCTION, parent->getExchange(),
                            parent.get()),
-      m_func_type(func_type), m_parent(parent), m_func_param(func_param) {}
+      m_func_type(func_type), m_parent(parent), m_func_param(func_param) {
+  parent->addChild(this);
+}
 
 //============================================================================
 AssetFunctionNode::~AssetFunctionNode() noexcept {}

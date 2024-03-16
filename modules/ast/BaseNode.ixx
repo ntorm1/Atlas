@@ -79,6 +79,7 @@ public:
 	
 	virtual ~ASTNode() {}
 	virtual size_t getWarmup() const noexcept = 0;
+  virtual void reset() noexcept = 0;
 	
 	NodeType getType() const noexcept { return _type; }
 	Option<ASTNode*> getParent() const noexcept { return _parent; }

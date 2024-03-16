@@ -71,6 +71,7 @@ ModelBase::ModelBase(String id,
       new ModelBaseImpl(std::move(id), std::move(features), std::move(target));
 
   for (auto const &feature : m_impl->m_features) {
+    feature->addChild(this);
     m_feature_warmup = std::max(m_feature_warmup, feature->getWarmup());
   }
   m_warmup = m_feature_warmup + m_config->training_window;
