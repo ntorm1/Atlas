@@ -78,7 +78,7 @@
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch_$(Configuration)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\rules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
@@ -144,7 +144,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>EnableAllWarnings</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -154,7 +154,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
       <ExceptionHandling>Sync</ExceptionHandling>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>
@@ -185,6 +185,8 @@
     <ClCompile Include="modules\ast\AllocationNode.cpp" />
     <ClCompile Include="modules\ast\AllocationNode.ixx" />
     <ClCompile Include="modules\ast\AssetLogical.ixx" />
+    <ClCompile Include="modules\ast\ClusterNode.cpp" />
+    <ClCompile Include="modules\ast\ClusterNode.ixx" />
     <ClCompile Include="modules\ast\HelperNodes.cpp" />
     <ClCompile Include="modules\ast\HelperNodes.ixx" />
     <ClCompile Include="modules\ast\NodeFactor.cpp" />

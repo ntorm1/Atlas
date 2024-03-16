@@ -257,5 +257,11 @@
     <ClCompile Include="modules\ast\PCA.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\ast\ClusterNode.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\ast\ClusterNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

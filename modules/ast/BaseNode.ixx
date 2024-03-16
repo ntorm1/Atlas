@@ -34,6 +34,7 @@ export enum class NodeType : Uint8
 	TARGET = 19,
 	NOP = 20,
   ASSET_PCA = 21,
+  CLUSTER = 22,
 };
 
 

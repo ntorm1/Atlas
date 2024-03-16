@@ -12,6 +12,7 @@ export using EigenVectorXd = Eigen::VectorXd;
 export using EigenMatrixXd = Eigen::MatrixXd;
 export using EigenVectorXf = Eigen::VectorXf;
 export using EigenMatrixXf = Eigen::MatrixXf;
+export using EigenVectorXi = Eigen::VectorXi;
 
 export template<typename T>
 using EigenMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
