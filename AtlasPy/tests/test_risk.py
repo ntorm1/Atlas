@@ -14,6 +14,7 @@ class TestRisk(unittest.TestCase):
         self.exchange = self.hydra.getExchange(EXCHANGE_ID)
         self.intial_cash = 100.0
         self.root_strategy = MetaStrategy("root", self.exchange, None, self.intial_cash)
+        self.hydra.addStrategy(self.root_strategy, True)
         self.data = pd.read_csv(DATA_PATH)
         self.data["Date"] = pd.to_datetime(self.data["Date"])
         self.data.set_index("Date", inplace=True)
@@ -90,7 +91,7 @@ class TestRisk(unittest.TestCase):
         strategy = ImmediateStrategy(
             self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
         )
-        _ = self.hydra.addStrategy(strategy, True)
+        _ = self.root_strategy.addStrategy(strategy, True)
         self.runTo("2010-02-01")
 
         allocation = strategy.getAllocationBuffer()

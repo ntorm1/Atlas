@@ -25,27 +25,35 @@ private:
   UniquePtr<AllocatorImpl> m_impl;
   String m_name;
   size_t m_id = 0;
+  bool m_is_meta;
   void resetBase() noexcept;
-  virtual void reset() noexcept = 0;
-  virtual void realize() noexcept = 0;
-  virtual void load() noexcept = 0;
-  void setID(size_t id) noexcept { m_id = id; }
-  virtual void step() noexcept = 0;
+  void realize() noexcept;
 
 protected:
   SharedPtr<Tracer> m_tracer;
-  LinAlg::EigenVectorXd m_target_weights_buffer;
   bool m_step_call = false;
   Exchange &m_exchange;
+
+  [[nodiscard]] size_t getAssetCount() const noexcept;
+  void lateRebalance(
+      LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
 
 public:
   virtual ~Allocator() noexcept;
   ATLAS_API Allocator(String name, Exchange &exchange,
-                     Option<SharedPtr<Allocator>>,
-            double cash_weight) noexcept;
-  LinAlg::EigenVectorXd const &getAllocationBuffer() const noexcept {
-    return m_target_weights_buffer;
-  }
+                      Option<SharedPtr<Allocator>>,
+                      double cash_weight) noexcept;
+  virtual const LinAlg::EigenRef<const LinAlg::EigenVectorXd>
+  getAllocationBuffer() const noexcept = 0;
+  void setIsMeta(bool is_meta) noexcept { m_is_meta = is_meta; }
+  [[nodiscard]] bool getIsMeta() const noexcept { return m_is_meta; }
+  virtual void reset() noexcept = 0;
+  virtual void load() noexcept = 0;
+  void setID(size_t id) noexcept { m_id = id; }
+  virtual void step(LinAlg::EigenRef<LinAlg::EigenVectorXd>
+                        target_weights_buffer) noexcept = 0;
+  [[nodiscard]] Option<SharedPtr<Allocator>> getParent() const noexcept;
+  [[nodiscard]] virtual size_t getWarmup() const noexcept = 0;
 
   ATLAS_API [[nodiscard]] LinAlg::EigenVectorXd const &
   getHistory(TracerType t) const noexcept;

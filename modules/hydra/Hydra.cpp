@@ -6,13 +6,14 @@ module HydraModule;
 
 import ExchangeMapModule;
 import AtlasAllocatorModule;
+import MetaStrategyModule;
 
 namespace Atlas {
 
 //============================================================================
 struct HydraImpl {
   ExchangeMap m_exchange_map;
-  Vector<SharedPtr<Allocator>> m_strategies;
+  Vector<SharedPtr<MetaStrategy>> m_strategies;
   HashMap<String, size_t> m_strategy_map;
   HashMap<String, size_t> m_portfolio_map;
 };
@@ -57,8 +58,8 @@ Hydra::getExchange(String const &name) const noexcept {
 }
 
 //============================================================================
-Result<Allocator const *, AtlasException>
-Hydra::addStrategy(SharedPtr<Allocator> allocator,
+Result<MetaStrategy const *, AtlasException>
+Hydra::addStrategy(SharedPtr<MetaStrategy> allocator,
                    bool replace_if_exists) noexcept {
   if (m_state != HydraState::BUILT && m_state != HydraState::FINISHED) {
     return Err("Hydra must be in build or finished state to add Allocator");
@@ -276,7 +277,7 @@ SharedPtr<Exchange> Hydra::pyAddExchange(String name, String source,
 }
 
 //============================================================================
-SharedPtr<Allocator> Hydra::pyAddStrategy(SharedPtr<Allocator> Allocator,
+SharedPtr<MetaStrategy> Hydra::pyAddStrategy(SharedPtr<MetaStrategy> Allocator,
                                          bool replace_if_exists) {
   auto res = addStrategy(std::move(Allocator), replace_if_exists);
   if (!res) {

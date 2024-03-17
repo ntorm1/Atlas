@@ -16,6 +16,7 @@ class TestObserver(unittest.TestCase):
         self.exchange = self.hydra.getExchange(EXCHANGE_ID)
         self.intial_cash = 100.0
         self.root_strategy = MetaStrategy("root", self.exchange, None, self.intial_cash)
+        self.hydra.addStrategy(self.root_strategy, True)
 
     def get_df(self):
         ticker = "BTC-USD"
@@ -47,7 +48,7 @@ class TestObserver(unittest.TestCase):
         strategy = ImmediateStrategy(
             self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
         )
-        _ = self.hydra.addStrategy(strategy, True)
+        _ = self.root_strategy.addStrategy(strategy, True)
         self.hydra.run()
 
         df = self.get_df()
@@ -73,7 +74,7 @@ class TestObserver(unittest.TestCase):
         strategy = ImmediateStrategy(
             self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
         )
-        _ = self.hydra.addStrategy(strategy, True)
+        _ = self.root_strategy.addStrategy(strategy, True)
 
         self.hydra.run()
         df = self.get_df()
@@ -101,7 +102,7 @@ class TestObserver(unittest.TestCase):
         strategy = ImmediateStrategy(
             self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
         )
-        _ = self.hydra.addStrategy(strategy, True)
+        _ = self.root_strategy.addStrategy(strategy, True)
         self.hydra.run()
 
         df = self.get_df()
@@ -139,7 +140,7 @@ class TestObserver(unittest.TestCase):
         strategy = ImmediateStrategy(
             self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
         )
-        _ = self.hydra.addStrategy(strategy, True)
+        _ = self.root_strategy.addStrategy(strategy, True)
         self.hydra.run()
 
         df = self.get_df()

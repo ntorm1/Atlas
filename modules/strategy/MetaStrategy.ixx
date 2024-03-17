@@ -13,24 +13,35 @@ import AtlasAllocatorModule;
 namespace Atlas {
 
 //============================================================================
-class MetaStrategyImpl;
+struct MetaStrategyImpl;
 
 //============================================================================
 export class MetaStrategy : public Allocator {
+  friend class Hydra;
+
 private:
   UniquePtr<MetaStrategyImpl> m_impl;
 
-  ATLAS_API void step() noexcept override {}
-  ATLAS_API void reset() noexcept override {}
-  ATLAS_API void realize() noexcept override {}
+  ATLAS_API void step() noexcept;
+  ATLAS_API void step(LinAlg::EigenRef<LinAlg::EigenVectorXd>
+                          target_weights_buffer) noexcept override;
+
+  ATLAS_API void reset() noexcept override;
   ATLAS_API void load() noexcept override {}
+  size_t getWarmup() const noexcept override;
 
 protected:
 public:
+  ~MetaStrategy() noexcept;
   ATLAS_API MetaStrategy(String name, SharedPtr<Exchange> exchange,
                          Option<SharedPtr<Allocator>>, double cash) noexcept;
+  const LinAlg::EigenRef<const LinAlg::EigenVectorXd>
+  getAllocationBuffer() const noexcept override;
+  const LinAlg::EigenRef<const LinAlg::EigenVectorXd>
+  getAllocationBuffer(Allocator const *strategy) const noexcept;
 
-  ~MetaStrategy() noexcept;
+  ATLAS_API SharedPtr<Allocator> pyAddStrategy(SharedPtr<Allocator> allocator,
+                                               bool replace_if_exists = false);
 };
 
 } // namespace Atlas

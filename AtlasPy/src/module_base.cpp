@@ -10,6 +10,7 @@ import CommissionsModule;
 import ExchangeModule;
 import HydraModule;
 import ModelBaseModule;
+import MetaStrategyModule;
 import StrategyModule;
 import ObserverNodeBaseModule;
 import HelperNodesModule;

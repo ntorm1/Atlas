@@ -16,11 +16,17 @@ struct AllocatorImpl {
 };
 
 //============================================================================
+size_t Allocator::getAssetCount() const noexcept {
+  return m_exchange.getAssetCount();
+}
+
+//============================================================================
 Allocator::~Allocator() noexcept {}
 
 //============================================================================
 Allocator::Allocator(String name, Exchange &exchange,
-                     Option<SharedPtr<Allocator>> parent, double cash_weight) noexcept
+                     Option<SharedPtr<Allocator>> parent,
+                     double cash_weight) noexcept
     : m_name(name), m_exchange(exchange) {
   if (parent) {
     double parent_cash = parent.value()->getTracer().getInitialCash();
@@ -28,8 +34,6 @@ Allocator::Allocator(String name, Exchange &exchange,
   }
   m_tracer = std::make_shared<Tracer>(this, m_exchange, cash_weight);
   m_exchange.registerAllocator(this);
-  m_target_weights_buffer.resize(m_exchange.getAssetCount());
-  m_target_weights_buffer.setZero();
   m_impl = std::make_unique<AllocatorImpl>(parent);
 }
 
@@ -44,16 +48,24 @@ Exchange const &Allocator::getExchange() const noexcept { return m_exchange; }
 
 //============================================================================
 double Allocator::getAllocation(size_t asset_index) const noexcept {
-  assert(asset_index < static_cast<size_t>(m_target_weights_buffer.rows()));
-  return m_target_weights_buffer[asset_index];
+  auto buffer = getAllocationBuffer();
+  assert(asset_index < static_cast<size_t>(buffer.cols()));
+  return buffer[asset_index];
 }
 
 //============================================================================
 void Allocator::resetBase() noexcept {
   m_step_call = false;
-  m_target_weights_buffer.setZero();
   m_tracer->reset();
   reset();
+}
+
+//============================================================================
+void Allocator::realize() noexcept { m_tracer->realize(); }
+
+//============================================================================
+Option<SharedPtr<Allocator>> Allocator::getParent() const noexcept {
+  return m_impl->parent;
 }
 
 //============================================================================
@@ -64,6 +76,18 @@ Eigen::VectorXd const &Allocator::getHistory(TracerType t) const noexcept {
 //============================================================================
 Eigen::MatrixXd const &Allocator::getWeightHistory() const noexcept {
   return m_tracer->m_weight_history;
+}
+
+//============================================================================
+void Allocator::lateRebalance(
+    Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept {
+  // if the strategy does not override the target weights buffer at the end of
+  // a time step, then we need to rebalance the portfolio to the target
+  // weights buffer according to the market returns update the target weights
+  // buffer according to the indivual asset returns
+  target_weights_buffer =
+      m_exchange.getReturnsScalar().cwiseProduct(target_weights_buffer);
+  assert(!target_weights_buffer.array().isNaN().any());
 }
 
 } // namespace Atlas

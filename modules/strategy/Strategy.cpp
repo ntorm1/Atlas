@@ -8,6 +8,7 @@ import ExchangeModule;
 import StrategyNodeModule;
 import CommissionsModule;
 import OptimizeNodeModule;
+import MetaStrategyModule;
 import TracerModule;
 
 import AtlasLinAlg;
@@ -43,6 +44,15 @@ void Strategy::load() noexcept {
 
 //============================================================================
 Strategy::~Strategy() noexcept {}
+
+//============================================================================
+const Eigen::Ref<const Eigen::VectorXd>
+Strategy::getAllocationBuffer() const noexcept {
+  auto parent = getParent();
+  assert(parent);
+  auto meta_strategy = static_cast<MetaStrategy *>(parent.value().get());
+  return meta_strategy->getAllocationBuffer(this);
+}
 
 //============================================================================
 [[nodiscard]] Result<bool, AtlasException>
@@ -135,33 +145,10 @@ void Strategy::evaluate(
 }
 
 //============================================================================
-void Strategy::lateRebalance(
-    Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept {
-  // if the strategy does not override the target weights buffer at the end of a
-  // time step, then we need to rebalance the portfolio to the target weights
-  // buffer according to the market returns update the target weights buffer
-  // according to the indivual asset returns
-  target_weights_buffer =
-      m_exchange.getReturnsScalar().cwiseProduct(target_weights_buffer);
-  assert(!target_weights_buffer.array().isNaN().any());
-}
-
-//============================================================================
 void Strategy::step(
     Eigen::Ref<Eigen::VectorXd> target_weights_buffer) noexcept {
-
-  // execute the strategy AST node. Update rebalance call if AST
-  // did not update the target weights buffer
-  if (!m_impl->m_ast->evaluate(target_weights_buffer)) {
-    // if no action was taken, propogate asset returns to adjust weights
-    lateRebalance(target_weights_buffer);
-  }
-}
-
-//============================================================================
-void Strategy::step() noexcept {
   // evaluate the strategy with the current market prices and weights
-  evaluate(m_target_weights_buffer);
+  evaluate(target_weights_buffer);
 
   // check if exchange took step or if the warmup is not over. In which case,
   // we do not need to execute the strategy AST node but we do check to see
@@ -181,11 +168,11 @@ void Strategy::step() noexcept {
   }
   // execute the strategy AST node. Update rebalance call if AST
   // did not update the target weights buffer
-  if (!m_impl->m_ast->evaluate(m_target_weights_buffer)) {
+  if (!m_impl->m_ast->evaluate(target_weights_buffer)) {
     // if no action was taken, propogate asset returns to adjust weights
-    lateRebalance(m_target_weights_buffer);
+    lateRebalance(target_weights_buffer);
   }
-  assert(!m_target_weights_buffer.array().isNaN().any());
+  assert(!target_weights_buffer.array().isNaN().any());
   m_step_call = false;
 
   if (m_impl->m_grid)
@@ -231,8 +218,5 @@ void Strategy::reset() noexcept {
   if (m_impl->m_grid)
     (*m_impl->m_grid)->reset();
 }
-
-//============================================================================
-void Strategy::realize() noexcept { m_tracer->realize(); }
 
 } // namespace Atlas

@@ -35,7 +35,7 @@ void Tracer::evaluate() noexcept {
     if (m_idx > (*m_covariance)->getWarmup()) {
       LinAlg::EigenMatrixXd const &covariance =
           (*m_covariance)->getCovariance();
-      LinAlg::EigenVectorXd const &weights = m_allocator->getAllocationBuffer();
+      auto weights = m_allocator->getAllocationBuffer();
       auto current_vol = (weights.transpose() * covariance * weights);
       double current_volatility = std::sqrt(current_vol(0)) * std::sqrt(252);
       m_volatility_history(m_idx) = current_volatility;

@@ -12,6 +12,7 @@ class SimpleTestStrategy(unittest.TestCase):
         self.exchange = self.hydra.getExchange(EXCHANGE_ID)
         self.intial_cash = 100.0
         self.root_strategy = MetaStrategy("root", self.exchange, None, self.intial_cash)
+        self.hydra.addStrategy(self.root_strategy, True)
 
         self.asset_id1 = "asset1"
         self.asset_id2 = "asset2"
@@ -36,7 +37,7 @@ class SimpleTestStrategy(unittest.TestCase):
         strategy = ImmediateStrategy(
             self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
         )
-        _ = self.hydra.addStrategy(strategy, True)
+        _ = self.root_strategy.addStrategy(strategy, True)
         self.hydra.step()
         nlv = strategy.getNLV()
         assert nlv == self.intial_cash
@@ -72,7 +73,7 @@ class SimpleTestStrategy(unittest.TestCase):
         strategy = ImmediateStrategy(
             self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
         )
-        _ = self.hydra.addStrategy(strategy, True)
+        _ = self.root_strategy.addStrategy(strategy, True)
         commission_manager = strategy.initCommissionManager()
         fixed_commission = 1.0
         pct_commission = 0.001
@@ -124,6 +125,7 @@ class VectorBTCompare(unittest.TestCase):
         self.exchange = self.hydra.getExchange(EXCHANGE_ID)
         self.intial_cash = 100.0
         self.root_strategy = MetaStrategy("root", self.exchange, None, self.intial_cash)
+        self.hydra.addStrategy(self.root_strategy, True)
         self.exchange_path = EXCHANGE_PATH
 
     def test_max_observer(self):
@@ -143,7 +145,7 @@ class VectorBTCompare(unittest.TestCase):
         strategy = ImmediateStrategy(
             self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
         )
-        _ = self.hydra.addStrategy(strategy, True)
+        _ = self.root_strategy.addStrategy(strategy, True)
         self.hydra.run()
 
         ticker = "BTC-USD"
@@ -181,7 +183,7 @@ class VectorBTCompare(unittest.TestCase):
         strategy = ImmediateStrategy(
             self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
         )
-        _ = self.hydra.addStrategy(strategy, True)
+        _ = self.root_strategy.addStrategy(strategy, True)
         strategy.enableTracerHistory(TracerType.NLV)
         self.hydra.run()
 
@@ -243,8 +245,8 @@ class VectorBTCompare(unittest.TestCase):
             1.0,
             strategy_node_signal,
         )
-        _ = self.hydra.addStrategy(strategy, True)
-        _ = self.hydra.addStrategy(strategy_signal, True)
+        _ = self.root_strategy.addStrategy(strategy, True)
+        _ = self.root_strategy.addStrategy(strategy_signal, True)
 
         strategy.enableTracerHistory(TracerType.NLV)
         strategy.enableTracerHistory(TracerType.ORDERS_EAGER)

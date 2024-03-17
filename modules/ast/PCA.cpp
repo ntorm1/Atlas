@@ -1,5 +1,7 @@
 module;
 #include <Eigen/Dense>
+#include <mutex>
+
 module PCAModule;
 
 import RiskNodeModule;
@@ -83,6 +85,7 @@ bool PCAModel::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept {
 //============================================================================
 void PCAModel::evaluate(
     LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept {
+  std::lock_guard<std::mutex> lock(m_mutex);
   if (m_last_index != getCurrentIdx()) {
     build();
     m_last_index = getCurrentIdx();

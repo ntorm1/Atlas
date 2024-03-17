@@ -32,28 +32,29 @@ private:
 
   void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> const
                     &target_weights_buffer) noexcept;
-  void lateRebalance(
-      LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
-  void
+
+  ATLAS_API void
   step(LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
-  ATLAS_API void step() noexcept override;
   ATLAS_API void reset() noexcept override;
-  ATLAS_API void realize() noexcept override;
   ATLAS_API void load() noexcept override;
   void setNlv(double nlv_new) noexcept;
-  SharedPtr<Tracer> getTracerPtr() const noexcept;
-  Option<SharedPtr<AST::TradeLimitNode>> getTradeLimitNode() const noexcept;
-  LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
   void setTracer(SharedPtr<Tracer> tracer) noexcept;
-  size_t refreshWarmup() noexcept;
-  size_t getWarmup() const noexcept;
-
+  ATLAS_API [[nodiscard]] size_t getWarmup() const noexcept override;
+  [[nodiscard]] SharedPtr<Tracer> getTracerPtr() const noexcept;
+  [[nodiscard]] Option<SharedPtr<AST::TradeLimitNode>>
+  getTradeLimitNode() const noexcept;
+  [[nodiscard]] LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
+  [[nodiscard]] size_t refreshWarmup() noexcept;
+  
 public:
   ATLAS_API Strategy(String name, SharedPtr<Exchange> exchange,
                      SharedPtr<Allocator> parent,
                      double portfolio_weight) noexcept;
   ATLAS_API virtual SharedPtr<AST::StrategyNode> loadAST() noexcept = 0;
   ATLAS_API ~Strategy() noexcept;
+
+  ATLAS_API const LinAlg::EigenRef<const LinAlg::EigenVectorXd>
+  getAllocationBuffer() const noexcept override;
 
   ATLAS_API [[nodiscard]] SharedPtr<CommisionManager>
   initCommissionManager() noexcept;

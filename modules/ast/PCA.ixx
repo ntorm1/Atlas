@@ -5,6 +5,7 @@ module;
 #else
 #define ATLAS_API __declspec(dllimport)
 #endif
+#include <mutex>
 export module PCAModule;
 
 import AtlasCore;
@@ -21,6 +22,7 @@ class PCAModel;
 //============================================================================
 export class PCAModel : public StrategyBufferOpNode {
 private:
+  std::mutex m_mutex;
   String m_id;
   size_t m_last_index;
   size_t m_warmup;

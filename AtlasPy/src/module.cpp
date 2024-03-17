@@ -350,17 +350,18 @@ PYBIND11_MODULE(atlas_internal, m) {
 
   py::class_<Atlas::Allocator, std::shared_ptr<Atlas::Allocator>>(m_core,
                                                                   "Allocator")
-      .def("getNLV", &Atlas::Strategy::getNLV)
-      .def("getName", &Atlas::Strategy::getName)
-      .def("getHistory", &Atlas::Strategy::getHistory,
+      .def("getNLV", &Atlas::Allocator::getNLV)
+      .def("getName", &Atlas::Allocator::getName)
+      .def("getHistory", &Atlas::Allocator::getHistory,
            py::return_value_policy::reference_internal)
-      .def("getWeightHistory", &Atlas::Strategy::getWeightHistory,
+      .def("getWeightHistory", &Atlas::Allocator::getWeightHistory,
            py::return_value_policy::reference_internal)
-      .def("getAllocationBuffer", &Atlas::Strategy::getAllocationBuffer,
+      .def("getAllocationBuffer", &Atlas::Allocator::getAllocationBuffer,
            py::return_value_policy::reference_internal);
 
   py::class_<Atlas::MetaStrategy, Atlas::Allocator,
              std::shared_ptr<Atlas::MetaStrategy>>(m_core, "MetaStrategy")
+      .def("addStrategy", &Atlas::MetaStrategy::pyAddStrategy)
       .def(py::init<std::string, std::shared_ptr<Atlas::Exchange>,
                     std::optional<std::shared_ptr<Atlas::Allocator>>, double>());
 
