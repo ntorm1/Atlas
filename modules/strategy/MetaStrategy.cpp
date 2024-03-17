@@ -1,6 +1,8 @@
 module;
 #include "AtlasMacros.hpp"
+#pragma warning(push, 0)
 #include <Eigen/Dense>
+#pragma warning(pop)
 module MetaStrategyModule;
 
 namespace Atlas {
@@ -87,7 +89,8 @@ void MetaStrategy::step() noexcept {
   }
   evaluate(m_impl->meta_weights);
 
-  for (size_t i = 0; i < m_impl->child_strategies.size(); i++) {
+#pragma omp parallel for
+  for (int i = 0; i < m_impl->child_strategies.size(); i++) {
     auto target_weights = m_impl->weights.col(static_cast<int>(i));
     auto &strategy = m_impl->child_strategies[i];
     strategy->step(target_weights);
