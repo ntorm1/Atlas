@@ -32,11 +32,14 @@ private:
 protected:
   SharedPtr<Tracer> m_tracer;
   bool m_step_call = false;
+  double m_portfolio_weight = 0.0;
   Exchange &m_exchange;
 
   [[nodiscard]] size_t getAssetCount() const noexcept;
   void lateRebalance(
       LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
+  void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> const
+                    &target_weights_buffer) noexcept;
 
 public:
   virtual ~Allocator() noexcept;
@@ -55,6 +58,7 @@ public:
   [[nodiscard]] Option<SharedPtr<Allocator>> getParent() const noexcept;
   [[nodiscard]] virtual size_t getWarmup() const noexcept = 0;
 
+  ATLAS_API [[nodiscard]] double getAllocation() const noexcept { return m_portfolio_weight;}
   ATLAS_API [[nodiscard]] LinAlg::EigenVectorXd const &
   getHistory(TracerType t) const noexcept;
   ATLAS_API [[nodiscard]] LinAlg::EigenMatrixXd const &

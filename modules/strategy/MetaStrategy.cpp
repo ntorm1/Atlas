@@ -7,15 +7,15 @@ namespace Atlas {
 
 //============================================================================
 struct MetaStrategyImpl {
-  size_t warmup = 0;
   Vector<SharedPtr<Allocator>> child_strategies;
   HashMap<String, size_t> strategy_map;
   LinAlg::EigenMatrixXd weights;
+  LinAlg::EigenVectorXd child_strategy_weights;
   LinAlg::EigenVectorXd meta_weights;
 };
 
 //============================================================================
-size_t MetaStrategy::getWarmup() const noexcept { return m_impl->warmup; }
+size_t MetaStrategy::getWarmup() const noexcept { return 0; }
 
 //============================================================================
 MetaStrategy::MetaStrategy(String name, SharedPtr<Exchange> exchange,
@@ -23,13 +23,8 @@ MetaStrategy::MetaStrategy(String name, SharedPtr<Exchange> exchange,
                            double cash) noexcept
     : Allocator(name, *exchange, parent, cash) {
   m_impl = std::make_unique<MetaStrategyImpl>();
-  if (parent) {
-    m_impl->warmup = parent.value()->getWarmup();
-    m_impl->weights.resize(getAssetCount(), 1);
-    m_impl->weights.setZero();
-    m_impl->meta_weights.resize(getAssetCount());
-    m_impl->meta_weights.setZero();
-  }
+  m_impl->meta_weights.resize(getAssetCount());
+  m_impl->meta_weights.setZero();
   setIsMeta(true);
 }
 
@@ -41,7 +36,7 @@ MetaStrategy::getAllocationBuffer() const noexcept {
 
 //============================================================================
 const Eigen::Ref<const Eigen::VectorXd>
-MetaStrategy::getAllocationBuffer(Allocator const*strategy) const noexcept {
+MetaStrategy::getAllocationBuffer(Allocator const *strategy) const noexcept {
   auto it = m_impl->strategy_map.find(strategy->getName());
   assert(it != m_impl->strategy_map.end());
   auto idx = it->second;
@@ -69,15 +64,22 @@ SharedPtr<Allocator> MetaStrategy::pyAddStrategy(SharedPtr<Allocator> allocator,
   m_impl->strategy_map[allocator->getName()] = m_impl->child_strategies.size();
   m_impl->child_strategies.push_back(std::move(allocator));
 
-  m_impl->weights.conservativeResize(getAssetCount(),
-																		 m_impl->child_strategies.size());
+  // reshape matrix/vector containers holding sub strategy weightings
+  m_impl->weights.resize(getAssetCount(), m_impl->child_strategies.size());
   m_impl->weights.setZero();
+  // reshape vector holding child strategy allocations
+  m_impl->child_strategy_weights.resize(m_impl->child_strategies.size());
+  int i = 0;
+  for (auto const &strategy : m_impl->child_strategies) {
+    m_impl->child_strategy_weights[i] = strategy->getAllocation();
+    i++;
+  }
   return m_impl->child_strategies.back();
 }
 
 //============================================================================
 void MetaStrategy::step() noexcept {
-  if (!m_step_call) {
+  if (!m_step_call || !m_impl->child_strategies.size()) {
     return;
   }
   for (size_t i = 0; i < m_impl->child_strategies.size(); i++) {
@@ -94,7 +96,22 @@ void MetaStrategy::step() noexcept {
 
 //============================================================================
 void MetaStrategy::step(
-    LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept {}
+    LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept {
+  // weights holds an M by N matrix of portfolio weights for the child
+  // strategies where M is the number of assets and N is the number of child
+  // strategies, to get the parent allocation, get the row-wise weighted mean
+  assert(m_impl->weights.cols() == m_impl->child_strategy_weights.rows());
+  assert(target_weights_buffer.rows() == m_impl->weights.rows());
+  target_weights_buffer = (m_impl->weights.array().rowwise() *
+                           m_impl->child_strategy_weights.array().transpose())
+                              .rowwise()
+                              .sum();
+
+  return;
+  // evaluate the strategy with the current market prices and weights
+  evaluate(target_weights_buffer);
+  m_step_call = false;
+}
 
 //============================================================================
 void MetaStrategy::reset() noexcept {

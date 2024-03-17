@@ -27,14 +27,10 @@ export class Strategy : public Allocator {
   friend class CommisionManager;
 
 private:
-  double m_portfolio_weight = 0.0;
   UniquePtr<StrategyImpl> m_impl;
 
-  void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> const
-                    &target_weights_buffer) noexcept;
-
-  ATLAS_API void
-  step(LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
+  ATLAS_API void step(LinAlg::EigenRef<LinAlg::EigenVectorXd>
+                          target_weights_buffer) noexcept override;
   ATLAS_API void reset() noexcept override;
   ATLAS_API void load() noexcept override;
   void setNlv(double nlv_new) noexcept;
@@ -45,7 +41,7 @@ private:
   getTradeLimitNode() const noexcept;
   [[nodiscard]] LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
   [[nodiscard]] size_t refreshWarmup() noexcept;
-  
+
 public:
   ATLAS_API Strategy(String name, SharedPtr<Exchange> exchange,
                      SharedPtr<Allocator> parent,
@@ -66,11 +62,11 @@ public:
   ATLAS_API void setVolTracer(SharedPtr<AST::CovarianceNodeBase> node) noexcept;
 
   ATLAS_API
-      [[nodiscard]] Result<SharedPtr<AST::StrategyGrid const>, AtlasException>
-      setGridDimmensions(std::pair<SharedPtr<AST::GridDimension>,
-                                   SharedPtr<AST::GridDimension>>
-                             dimensions,
-                         Option<GridType> grid_type = std::nullopt) noexcept;
+  [[nodiscard]] Result<SharedPtr<AST::StrategyGrid const>, AtlasException>
+  setGridDimmensions(
+      std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>>
+          dimensions,
+      Option<GridType> grid_type = std::nullopt) noexcept;
   ATLAS_API [[nodiscard]] SharedPtr<AST::StrategyGrid const>
   pySetGridDimmensions(
       std::pair<SharedPtr<AST::GridDimension>, SharedPtr<AST::GridDimension>>

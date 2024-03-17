@@ -124,25 +124,7 @@ SharedPtr<CommisionManager> Strategy::initCommissionManager() noexcept {
   return m_impl->m_commision_manager.value();
 }
 
-//============================================================================
-void Strategy::evaluate(
-    Eigen::Ref<Eigen::VectorXd> const &target_weights_buffer) noexcept {
-  // get the current market returns
-  LinAlg::EigenConstColView market_returns = m_exchange.getMarketReturns();
 
-  // get the portfolio return by calculating the sum product of the market
-  // returns and the portfolio weights
-  assert(market_returns.rows() == target_weights_buffer.rows());
-  assert(!market_returns.array().isNaN().any());
-
-  // print out target weights buffer and market returns
-  double portfolio_return = market_returns.dot(target_weights_buffer);
-
-  // update the tracer nlv
-  double nlv = m_tracer->getNLV();
-  m_tracer->setNLV(nlv * (1.0 + portfolio_return));
-  m_tracer->evaluate();
-}
 
 //============================================================================
 void Strategy::step(

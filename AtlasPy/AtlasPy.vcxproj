@@ -82,6 +82,7 @@
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);C:\Python312\libs</LibraryPath>
     <TargetExt>.pyd</TargetExt>
     <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <TargetName>atlas_internal</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
