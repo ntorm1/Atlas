@@ -11,7 +11,7 @@ import ModelBaseModule;
 import ObserverNodeBaseModule;
 import RiskNodeModule;
 import StrategyBufferModule;
-import StrategyModule;
+import AtlasAllocatorModule;
 
 namespace Atlas {
 
@@ -154,7 +154,7 @@ void Exchange::reset() noexcept {
 
   // Reset strategies
   for (auto &strategy : m_impl->registered_strategies) {
-    strategy->m_step_call = false;
+    strategy->resetBase();
   }
 
   // Collect triggers to erase
@@ -415,7 +415,7 @@ Exchange::getSlice(size_t column, int row_offset) const noexcept {
 Exchange::~Exchange() {}
 
 //============================================================================
-void Exchange::registerStrategy(Strategy *strategy) noexcept {
+void Exchange::registerAllocator(Allocator *strategy) noexcept {
   m_impl->registered_strategies.push_back(strategy);
 }
 

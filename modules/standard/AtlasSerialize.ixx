@@ -63,25 +63,6 @@ rapidjson::Document serialize_exchange(
 ) noexcept;
 
 
-rapidjson::Document serialize_portfolios(
-	rapidjson::Document::AllocatorType& allocator,
-	Hydra const& hydra
-) noexcept;
-
-//============================================================================
-rapidjson::Document serialize_portfolio(
-	rapidjson::Document::AllocatorType& allocator,
-	SharedPtr<Portfolio> const& portfolio
-) noexcept;
-
-
-//============================================================================
-Result<bool, AtlasException> deserialize_portfolios(
-	rapidjson::Document const& json,
-	Hydra* hydra
-) noexcept;
-
-
 //============================================================================
 Result<bool, AtlasException> deserialize_exchange_map(
 	rapidjson::Document const& json,

@@ -65,7 +65,7 @@ StrategyGrid::StrategyGrid(
   for (size_t i = 0; i < row_count; ++i) {
     for (size_t j = 0; j < col_count; ++j) {
       m_tracers(i, j) =
-          std::make_shared<Tracer>(*m_strategy, exchange, initial_cash);
+          std::make_shared<Tracer>(m_strategy, exchange, initial_cash);
     }
   }
 

@@ -20,7 +20,6 @@ module AtlasSerializeModule;
 import HydraModule;
 import ExchangeModule;
 import ExchangeMapModule;
-import PortfolioModule;
 
 namespace Atlas 
 {
@@ -36,10 +35,7 @@ serialize_hydra(
 {
 	rapidjson::Value j(rapidjson::kObjectType);
 	auto exchange_map_json = serialize_exchange_map(allocator, hydra.getExchangeMap());
-	auto master_portfolio_json = serialize_portfolios(allocator, hydra);
 	j.AddMember("exchanges", std::move(exchange_map_json), allocator);
-	j.AddMember("portfolios", std::move(master_portfolio_json), allocator);
-
 
 	if (out_path)
 	{
@@ -90,7 +86,6 @@ deserialize_hydra(String const& path) noexcept
 
 	UniquePtr<Hydra> hydra = std::make_unique<Hydra>();
 	ATLAS_ASSIGN_OR_RETURN(res, deserialize_exchange_map(doc, hydra.get()));
-	ATLAS_ASSIGN_OR_RETURN(res_p, deserialize_portfolios(doc, hydra.get()));
 	return std::move(hydra);
 }
 
@@ -119,65 +114,6 @@ serialize_exchange(
 	}
 
 	return j;
-}
-
-
-//============================================================================
-rapidjson::Document serialize_portfolio(
-	rapidjson::Document::AllocatorType& allocator,
-	SharedPtr<Portfolio> const& portfolio) noexcept
-{
-	auto name = portfolio->getName();
-	auto intial_cash = portfolio->getInitialCash();
-	auto exchange_name = portfolio->getExchangeName();
-
-	rapidjson::Document j(rapidjson::kObjectType);
-	rapidjson::Value v_name(name.c_str(), allocator);
-	j.AddMember("name", v_name.Move(), allocator);
-	rapidjson::Value v_cash(std::to_string(intial_cash).c_str(), allocator);
-	j.AddMember("initial_cash", v_cash.Move(), allocator);
-	rapidjson::Value v_exchange(exchange_name.c_str(), allocator);
-	j.AddMember("exchange", v_exchange.Move(), allocator);
-
-	return j;	
-}
-
-
-//============================================================================
-Result<bool, AtlasException>
-deserialize_portfolios(rapidjson::Document const& json, Hydra* hydra) noexcept
-{
-	try {
-		auto& hydra_config = json["hydra_config"];
-		if (!hydra_config.HasMember("portfolios"))
-		{
-			return std::unexpected(AtlasException("Json file does not have portfolios"));
-		}
-		auto& portfolios = hydra_config["portfolios"];
-		for (auto& portfolio : portfolios.GetObject())
-		{
-			auto name = portfolio.name.GetString();
-			auto initial_cash = std::stod(portfolio.value["initial_cash"].GetString());
-			auto exchange_name = portfolio.value["exchange"].GetString();
-			auto exchange_opt = hydra->getExchange(exchange_name);
-			if (!exchange_opt)
-			{
-				String msg = "Exchange does not exist: ";
-				msg += exchange_name;
-				return Err(msg.c_str());
-			}
-			auto res = hydra->addPortfolio(name, *(exchange_opt.value()), initial_cash);
-			if (!res)
-			{
-				return Err(res.error().what());
-			}
-		}
-		return true;
-	}
-	catch (std::exception& e)
-	{
-		return std::unexpected(AtlasException(e.what()));
-	}
 }
 
 
@@ -234,23 +170,6 @@ deserialize_exchange_map(
 	}
 	return true;
 }
-
-
-//============================================================================
-rapidjson::Document serialize_portfolios(rapidjson::Document::AllocatorType& allocator, Hydra const& hydra) noexcept
-{
-	rapidjson::Document j(rapidjson::kObjectType);
-	HashMap<String, size_t> portfolio_ids = hydra.getPortfolioIdxMap();
-	for (const auto& [name, index] : portfolio_ids) {
-		auto portfolio = hydra.pyGetPortfolio(name);
-		auto json = serialize_portfolio(allocator,portfolio);
-		rapidjson::Value key(name.c_str(), allocator);
-		j.AddMember(key.Move(), std::move(json), allocator);
-	}
-	return j;
-}
-
-
 
 
 //============================================================================

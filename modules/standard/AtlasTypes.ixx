@@ -60,8 +60,9 @@ export namespace Atlas
 	class Exchange;
 	class ExchangeMap;
 	struct Asset;
-	class Portfolio;
 	class Strategy;
+  class MetaStrategy;
+  class Allocator;
 	class Tracer;
 	class CommisionManager;
 	class Hydra;

@@ -1,6 +1,6 @@
+from __future__ import annotations
 import atlas_internal.ast
 import atlas_internal.core
-from __future__ import annotations
 import numpy
 import typing
 __all__ = ['LassoRegressionModelConfig', 'LinearRegressionModel', 'LinearRegressionModelConfig', 'LinearRegressionSolver', 'ModelBase', 'ModelConfig', 'ModelScalingType', 'ModelTarget', 'ModelTargetType', 'ModelType']

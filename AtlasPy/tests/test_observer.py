@@ -14,7 +14,8 @@ class TestObserver(unittest.TestCase):
         parser = Parser(hydra_path)
         self.hydra = parser.getHydra()
         self.exchange = self.hydra.getExchange(EXCHANGE_ID)
-        self.portfolio = self.hydra.getPortfolio(PORTFOLIO_ID)
+        self.intial_cash = 100.0
+        self.root_strategy = MetaStrategy("root", self.exchange, None, self.intial_cash)
 
     def get_df(self):
         ticker = "BTC-USD"
@@ -27,7 +28,6 @@ class TestObserver(unittest.TestCase):
     def test_parse(self):
         window = 5
         self.hydra.getExchange(EXCHANGE_ID)
-        self.hydra.getPortfolio(PORTFOLIO_ID)
         window = 5
         close = AssetReadNode.make("Close", 0, self.exchange)
         prev_close = AssetReadNode.make("Close", -1, self.exchange)
@@ -43,9 +43,9 @@ class TestObserver(unittest.TestCase):
 
         ev = ExchangeViewNode.make(self.exchange, close)
         allocation = AllocationNode.make(ev)
-        strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
+        strategy_node_signal = StrategyNode.make(allocation)
         strategy = ImmediateStrategy(
-            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node_signal
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
         )
         _ = self.hydra.addStrategy(strategy, True)
         self.hydra.run()
@@ -69,9 +69,9 @@ class TestObserver(unittest.TestCase):
         self.exchange.enableNodeCache("sum", sum_node, False)
         ev = ExchangeViewNode.make(self.exchange, sum_node)
         allocation = AllocationNode.make(ev)
-        strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
+        strategy_node_signal = StrategyNode.make(allocation)
         strategy = ImmediateStrategy(
-            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node_signal
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
         )
         _ = self.hydra.addStrategy(strategy, True)
 
@@ -97,9 +97,9 @@ class TestObserver(unittest.TestCase):
         self.exchange.enableNodeCache("change_squared_sum", change_squared_sum, False)
         ev = ExchangeViewNode.make(self.exchange, change_squared_sum)
         allocation = AllocationNode.make(ev)
-        strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
+        strategy_node_signal = StrategyNode.make(allocation)
         strategy = ImmediateStrategy(
-            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node_signal
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
         )
         _ = self.hydra.addStrategy(strategy, True)
         self.hydra.run()
@@ -135,9 +135,9 @@ class TestObserver(unittest.TestCase):
         self.exchange.enableNodeCache("cov", cov, False)
         ev = ExchangeViewNode.make(self.exchange, cov)
         allocation = AllocationNode.make(ev)
-        strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
+        strategy_node_signal = StrategyNode.make(allocation)
         strategy = ImmediateStrategy(
-            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node_signal
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
         )
         _ = self.hydra.addStrategy(strategy, True)
         self.hydra.run()

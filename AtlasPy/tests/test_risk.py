@@ -12,7 +12,8 @@ class TestRisk(unittest.TestCase):
         parser = Parser(hydra_path)
         self.hydra = parser.getHydra()
         self.exchange = self.hydra.getExchange(EXCHANGE_ID)
-        self.portfolio = self.hydra.getPortfolio(PORTFOLIO_ID)
+        self.intial_cash = 100.0
+        self.root_strategy = MetaStrategy("root", self.exchange, None, self.intial_cash)
         self.data = pd.read_csv(DATA_PATH)
         self.data["Date"] = pd.to_datetime(self.data["Date"])
         self.data.set_index("Date", inplace=True)
@@ -84,10 +85,10 @@ class TestRisk(unittest.TestCase):
         )
 
         # build final strategy and insert into hydra
-        strategy_node = StrategyNode.make(allocation, self.portfolio)
+        strategy_node = StrategyNode.make(allocation)
         strategy_node.setTrigger(monthly_trigger_node)
         strategy = ImmediateStrategy(
-            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
         )
         _ = self.hydra.addStrategy(strategy, True)
         self.runTo("2010-02-01")

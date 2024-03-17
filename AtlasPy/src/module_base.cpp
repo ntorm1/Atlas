@@ -5,21 +5,17 @@
 #include <pybind11/stl.h>
 
 import AtlasEnumsModule;
+import AtlasAllocatorModule;
 import CommissionsModule;
 import ExchangeModule;
 import HydraModule;
 import ModelBaseModule;
-import PortfolioModule;
 import StrategyModule;
 import ObserverNodeBaseModule;
 import HelperNodesModule;
 import RiskNodeModule;
 
 void wrap_base(py::module &m_core) {
-  py::class_<Atlas::Portfolio, std::shared_ptr<Atlas::Portfolio>>(m_core,
-                                                                  "Portfolio")
-      .def("getName", &Atlas::Portfolio::getName,
-           "get unique id of the portfolio");
   py::class_<Atlas::Hydra, std::shared_ptr<Atlas::Hydra>>(m_core, "Hydra")
       .def("build", &Atlas::Hydra::pyBuild)
       .def("run", &Atlas::Hydra::pyRun)
@@ -31,8 +27,6 @@ void wrap_base(py::module &m_core) {
       .def("getExchange", &Atlas::Hydra::pyGetExchange)
       .def("addStrategy", &Atlas::Hydra::pyAddStrategy, py::arg("strategy"),
            py::arg("replace_if_exists") = false)
-      .def("addPortfolio", &Atlas::Hydra::pyAddPortfolio)
-      .def("getPortfolio", &Atlas::Hydra::pyGetPortfolio)
       .def(py::init<>());
 
   py::class_<Atlas::CommisionManager, std::shared_ptr<Atlas::CommisionManager>>(

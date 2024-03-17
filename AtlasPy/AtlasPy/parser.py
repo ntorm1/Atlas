@@ -5,7 +5,7 @@ import importlib
 from typing import *
 import tomllib
 
-from atlas_internal.core import Hydra, Exchange, Portfolio
+from atlas_internal.core import Hydra, Exchange
 
 
 class Parser:
@@ -44,7 +44,6 @@ class Parser:
             raise e
 
         self._load_exchanges()
-        self._load_portfolios()
         self._hydra.build()
         self._load_strategies()
 
@@ -54,31 +53,6 @@ class Parser:
         strategy_files = [
             f for f in os.listdir(self._hydra_config_dir) if f.endswith(".py")
         ]
-
-    def _load_portfolios(self) -> None:
-        if not "portfolios" in self._toml or not isinstance(
-            self._toml["portfolios"], list
-        ):
-            raise ValueError(
-                """missing portfolios in Hydra.toml, expected: 
-                    [portfolios]
-                    [[portfolios.ids]]
-                    id = "test"
-                    exchange_id = "test"
-                    starting_cash = 100.0
-                """
-            )
-
-        for portfolio in self._toml["portfolios"]:
-            if not isinstance(portfolio, dict):
-                raise ValueError("expected portfolio to be a dict")
-            id = portfolio.get("id")
-            exchange_id = portfolio.get("exchange_id")
-            starting_cash = portfolio.get("starting_cash")
-            if not id or not exchange_id or not starting_cash:
-                raise ValueError("portfolio missing id, exchange_id, or starting_cash")
-            exchange = self._hydra.getExchange(exchange_id)
-            self._hydra.addPortfolio(id, exchange, starting_cash)
 
     def _load_exchanges(self) -> None:
         if not "exchanges" in self._toml or not isinstance(

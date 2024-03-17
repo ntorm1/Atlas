@@ -5,23 +5,23 @@ from abc import ABC, abstractmethod
 
 
 import atlas_internal
-from atlas_internal.core import Hydra, Exchange, Portfolio, Strategy
+from atlas_internal.core import Hydra, Exchange, Allocator, Strategy
 
 
 class PyStrategy(Strategy):
-    portfolio: Portfolio = None
+    parent_strategy: Allocator = None
     exchange: Exchange = None
 
     def __init__(
         self,
         exchange: Exchange,
-        portfolio,
+        parent_strategy: Allocator,
         name: str,
         portfolio_weight: float,
     ) -> None:
-        super().__init__(name, portfolio_weight)
+        super().__init__(name, exchange, parent_strategy, portfolio_weight)
         self.exchange = exchange
-        self.portfolio = portfolio
+        self.parent_strategy = parent_strategy
 
     @abstractmethod
     def loadAST(self) -> atlas_internal.ast.StrategyBufferOpNode:
@@ -34,19 +34,18 @@ class ImmediateStrategy(PyStrategy):
     def __init__(
         self,
         exchange: Exchange,
-        portfolio,
+        parent_strategy: Allocator,
         name: str,
         portfolio_weight: float,
         ast: atlas_internal.ast.StrategyBufferOpNode,
     ) -> None:
         super().__init__(
             exchange=exchange,
-            portfolio=portfolio,
+            parent_strategy=parent_strategy,
             name=name,
             portfolio_weight=portfolio_weight,
         )
         self.exchange = exchange
-        self.portfolio = portfolio
         self.ast = ast
 
     def loadAST(self) -> atlas_internal.ast.StrategyBufferOpNode:

@@ -243,8 +243,6 @@
     <ClCompile Include="modules\model\TorchModelImpl.cpp" />
     <ClCompile Include="modules\model\XGBoost.cpp" />
     <ClCompile Include="modules\model\XGBoost.ixx" />
-    <ClCompile Include="modules\portfolio\Portfolio.cpp" />
-    <ClCompile Include="modules\portfolio\Portfolio.ixx" />
     <ClCompile Include="modules\standard\AtlasCore.ixx" />
     <ClCompile Include="modules\standard\AtlasEnums.ixx" />
     <ClCompile Include="modules\standard\AtlasLinAlg.ixx" />
@@ -255,6 +253,10 @@
     <ClCompile Include="modules\standard\AtlasTypes.ixx" />
     <ClCompile Include="modules\standard\AtlasException.ixx" />
     <ClCompile Include="modules\standard\AtlasUtils.ixx" />
+    <ClCompile Include="modules\strategy\Allocator.ixx" />
+    <ClCompile Include="modules\strategy\Allocator.cpp" />
+    <ClCompile Include="modules\strategy\MetaStrategy.cpp" />
+    <ClCompile Include="modules\strategy\MetaStrategy.ixx" />
     <ClCompile Include="modules\strategy\Strategy.cpp" />
     <ClCompile Include="modules\strategy\Strategy.ixx" />
     <ClCompile Include="modules\strategy\Tracer.cpp" />

@@ -1,5 +1,5 @@
-import atlas_internal.core
 from __future__ import annotations
+import atlas_internal.core
 import numpy
 import typing
 __all__ = ['ABS', 'ADD', 'AND', 'ASTNode', 'ATRNode', 'AllocationBaseNode', 'AllocationNode', 'AllocationType', 'AllocationWeightNode', 'AssetCompNode', 'AssetCompType', 'AssetFunctionNode', 'AssetFunctionType', 'AssetIfNode', 'AssetMedianNode', 'AssetObserverNode', 'AssetOpNode', 'AssetOpType', 'AssetReadNode', 'AssetScalerNode', 'CONDITIONAL_SPLIT', 'CovarianceNode', 'CovarianceNodeBase', 'CovarianceObserverNode', 'CovarianceType', 'DIVIDE', 'DummyNode', 'EQUAL', 'EVRankNode', 'EVRankType', 'ExchangeViewFilter', 'ExchangeViewFilterType', 'ExchangeViewNode', 'FULL', 'FixedAllocationNode', 'GREATER', 'GREATER_EQUAL', 'GREATER_THAN', 'GridDimension', 'GridDimensionLimit', 'GridDimensionObserver', 'GridType', 'INCREMENTAL', 'IncrementalCovarianceNode', 'InvVolWeight', 'LESS', 'LESS_EQUAL', 'LESS_THAN', 'LOG', 'LOWER_TRIANGULAR', 'LagNode', 'LogicalType', 'MULTIPLY', 'MaxObserverNode', 'MeanObserverNode', 'NEXTREME', 'NLARGEST', 'NLV', 'NOT_EQUAL', 'NSMALLEST', 'OR', 'ORDERS_EAGER', 'POWER', 'PeriodicTriggerNode', 'SIGN', 'STOP_LOSS', 'SUBTRACT', 'StrategyBufferOpNode', 'StrategyGrid', 'StrategyMonthlyRunnerNode', 'StrategyNode', 'SumObserverNode', 'TAKE_PROFIT', 'Tracer', 'TracerType', 'TradeLimitNode', 'TradeLimitType', 'TriggerNode', 'TsArgMaxObserverNode', 'UNIFORM', 'UPPER_TRIANGULAR', 'VOLATILITY', 'VarianceObserverNode', 'WEIGHTS']
@@ -495,7 +495,7 @@ class StrategyMonthlyRunnerNode(TriggerNode):
         ...
 class StrategyNode:
     @staticmethod
-    def make(allocation: AllocationBaseNode, portfolio: atlas_internal.core.Portfolio) -> StrategyNode:
+    def make(allocation: AllocationBaseNode) -> StrategyNode:
         ...
     def setTrigger(self, arg0: TriggerNode) -> None:
         ...

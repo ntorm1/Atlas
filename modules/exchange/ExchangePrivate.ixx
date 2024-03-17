@@ -58,7 +58,7 @@ public:
   FastMap<String, SharedPtr<Model::ModelBase>> models;
   FastMap<String, SharedPtr<AST::CovarianceNodeBase>> covariance_nodes;
   FastMap<String, SharedPtr<AST::StrategyBufferOpNode>> ast_cache;
-  Vector<Strategy *> registered_strategies;
+  Vector<Allocator*> registered_strategies;
   Int64 current_timestamp = 0;
   Eigen::MatrixXd data;
   Eigen::MatrixXd returns;

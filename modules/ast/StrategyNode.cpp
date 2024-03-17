@@ -15,11 +15,10 @@ namespace Atlas {
 namespace AST {
 
 //============================================================================
-StrategyNode::StrategyNode(SharedPtr<AllocationBaseNode> allocation,
-                           Portfolio &portfolio) noexcept
+StrategyNode::StrategyNode(SharedPtr<AllocationBaseNode> allocation) noexcept
     : OpperationNode<bool, Eigen::Ref<Eigen::VectorXd>>(NodeType::STRATEGY,
                                                         allocation.get()),
-      m_allocation(std::move(allocation)), m_portfolio(portfolio) {
+      m_allocation(std::move(allocation)) {
   m_warmup = m_allocation->getWarmup();
 }
 
@@ -89,8 +88,8 @@ void StrategyNode::setTracer(SharedPtr<Tracer> tracer) noexcept {
 
 //============================================================================
 SharedPtr<StrategyNode>
-StrategyNode::make(SharedPtr<AllocationBaseNode> allocation,
-                   Portfolio &portfolio) {
+StrategyNode::make(SharedPtr<AllocationBaseNode> allocation
+                   ) {
   // when we make a strategy node we need to make sure that the allocation node
   // has not been used on the side by another strategy node. To do this we check
   // the use count of the allocation node and subtract the internal ref count,
@@ -106,7 +105,7 @@ StrategyNode::make(SharedPtr<AllocationBaseNode> allocation,
         std::to_string(use_count));
   }
 
-  return std::make_shared<StrategyNode>(std::move(allocation), portfolio);
+  return std::make_shared<StrategyNode>(std::move(allocation));
 }
 
 //============================================================================

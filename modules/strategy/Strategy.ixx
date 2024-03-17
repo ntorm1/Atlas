@@ -1,6 +1,5 @@
 module;
 #pragma once
-#pragma once
 #ifdef ATLAS_EXPORTS
 #define ATLAS_API __declspec(dllexport)
 #else
@@ -10,6 +9,7 @@ export module StrategyModule;
 
 import AtlasCore;
 import AtlasEnumsModule;
+import AtlasAllocatorModule;
 import AtlasLinAlg;
 
 namespace Atlas {
@@ -18,7 +18,7 @@ namespace Atlas {
 class StrategyImpl;
 
 //============================================================================
-export class Strategy {
+export class Strategy : public Allocator {
   friend class AST::StrategyNode;
   friend class AST::StrategyGrid;
   friend class AST::GridDimensionObserver;
@@ -27,9 +27,6 @@ export class Strategy {
   friend class CommisionManager;
 
 private:
-  String m_name;
-  size_t m_id = 0;
-  bool m_step_call = false;
   double m_portfolio_weight = 0.0;
   UniquePtr<StrategyImpl> m_impl;
 
@@ -39,12 +36,11 @@ private:
       LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
   void
   step(LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
-  void step() noexcept;
-  void load() noexcept;
-  void reset() noexcept;
-  void realize() noexcept;
+  ATLAS_API void step() noexcept override;
+  ATLAS_API void reset() noexcept override;
+  ATLAS_API void realize() noexcept override;
+  ATLAS_API void load() noexcept override;
   void setNlv(double nlv_new) noexcept;
-  void setID(size_t id) noexcept { m_id = id; }
   SharedPtr<Tracer> getTracerPtr() const noexcept;
   Option<SharedPtr<AST::TradeLimitNode>> getTradeLimitNode() const noexcept;
   LinAlg::EigenRef<LinAlg::EigenVectorXd> getPnL() noexcept;
@@ -53,26 +49,14 @@ private:
   size_t getWarmup() const noexcept;
 
 public:
-  ATLAS_API Strategy(String name, double portfolio_weight) noexcept;
+  ATLAS_API Strategy(String name, SharedPtr<Exchange> exchange,
+                     SharedPtr<Allocator> parent,
+                     double portfolio_weight) noexcept;
   ATLAS_API virtual SharedPtr<AST::StrategyNode> loadAST() noexcept = 0;
   ATLAS_API ~Strategy() noexcept;
-  ATLAS_API [[nodiscard]] LinAlg::EigenVectorXd const &
-  getAllocationBuffer() const noexcept;
-  ATLAS_API [[nodiscard]] double
-  getAllocation(size_t asset_index) const noexcept;
-  ATLAS_API [[nodiscard]] Tracer const &getTracer() const noexcept;
-  ATLAS_API [[nodiscard]] auto const &getName() const noexcept {
-    return m_name;
-  }
-  ATLAS_API [[nodiscard]] auto const &getId() const noexcept { return m_id; }
-  ATLAS_API [[nodiscard]] double getNLV() const noexcept;
-  ATLAS_API [[nodiscard]] LinAlg::EigenVectorXd const &
-  getHistory(TracerType t) const noexcept;
-  ATLAS_API [[nodiscard]] LinAlg::EigenMatrixXd const &
-  getWeightHistory() const noexcept;
+
   ATLAS_API [[nodiscard]] SharedPtr<CommisionManager>
   initCommissionManager() noexcept;
-  ATLAS_API [[nodiscard]] Exchange const &getExchange() const noexcept;
   ATLAS_API [[nodiscard]] Result<bool, AtlasException>
   enableTracerHistory(TracerType t) noexcept;
   ATLAS_API [[nodiscard]] Option<SharedPtr<AST::StrategyGrid>>

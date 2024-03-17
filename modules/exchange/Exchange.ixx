@@ -66,7 +66,7 @@ public:
 	Exchange& operator=(const Exchange&) = delete;
 	Exchange& operator=(Exchange&&) = delete;
 
-	void registerStrategy(Strategy* strategy) noexcept;
+	void registerAllocator(Allocator *strategy) noexcept;
 	auto const& getSource() const noexcept{return m_source;}
 	size_t currentIdx() const noexcept;
 	Option<SharedPtr<AST::StrategyBufferOpNode>> getSameFromCache(SharedPtr<AST::StrategyBufferOpNode> a) noexcept;

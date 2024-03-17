@@ -4,7 +4,6 @@ module;
 module HelperNodesModule;
 
 import ExchangeModule;
-import StrategyModule;
 import AtlasTimeModule;
 
 namespace Atlas {

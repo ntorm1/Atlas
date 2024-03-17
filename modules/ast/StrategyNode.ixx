@@ -30,7 +30,6 @@ private:
 	SharedPtr<AllocationBaseNode> m_allocation;
 	Option<SharedPtr<AllocationWeightNode>> m_alloc_weight;
 	Option<SharedPtr<TriggerNode>> m_trigger;
-	Portfolio& m_portfolio;
 	size_t m_warmup;
 
 	[[nodiscard]] size_t refreshWarmup() noexcept;
@@ -49,22 +48,13 @@ public:
 
 	//============================================================================
 	ATLAS_API StrategyNode(
-		SharedPtr<AllocationBaseNode> allocation,
-		Portfolio& portfolio
+		SharedPtr<AllocationBaseNode> allocation
 	) noexcept;
 
 
 	//============================================================================
-	ATLAS_API StrategyNode(
-		SharedPtr<AllocationBaseNode> allocation,
-		SharedPtr<Portfolio> portfolio
-	) noexcept : StrategyNode(std::move(allocation), *portfolio) {}
-
-
-	//============================================================================
 	ATLAS_API [[nodiscard]] static SharedPtr<StrategyNode> make(
-		SharedPtr<AllocationBaseNode> allocation,
-		Portfolio& portfolio
+		SharedPtr<AllocationBaseNode> allocation
 	);
 
 
@@ -72,7 +62,6 @@ public:
 	ATLAS_API void setTrigger(SharedPtr<TriggerNode> trigger) noexcept;
 	ATLAS_API void setWarmupOverride(size_t warmup) noexcept { m_warmup = warmup; }
 	
-	[[nodiscard]] Portfolio& getPortfolio() const noexcept { return m_portfolio; }
 	[[nodiscard]] Exchange& getExchange() noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 

@@ -10,11 +10,11 @@ class SimpleTestStrategy(unittest.TestCase):
         parser = Parser(hydra_path)
         self.hydra = parser.getHydra()
         self.exchange = self.hydra.getExchange(EXCHANGE_ID)
-        self.portfolio = self.hydra.getPortfolio(PORTFOLIO_ID)
+        self.intial_cash = 100.0
+        self.root_strategy = MetaStrategy("root", self.exchange, None, self.intial_cash)
 
         self.asset_id1 = "asset1"
         self.asset_id2 = "asset2"
-        self.intial_cash = 100.0
         self.asset1_index = self.exchange.getAssetIndex(self.asset_id1)
         self.asset2_index = self.exchange.getAssetIndex(self.asset_id2)
 
@@ -31,10 +31,10 @@ class SimpleTestStrategy(unittest.TestCase):
         allocation = AllocationNode.make(exchange_view, AllocationType.UNIFORM, 0.0)
 
         # build final strategy and insert into hydra
-        strategy_node = StrategyNode.make(allocation, self.portfolio)
+        strategy_node = StrategyNode.make(allocation)
         self.hydra.build()
         strategy = ImmediateStrategy(
-            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
         )
         _ = self.hydra.addStrategy(strategy, True)
         self.hydra.step()
@@ -62,7 +62,7 @@ class SimpleTestStrategy(unittest.TestCase):
     def testFixedAlloc(self) -> None:
         alloc = [(self.asset_id1, 0.3), (self.asset_id2, 0.7)]
         allocation = FixedAllocationNode.make(alloc, self.exchange, 0.0)
-        strategy_node = StrategyNode.make(allocation, self.portfolio)
+        strategy_node = StrategyNode.make(allocation)
 
         trigger_node = PeriodicTriggerNode.make(self.exchange, 2)
         strategy_node.setTrigger(trigger_node)
@@ -70,7 +70,7 @@ class SimpleTestStrategy(unittest.TestCase):
 
         self.hydra.build()
         strategy = ImmediateStrategy(
-            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
         )
         _ = self.hydra.addStrategy(strategy, True)
         commission_manager = strategy.initCommissionManager()
@@ -122,7 +122,8 @@ class VectorBTCompare(unittest.TestCase):
         parser = Parser(hydra_path)
         self.hydra = parser.getHydra()
         self.exchange = self.hydra.getExchange(EXCHANGE_ID)
-        self.portfolio = self.hydra.getPortfolio(PORTFOLIO_ID)
+        self.intial_cash = 100.0
+        self.root_strategy = MetaStrategy("root", self.exchange, None, self.intial_cash)
         self.exchange_path = EXCHANGE_PATH
 
     def test_max_observer(self):
@@ -138,9 +139,9 @@ class VectorBTCompare(unittest.TestCase):
 
         ev = ExchangeViewNode.make(self.exchange, close)
         allocation = AllocationNode.make(ev)
-        strategy_node_signal = StrategyNode.make(allocation, self.portfolio)
+        strategy_node_signal = StrategyNode.make(allocation)
         strategy = ImmediateStrategy(
-            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node_signal
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
         )
         _ = self.hydra.addStrategy(strategy, True)
         self.hydra.run()
@@ -176,9 +177,9 @@ class VectorBTCompare(unittest.TestCase):
         exchange_view = ExchangeViewNode.make(self.exchange, spread, spread_filter)
 
         allocation = AllocationNode.make(exchange_view)
-        strategy_node = StrategyNode.make(allocation, self.portfolio)
+        strategy_node = StrategyNode.make(allocation)
         strategy = ImmediateStrategy(
-            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
         )
         _ = self.hydra.addStrategy(strategy, True)
         strategy.enableTracerHistory(TracerType.NLV)
@@ -228,16 +229,16 @@ class VectorBTCompare(unittest.TestCase):
             exchange_view_up, AllocationType.CONDITIONAL_SPLIT, 0.0
         )
 
-        strategy_node = StrategyNode.make(allocation, self.portfolio)
-        strategy_node_signal = StrategyNode.make(allocation_signal, self.portfolio)
+        strategy_node = StrategyNode.make(allocation)
+        strategy_node_signal = StrategyNode.make(allocation_signal)
 
         strategy = ImmediateStrategy(
-            self.exchange, self.portfolio, STRATEGY_ID, 1.0, strategy_node
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
         )
 
         strategy_signal = ImmediateStrategy(
             self.exchange,
-            self.portfolio,
+            self.root_strategy,
             STRATEGY_ID + "_signal",
             1.0,
             strategy_node_signal,
