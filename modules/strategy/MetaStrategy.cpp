@@ -85,6 +85,8 @@ void MetaStrategy::step() noexcept {
   if (!m_step_call || !m_impl->child_strategies.size()) {
     return;
   }
+  evaluate(m_impl->meta_weights);
+
   for (size_t i = 0; i < m_impl->child_strategies.size(); i++) {
     auto target_weights = m_impl->weights.col(static_cast<int>(i));
     auto &strategy = m_impl->child_strategies[i];
@@ -109,10 +111,6 @@ void MetaStrategy::step(
                            m_impl->child_strategy_weights.array().transpose())
                               .rowwise()
                               .sum();
-
-  return;
-  // evaluate the strategy with the current market prices and weights
-  evaluate(target_weights_buffer);
   m_step_call = false;
 }
 

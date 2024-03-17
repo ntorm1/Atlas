@@ -235,19 +235,20 @@ class VectorBTCompare(unittest.TestCase):
         strategy_node_signal = StrategyNode.make(allocation_signal)
 
         strategy = ImmediateStrategy(
-            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
+            self.exchange, self.root_strategy, STRATEGY_ID, 0.5, strategy_node
         )
 
         strategy_signal = ImmediateStrategy(
             self.exchange,
             self.root_strategy,
             STRATEGY_ID + "_signal",
-            1.0,
+            0.5,
             strategy_node_signal,
         )
         _ = self.root_strategy.addStrategy(strategy, True)
         _ = self.root_strategy.addStrategy(strategy_signal, True)
 
+        self.root_strategy.enableTracerHistory(TracerType.NLV)
         strategy.enableTracerHistory(TracerType.NLV)
         strategy.enableTracerHistory(TracerType.ORDERS_EAGER)
 
@@ -274,13 +275,19 @@ class VectorBTCompare(unittest.TestCase):
 
         nlv1 = strategy.getHistory(TracerType.NLV)[-1]
         nlv2 = strategy_signal.getHistory(TracerType.NLV)[-1]
+        nlv_root = self.root_strategy.getHistory(TracerType.NLV)[-1]
+        returns1 = nlv1 / self.intial_cash
+        returns = nlv_root / self.intial_cash
+        self.assertAlmostEqual(nlv_root, 2 * returns1 * self.intial_cash)
         self.assertAlmostEqual(nlv1, nlv2)
-
         self.hydra.reset()
         self.hydra.run()
 
         nlv1_reset = strategy.getHistory(TracerType.NLV)[-1]
         nlv2_reset = strategy_signal.getHistory(TracerType.NLV)[-1]
+        nlv_root_reset = self.root_strategy.getHistory(TracerType.NLV)[-1]
+        returns1_reset = nlv1_reset / self.intial_cash
+        self.assertAlmostEqual(nlv_root_reset, 2 * returns1_reset * self.intial_cash)
         self.assertAlmostEqual(nlv1_reset, nlv2_reset)
         self.assertAlmostEqual(nlv1, nlv1_reset)
 

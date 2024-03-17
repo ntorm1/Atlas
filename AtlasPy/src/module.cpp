@@ -352,6 +352,10 @@ PYBIND11_MODULE(atlas_internal, m) {
                                                                   "Allocator")
       .def("getNLV", &Atlas::Allocator::getNLV)
       .def("getName", &Atlas::Allocator::getName)
+      .def("enableTracerHistory", &Atlas::Allocator::pyEnableTracerHistory)
+      .def("getTracer", &Atlas::Allocator::getTracer,
+           py::return_value_policy::reference_internal)
+      .def("setVolTracer", &Atlas::Allocator::setVolTracer)
       .def("getHistory", &Atlas::Allocator::getHistory,
            py::return_value_policy::reference_internal)
       .def("getWeightHistory", &Atlas::Allocator::getWeightHistory,
@@ -369,12 +373,8 @@ PYBIND11_MODULE(atlas_internal, m) {
              std::shared_ptr<Atlas::Strategy>>(
       m_core, "Strategy")
       .def("loadAST", &Atlas::Strategy::loadAST)
-      .def("enableTracerHistory", &Atlas::Strategy::pyEnableTracerHistory)
       .def("setGridDimmensions", &Atlas::Strategy::pySetGridDimmensions,
            py::arg("dimensions"), py::arg("grid_type") = std::nullopt)
-      .def("getTracer", &Atlas::Strategy::getTracer,
-           py::return_value_policy::reference_internal)
-      .def("setVolTracer", &Atlas::Strategy::setVolTracer)
       .def("initCommissionManager", &Atlas::Strategy::initCommissionManager)
       .def(py::init<std::string, std::shared_ptr<Atlas::Exchange>,
                     std::shared_ptr<Atlas::Allocator>, double>());
