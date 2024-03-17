@@ -72,7 +72,8 @@ AssetOpNode::AssetOpNode(SharedPtr<StrategyBufferOpNode> asset_op_left,
                          SharedPtr<StrategyBufferOpNode> asset_op_right,
                          AssetOpType op_type) noexcept
     : StrategyBufferOpNode(NodeType::ASSET_OP, asset_op_left->getExchange(),
-                           std::nullopt),
+                           Vector<SharedPtr<StrategyBufferOpNode>>(
+                               {asset_op_left, asset_op_right})),
       m_asset_op_left(std::move(asset_op_left)),
       m_asset_op_right(std::move(asset_op_right)), m_op_type(op_type) {
   warmup =

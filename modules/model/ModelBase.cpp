@@ -62,7 +62,7 @@ ModelBase::ModelBase(String id,
                      SharedPtr<ModelTarget> target,
                      SharedPtr<ModelConfig> config) noexcept
     : AST::StrategyBufferOpNode(AST::NodeType::MODEL, *config->exchange,
-                                std::nullopt),
+                                features),
       m_config(config), m_exchange(config->exchange) {
   m_asset_count = m_exchange->getAssetCount();
   m_signal.resize(m_asset_count);

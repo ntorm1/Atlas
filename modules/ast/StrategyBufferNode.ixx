@@ -29,6 +29,12 @@ protected:
   LinAlg::EigenMatrixXd m_cache;
   bool m_take_from_cache = false;
 
+  
+  StrategyBufferOpNode(NodeType t, Exchange &exchange,
+                       Vector<SharedPtr<AST::StrategyBufferOpNode>> parent)
+      : OpperationNode<void, LinAlg::EigenRef<LinAlg::EigenVectorXd>>(t,
+                                                                      std::move(parent)),
+        m_exchange(exchange) {}
   StrategyBufferOpNode(NodeType t, Exchange &exchange, Option<ASTNode *> parent)
       : OpperationNode<void, LinAlg::EigenRef<LinAlg::EigenVectorXd>>(t,
                                                                       parent),

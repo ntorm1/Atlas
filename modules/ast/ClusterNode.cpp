@@ -97,8 +97,7 @@ static void deMean(Eigen::Ref<Eigen::VectorXd> data,
 ClusterNode::ClusterNode(Vector<SharedPtr<StrategyBufferOpNode>> features,
                          SharedPtr<AST::StrategyBufferOpNode> target,
                          ClusterNodeConfig config) noexcept
-    : StrategyBufferOpNode(NodeType::CLUSTER, target->getExchange(),
-                           std::nullopt),
+    : StrategyBufferOpNode(NodeType::CLUSTER, target->getExchange(), features),
       m_features(std::move(features)), m_config(config),
       m_target(std::move(target)) {
   m_warmup = 0;

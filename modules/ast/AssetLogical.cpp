@@ -11,8 +11,9 @@ namespace AST {
 AssetIfNode::AssetIfNode(SharedPtr<StrategyBufferOpNode> left_eval,
                          AssetCompType comp_type,
                          SharedPtr<StrategyBufferOpNode> right_eval) noexcept
-    : StrategyBufferOpNode(NodeType::ASSET_IF, left_eval->getExchange(),
-                           left_eval.get()),
+    : StrategyBufferOpNode(
+          NodeType::ASSET_IF, left_eval->getExchange(),
+          Vector<SharedPtr<StrategyBufferOpNode>>({left_eval, right_eval})),
       m_left_eval(left_eval), m_right_eval(right_eval), m_comp_type(comp_type) {
   m_warmup = std::max({left_eval->getWarmup(), right_eval->getWarmup()});
   m_buffer.resize(m_left_eval->getAssetCount());
@@ -88,7 +89,8 @@ AssetCompNode::AssetCompNode(
     SharedPtr<StrategyBufferOpNode> true_eval,
     SharedPtr<StrategyBufferOpNode> false_eval) noexcept
     : StrategyBufferOpNode(NodeType::ASSET_COMP, left_eval->getExchange(),
-                           left_eval.get()),
+                           Vector<SharedPtr<StrategyBufferOpNode>>(
+                               {left_eval, right_eval, true_eval, false_eval})),
       m_left_eval(left_eval), m_right_eval(right_eval), m_true_eval(true_eval),
       m_false_eval(false_eval), m_logical_type(logicial_type) {
   m_warmup = std::max({left_eval->getWarmup(), right_eval->getWarmup(),

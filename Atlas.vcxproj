@@ -185,6 +185,7 @@
     <ClCompile Include="modules\ast\AllocationNode.cpp" />
     <ClCompile Include="modules\ast\AllocationNode.ixx" />
     <ClCompile Include="modules\ast\AssetLogical.ixx" />
+    <ClCompile Include="modules\ast\BaseNode.cpp" />
     <ClCompile Include="modules\ast\ClusterNode.cpp" />
     <ClCompile Include="modules\ast\ClusterNode.ixx" />
     <ClCompile Include="modules\ast\HelperNodes.cpp" />

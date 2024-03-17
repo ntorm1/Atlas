@@ -13,7 +13,7 @@ PCAModel::PCAModel(String id,
                    Vector<SharedPtr<AST::StrategyBufferOpNode>> features,
                    size_t components) noexcept
     : StrategyBufferOpNode(NodeType::ASSET_PCA, features[0]->getExchange(),
-                           features[0].get()),
+                           features),
       m_components(components) {
   m_id = std::move(id);
   m_features = std::move(features);
@@ -70,13 +70,13 @@ bool PCAModel::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept {
   auto other_pca = static_cast<PCAModel *>(other.get());
   auto const &other_features = other_pca->getFeatures();
   if (m_features.size() != other_features.size()) {
-		return false;
-	}
+    return false;
+  }
   for (size_t i = 0; i < m_features.size(); ++i) {
     if (!m_features[i]->isSame(other_features[i])) {
-			return false;
-		}
-	}
+      return false;
+    }
+  }
   return true;
 }
 
