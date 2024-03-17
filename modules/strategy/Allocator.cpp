@@ -69,7 +69,6 @@ void Allocator::evaluate(
   m_tracer->evaluate();
 }
 
-
 //============================================================================
 double Allocator::getAllocation(size_t asset_index) const noexcept {
   auto buffer = getAllocationBuffer();
@@ -112,6 +111,34 @@ void Allocator::lateRebalance(
   target_weights_buffer =
       m_exchange.getReturnsScalar().cwiseProduct(target_weights_buffer);
   assert(!target_weights_buffer.array().isNaN().any());
+}
+
+//============================================================================
+void Allocator::pyEnableTracerHistory(TracerType t) {
+  auto res = enableTracerHistory(t);
+  if (!res) {
+    throw std::runtime_error(res.error().what());
+  }
+}
+
+//============================================================================
+void Allocator::setVolTracer(SharedPtr<AST::CovarianceNodeBase> node) noexcept {
+  assert(node);
+  m_tracer->setCovarianceNode(node);
+  auto res = m_tracer->enableTracerHistory(TracerType::VOLATILITY);
+  assert(res);
+}
+
+//============================================================================
+Result<bool, AtlasException>
+Allocator::enableTracerHistory(TracerType t) noexcept {
+  switch (t) {
+  case TracerType::ORDERS_EAGER:
+    enableCopyWeightsBuffer();
+  default:
+    break;
+  }
+  return m_tracer->enableTracerHistory(t);
 }
 
 } // namespace Atlas

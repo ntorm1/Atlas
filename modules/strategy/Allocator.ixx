@@ -52,13 +52,20 @@ public:
   [[nodiscard]] bool getIsMeta() const noexcept { return m_is_meta; }
   virtual void reset() noexcept = 0;
   virtual void load() noexcept = 0;
+  virtual void enableCopyWeightsBuffer() noexcept = 0;
   void setID(size_t id) noexcept { m_id = id; }
   virtual void step(LinAlg::EigenRef<LinAlg::EigenVectorXd>
                         target_weights_buffer) noexcept = 0;
   [[nodiscard]] Option<SharedPtr<Allocator>> getParent() const noexcept;
   [[nodiscard]] virtual size_t getWarmup() const noexcept = 0;
 
-  ATLAS_API [[nodiscard]] double getAllocation() const noexcept { return m_portfolio_weight;}
+  ATLAS_API [[nodiscard]] Result<bool, AtlasException>
+  enableTracerHistory(TracerType t) noexcept;
+  ATLAS_API void pyEnableTracerHistory(TracerType t);
+  ATLAS_API void setVolTracer(SharedPtr<AST::CovarianceNodeBase> node) noexcept;
+  ATLAS_API [[nodiscard]] double getAllocation() const noexcept {
+    return m_portfolio_weight;
+  }
   ATLAS_API [[nodiscard]] LinAlg::EigenVectorXd const &
   getHistory(TracerType t) const noexcept;
   ATLAS_API [[nodiscard]] LinAlg::EigenMatrixXd const &

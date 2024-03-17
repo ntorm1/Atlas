@@ -55,22 +55,6 @@ Strategy::getAllocationBuffer() const noexcept {
 }
 
 //============================================================================
-[[nodiscard]] Result<bool, AtlasException>
-Strategy::enableTracerHistory(TracerType t) noexcept {
-  if (!m_impl->m_ast) {
-    return Err("ast not build yet");
-  }
-  switch (t) {
-  case TracerType::ORDERS_EAGER:
-    m_impl->m_ast->enableCopyWeightsBuffer();
-  default:
-    break;
-  }
-
-  return m_tracer->enableTracerHistory(t);
-}
-
-//============================================================================
 Option<SharedPtr<AST::StrategyGrid>> Strategy::getGrid() const noexcept {
   return m_impl->m_grid;
 }
@@ -102,29 +86,11 @@ SharedPtr<AST::StrategyGrid const> Strategy::pySetGridDimmensions(
 }
 
 //============================================================================
-void Strategy::pyEnableTracerHistory(TracerType t) {
-  auto res = enableTracerHistory(t);
-  if (!res) {
-    throw std::runtime_error(res.error().what());
-  }
-}
-
-//============================================================================
-void Strategy::setVolTracer(SharedPtr<AST::CovarianceNodeBase> node) noexcept {
-  assert(node);
-  m_tracer->setCovarianceNode(node);
-  auto res = m_tracer->enableTracerHistory(TracerType::VOLATILITY);
-  assert(res);
-}
-
-//============================================================================
 SharedPtr<CommisionManager> Strategy::initCommissionManager() noexcept {
   m_impl->m_commision_manager = CommissionManagerFactory::create(*this);
   m_impl->m_ast->setCommissionManager(m_impl->m_commision_manager.value());
   return m_impl->m_commision_manager.value();
 }
-
-
 
 //============================================================================
 void Strategy::step(
@@ -182,6 +148,14 @@ LinAlg::EigenRef<LinAlg::EigenVectorXd> Strategy::getPnL() noexcept {
 void Strategy::setTracer(SharedPtr<Tracer> tracer) noexcept {
   m_impl->m_ast->setTracer(tracer);
   std::swap(m_tracer, tracer);
+}
+
+//============================================================================
+void Strategy::enableCopyWeightsBuffer() noexcept {
+  if (!m_impl->m_ast) {
+    return;
+  }
+  m_impl->m_ast->enableCopyWeightsBuffer();
 }
 
 //============================================================================
