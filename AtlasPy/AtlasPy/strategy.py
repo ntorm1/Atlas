@@ -3,6 +3,7 @@ import sys
 import logging
 from abc import ABC, abstractmethod
 
+from graphviz import Digraph
 
 import atlas_internal
 from atlas_internal.core import Hydra, Exchange, Allocator, Strategy

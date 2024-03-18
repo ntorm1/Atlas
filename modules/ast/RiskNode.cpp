@@ -189,6 +189,106 @@ void InvVolWeight::evaluate(
   assert(!target.array().isNaN().any());
 }
 
+//============================================================================
+static LinAlg::EigenVectorXd
+risk_parity_weights_ccd_spinu(LinAlg::EigenVectorXd const &weights,
+                              LinAlg::EigenMatrixXd const &cov,
+                              const double tol, const int max_iter) {
+  assert(weights.size() == cov.rows());
+  double aux, x_diff, xk_sum;
+  auto n = weights.size();
+  LinAlg::EigenVectorXd xk = LinAlg::EigenVectorXd::Constant(n, 1);
+  xk = std::sqrt(1.0 / cov.sum()) * xk;
+  LinAlg::EigenVectorXd x_star(n), Sigma_xk(n), rc(n);
+  Sigma_xk = cov * xk;
+  for (auto k = 0; k < max_iter; ++k) {
+    for (auto i = 0; i < n; ++i) {
+      // compute update for the portfolio weights x
+      aux = xk(i) * cov(i, i) - Sigma_xk(i);
+      x_star(i) = (.5 / cov(i, i)) *
+                  (aux + std::sqrt(aux * aux + 4 * cov(i, i) * weights(i)));
+      // update auxiliary terms
+      x_diff = x_star(i) - xk(i);
+      Sigma_xk += (cov.col(i).array() * x_diff).matrix();
+      xk(i) = x_star(i);
+    }
+    xk_sum = xk.sum();
+    rc = (xk.array() * (Sigma_xk).array() / (xk_sum * xk_sum)).matrix();
+    if ((rc.array() / rc.sum() - weights.array()).abs().maxCoeff() < tol)
+      break;
+  }
+  return x_star / xk_sum;
+}
+
+//============================================================================
+static LinAlg::EigenVectorXd
+risk_parity_portfolio_ccd_choi(LinAlg::EigenVectorXd const &weights,
+                               LinAlg::EigenMatrixXd const &cov,
+                               const double tol, const int max_iter) {
+  assert(weights.size() == cov.rows());
+  double ai;
+  auto n = weights.size();
+  auto vol = cov.diagonal().array().sqrt();
+  auto invvol = (1 / vol.array()).matrix();
+  LinAlg::EigenMatrixXd corr = cov.array().colwise() * invvol.array();
+  corr = corr.array().rowwise() * invvol.transpose().array();
+  LinAlg::EigenMatrixXd adj = corr;
+  adj.diagonal().array() = 0;
+  LinAlg::EigenVectorXd wk = LinAlg::EigenVectorXd::Ones(n);
+  wk = (wk.array() / std::sqrt(corr.sum())).matrix();
+  for (auto k = 0; k < max_iter; ++k) {
+    for (auto i = 0; i < n; ++i) {
+      // compute portfolio weights
+      ai = 0.5 * ((adj.col(i).array() * wk.array()).sum());
+      wk(i) = std::sqrt(ai * ai + weights(i)) - ai;
+    }
+    wk = wk.array() / std::sqrt(wk.transpose() * corr * wk);
+    if ((wk.array() * (corr * wk).array() - weights.array()).abs().maxCoeff() <
+        tol)
+      break;
+  }
+  LinAlg::EigenVectorXd w = wk.array() / vol.array();
+  return (w / w.sum()).matrix();
+}
+
+// ===========================================================================
+RiskParityWeight::~RiskParityWeight() noexcept {}
+
+//============================================================================
+RiskParityWeight::RiskParityWeight(SharedPtr<CovarianceNodeBase> covariance,
+                                   Option<double> vol_target, double tol,
+                                   int max_iter, bool chinu) noexcept
+    : AllocationWeightNode(std::move(covariance), vol_target), m_chinu(chinu),
+      m_tol(tol), m_max_iter(max_iter) {}
+
+//============================================================================
+void RiskParityWeight::evaluate(
+    LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept {
+  // scale target to 1 for stability
+  target /= target.sum();
+  if (m_chinu) {
+    target = risk_parity_portfolio_ccd_choi(
+        target, m_covariance->getCovariance(), m_tol, m_max_iter);
+  } else {
+    target = risk_parity_weights_ccd_spinu(
+        target, m_covariance->getCovariance(), m_tol, m_max_iter);
+  }
+  if (m_vol_target) {
+    targetVol(target);
+  }
+}
+
+//============================================================================
+bool RiskParityWeight::isSame(
+    SharedPtr<StrategyBufferOpNode> other) const noexcept {
+  auto other_ptr = std::dynamic_pointer_cast<RiskParityWeight>(other);
+  if (!other_ptr) {
+    return false;
+  }
+  return m_chinu == other_ptr->m_chinu && m_tol == other_ptr->m_tol &&
+         m_max_iter == other_ptr->m_max_iter;
+}
+
 } // namespace AST
 
 } // namespace Atlas
