@@ -195,16 +195,18 @@ class VectorBTCompare(unittest.TestCase):
         fast_n = 50
         slow_n = 200
         close = AssetReadNode.make("Close", 0, self.exchange)
-        fast_ma = AssetScalerNode(
-            self.exchange.registerObserver(SumObserverNode("fast_sum", close, fast_n)),
-            AssetOpType.DIVIDE,
+        fast_ma = MeanObserverNode(
+            "fast_mean",
+            close,
             fast_n,
         )
-        slow_ma = AssetScalerNode(
-            self.exchange.registerObserver(SumObserverNode("slow_sum", close, slow_n)),
-            AssetOpType.DIVIDE,
+        slow_ma = MeanObserverNode(
+            "slow_mean",
+            close,
             slow_n,
         )
+        fast_ma = self.exchange.registerObserver(fast_ma)
+        slow_ma = self.exchange.registerObserver(slow_ma)
         spread = AssetOpNode.make(fast_ma, slow_ma, AssetOpType.SUBTRACT)
 
         spread_filter_up = ExchangeViewFilter(

@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
+import scipy.stats
 
 
 from context import *
@@ -152,6 +153,44 @@ class TestObserver(unittest.TestCase):
         self.assertTrue(
             np.allclose(df["close_open_cov_atlas"], df["close_open_cov_pd"])
         )
+
+    def test_skew_observer(self):
+        window = 5
+        close = AssetReadNode.make("Close", 0, self.exchange)
+        skew = self.exchange.registerObserver(
+            SkewnessObserverNode("skew", close, window)
+        )
+        mean = self.exchange.registerObserver(MeanObserverNode("mean", close, window))
+        self.exchange.enableNodeCache("mean", mean, False)
+        self.exchange.enableNodeCache("skew", skew, False)
+        ev = ExchangeViewNode.make(self.exchange, mean)
+        allocation = AllocationNode.make(ev)
+        strategy_node_signal = StrategyNode.make(allocation)
+        strategy = ImmediateStrategy(
+            self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node_signal
+        )
+        _ = self.root_strategy.addStrategy(strategy, True)
+        self.hydra.run()
+        df = self.get_df()
+        btc_idx = self.exchange.getAssetIndex("BTC-USD")
+        df["close_skew_atlas"] = skew.cache()[btc_idx].T
+        df["close_mean_atlas"] = mean.cache()[btc_idx].T
+
+        def skewness(data):
+            return scipy.stats.skew(data)
+
+        df["close_mean_pd"] = df["Close"].rolling(window).mean()
+        df["close_skew_pandas"] = df["Close"].rolling(window).apply(skewness)
+        df = df[
+            [
+                "close_skew_atlas",
+                "close_skew_pandas",
+                "close_mean_atlas",
+                "close_mean_pd",
+            ]
+        ]
+        df.replace(np.nan, 0, inplace=True)
+        self.assertTrue(np.allclose(df["close_skew_atlas"], df["close_skew_pandas"]))
 
     def test_lr(self):
         walk_forward_window = 3

@@ -339,6 +339,15 @@ PYBIND11_MODULE(atlas_internal, m) {
                     std::shared_ptr<Atlas::AST::StrategyBufferOpNode>,
                     size_t>());
 
+   py::class_<Atlas::AST::SkewnessObserverNode, Atlas::AST::AssetObserverNode,
+             std::shared_ptr<Atlas::AST::SkewnessObserverNode>>(
+      m_ast,
+                                                            "SkewnessObserverNode")
+      .def(py::init<std::string,
+                    std::shared_ptr<Atlas::AST::StrategyBufferOpNode>,
+                    size_t>());
+
+
   py::class_<Atlas::AST::StrategyGrid,
              std::shared_ptr<Atlas::AST::StrategyGrid>>(m_ast, "StrategyGrid")
       .def("enableTracerHistory",
@@ -366,12 +375,12 @@ PYBIND11_MODULE(atlas_internal, m) {
   py::class_<Atlas::MetaStrategy, Atlas::Allocator,
              std::shared_ptr<Atlas::MetaStrategy>>(m_core, "MetaStrategy")
       .def("addStrategy", &Atlas::MetaStrategy::pyAddStrategy)
-      .def(py::init<std::string, std::shared_ptr<Atlas::Exchange>,
-                    std::optional<std::shared_ptr<Atlas::Allocator>>, double>());
+      .def(
+          py::init<std::string, std::shared_ptr<Atlas::Exchange>,
+                   std::optional<std::shared_ptr<Atlas::Allocator>>, double>());
 
   py::class_<Atlas::Strategy, Atlas::Allocator, PyStrategy,
-             std::shared_ptr<Atlas::Strategy>>(
-      m_core, "Strategy")
+             std::shared_ptr<Atlas::Strategy>>(m_core, "Strategy")
       .def("loadAST", &Atlas::Strategy::loadAST)
       .def("setGridDimmensions", &Atlas::Strategy::pySetGridDimmensions,
            py::arg("dimensions"), py::arg("grid_type") = std::nullopt)

@@ -36,8 +36,8 @@ export enum class AssetObserverType : Uint8
 	COVARIANCE= 6,
 	CORRELATION = 7,
 	LINEAR_DECAY = 8,
+	SKEWNESS = 9,
 };
-
 
 
 
@@ -148,7 +148,8 @@ public:
 	/// override if observer is a managed view of another observer.
 	/// </summary>
 	/// <param name="target"></param>
-	virtual void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept;
+        virtual void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd>
+                                  target) noexcept final override;
 
 	[[nodiscard]] auto const& getId() const noexcept { return m_id; }
 	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept final override;

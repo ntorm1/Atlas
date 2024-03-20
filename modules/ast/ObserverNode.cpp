@@ -40,16 +40,13 @@ MeanObserverNode::~MeanObserverNode() noexcept {}
 
 //============================================================================
 void MeanObserverNode::onOutOfRange(
-    LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept {}
-
-//============================================================================
-void MeanObserverNode::evaluate(
-    LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept {
-  m_scaler->evaluate(target);
+    LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept {
 }
 
 //============================================================================
-void MeanObserverNode::cacheObserver() noexcept {}
+void MeanObserverNode::cacheObserver() noexcept {
+  m_signal = m_sum_observer->getSignalCopy() / static_cast<double>(getWindow());
+}
 
 //============================================================================
 void MeanObserverNode::reset() noexcept { m_sum_observer->reset(); }
@@ -72,8 +69,8 @@ MeanObserverNode::MeanObserverNode(Option<String> id,
   auto sum = std::make_shared<SumObserverNode>(sum_id, parent, window);
   m_sum_observer = std::static_pointer_cast<SumObserverNode>(
       m_exchange.registerObserver(std::move(sum)));
-  m_scaler = std::make_shared<AssetScalerNode>(
-      m_sum_observer, AssetOpType::DIVIDE, static_cast<double>(window));
+  setObserverWarmup(parent->getWarmup());
+  setWarmup(parent->getWarmup() + window);
 }
 
 //============================================================================
@@ -96,6 +93,7 @@ void MaxObserverNode::onOutOfRange(
     LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept {
   assert(buffer_old.size() == m_signal.size());
   size_t buffer_idx = getBufferIdx();
+  auto const &buffer_matrix = getBufferMatrix();
   for (size_t i = 0; i < static_cast<size_t>(m_signal.rows()); i++) {
     // Check if the column going out of range holds the max value for the row
     if (buffer_old(i) != m_signal(i)) {
@@ -104,7 +102,6 @@ void MaxObserverNode::onOutOfRange(
 
     // loop over the buffer row and find the new max, skipping the expiring
     // index
-    auto const &buffer_matrix = getBufferMatrix();
     size_t columns = static_cast<size_t>(buffer_matrix.cols());
     double max = -std::numeric_limits<double>::max();
     for (size_t j = 0; j < columns; j++) {
@@ -232,11 +229,11 @@ void VarianceObserverNode::onOutOfRange(
 //============================================================================
 void VarianceObserverNode::cacheObserver() noexcept {
   m_mean_observer->evaluate(m_signal);
-  auto sum_squared_cache = m_sum_squared_observer->getSignalCopy();
+  auto const& sum_squared_cache = m_sum_squared_observer->getSignalCopy();
   m_signal =
       sum_squared_cache - (getWindow() * m_signal.cwiseProduct(m_signal));
   if (getWindow() > 1)
-    m_signal /= static_cast<double>(getWindow() - 1);
+    m_signal /= static_cast<double>(getWindow());
 }
 
 //============================================================================
@@ -299,6 +296,50 @@ void CovarianceObserverNode::cacheObserver() noexcept {
 
 //============================================================================
 void CovarianceObserverNode::reset() noexcept { m_signal.setConstant(0); }
+
+//============================================================================
+SkewnessObserverNode::SkewnessObserverNode(
+    Option<String> id, SharedPtr<StrategyBufferOpNode> parent,
+    size_t window) noexcept
+    : AssetObserverNode(id, parent, AssetObserverType::SKEWNESS, window) {
+  auto mean = std::make_shared<MeanObserverNode>(std::nullopt, parent, window);
+  m_mean_observer = std::static_pointer_cast<MeanObserverNode>(
+      m_exchange.registerObserver(std::move(mean)));
+  auto var =
+      std::make_shared<VarianceObserverNode>(std::nullopt, parent, window);
+  m_var_observer = std::static_pointer_cast<VarianceObserverNode>(
+      m_exchange.registerObserver(std::move(var)));
+
+  setObserverWarmup(parent->getWarmup());
+  setWarmup(parent->getWarmup() + window);
+}
+
+//============================================================================
+SkewnessObserverNode::~SkewnessObserverNode() noexcept {}
+
+//============================================================================
+void SkewnessObserverNode::onOutOfRange(
+    LinAlg::EigenRef<LinAlg::EigenVectorXd> buffer_old) noexcept {}
+
+//============================================================================
+void SkewnessObserverNode::cacheObserver() noexcept {
+  // Fisher-Pearson coefficient of skewness
+  auto const &data = getBufferMatrix();
+  Eigen::VectorXd const& mean = m_mean_observer->getSignalCopy();
+  LinAlg::EigenMatrixXd centered = data.colwise() - mean;
+  Eigen::VectorXd third_moment_sum = centered.array().pow(3).rowwise().sum();
+  Eigen::VectorXd std_dev = m_var_observer->getSignalCopy().array().pow(1.5);
+  std_dev *= static_cast<double>(getWindow());
+  m_signal = third_moment_sum.cwiseQuotient(std_dev);
+}
+
+
+//============================================================================
+void SkewnessObserverNode::reset() noexcept {
+  m_signal.setConstant(0);
+  m_mean_observer->reset();
+  m_var_observer->reset();
+}
 
 //============================================================================
 CorrelationObserverNode::CorrelationObserverNode(
