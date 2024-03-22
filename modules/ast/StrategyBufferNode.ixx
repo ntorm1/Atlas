@@ -42,15 +42,16 @@ protected:
 
 
   void enableCache(bool v = true) noexcept;
+  [[nodiscard]] bool sameParents(Vector<ASTNode *> const &parent) const noexcept;
   [[nodiscard]] bool hasCache() const noexcept { return m_cache.cols() > 1; }
-  LinAlg::EigenRef<LinAlg::EigenVectorXd>
+  [[nodiscard]] LinAlg::EigenRef<LinAlg::EigenVectorXd>
   cacheColumn(Option<size_t> col = std::nullopt) noexcept;
 
 public:
   virtual ~StrategyBufferOpNode() = default;
   virtual size_t refreshWarmup() noexcept { return 0; }
   virtual [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept = 0;
+  isSame(StrategyBufferOpNode const* other) const noexcept = 0;
   void addChild(StrategyBufferOpNode *child) noexcept;
   [[nodiscard]] size_t getAssetCount() const noexcept;
   [[nodiscard]] size_t getCurrentIdx() const noexcept;
@@ -61,6 +62,7 @@ public:
   ATLAS_API Option<Vector<double>>
   getAssetCacheSlice(size_t asset_index) const noexcept;
   ATLAS_API auto const &cache() noexcept { return m_cache; }
+  ATLAS_API uintptr_t address() const noexcept {return reinterpret_cast<uintptr_t>(this); }
 };
 
 //============================================================================
@@ -72,7 +74,7 @@ public:
 
   [[nodiscard]] size_t getWarmup() const noexcept override { return 0; }
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override {
+  isSame(StrategyBufferOpNode const* other) const noexcept override {
     return false;
   }
   void
@@ -93,7 +95,7 @@ public:
 
   ATLAS_API [[nodiscard]] size_t getWarmup() const noexcept override;
   ATLAS_API [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+  isSame(StrategyBufferOpNode const* other) const noexcept override;
   ATLAS_API void
   evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
   ATLAS_API void reset() noexcept override;

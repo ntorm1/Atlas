@@ -280,13 +280,8 @@ void RiskParityWeight::evaluate(
 
 //============================================================================
 bool RiskParityWeight::isSame(
-    SharedPtr<StrategyBufferOpNode> other) const noexcept {
-  auto other_ptr = std::dynamic_pointer_cast<RiskParityWeight>(other);
-  if (!other_ptr) {
-    return false;
-  }
-  return m_chinu == other_ptr->m_chinu && m_tol == other_ptr->m_tol &&
-         m_max_iter == other_ptr->m_max_iter;
+    StrategyBufferOpNode const* other) const noexcept {
+  return false; //TODO: implement
 }
 
 } // namespace AST

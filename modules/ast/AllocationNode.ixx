@@ -61,7 +61,7 @@ public:
 	[[nodiscard]] double getAllocEpsilon() const noexcept;
 	[[nodiscard]] size_t getWarmup() const noexcept { return m_warmup; }
 	[[nodiscard]] size_t getAssetCount() const noexcept;
-	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept final override { return false; }
+	[[nodiscard]] bool isSame(StrategyBufferOpNode const* other) const noexcept final override { return false; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
 	virtual void evaluateChild(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept = 0;
 

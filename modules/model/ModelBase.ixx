@@ -68,7 +68,7 @@ public:
 	ATLAS_API ~ModelTarget() noexcept;
 
 
-	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+	[[nodiscard]] bool isSame(StrategyBufferOpNode const* other) const noexcept override;
 	[[nodiscard]] size_t getWarmup() const noexcept { return m_lookforward; }
 	[[nodiscard]] size_t getLookForward() const noexcept { return m_lookforward; }
 	void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;

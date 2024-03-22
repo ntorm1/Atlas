@@ -260,7 +260,7 @@ void LinearRegressionModel::predict() noexcept {
 
 //============================================================================
 bool LinearRegressionModel::isSame(
-    SharedPtr<StrategyBufferOpNode> other) const noexcept {
+    StrategyBufferOpNode const* other) const noexcept {
   return false;
 }
 

@@ -285,11 +285,11 @@ ModelTarget::ModelTarget(SharedPtr<AST::StrategyBufferOpNode> target,
 ModelTarget::~ModelTarget() noexcept {}
 
 //============================================================================
-bool ModelTarget::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool ModelTarget::isSame(StrategyBufferOpNode const* other) const noexcept {
   if (other->getType() != AST::NodeType::TARGET) {
     return false;
   }
-  auto const other_target = std::static_pointer_cast<ModelTarget>(other);
+  auto const other_target = static_cast<ModelTarget const*>(other);
   return m_target == other_target->m_target && m_type == other_target->m_type &&
          m_lookforward == other_target->m_lookforward;
 }

@@ -78,6 +78,7 @@ public:
   virtual void reset() noexcept = 0;
 
   NodeType getType() const noexcept { return m_type; }
+  auto const &getParents() const noexcept { return m_parent; }
   Option<ASTNode *> getParent() const noexcept {
     if (m_parent.size() > 0) {
 			return m_parent[0];

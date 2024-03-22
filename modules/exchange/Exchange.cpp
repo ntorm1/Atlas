@@ -273,8 +273,8 @@ SharedPtr<AST::AssetObserverNode> Exchange::registerObserver(
     SharedPtr<AST::AssetObserverNode> observer) noexcept {
   auto const &id = observer->getId();
   for (auto const &node : m_impl->asset_observers) {
-    if (node->isSame(observer)) {
-      return observer;
+    if (node->isSame(observer.get())) {
+      return node;
     }
   }
   m_impl->asset_observers.push_back(observer);
@@ -440,7 +440,7 @@ Exchange::getObserver(String const &id) noexcept {
 Option<SharedPtr<AST::StrategyBufferOpNode>>
 Exchange::getSameFromCache(SharedPtr<AST::StrategyBufferOpNode> a) noexcept {
   for (auto const &[name, node] : m_impl->ast_cache) {
-    if (node->isSame(a)) {
+    if (node->isSame(a.get())) {
       return node;
     }
   }

@@ -64,7 +64,7 @@ public:
 	void train() noexcept override;
 	void reset() noexcept override;
 	void predict() noexcept override;
-	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+	[[nodiscard]] bool isSame(StrategyBufferOpNode const* other) const noexcept override;
 };
 
 

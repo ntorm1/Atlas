@@ -79,12 +79,12 @@ void EVRankNode::sort() noexcept {
 size_t EVRankNode::getWarmup() const noexcept { return m_ev->getWarmup(); }
 
 //============================================================================
-bool EVRankNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool EVRankNode::isSame(StrategyBufferOpNode const* other) const noexcept {
   if (other->getType() != NodeType::RANK_NODE) {
     return false;
   }
-  auto ptr = static_cast<EVRankNode *>(other.get());
-  return m_N == ptr->m_N && m_type == ptr->m_type && m_ev->isSame(ptr->m_ev);
+  auto ptr = static_cast<EVRankNode const*>(other);
+  return m_N == ptr->m_N && m_type == ptr->m_type && m_ev->isSame(ptr->m_ev.get());
 }
 
 //============================================================================

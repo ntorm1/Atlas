@@ -22,12 +22,11 @@ size_t AssetReadNode::size() const noexcept {
 }
 
 //============================================================================
-bool AssetReadNode::isSame(
-    SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool AssetReadNode::isSame(StrategyBufferOpNode const *other) const noexcept {
   if (other->getType() != NodeType::ASSET_READ) {
     return false;
   }
-  auto node = static_cast<AssetReadNode *>(other.get());
+  auto node = static_cast<AssetReadNode const*>(other);
   return m_column == node->getColumn() && m_row_offset == node->getRowOffset();
 }
 
@@ -118,14 +117,14 @@ size_t AssetOpNode::refreshWarmup() noexcept {
 }
 
 //============================================================================
-bool AssetOpNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool AssetOpNode::isSame(StrategyBufferOpNode const *other) const noexcept {
   if (other->getType() != NodeType::ASSET_OP) {
     return false;
   }
-  auto other_asset_op = static_cast<AssetOpNode *>(other.get());
+  auto other_asset_op = static_cast<AssetOpNode const*>(other);
   return m_op_type == other_asset_op->getOpType() &&
-         m_asset_op_left->isSame(other_asset_op->getLeft()) &&
-         m_asset_op_right->isSame(other_asset_op->getRight());
+         m_asset_op_left->isSame(other_asset_op->getLeft().get()) &&
+         m_asset_op_right->isSame(other_asset_op->getRight().get());
 }
 
 //============================================================================
@@ -186,12 +185,11 @@ SharedPtr<AssetMedianNode> AssetMedianNode::pyMake(SharedPtr<Exchange> exchange,
 AssetMedianNode::~AssetMedianNode() noexcept {}
 
 //============================================================================
-bool AssetMedianNode::isSame(
-    SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool AssetMedianNode::isSame(StrategyBufferOpNode const *other) const noexcept {
   if (other->getType() != NodeType::ASSET_MEDIAN) {
     return false;
   }
-  auto other_median = static_cast<AssetMedianNode *>(other.get());
+  auto other_median = static_cast<AssetMedianNode const*>(other);
   return m_col_1 == other_median->getCol1() &&
          m_col_2 == other_median->getCol2();
 }
@@ -266,11 +264,11 @@ SharedPtr<ATRNode> ATRNode::pyMake(SharedPtr<Exchange> exchange,
 }
 
 //============================================================================
-bool ATRNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool ATRNode::isSame(StrategyBufferOpNode const *other) const noexcept {
   if (other->getType() != NodeType::ASSET_ATR) {
     return false;
   }
-  auto other_atr = static_cast<ATRNode *>(other.get());
+  auto other_atr = static_cast<ATRNode const*>(other);
   return m_high == other_atr->getHigh() && m_low == other_atr->getLow() &&
          m_window == other_atr->getWindow();
 }
@@ -320,15 +318,14 @@ void AssetScalerNode::evaluate(
 void AssetScalerNode::reset() noexcept { m_parent->reset(); }
 
 //============================================================================
-bool AssetScalerNode::isSame(
-    SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool AssetScalerNode::isSame(StrategyBufferOpNode const *other) const noexcept {
   if (other->getType() != NodeType::ASSET_SCALAR) {
     return false;
   }
-  auto other_scaler = static_cast<AssetScalerNode *>(other.get());
+  auto other_scaler = static_cast<AssetScalerNode const*>(other);
   return m_op_type == other_scaler->getOpType() &&
          m_scale == other_scaler->getScale() &&
-         m_parent->isSame(other_scaler->getParent());
+         m_parent->isSame(other_scaler->getParent().get());
 }
 
 //============================================================================
@@ -372,14 +369,14 @@ void AssetFunctionNode::evaluate(
 
 //============================================================================
 bool AssetFunctionNode::isSame(
-    SharedPtr<StrategyBufferOpNode> other) const noexcept {
+    StrategyBufferOpNode const *other) const noexcept {
   if (other->getType() != NodeType::ASSET_FUNCTION) {
     return false;
   }
-  auto other_func = static_cast<AssetFunctionNode *>(other.get());
+  auto other_func = static_cast<AssetFunctionNode const *>(other);
   return m_func_type == other_func->getFuncType() &&
          m_func_param == other_func->getFuncParam() &&
-         m_parent->isSame(other_func->getParent());
+         m_parent->isSame(other_func->getParent().get());
 }
 
 } // namespace AST

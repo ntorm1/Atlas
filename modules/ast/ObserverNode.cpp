@@ -297,6 +297,7 @@ void CovarianceObserverNode::cacheObserver() noexcept {
 //============================================================================
 void CovarianceObserverNode::reset() noexcept { m_signal.setConstant(0); }
 
+
 //============================================================================
 SkewnessObserverNode::SkewnessObserverNode(
     Option<String> id, SharedPtr<StrategyBufferOpNode> parent,

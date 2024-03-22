@@ -42,7 +42,7 @@ public:
   [[nodiscard]] size_t size() const noexcept;
   [[nodiscard]] size_t getColumn() const noexcept { return m_column; }
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+  isSame(StrategyBufferOpNode const* other) const noexcept override;
   [[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
   void reset() noexcept override{};
   void
@@ -52,16 +52,16 @@ public:
 //============================================================================
 export class AssetOpNode final : public StrategyBufferOpNode {
 private:
-  SharedPtr<StrategyBufferOpNode> m_asset_op_left;
-  SharedPtr<StrategyBufferOpNode> m_asset_op_right;
+  mutable SharedPtr<StrategyBufferOpNode> m_asset_op_left;
+  mutable SharedPtr<StrategyBufferOpNode> m_asset_op_right;
   LinAlg::EigenVectorXd m_right_buffer;
   AssetOpType m_op_type;
   size_t warmup;
 
 public:
-  auto &getLeft() noexcept { return m_asset_op_left; }
-  auto &getRight() noexcept { return m_asset_op_right; }
-  auto &getOpType() noexcept { return m_op_type; }
+  auto &getLeft() const noexcept { return m_asset_op_left; }
+  auto &getRight() const noexcept { return m_asset_op_right; }
+  auto &getOpType() const noexcept { return m_op_type; }
 
   virtual ~AssetOpNode() noexcept = default;
 
@@ -102,7 +102,7 @@ public:
     return reinterpret_cast<uintptr_t>(&AssetOpNode::swapRight);
   }
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+  isSame(StrategyBufferOpNode const* other) const noexcept override;
   void reset() noexcept override;
   void
   evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
@@ -136,7 +136,7 @@ public:
 
   [[nodiscard]] size_t getWarmup() const noexcept override { return 0; }
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+  isSame(StrategyBufferOpNode const* other) const noexcept override;
   void reset() noexcept override {}
   void
   evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
@@ -167,7 +167,7 @@ public:
   size_t getLow() const noexcept { return m_low; }
   size_t getWindow() const noexcept { return m_window; }
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+  isSame(StrategyBufferOpNode const* other) const noexcept override;
   [[nodiscard]] size_t getWarmup() const noexcept override { return m_window; }
 
   ATLAS_API ~ATRNode() noexcept;
@@ -195,7 +195,7 @@ public:
   [[nodiscard]] AssetOpType getOpType() const noexcept { return m_op_type; }
   [[nodiscard]] double getScale() const noexcept { return m_scale; }
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+  isSame(StrategyBufferOpNode const* other) const noexcept override;
   [[nodiscard]] size_t getWarmup() const noexcept override {
     return m_parent->getWarmup();
   }
@@ -226,7 +226,7 @@ public:
     return m_func_param;
   }
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+  isSame(StrategyBufferOpNode const* other) const noexcept override;
   [[nodiscard]] size_t getWarmup() const noexcept override {
     return m_parent->getWarmup();
   }

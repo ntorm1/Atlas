@@ -115,7 +115,7 @@ public:
 	}
 
 	[[nodiscard]] size_t refreshWarmup() noexcept override;
-	[[nodiscard]] bool isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept final override;
+	[[nodiscard]] bool isSame(StrategyBufferOpNode const* other) const noexcept final override;
 	[[nodiscard]] size_t getWarmup() const noexcept override { return m_warmup; }
 	[[nodiscard]] size_t getViewSize() const noexcept { return m_view_size; }
 	[[nodiscard]] auto& getExchange() { return m_exchange; }

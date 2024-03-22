@@ -32,6 +32,22 @@ void StrategyBufferOpNode::setTakeFromCache(bool v) noexcept {
 }
 
 //============================================================================
+bool StrategyBufferOpNode::sameParents(
+    Vector<ASTNode *> const &parents) const noexcept {
+  auto const &this_parents = getParents();
+  if (this_parents.size() != parents.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < this_parents.size(); ++i) {
+    if (reinterpret_cast<uintptr_t>(this_parents[i]) !=
+        reinterpret_cast<uintptr_t>(parents[i])) {
+			return false;
+		}
+  }
+  return true;
+}
+
+//============================================================================
 void StrategyBufferOpNode::enableCache(bool v) noexcept {
   size_t rows = m_exchange.getAssetCount();
   size_t cols = m_exchange.getTimestamps().size();
@@ -129,11 +145,11 @@ size_t LagNode::getWarmup() const noexcept {
 }
 
 //============================================================================
-bool LagNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool LagNode::isSame(StrategyBufferOpNode const* other) const noexcept {
   if (other->getType() != NodeType::LAG) {
     return false;
   }
-  auto other_lag = static_cast<LagNode *>(other.get());
+  auto other_lag = static_cast<LagNode const*>(other);
   return m_lag == other_lag->m_lag;
 }
 

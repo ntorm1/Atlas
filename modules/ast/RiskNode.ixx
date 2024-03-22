@@ -139,7 +139,7 @@ public:
   void
   evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override {
+  isSame(StrategyBufferOpNode const* other) const noexcept override {
     return false;
   }
 };
@@ -169,7 +169,7 @@ public:
   void
   evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+  isSame(StrategyBufferOpNode const* other) const noexcept override;
 };
 
 } // namespace AST

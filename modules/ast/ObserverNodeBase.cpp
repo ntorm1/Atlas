@@ -65,6 +65,19 @@ void AssetObserverNode::cacheBase() noexcept {
 }
 
 //============================================================================
+bool AssetObserverNode::isSame(
+    StrategyBufferOpNode const *other) const noexcept {
+  if (other->getType() != NodeType::ASSET_OBSERVER)
+		return false;
+  auto ptr = static_cast<AssetObserverNode const *>(other);
+  if (ptr->m_observer_type != m_observer_type)
+		return false;
+  if (ptr->window() != window())
+    return false;
+  return sameParents(other->getParents());
+}
+
+//============================================================================
 LinAlg::EigenRef<LinAlg::EigenVectorXd> AssetObserverNode::buffer() noexcept {
   size_t col = 0;
   assert(m_buffer_idx < static_cast<size_t>(m_buffer_matrix.cols()));
@@ -76,18 +89,6 @@ void AssetObserverNode::evaluate(
     LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept {
   assert(target.size() == m_signal_copy.size());
   target = m_signal_copy;
-}
-
-//============================================================================
-bool AssetObserverNode::isSame(
-    SharedPtr<StrategyBufferOpNode> other) const noexcept {
-  if (other->getType() != NodeType::ASSET_OBSERVER) {
-    return false;
-  }
-  auto ptr = static_cast<AssetObserverNode *>(other.get());
-
-  return m_parent == other && m_observer_type == ptr->getObserverType() &&
-         m_window == ptr->getWindow();
 }
 
 } // namespace AST

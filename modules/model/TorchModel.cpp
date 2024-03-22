@@ -80,7 +80,7 @@ void TorchModel::reset() noexcept {}
 void TorchModel::predict() noexcept {}
 
 //============================================================================
-bool TorchModel::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool TorchModel::isSame(StrategyBufferOpNode const* other) const noexcept {
   return false;
 }
 

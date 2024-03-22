@@ -123,7 +123,7 @@ void XGBoostModel::predict() noexcept {
 
 //============================================================================
 bool XGBoostModel::isSame(
-    SharedPtr<StrategyBufferOpNode> other) const noexcept {
+    StrategyBufferOpNode const* other) const noexcept {
   return false;
 }
 }

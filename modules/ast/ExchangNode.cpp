@@ -39,7 +39,7 @@ size_t ExchangeViewNode::refreshWarmup() noexcept {
 
 //============================================================================
 bool ExchangeViewNode::isSame(
-    SharedPtr<StrategyBufferOpNode> other) const noexcept {
+    StrategyBufferOpNode const* other) const noexcept {
   return false; // TODO
 }
 

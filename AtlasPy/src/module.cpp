@@ -61,6 +61,7 @@ PYBIND11_MODULE(atlas_internal, m) {
              std::shared_ptr<Atlas::AST::StrategyBufferOpNode>>(
       m_ast, "StrategyBufferOpNode")
       .def("lag", &Atlas::AST::StrategyBufferOpNode::lag)
+      .def("address", &Atlas::AST::StrategyBufferOpNode::address)
       .def("cache", &Atlas::AST::StrategyBufferOpNode::cache,
            py::return_value_policy::reference_internal);
 

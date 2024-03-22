@@ -37,7 +37,7 @@ public:
   ~PCAModel() noexcept;
 
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+  isSame(StrategyBufferOpNode const* other) const noexcept override;
   void
   evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;
   void build() noexcept;

@@ -26,12 +26,12 @@ AssetIfNode::AssetIfNode(SharedPtr<StrategyBufferOpNode> left_eval,
 AssetIfNode::~AssetIfNode() noexcept {}
 
 //============================================================================
-bool AssetIfNode::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool AssetIfNode::isSame(StrategyBufferOpNode const* other) const noexcept {
   if (other->getType() != NodeType::ASSET_IF)
     return false;
-  auto ptr = static_cast<AssetIfNode *>(other.get());
-  return m_left_eval->isSame(ptr->m_left_eval) &&
-         m_right_eval->isSame(ptr->m_right_eval) &&
+  auto ptr = static_cast<AssetIfNode const*>(other);
+  return m_left_eval->isSame(ptr->m_left_eval.get()) &&
+         m_right_eval->isSame(ptr->m_right_eval.get()) &&
          m_comp_type == ptr->m_comp_type;
 }
 
@@ -130,14 +130,14 @@ void AssetCompNode::evaluate(
 
 //============================================================================
 bool AssetCompNode::isSame(
-    SharedPtr<StrategyBufferOpNode> other) const noexcept {
+    StrategyBufferOpNode const* other) const noexcept {
   if (other->getType() != NodeType::ASSET_COMP)
     return false;
-  auto ptr = static_cast<AssetCompNode *>(other.get());
-  return m_left_eval->isSame(ptr->getLeftEval()) &&
-         m_right_eval->isSame(ptr->getRightEval()) &&
-         m_true_eval->isSame(ptr->getTrueEval()) &&
-         m_false_eval->isSame(ptr->getFalseEval()) &&
+  auto ptr = static_cast<AssetCompNode const*>(other);
+  return m_left_eval->isSame(ptr->getLeftEval().get()) &&
+         m_right_eval->isSame(ptr->getRightEval().get()) &&
+         m_true_eval->isSame(ptr->getTrueEval().get()) &&
+         m_false_eval->isSame(ptr->getFalseEval().get()) &&
          m_logical_type == ptr->getLogicalType();
 }
 

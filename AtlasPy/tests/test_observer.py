@@ -40,6 +40,7 @@ class TestObserver(unittest.TestCase):
         close_max = self.exchange.registerObserver(
             MaxObserverNode("max", change, window)
         )
+        self.assertNotEqual(close_max.address(), close_arg_max.address())
         self.exchange.enableNodeCache("close_arg_max", close_arg_max, False)
         self.exchange.enableNodeCache("close_max", close_max, False)
 
@@ -153,6 +154,18 @@ class TestObserver(unittest.TestCase):
         self.assertTrue(
             np.allclose(df["close_open_cov_atlas"], df["close_open_cov_pd"])
         )
+
+    def test_observer_cache(self):
+        window = 5
+        close = AssetReadNode.make("Close", 0, self.exchange)
+        open_node = AssetReadNode.make("Open", 0, self.exchange)
+        cov1 = self.exchange.registerObserver(
+            CovarianceObserverNode("cov1", close, open_node, window)
+        )
+        cov2 = self.exchange.registerObserver(
+            CovarianceObserverNode("cov2", close, open_node, window)
+        )
+        self.assertEqual(cov1.address(), cov2.address())
 
     def test_skew_observer(self):
         window = 5

@@ -65,17 +65,17 @@ void PCAModel::build() noexcept {
 }
 
 //============================================================================
-bool PCAModel::isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept {
+bool PCAModel::isSame(StrategyBufferOpNode const* other) const noexcept {
   if (other->getType() != NodeType::ASSET_PCA) {
     return false;
   }
-  auto other_pca = static_cast<PCAModel *>(other.get());
+  auto other_pca = static_cast<PCAModel const*>(other);
   auto const &other_features = other_pca->getFeatures();
   if (m_features.size() != other_features.size()) {
     return false;
   }
   for (size_t i = 0; i < m_features.size(); ++i) {
-    if (!m_features[i]->isSame(other_features[i])) {
+    if (!m_features[i]->isSame(other_features[i].get())) {
       return false;
     }
   }

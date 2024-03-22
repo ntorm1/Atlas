@@ -69,7 +69,7 @@ public:
   void reset() noexcept override;
   void predict() noexcept override;
   [[nodiscard]] bool
-  isSame(SharedPtr<StrategyBufferOpNode> other) const noexcept override;
+  isSame(StrategyBufferOpNode const* other) const noexcept override;
 };
 
 } // namespace Model
