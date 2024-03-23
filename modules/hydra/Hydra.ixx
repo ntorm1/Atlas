@@ -65,7 +65,7 @@ public:
 
   //============================================================================
   ATLAS_API SharedPtr<Exchange> pyGetExchange(String const &name) const;
-
+  ATLAS_API Vector<AtlasException> const& getExceptions() const noexcept;
   ATLAS_API void pyRun();
   ATLAS_API void pyBuild();
   ATLAS_API void pyReset();

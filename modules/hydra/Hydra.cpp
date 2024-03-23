@@ -13,6 +13,7 @@ namespace Atlas {
 //============================================================================
 struct HydraImpl {
   ExchangeMap m_exchange_map;
+  Vector<AtlasException> exceptions;
   Vector<SharedPtr<MetaStrategy>> m_strategies;
   HashMap<String, size_t> m_strategy_map;
   HashMap<String, size_t> m_portfolio_map;
@@ -195,8 +196,11 @@ Result<bool, AtlasException> Hydra::run() noexcept {
 
   // on finish realize Allocator valuation as needed
   for (auto &allocator : m_impl->m_strategies) {
-    allocator->realize();
+    allocator->realize(m_impl->exceptions);
   }
+  if (m_impl->exceptions.size() > 0) {
+		return Err("Exceptions occurred during run, see Hydra::getExceptions()");
+	}
 
   m_state = HydraState::FINISHED;
   return true;
@@ -257,6 +261,7 @@ Result<bool, AtlasException> Hydra::reset() noexcept {
   if (m_state == HydraState::INIT) {
     return Err("Hydra can not be in init state to reset");
   }
+  m_impl->exceptions.clear();
   m_impl->m_exchange_map.reset();
   for (auto &allocator : m_impl->m_strategies) {
     allocator->reset();
@@ -293,6 +298,11 @@ SharedPtr<Exchange> Hydra::pyGetExchange(String const &name) const {
     throw std::exception(res.error().what());
   }
   return *res;
+}
+
+//============================================================================
+Vector<AtlasException> const &Hydra::getExceptions() const noexcept {
+  return m_impl->exceptions;
 }
 
 //============================================================================

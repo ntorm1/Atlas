@@ -34,6 +34,11 @@ MetaStrategy::MetaStrategy(String name, SharedPtr<Exchange> exchange,
 }
 
 //============================================================================
+Vector<SharedPtr<Allocator>> MetaStrategy::getStrategies() const noexcept {
+  return m_impl->child_strategies;
+}
+
+//============================================================================
 const Eigen::Ref<const Eigen::VectorXd>
 MetaStrategy::getAllocationBuffer() const noexcept {
   return m_impl->meta_weights;

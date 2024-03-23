@@ -41,8 +41,8 @@ private:
   size_t m_id = 0;
   bool m_is_meta;
   void resetBase() noexcept;
-  void realize() noexcept;
-  void disable(String const& exception) noexcept;
+  void realize(Vector<AtlasException> &exceptions) noexcept;
+  void disable(String const &exception) noexcept;
 
 protected:
   SharedPtr<Tracer> m_tracer;
@@ -50,6 +50,7 @@ protected:
   double m_portfolio_weight = 0.0;
   Exchange &m_exchange;
 
+  void takeException(Vector<AtlasException> &exceptions) noexcept;
   [[nodiscard]] size_t getAssetCount() const noexcept;
   void lateRebalance(
       LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
@@ -57,7 +58,6 @@ protected:
                     &target_weights_buffer) noexcept;
   void validate(
       LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
-
 
 public:
   virtual ~Allocator() noexcept;

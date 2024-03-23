@@ -5,6 +5,7 @@ module AtlasAllocatorModule;
 
 import TracerModule;
 import ExchangeModule;
+import MetaStrategyModule;
 
 namespace Atlas {
 
@@ -17,6 +18,21 @@ struct AllocatorImpl {
 
   AllocatorImpl(Option<SharedPtr<Allocator>> p) noexcept : parent(p) {}
 };
+
+//============================================================================
+void Allocator::takeException(Vector<AtlasException> &exceptions) noexcept {
+  auto res = m_impl->exception;
+  if (res) {
+    m_impl->exception = std::nullopt;
+    exceptions.push_back(std::move(res.value()));
+  }
+  if (m_is_meta) {
+    auto p = static_cast<MetaStrategy *>(this);
+    for (auto &a : p->getStrategies()) {
+      a->takeException(exceptions);
+    }
+  }
+}
 
 //============================================================================
 size_t Allocator::getAssetCount() const noexcept {
@@ -56,8 +72,8 @@ Exchange const &Allocator::getExchange() const noexcept { return m_exchange; }
 void Allocator::evaluate(
     Eigen::Ref<Eigen::VectorXd> const &target_weights_buffer) noexcept {
   if (m_impl->is_disabled) {
-		return;
-	}
+    return;
+  }
   // get the current market returns
   LinAlg::EigenConstColView market_returns = m_exchange.getMarketReturns();
 
@@ -109,7 +125,10 @@ void Allocator::validate(
 }
 
 //============================================================================
-void Allocator::realize() noexcept { m_tracer->realize(); }
+void Allocator::realize(Vector<AtlasException> &exceptions) noexcept {
+  takeException(exceptions);
+  m_tracer->realize();
+}
 
 //============================================================================
 void Allocator::disable(String const &exception) noexcept {

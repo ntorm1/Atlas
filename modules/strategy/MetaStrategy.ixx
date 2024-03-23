@@ -36,6 +36,7 @@ public:
   ~MetaStrategy() noexcept;
   ATLAS_API MetaStrategy(String name, SharedPtr<Exchange> exchange,
                          Option<SharedPtr<Allocator>>, double cash) noexcept;
+  Vector<SharedPtr<Allocator>> getStrategies() const noexcept;
   const LinAlg::EigenRef<const LinAlg::EigenVectorXd>
   getAllocationBuffer() const noexcept override;
   const LinAlg::EigenRef<const LinAlg::EigenVectorXd>
