@@ -154,7 +154,7 @@ class VectorBTCompare(unittest.TestCase):
         df = pd.read_csv(path)
         df["close_max_atlas"] = close_max.cache()[btc_idx].T
         df["close_max_pd"] = df["Close"].diff().rolling(n).max()
-        df["close_max_pd"].fillna(0, inplace=True)
+        df["close_max_pd"] = df["close_max_pd"].fillna(0)
         df = df.iloc[n:]
         self.assertTrue(np.allclose(df["close_max_atlas"], df["close_max_pd"]))
 

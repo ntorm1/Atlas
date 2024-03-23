@@ -22,4 +22,6 @@ EXCHANGE_ID = "test_exchange_1"
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-EXCHANGE_PATH = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchangeVBT"
+EXCHANGE_PATH = (
+    r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/tests/files/exchangeVBT"
+)

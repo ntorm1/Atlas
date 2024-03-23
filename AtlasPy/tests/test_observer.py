@@ -6,8 +6,6 @@ import scipy.stats
 
 from context import *
 
-EXCHANGE_CSV = r"C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchangeVBT"
-
 
 class TestObserver(unittest.TestCase):
     def setUp(self) -> None:
@@ -21,7 +19,7 @@ class TestObserver(unittest.TestCase):
 
     def get_df(self):
         ticker = "BTC-USD"
-        path = os.path.join(EXCHANGE_CSV, f"{ticker}.csv")
+        path = os.path.join(EXCHANGE_PATH, f"{ticker}.csv")
         df = pd.read_csv(path)
         df["Date"] = pd.to_datetime(df["Date"])
         df = df.set_index("Date")

@@ -3,7 +3,7 @@
 
 [[exchanges]]
 id = "test_exchange_1"
-path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/src/exchange1"
+path = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/AtlasPy/tests/files/exchange1"
 datetime_format = "%Y-%m-%d"
 
 

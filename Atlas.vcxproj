@@ -250,11 +250,13 @@
     <ClCompile Include="modules\standard\AtlasLinAlg.ixx" />
     <ClCompile Include="modules\standard\AtlasSerialize.cpp" />
     <ClCompile Include="modules\standard\AtlasSerialize.ixx" />
+    <ClCompile Include="modules\standard\AtlasStats.cpp" />
     <ClCompile Include="modules\standard\AtlasTime.cpp" />
     <ClCompile Include="modules\standard\AtlasTime.ixx" />
     <ClCompile Include="modules\standard\AtlasTypes.ixx" />
     <ClCompile Include="modules\standard\AtlasException.ixx" />
     <ClCompile Include="modules\standard\AtlasUtils.ixx" />
+    <ClCompile Include="modules\standard\AtlasStats.ixx" />
     <ClCompile Include="modules\strategy\Allocator.ixx" />
     <ClCompile Include="modules\strategy\Allocator.cpp" />
     <ClCompile Include="modules\strategy\MetaStrategy.cpp" />
