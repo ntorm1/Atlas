@@ -84,7 +84,7 @@ SharedPtr<Allocator> MetaStrategy::pyAddStrategy(SharedPtr<Allocator> allocator,
 
 //============================================================================
 void MetaStrategy::step() noexcept {
-  if (!m_step_call || !m_impl->child_strategies.size()) {
+  if (!m_impl->child_strategies.size()) {
     return;
   }
   evaluate(m_impl->meta_weights);
@@ -93,13 +93,13 @@ void MetaStrategy::step() noexcept {
   for (int i = 0; i < m_impl->child_strategies.size(); i++) {
     auto target_weights = m_impl->weights.col(static_cast<int>(i));
     auto &strategy = m_impl->child_strategies[i];
-    strategy->step(target_weights);
+    strategy->stepBase(target_weights);
     if (strategy->getIsMeta()) {
       auto meta_strategy = static_cast<MetaStrategy *>(strategy.get());
       meta_strategy->step();
     }
   }
-  step(m_impl->meta_weights);
+  stepBase(m_impl->meta_weights);
 }
 
 //============================================================================

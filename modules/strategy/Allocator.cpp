@@ -11,6 +11,9 @@ namespace Atlas {
 //============================================================================
 struct AllocatorImpl {
   Option<SharedPtr<Allocator>> parent;
+  Option<AtlasException> exception = std::nullopt;
+  Option<AllocatorConfig> config = std::nullopt;
+  bool is_disabled = false;
 
   AllocatorImpl(Option<SharedPtr<Allocator>> p) noexcept : parent(p) {}
 };
@@ -52,6 +55,9 @@ Exchange const &Allocator::getExchange() const noexcept { return m_exchange; }
 //============================================================================
 void Allocator::evaluate(
     Eigen::Ref<Eigen::VectorXd> const &target_weights_buffer) noexcept {
+  if (m_impl->is_disabled) {
+		return;
+	}
   // get the current market returns
   LinAlg::EigenConstColView market_returns = m_exchange.getMarketReturns();
 
@@ -84,7 +90,45 @@ void Allocator::resetBase() noexcept {
 }
 
 //============================================================================
+void Allocator::validate(
+    LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept {
+  if (!m_impl->config) {
+    return;
+  }
+  auto const &config = m_impl->config.value();
+  if (!config.can_short && target_weights_buffer.minCoeff() < 0) {
+    return disable("Shorting is not allowed");
+  }
+  if (config.weight_clip) {
+    if (config.disable_on_breach) {
+      return disable("Weight clip breach");
+    }
+    target_weights_buffer = target_weights_buffer.cwiseMax(*config.weight_clip);
+  }
+}
+
+//============================================================================
 void Allocator::realize() noexcept { m_tracer->realize(); }
+
+//============================================================================
+void Allocator::disable(String const &exception) noexcept {
+  m_impl->exception = AtlasException(exception);
+  m_impl->is_disabled = true;
+}
+
+//============================================================================
+void Allocator::stepBase(
+    LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept {
+  if (m_impl->is_disabled) {
+    return;
+  }
+  if (!m_step_call) {
+    validate(target_weights_buffer);
+    return;
+  }
+  step(target_weights_buffer);
+  validate(target_weights_buffer);
+}
 
 //============================================================================
 Option<SharedPtr<Allocator>> Allocator::getParent() const noexcept {

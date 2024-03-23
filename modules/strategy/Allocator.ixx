@@ -17,6 +17,20 @@ namespace Atlas {
 struct AllocatorImpl;
 
 //============================================================================
+struct AllocatorConfig {
+  bool can_short = true;
+  bool disable_on_breach = false;
+  WeightScaleType weight_scale = WeightScaleType::NO_SCALE;
+  Option<double> vol_target = std::nullopt;
+  Option<double> weight_clip = std::nullopt;
+  Option<double> vol_limit = std::nullopt;
+  Option<double> risk_contrib_limit = std::nullopt;
+
+  AllocatorConfig() noexcept = default;
+  ~AllocatorConfig() noexcept = default;
+};
+
+//============================================================================
 export class Allocator {
   friend class Exchange;
   friend class Hydra;
@@ -28,6 +42,7 @@ private:
   bool m_is_meta;
   void resetBase() noexcept;
   void realize() noexcept;
+  void disable(String const& exception) noexcept;
 
 protected:
   SharedPtr<Tracer> m_tracer;
@@ -40,6 +55,9 @@ protected:
       LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
   void evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> const
                     &target_weights_buffer) noexcept;
+  void validate(
+      LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
+
 
 public:
   virtual ~Allocator() noexcept;
@@ -54,6 +72,8 @@ public:
   virtual void load() noexcept = 0;
   virtual void enableCopyWeightsBuffer() noexcept = 0;
   void setID(size_t id) noexcept { m_id = id; }
+  void stepBase(
+      LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;
   virtual void step(LinAlg::EigenRef<LinAlg::EigenVectorXd>
                         target_weights_buffer) noexcept = 0;
   [[nodiscard]] Option<SharedPtr<Allocator>> getParent() const noexcept;

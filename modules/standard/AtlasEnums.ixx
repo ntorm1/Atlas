@@ -28,6 +28,14 @@ export namespace Atlas
 	};
 
 	//============================================================================
+	export enum class WeightScaleType
+	{
+		NO_SCALE = 0,
+		VOLATILITY,
+		EQUAL_RISK_CONTRIBUTION
+	};
+
+	//============================================================================
 	export enum class GridType
 	{
 		FULL = 0,

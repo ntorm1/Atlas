@@ -4,8 +4,16 @@ import sys
 import importlib
 from typing import *
 import tomllib
+from dataclasses import dataclass
 
 from atlas_internal.core import Hydra, Exchange
+
+
+@dataclass
+class ExchangeConfig:
+    id: str
+    path: str
+    datetime_format: str
 
 
 class Parser:
@@ -67,16 +75,11 @@ class Parser:
                     datetime_format = "%Y-%m-%d %H:%M:%S"
                 """
             )
-
-        for exchange in self._toml["exchanges"]:
-            if not isinstance(exchange, dict):
-                raise ValueError("expected exchange to be a dict")
-            id = exchange.get("id")
-            path = exchange.get("path")
-            datetime_format = exchange.get("datetime_format")
-            if not id or not path or not datetime_format:
-                raise ValueError("exchange missing id, path, or datetime_format")
-            self._hydra.addExchange(id, path, datetime_format)
+        exchanges = [ExchangeConfig(**exchange) for exchange in self._toml["exchanges"]]
+        for exchange in exchanges:
+            self._hydra.addExchange(
+                exchange.id, exchange.path, exchange.datetime_format
+            )
 
     def _validate_toml(self) -> None:
         pass

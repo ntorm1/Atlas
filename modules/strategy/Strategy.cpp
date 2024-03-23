@@ -125,6 +125,7 @@ void Strategy::step(
 
   if (m_impl->m_grid)
     (*m_impl->m_grid)->evaluateGrid();
+  validate(target_weights_buffer);
 }
 
 //============================================================================
