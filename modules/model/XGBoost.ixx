@@ -62,9 +62,10 @@ public:
 	[[nodiscard]] bool isSame(StrategyBufferOpNode const* other) const noexcept override;
 };
 
+
+
+}
+
+}
+
 #endif
-
-
-}
-
-}

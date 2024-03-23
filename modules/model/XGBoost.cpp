@@ -8,11 +8,13 @@ module;
 
 module XGBoostModule;
 
+#ifdef ATLAS_XGBOOST
+
+
 namespace Atlas {
 
 namespace Model {
 
-#ifdef ATLAS_XGBOOST
 
 //============================================================================
 XGBoostModelConfig::XGBoostModelConfig(
@@ -126,8 +128,10 @@ bool XGBoostModel::isSame(
     StrategyBufferOpNode const* other) const noexcept {
   return false;
 }
+
 }
 
-#endif
 
 } // namespace Atlas
+
+#endif
