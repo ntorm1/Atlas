@@ -100,7 +100,8 @@ void Allocator::validate(
     return disable("Shorting is not allowed");
   }
   if (config.weight_clip) {
-    if (config.disable_on_breach) {
+    if (config.disable_on_breach &&
+        target_weights_buffer.maxCoeff() > *config.weight_clip) {
       return disable("Weight clip breach");
     }
     target_weights_buffer = target_weights_buffer.cwiseMax(*config.weight_clip);
