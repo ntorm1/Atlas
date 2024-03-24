@@ -26,6 +26,7 @@ void wrap_base(py::module &m_core) {
       .def("addExchange", &Atlas::Hydra::pyAddExchange, py::arg("name"),
            py::arg("source"), py::arg("datetime_format") = std::nullopt)
       .def("getExchange", &Atlas::Hydra::pyGetExchange)
+      .def("getStrategy", &Atlas::Hydra::getStrategy)
       .def("addStrategy", &Atlas::Hydra::pyAddStrategy, py::arg("strategy"),
            py::arg("replace_if_exists") = false)
       .def(py::init<>());

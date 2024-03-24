@@ -32,7 +32,7 @@ private:
   ATLAS_API void step(LinAlg::EigenRef<LinAlg::EigenVectorXd>
                           target_weights_buffer) noexcept override;
   ATLAS_API void reset() noexcept override;
-  ATLAS_API void load() noexcept override;
+  ATLAS_API void load()  override;
   ATLAS_API void enableCopyWeightsBuffer() noexcept override;
   ATLAS_API [[nodiscard]] size_t getWarmup() const noexcept override;
   [[nodiscard]] SharedPtr<Tracer> getTracerPtr() const noexcept;

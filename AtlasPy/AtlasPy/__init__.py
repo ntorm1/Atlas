@@ -1,11 +1,7 @@
 import logging
 import sys
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-
-# python -m pybind11_stubgen AtlasPy --ignore-all-errors -o C:\Users\natha\OneDrive\Desktop\C++\Atlas\AtlasPy\AtlasWrap
+# python -m pybind11_stubgen atlas_internal --ignore-all-errors -o C:\Users\natha\OneDrive\Desktop\C++\Atlas\AtlasPy\AtlasWrap
 ATLAS_CORE_PATH = "C:/Users/natha/OneDrive/Desktop/C++/Atlas/x64/Debug"
 sys.path.append(ATLAS_CORE_PATH)
 

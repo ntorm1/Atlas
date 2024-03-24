@@ -9,9 +9,7 @@ from dataclasses import dataclass
 
 from atlas_internal.core import Hydra, Exchange, Strategy, MetaStrategy, Allocator
 from .strategy import PyStrategy, PyMetaStrategy
-from .logging import CustomLogger
-
-logger = CustomLogger(__name__)
+from .atlas_logging import CustomLogger
 
 
 @dataclass
@@ -33,11 +31,13 @@ class Parser:
     _hydra: Hydra = None
     _hydra_config_dir: str = None
     _toml: Dict[str, Any] = None
+    _logger = CustomLogger(__name__)
 
-    def __init__(self, hydra_config_dir: Hydra) -> None:
+    def __init__(self, hydra_config_dir: Hydra, logging_level: int = logging.DEBUG):
         self._hydra_config_dir = hydra_config_dir
         self._hydra = Hydra()
         self._parse()
+        self._logger = CustomLogger(__name__, logging_level=logging_level)
 
     def getHydra(self) -> Hydra:
         return self._hydra
@@ -61,7 +61,7 @@ class Parser:
             with open(file_path, "rb") as f:
                 self._toml = tomllib.load(f)
         except Exception as e:
-            logger.error(f"An error occurred: {type(e).__name__}: {e}")
+            self._logger.error(f"An error occurred: {type(e).__name__}: {e}")
             raise e
 
         self._load_exchanges()
@@ -83,23 +83,25 @@ class Parser:
         strategy_config_path = os.path.join(strategy_dir, "Strategy.toml")
         py_files = [f for f in os.listdir(strategy_dir) if f.endswith(".py")]
         if len(py_files) == 0:
-            logger.info(f"no py files in {strategy_dir}")
+            self._logger.info(f"no py files in {strategy_dir}")
             return None
 
         if not os.path.isfile(strategy_config_path):
-            logger.error(f"missing Strategy.toml: {strategy_config_path}")
+            self._logger.error(f"missing Strategy.toml: {strategy_config_path}")
             raise FileNotFoundError(f"missing Strategy.toml: {strategy_config_path}")
         try:
             with open(strategy_config_path, "rb") as f:
                 strategy_toml = tomllib.load(f)
             strategy_config = StrategyConfig(**strategy_toml)
         except Exception as e:
-            logger.error(
+            self._logger.error(
                 f"Failed to load {strategy_config_path} config: {type(e).__name__}: {e}"
             )
             raise e
         if len(py_files) != 1:
-            logger.error(f"expected 1 .py file in {strategy_dir}, found: {py_files}")
+            self._logger.error(
+                f"expected 1 .py file in {strategy_dir}, found: {py_files}"
+            )
             raise FileNotFoundError(f"expected 1 .py file in {strategy_dir}")
         strategy = self._load_strategy_module(
             strategy_config=strategy_config,
@@ -109,28 +111,28 @@ class Parser:
         )
         try:
             if parent is None:
-                logger.info(
+                self._logger.info(
                     f"Adding strategy {strategy_config.id}, type: {type(strategy)}, parent: {type(parent)}"
                 )
                 strategy = self._hydra.addStrategy(strategy, replace_if_exists=True)
             else:
-                logger.info(
+                self._logger.info(
                     f"Adding strategy {strategy_config.id}, type: {type(strategy)}, parent: {type(parent)}"
                 )
                 if not isinstance(parent, MetaStrategy):
-                    logger.error(
+                    self._logger.error(
                         f"expected parent to be MetaStrategy, got: {type(parent)}"
                     )
                     raise ValueError(f"expected parent to be PyMetaStrategy")
                 if not isinstance(strategy, Allocator):
-                    logger.error(
+                    self._logger.error(
                         f"expected strategy to be Allocator, got: {type(strategy)}"
                     )
                     raise ValueError(f"expected strategy to be PyStrategy")
                 strategy = parent.addStrategy(strategy, False)
-            logger.info(f"Added strategy {strategy_config.id}")
+            self._logger.info(f"Added strategy {strategy_config.id}")
         except Exception as e:
-            logger.error(
+            self._logger.error(
                 f"Failed to add strategy {strategy_config.id}: {type(e).__name__}: {e}"
             )
             raise e
@@ -166,10 +168,10 @@ class Parser:
             if issubclass(cls, PyStrategy) or issubclass(cls, PyMetaStrategy):
                 strategy_class = cls
         if strategy_class is None:
-            logger.error(f"missing PyStrategy in {py_file_path}")
+            self._logger.error(f"missing PyStrategy in {py_file_path}")
             raise FileNotFoundError(f"missing PyStrategy in {py_file_path}")
         if issubclass(cls, PyStrategy) and parent is None:
-            logger.error(f"expected PyMetaStrategy in {py_file_path}")
+            self._logger.error(f"expected PyMetaStrategy in {py_file_path}")
             raise FileNotFoundError(f"expected PyMetaStrategy in {py_file_path}")
         exchange = self._hydra.getExchange(strategy_config.exchange_id)
         return strategy_class(

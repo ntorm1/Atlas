@@ -87,6 +87,11 @@ SharedPtr<Allocator> MetaStrategy::pyAddStrategy(SharedPtr<Allocator> allocator,
 
   allocator->setID(m_impl->child_strategies.size());
   allocator->load();
+  auto exception_opt = getException();
+  if (exception_opt) {
+		throw std::runtime_error(exception_opt.value().what());
+	}
+
   m_impl->strategy_map[allocator->getName()] = m_impl->child_strategies.size();
   m_impl->child_strategies.push_back(std::move(allocator));
 

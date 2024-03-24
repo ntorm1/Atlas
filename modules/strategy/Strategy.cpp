@@ -2,6 +2,7 @@ module;
 #define NOMINMAX
 #include "AtlasMacros.hpp"
 #include <Eigen/Dense>
+#include <pybind11/pybind11.h>
 module StrategyModule;
 
 import ExchangeModule;
@@ -12,6 +13,8 @@ import MetaStrategyModule;
 import TracerModule;
 
 import AtlasLinAlg;
+
+namespace py = pybind11;
 
 namespace Atlas {
 
@@ -36,9 +39,19 @@ Strategy::Strategy(String name, SharedPtr<Exchange> exchange,
 }
 
 //============================================================================
-void Strategy::load() {
+void Strategy::load()  {
   SharedPtr<AST::StrategyNode> ast;
-  ast = loadAST();
+  try {
+    ast = loadAST();
+  } catch (py::error_already_set &eas) {
+    assert(false);
+		setException(AtlasException(eas.what()));
+    eas.discard_as_unraisable(__func__);
+		return;
+  } catch (...){
+    setException(AtlasException("Unknown error in loadAST"));
+		return;
+	}
   m_impl = std::make_unique<StrategyImpl>(std::move(ast));
   m_impl->m_ast->setTracer(m_tracer);
 }

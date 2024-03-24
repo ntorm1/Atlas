@@ -27,7 +27,7 @@ private:
                           target_weights_buffer) noexcept override;
 
   ATLAS_API void reset() noexcept override;
-  ATLAS_API void load() noexcept override {}
+  ATLAS_API void load()  override {}
   ATLAS_API void enableCopyWeightsBuffer() noexcept override;
   ATLAS_API size_t getWarmup() const noexcept override;
 

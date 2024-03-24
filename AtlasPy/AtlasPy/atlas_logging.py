@@ -29,9 +29,9 @@ class CustomFormatter(logging.Formatter):
 
 
 class CustomLogger(logging.Logger):
-    def __init__(self, name, log_file=None):
+    def __init__(self, name, log_file=None, logging_level: int = logging.DEBUG):
         super().__init__(name)
-        self.setLevel(logging.DEBUG)
+        self.setLevel(logging_level)
 
         formatter = CustomFormatter(
             fmt="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"

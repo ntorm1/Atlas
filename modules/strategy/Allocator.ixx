@@ -71,7 +71,7 @@ public:
   void setIsMeta(bool is_meta) noexcept { m_is_meta = is_meta; }
   [[nodiscard]] bool getIsMeta() const noexcept { return m_is_meta; }
   virtual void reset() noexcept = 0;
-  virtual void load() noexcept = 0;
+  virtual void load()  = 0;
   virtual void enableCopyWeightsBuffer() noexcept = 0;
   void setID(size_t id) noexcept { m_id = id; }
   void stepBase(
