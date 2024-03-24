@@ -4,3 +4,6 @@
 [submodule "external/xgboost"]
 	path = external/xgboost
 	url = https://github.com/dmlc/xgboost.git
+[submodule "AtlasX/external/Qt-Advanced-Docking-System"]
+	path = AtlasX/external/Qt-Advanced-Docking-System
+	url = https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System.git
