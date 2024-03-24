@@ -179,6 +179,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\AtlasFeature.hpp" />
     <ClInclude Include="include\AtlasMacros.hpp" />
+    <ClInclude Include="include\AtlasPointer.hpp" />
     <ClInclude Include="include\AtlasStruct.hpp" />
     <ClInclude Include="modules\model\TorchModelImpl.hpp" />
   </ItemGroup>
@@ -192,8 +193,6 @@
     <ClCompile Include="modules\ast\ClusterNode.ixx" />
     <ClCompile Include="modules\ast\HelperNodes.cpp" />
     <ClCompile Include="modules\ast\HelperNodes.ixx" />
-    <ClCompile Include="modules\ast\NodeFactor.cpp" />
-    <ClCompile Include="modules\ast\NodeFactory.ixx" />
     <ClCompile Include="modules\ast\ObserverNode.ixx" />
     <ClCompile Include="modules\ast\ObserverNode.cpp" />
     <ClCompile Include="modules\ast\ObserverNodeBase.cpp" />
@@ -259,6 +258,8 @@
     <ClCompile Include="modules\standard\AtlasStats.ixx" />
     <ClCompile Include="modules\strategy\Allocator.ixx" />
     <ClCompile Include="modules\strategy\Allocator.cpp" />
+    <ClCompile Include="modules\strategy\Measure.cpp" />
+    <ClCompile Include="modules\strategy\Measure.ixx" />
     <ClCompile Include="modules\strategy\MetaStrategy.cpp" />
     <ClCompile Include="modules\strategy\MetaStrategy.ixx" />
     <ClCompile Include="modules\strategy\Strategy.cpp" />

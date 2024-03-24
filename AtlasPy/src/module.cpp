@@ -39,12 +39,23 @@ import RiskNodeModule;
 class PyStrategy : public Atlas::Strategy {
 public:
   using Atlas::Strategy::Strategy;
-
   std::shared_ptr<Atlas::AST::StrategyNode> loadAST() noexcept override {
     PYBIND11_OVERLOAD_PURE(
         std::shared_ptr<Atlas::AST::StrategyNode>, /* Return type */
         Atlas::Strategy,                           /* Parent class */
         loadAST, /* Name of function in C++ (must match Python name) */
+    );
+  }
+};
+
+class PyMetaStrategy : public Atlas::MetaStrategy {
+public:
+  using Atlas::MetaStrategy::MetaStrategy;
+  void allocate() noexcept override {
+    PYBIND11_OVERLOAD_PURE(
+        void,                /* Return type */
+        Atlas::MetaStrategy, /* Parent class */
+        allocate, /* Name of function in C++ (must match Python name) */
     );
   }
 };
@@ -340,14 +351,12 @@ PYBIND11_MODULE(atlas_internal, m) {
                     std::shared_ptr<Atlas::AST::StrategyBufferOpNode>,
                     size_t>());
 
-   py::class_<Atlas::AST::SkewnessObserverNode, Atlas::AST::AssetObserverNode,
+  py::class_<Atlas::AST::SkewnessObserverNode, Atlas::AST::AssetObserverNode,
              std::shared_ptr<Atlas::AST::SkewnessObserverNode>>(
-      m_ast,
-                                                            "SkewnessObserverNode")
+      m_ast, "SkewnessObserverNode")
       .def(py::init<std::string,
                     std::shared_ptr<Atlas::AST::StrategyBufferOpNode>,
                     size_t>());
-
 
   py::class_<Atlas::AST::StrategyGrid,
              std::shared_ptr<Atlas::AST::StrategyGrid>>(m_ast, "StrategyGrid")
@@ -373,7 +382,8 @@ PYBIND11_MODULE(atlas_internal, m) {
       .def("getAllocationBuffer", &Atlas::Allocator::getAllocationBuffer,
            py::return_value_policy::reference_internal);
 
-  py::class_<Atlas::MetaStrategy, Atlas::Allocator,
+
+  py::class_<Atlas::MetaStrategy, Atlas::Allocator, PyMetaStrategy,
              std::shared_ptr<Atlas::MetaStrategy>>(m_core, "MetaStrategy")
       .def("addStrategy", &Atlas::MetaStrategy::pyAddStrategy)
       .def(

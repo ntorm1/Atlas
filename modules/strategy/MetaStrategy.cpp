@@ -34,6 +34,23 @@ MetaStrategy::MetaStrategy(String name, SharedPtr<Exchange> exchange,
 }
 
 //============================================================================
+void MetaStrategy::allocate() noexcept {
+  // allocate the parent strategy based on meta impl, default to taking 
+  // the mean of the child strategy allocations not this operates in place
+  // if allocate virtual step 
+  //
+  // weights holds an M by N matrix of portfolio weights for the child
+  // strategies where M is the number of assets and N is the number of child
+  // strategies, to get the parent allocation, get the row-wise weighted mean
+  assert(m_impl->weights.cols() == m_impl->child_strategy_weights.rows());
+  assert(m_impl->meta_weights.rows() == m_impl->weights.rows());
+  m_impl->meta_weights = (m_impl->weights.array().rowwise() *
+                           m_impl->child_strategy_weights.array().transpose())
+                              .rowwise()
+                              .sum();
+}
+
+//============================================================================
 Vector<SharedPtr<Allocator>> MetaStrategy::getStrategies() const noexcept {
   return m_impl->child_strategies;
 }
@@ -110,15 +127,7 @@ void MetaStrategy::step() noexcept {
 //============================================================================
 void MetaStrategy::step(
     LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept {
-  // weights holds an M by N matrix of portfolio weights for the child
-  // strategies where M is the number of assets and N is the number of child
-  // strategies, to get the parent allocation, get the row-wise weighted mean
-  assert(m_impl->weights.cols() == m_impl->child_strategy_weights.rows());
-  assert(target_weights_buffer.rows() == m_impl->weights.rows());
-  target_weights_buffer = (m_impl->weights.array().rowwise() *
-                           m_impl->child_strategy_weights.array().transpose())
-                              .rowwise()
-                              .sum();
+  allocate();
   m_step_call = false;
 }
 

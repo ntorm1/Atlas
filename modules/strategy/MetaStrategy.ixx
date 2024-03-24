@@ -28,16 +28,17 @@ private:
 
   ATLAS_API void reset() noexcept override;
   ATLAS_API void load() noexcept override {}
-  void enableCopyWeightsBuffer() noexcept override;
-  size_t getWarmup() const noexcept override;
+  ATLAS_API void enableCopyWeightsBuffer() noexcept override;
+  ATLAS_API size_t getWarmup() const noexcept override;
 
 protected:
 public:
-  ~MetaStrategy() noexcept;
+  ATLAS_API ~MetaStrategy() noexcept;
   ATLAS_API MetaStrategy(String name, SharedPtr<Exchange> exchange,
                          Option<SharedPtr<Allocator>>, double cash) noexcept;
+  ATLAS_API virtual void allocate() noexcept;
   Vector<SharedPtr<Allocator>> getStrategies() const noexcept;
-  const LinAlg::EigenRef<const LinAlg::EigenVectorXd>
+  ATLAS_API const LinAlg::EigenRef<const LinAlg::EigenVectorXd>
   getAllocationBuffer() const noexcept override;
   const LinAlg::EigenRef<const LinAlg::EigenVectorXd>
   getAllocationBuffer(Allocator const *strategy) const noexcept;

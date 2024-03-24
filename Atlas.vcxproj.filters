@@ -30,6 +30,9 @@
     <ClInclude Include="modules\model\TorchModelImpl.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\AtlasPointer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -185,12 +188,6 @@
     <ClCompile Include="modules\ast\AssetLogical.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ast\NodeFactory.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\NodeFactor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\interpreter\AtlasLangTypes.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -276,6 +273,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\standard\AtlasStats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\strategy\Measure.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\strategy\Measure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
