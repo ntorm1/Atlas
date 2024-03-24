@@ -1,8 +1,6 @@
 module;
 #include "AtlasMacros.hpp"
-#pragma warning(push, 0)
 #include <Eigen/Dense>
-#pragma warning(pop)
 module MetaStrategyModule;
 
 namespace Atlas {
@@ -35,9 +33,9 @@ MetaStrategy::MetaStrategy(String name, SharedPtr<Exchange> exchange,
 
 //============================================================================
 void MetaStrategy::allocate() noexcept {
-  // allocate the parent strategy based on meta impl, default to taking 
+  // allocate the parent strategy based on meta impl, default to taking
   // the mean of the child strategy allocations not this operates in place
-  // if allocate virtual step 
+  // if allocate virtual step
   //
   // weights holds an M by N matrix of portfolio weights for the child
   // strategies where M is the number of assets and N is the number of child
@@ -45,9 +43,9 @@ void MetaStrategy::allocate() noexcept {
   assert(m_impl->weights.cols() == m_impl->child_strategy_weights.rows());
   assert(m_impl->meta_weights.rows() == m_impl->weights.rows());
   m_impl->meta_weights = (m_impl->weights.array().rowwise() *
-                           m_impl->child_strategy_weights.array().transpose())
-                              .rowwise()
-                              .sum();
+                          m_impl->child_strategy_weights.array().transpose())
+                             .rowwise()
+                             .sum();
 }
 
 //============================================================================
@@ -86,6 +84,7 @@ SharedPtr<Allocator> MetaStrategy::pyAddStrategy(SharedPtr<Allocator> allocator,
     m_impl->child_strategies[idx] = std::move(allocator);
     return m_impl->child_strategies[idx];
   }
+
   allocator->setID(m_impl->child_strategies.size());
   allocator->load();
   m_impl->strategy_map[allocator->getName()] = m_impl->child_strategies.size();
@@ -94,7 +93,6 @@ SharedPtr<Allocator> MetaStrategy::pyAddStrategy(SharedPtr<Allocator> allocator,
   // reshape matrix/vector containers holding sub strategy weightings
   m_impl->weights.resize(getAssetCount(), m_impl->child_strategies.size());
   m_impl->weights.setZero();
-  // reshape vector holding child strategy allocations
   m_impl->child_strategy_weights.resize(m_impl->child_strategies.size());
   int i = 0;
   for (auto const &strategy : m_impl->child_strategies) {

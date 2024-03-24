@@ -35,6 +35,16 @@ void Allocator::takeException(Vector<AtlasException> &exceptions) noexcept {
 }
 
 //============================================================================
+void Allocator::setException(AtlasException const &exception) noexcept {
+	m_impl->exception = exception;
+}
+
+//============================================================================
+Option<AtlasException> Allocator::getException() noexcept {
+	return m_impl->exception;
+}
+
+//============================================================================
 size_t Allocator::getAssetCount() const noexcept {
   return m_exchange.getAssetCount();
 }

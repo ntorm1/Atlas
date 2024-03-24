@@ -1,5 +1,0 @@
-[strategy]
-id = "strategy2"
-parent_id="root"
-portfolio_weight=.7
-exchange="test_exchange_1"

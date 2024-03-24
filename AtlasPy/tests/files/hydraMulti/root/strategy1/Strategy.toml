@@ -1,0 +1,4 @@
+id = "strategy1"
+parent_id="root"
+portfolio_weight=0.7
+exchange_id="test_exchange_1"

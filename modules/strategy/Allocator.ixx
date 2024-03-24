@@ -51,6 +51,8 @@ protected:
   Exchange &m_exchange;
 
   void takeException(Vector<AtlasException> &exceptions) noexcept;
+  void setException(AtlasException const &exception) noexcept;
+  Option <AtlasException> getException() noexcept;
   [[nodiscard]] size_t getAssetCount() const noexcept;
   void lateRebalance(
       LinAlg::EigenRef<LinAlg::EigenVectorXd> target_weights_buffer) noexcept;

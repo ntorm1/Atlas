@@ -73,16 +73,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CodeAnalysisRuleSet>MixedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include</IncludePath>
+    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include;C:\Program Files\Python312\include</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch_$(Configuration)\lib</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch_$(Configuration)\lib;C:\Program Files\Python312\libs</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CodeAnalysisRuleSet>MixedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include</IncludePath>
+    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include;C:\Program Files\Python312\include</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch_$(Configuration)\lib</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch_$(Configuration)\lib;C:\Program Files\Python312\libs</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -139,7 +139,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);;python312.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -172,7 +172,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);xgboost.lib;torch_cpu.lib;c10.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);xgboost.lib;torch_cpu.lib;c10.lib;python312.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

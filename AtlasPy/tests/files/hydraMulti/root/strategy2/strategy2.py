@@ -1,18 +1,10 @@
-import os
-import sys
-
-sys.path.insert(
-    0,
-    os.path.abspath(
-        os.path.join(os.path.dirname(os.path.dirname(__file__)), "../../..")
-    ),
-)
-
 from AtlasPy import atlas_internal
 from AtlasPy.strategy import *
 
 
-class TestStrategy1(PyStrategy):
+class TestStrategy2(PyStrategy):
+    _ast: atlas_internal.ast.StrategyNode = None
+
     def __init__(
         self,
         exchange: Exchange,
@@ -20,10 +12,17 @@ class TestStrategy1(PyStrategy):
         name: str,
         portfolio_weight: float,
     ) -> None:
-        super().__init__(exchange, parent_strategy, name, portfolio_weight)
+        super().__init__(
+            exchange=exchange,
+            parent_strategy=parent_strategy,
+            name=name,
+            portfolio_weight=portfolio_weight,
+        )
 
-    def loadAST(self) -> atlas_internal.ast.AllocationNode:
-        close = atlas_internal.ast.AssetReadNode.make("Close", 0, self.exchange)
-        ev = atlas_internal.ast.exchangeViewNode.make(self.exchange, close)
+        close = atlas_internal.ast.AssetReadNode.make("close", 0, self.exchange)
+        ev = atlas_internal.ast.ExchangeViewNode.make(self.exchange, close)
         allocation = atlas_internal.ast.AllocationNode.make(ev)
-        return atlas_internal.ast.StrategyNode.make(allocation, self.portfolio)
+        self._ast = atlas_internal.ast.StrategyNode.make(allocation)
+
+    def loadAST(self) -> atlas_internal.ast.StrategyNode:
+        return self._ast

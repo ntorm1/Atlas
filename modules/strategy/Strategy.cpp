@@ -36,8 +36,9 @@ Strategy::Strategy(String name, SharedPtr<Exchange> exchange,
 }
 
 //============================================================================
-void Strategy::load() noexcept {
-  auto ast = loadAST();
+void Strategy::load() {
+  SharedPtr<AST::StrategyNode> ast;
+  ast = loadAST();
   m_impl = std::make_unique<StrategyImpl>(std::move(ast));
   m_impl->m_ast->setTracer(m_tracer);
 }
