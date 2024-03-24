@@ -9,8 +9,8 @@ sys.path.insert(
     ),
 )
 
-from AtlasPy import atlas_internal
-from AtlasPy.strategy import *
+from atlas_py import atlas_internal
+from atlas_py.strategy import *
 
 
 class ObserverTestStrategy(PyStrategy):

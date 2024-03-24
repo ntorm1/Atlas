@@ -5,10 +5,10 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import AtlasPy
-from AtlasPy import *
-from AtlasPy import atlas_internal
-from AtlasPy.strategy import ImmediateStrategy
+import atlas_py
+from atlas_py import *
+from atlas_py import atlas_internal
+from atlas_py.strategy import ImmediateStrategy
 
 HYDRA_DIR = "files/hydra1"
 HYDRA_DIR_2 = "files/hydra2"

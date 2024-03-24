@@ -33,7 +33,7 @@ class Parser:
     _toml: Dict[str, Any] = None
     _logger = CustomLogger(__name__)
 
-    def __init__(self, hydra_config_dir: Hydra, logging_level: int = logging.DEBUG):
+    def __init__(self, hydra_config_dir: Hydra, logging_level: int = logging.ERROR):
         self._hydra_config_dir = hydra_config_dir
         self._hydra = Hydra()
         self._parse()

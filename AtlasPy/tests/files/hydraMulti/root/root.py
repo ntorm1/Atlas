@@ -1,6 +1,6 @@
 from typing import Optional
-from AtlasPy import atlas_internal
-from AtlasPy.strategy import PyMetaStrategy, Exchange, Allocator
+from atlas_py import atlas_internal
+from atlas_py.strategy import PyMetaStrategy, Exchange, Allocator
 
 
 class TestMetaStrategy(PyMetaStrategy):

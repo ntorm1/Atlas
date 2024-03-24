@@ -1,5 +1,5 @@
-from AtlasPy import atlas_internal
-from AtlasPy.strategy import *
+from atlas_py import atlas_internal
+from atlas_py.strategy import *
 
 
 class TestStrategy2(PyStrategy):
@@ -18,7 +18,6 @@ class TestStrategy2(PyStrategy):
             name=name,
             portfolio_weight=portfolio_weight,
         )
-
         close = atlas_internal.ast.AssetReadNode.make("close", 0, self.exchange)
         ev = atlas_internal.ast.ExchangeViewNode.make(self.exchange, close)
         allocation = atlas_internal.ast.AllocationNode.make(ev)

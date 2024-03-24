@@ -4,7 +4,7 @@ import numpy as np
 
 from context import *
 
-from AtlasPy.strategy import PyStrategy, PyMetaStrategy
+from atlas_py.strategy import PyStrategy, PyMetaStrategy
 
 
 class SimpleTestStrategy(unittest.TestCase):
