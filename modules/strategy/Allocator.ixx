@@ -83,15 +83,13 @@ public:
 
   ATLAS_API [[nodiscard]] Result<bool, AtlasException>
   enableTracerHistory(TracerType t) noexcept;
-  ATLAS_API void pyEnableTracerHistory(TracerType t);
-  ATLAS_API void setVolTracer(SharedPtr<AST::CovarianceNodeBase> node) noexcept;
+  ATLAS_API void pyEnableMeasure(TracerType t);
+  ATLAS_API void setVolMeasure(SharedPtr<AST::CovarianceNodeBase> node) noexcept;
   ATLAS_API [[nodiscard]] double getAllocation() const noexcept {
     return m_portfolio_weight;
   }
-  ATLAS_API [[nodiscard]] LinAlg::EigenVectorXd const &
-  getHistory(TracerType t) const noexcept;
-  ATLAS_API [[nodiscard]] LinAlg::EigenMatrixXd const &
-  getWeightHistory() const noexcept;
+  ATLAS_API [[nodiscard]] Option<SharedPtr<Measure>>
+  getMeasure(TracerType t) const noexcept;
   ATLAS_API [[nodiscard]] double
   getAllocation(size_t asset_index) const noexcept;
   ATLAS_API [[nodiscard]] auto const &getId() const noexcept { return m_id; }

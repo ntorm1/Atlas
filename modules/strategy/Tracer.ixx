@@ -5,6 +5,7 @@ module;
 #else
 #define ATLAS_API __declspec(dllimport)
 #endif
+#include "AtlasPointer.hpp"
 #include "AtlasStruct.hpp"
 export module TracerModule;
 
@@ -47,15 +48,14 @@ export class Tracer {
   friend class Allocator;
   friend class AST::AllocationBaseNode;
   friend class AST::StrategyGrid;
+  friend class Measure;
 
 private:
   Exchange const &m_exchange;
   Allocator const *m_allocator;
   Option<UniquePtr<StructTracer>> m_struct_tracer = std::nullopt;
   Option<SharedPtr<AST::CovarianceNodeBase>> m_covariance;
-  LinAlg::EigenMatrixXd m_weight_history;
-  LinAlg::EigenVectorXd m_nlv_history;
-  LinAlg::EigenVectorXd m_volatility_history;
+  Vector<SharedPtr<Measure>> m_measures;
   LinAlg::EigenVectorXd m_pnl;
   LinAlg::EigenVectorXd m_weights_buffer;
   size_t m_idx = 0;
@@ -74,19 +74,29 @@ private:
   setCovarianceNode(SharedPtr<AST::CovarianceNodeBase> covariance) noexcept {
     m_covariance = covariance;
   }
-  LinAlg::EigenVectorXd &getPnL() noexcept;
+  [[nodiscard]] LinAlg::EigenVectorXd &getPnL() noexcept;
   void setPnL(LinAlg::EigenRef<LinAlg::EigenVectorXd> pnl) noexcept;
   void initPnL() noexcept;
 
 public:
   Tracer(Allocator const *allocator, Exchange const &exchange,
          double cash) noexcept;
-  ATLAS_API Vector<Order> const &getOrders() const noexcept;
-  ATLAS_API LinAlg::EigenVectorXd const &
-  getHistory(TracerType t) const noexcept;
+  [[nodiscard]] ATLAS_API Vector<Order> const &getOrders() const noexcept;
+  [[nodiscard]] ATLAS_API Option<SharedPtr<Measure>>
+  getMeasure(TracerType t) const noexcept;
   ATLAS_API double getCash() const noexcept { return m_cash; }
   ATLAS_API double getNLV() const noexcept { return m_nlv; }
   ATLAS_API double getInitialCash() const noexcept { return m_initial_cash; }
+
+  [[nodiscard]] Exchange const &getExchange() const noexcept {
+    return m_exchange;
+  }
+  [[nodiscard]] auto const &getCovariance() const noexcept {
+    return m_covariance;
+  }
+  [[nodiscard]] NotNullPtr<Allocator const> getAllocator() const noexcept {
+    return m_allocator;
+  }
 };
 
 } // namespace Atlas

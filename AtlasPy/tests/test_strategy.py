@@ -184,10 +184,10 @@ class VectorBTCompare(unittest.TestCase):
             self.exchange, self.root_strategy, STRATEGY_ID, 1.0, strategy_node
         )
         _ = self.root_strategy.addStrategy(strategy, True)
-        strategy.enableTracerHistory(TracerType.NLV)
+        strategy.enableMeasure(TracerType.NLV)
         self.hydra.run()
 
-        nlv = strategy.getHistory(TracerType.NLV)
+        nlv = strategy.getMeasure(TracerType.NLV).getValues()[:, 0]
         returns = nlv[-1] / nlv[0] - 1
         # self.assertAlmostEqual(returns, 1.5693292786263853)
 
@@ -250,12 +250,12 @@ class VectorBTCompare(unittest.TestCase):
         _ = self.root_strategy.addStrategy(strategy, True)
         _ = self.root_strategy.addStrategy(strategy_signal, True)
 
-        self.root_strategy.enableTracerHistory(TracerType.NLV)
-        strategy.enableTracerHistory(TracerType.NLV)
-        strategy.enableTracerHistory(TracerType.ORDERS_EAGER)
+        self.root_strategy.enableMeasure(TracerType.NLV)
+        strategy.enableMeasure(TracerType.NLV)
+        strategy.enableMeasure(TracerType.ORDERS_EAGER)
 
-        strategy_signal.enableTracerHistory(TracerType.NLV)
-        strategy_signal.enableTracerHistory(TracerType.ORDERS_EAGER)
+        strategy_signal.enableMeasure(TracerType.NLV)
+        strategy_signal.enableMeasure(TracerType.ORDERS_EAGER)
 
         self.hydra.run()
 
@@ -275,9 +275,9 @@ class VectorBTCompare(unittest.TestCase):
 
         self.assertEqual(len(orders1), len(orders2))
 
-        nlv1 = strategy.getHistory(TracerType.NLV)[-1]
-        nlv2 = strategy_signal.getHistory(TracerType.NLV)[-1]
-        nlv_root = self.root_strategy.getHistory(TracerType.NLV)[-1]
+        nlv1 = strategy.getMeasure(TracerType.NLV).getValues()[:, 0][-1]
+        nlv2 = strategy_signal.getMeasure(TracerType.NLV).getValues()[:, 0][-1]
+        nlv_root = self.root_strategy.getMeasure(TracerType.NLV).getValues()[:, 0][-1]
         returns1 = nlv1 / self.intial_cash
         returns = nlv_root / self.intial_cash
         self.assertAlmostEqual(nlv_root, 2 * returns1 * self.intial_cash)
@@ -285,9 +285,11 @@ class VectorBTCompare(unittest.TestCase):
         self.hydra.reset()
         self.hydra.run()
 
-        nlv1_reset = strategy.getHistory(TracerType.NLV)[-1]
-        nlv2_reset = strategy_signal.getHistory(TracerType.NLV)[-1]
-        nlv_root_reset = self.root_strategy.getHistory(TracerType.NLV)[-1]
+        nlv1_reset = strategy.getMeasure(TracerType.NLV).getValues()[:, 0][-1]
+        nlv2_reset = strategy_signal.getMeasure(TracerType.NLV).getValues()[:, 0][-1]
+        nlv_root_reset = self.root_strategy.getMeasure(TracerType.NLV).getValues()[
+            :, 0
+        ][-1]
         returns1_reset = nlv1_reset / self.intial_cash
         self.assertAlmostEqual(nlv_root_reset, 2 * returns1_reset * self.intial_cash)
         self.assertAlmostEqual(nlv1_reset, nlv2_reset)

@@ -1,9 +1,10 @@
 module;
-#include <cmath>
 #include <Eigen/Dense>
+#include <cmath>
 module AtlasStatsModule;
 
 import AtlasAllocatorModule;
+import MeasureModule;
 
 namespace Atlas {
 
@@ -21,7 +22,11 @@ static double stdv(LinAlg::EigenVectorXd const &data) {
 StatsBuilder::StatsBuilder(SharedPtr<Allocator> allocator, double risk_free,
                            size_t days_per_year) noexcept
     : m_risk_free(risk_free), m_days_per_year(days_per_year) {
-  auto const nlv = allocator->getHistory(TracerType::NLV);
+  auto const nlv_opt = allocator->getMeasure(TracerType::NLV);
+  if (!nlv_opt) {
+    return;
+  }
+  auto nlv = (*nlv_opt)->getValues().col(0);
   if (nlv.size() < 2) {
     m_returns.resize(0);
     m_returns.setZero();

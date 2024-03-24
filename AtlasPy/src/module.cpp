@@ -20,6 +20,7 @@ import ExchangeNodeModule;
 import ExchangeModule;
 import HelperNodesModule;
 import HydraModule;
+import MeasureModule;
 import MetaStrategyModule;
 import OptimizeNodeModule;
 import ObserverNodeModule;
@@ -291,11 +292,21 @@ PYBIND11_MODULE(atlas_internal, m) {
       .def_static("make", &Atlas::AST::StrategyNode::make,
                   py::arg("allocation"));
 
+  py::class_<Atlas::Measure, std::shared_ptr<Atlas::Measure>>(m_core, "Measure")
+      .def("getValues", &Atlas::Measure::getValues,
+           py::return_value_policy::reference_internal);
+
+  py::class_<Atlas::NLVMeasure, Atlas::Measure,
+             std::shared_ptr<Atlas::NLVMeasure>>(m_core, "NLVMeasure");
+  py::class_<Atlas::WeightMeasure, Atlas::Measure,
+             std::shared_ptr<Atlas::WeightMeasure>>(m_core, "WeightMeasure");
+  py::class_<Atlas::VolatilityMeasure, Atlas::Measure,
+             std::shared_ptr<Atlas::VolatilityMeasure>>(m_core, "VolatilityMeasure");
+
   py::class_<Atlas::Tracer, std::shared_ptr<Atlas::Tracer>>(m_ast, "Tracer")
       .def("getOrders", &Atlas::Tracer::getOrders,
            py::return_value_policy::reference_internal)
-      .def("getHistory", &Atlas::Tracer::getHistory,
-           py::return_value_policy::reference_internal);
+      .def("getMeasure", &Atlas::Tracer::getMeasure);
 
   py::class_<Atlas::AST::AssetScalerNode, Atlas::AST::StrategyBufferOpNode,
              std::shared_ptr<Atlas::AST::AssetScalerNode>>(m_ast,
@@ -371,17 +382,13 @@ PYBIND11_MODULE(atlas_internal, m) {
                                                                   "Allocator")
       .def("getNLV", &Atlas::Allocator::getNLV)
       .def("getName", &Atlas::Allocator::getName)
-      .def("enableTracerHistory", &Atlas::Allocator::pyEnableTracerHistory)
+      .def("enableMeasure", &Atlas::Allocator::pyEnableMeasure)
       .def("getTracer", &Atlas::Allocator::getTracer,
            py::return_value_policy::reference_internal)
-      .def("setVolTracer", &Atlas::Allocator::setVolTracer)
-      .def("getHistory", &Atlas::Allocator::getHistory,
-           py::return_value_policy::reference_internal)
-      .def("getWeightHistory", &Atlas::Allocator::getWeightHistory,
-           py::return_value_policy::reference_internal)
+      .def("setVolMeasure", &Atlas::Allocator::setVolMeasure)
+      .def("getMeasure", &Atlas::Allocator::getMeasure)
       .def("getAllocationBuffer", &Atlas::Allocator::getAllocationBuffer,
            py::return_value_policy::reference_internal);
-
 
   py::class_<Atlas::MetaStrategy, Atlas::Allocator, PyMetaStrategy,
              std::shared_ptr<Atlas::MetaStrategy>>(m_core, "MetaStrategy")

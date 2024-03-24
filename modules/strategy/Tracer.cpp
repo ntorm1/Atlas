@@ -5,7 +5,7 @@ module TracerModule;
 
 import ExchangeModule;
 import AtlasAllocatorModule;
-import RiskNodeModule;
+import MeasureModule;
 
 namespace Atlas {
 
@@ -16,30 +16,14 @@ Tracer::Tracer(Allocator const *allocator, Exchange const &exchange,
   m_cash = cash;
   m_nlv = cash;
   m_initial_cash = cash;
-  m_weight_history.resize(0, 0);
-  m_nlv_history.resize(0);
   m_weights_buffer.resize(exchange.getAssetCount());
   m_weights_buffer.setZero();
 }
 
 //============================================================================
 void Tracer::evaluate() noexcept {
-  if (m_nlv_history.size() > 0) {
-    m_nlv_history(m_idx) = m_nlv;
-  }
-  if (m_weight_history.cols() > 0) {
-    m_weight_history.col(m_idx) = m_allocator->getAllocationBuffer();
-  }
-  if (m_volatility_history.size() > 0) {
-    assert(m_covariance);
-    if (m_idx > (*m_covariance)->getWarmup()) {
-      LinAlg::EigenMatrixXd const &covariance =
-          (*m_covariance)->getCovariance();
-      auto weights = m_allocator->getAllocationBuffer();
-      auto current_vol = (weights.transpose() * covariance * weights);
-      double current_volatility = std::sqrt(current_vol(0)) * std::sqrt(252);
-      m_volatility_history(m_idx) = current_volatility;
-    }
+  for (auto &m : m_measures) {
+    m->measure(m_idx);
   }
   if (m_struct_tracer && m_struct_tracer.value()->eager()) {
     m_struct_tracer.value()->evaluate(m_allocator->getAllocationBuffer(),
@@ -66,15 +50,8 @@ LinAlg::EigenVectorXd &Tracer::getPnL() noexcept {
 void Tracer::reset() noexcept {
   m_cash = m_initial_cash;
   m_nlv = m_initial_cash;
-
-  if (m_nlv_history.size() > 0) {
-    m_nlv_history.setZero();
-  }
-  if (m_weight_history.cols() > 0) {
-    m_weight_history.setZero();
-  }
-  if (m_volatility_history.size() > 0) {
-    m_volatility_history.setZero();
+  for (auto &m : m_measures) {
+    m->reset();
   }
   if (m_struct_tracer) {
     m_struct_tracer.value()->reset();
@@ -90,19 +67,17 @@ Tracer::enableTracerHistory(TracerType t) noexcept {
   size_t n = m_exchange.getTimestamps().size();
   switch (t) {
   case TracerType::NLV:
-    m_nlv_history.resize(n);
-    m_nlv_history.setZero();
+    m_measures.push_back(std::make_shared<NLVMeasure>(m_exchange, this));
     break;
   case TracerType::WEIGHTS:
-    m_weight_history.resize(m_exchange.getAssetCount(), n);
-    m_weight_history.setZero();
+    m_measures.push_back(std::make_shared<WeightMeasure>(m_exchange, this));
     break;
   case TracerType::VOLATILITY:
     if (!m_covariance) {
       return Err("Covariance matrix not set");
     }
-    m_volatility_history.resize(n);
-    m_volatility_history.setZero();
+    m_measures.push_back(
+				std::make_shared<VolatilityMeasure>(m_exchange, this, 252));
     break;
   case TracerType::ORDERS_EAGER:
     if (!m_struct_tracer) {
@@ -128,17 +103,14 @@ Vector<Order> const &Tracer::getOrders() const noexcept {
 }
 
 //============================================================================
-Eigen::VectorXd const &Tracer::getHistory(TracerType t) const noexcept {
-  switch (t) {
-  case TracerType::NLV:
-    return m_nlv_history;
-  case TracerType::VOLATILITY:
-    return m_volatility_history;
-  case TracerType::WEIGHTS:
-    assert(false);
-    break; // handled differently
-  }
-  std::unreachable();
+Option<SharedPtr<Measure>>
+Tracer::getMeasure(TracerType t) const noexcept {
+  for (auto& m : m_measures) {
+    if (m->getType() == t) {
+			return m;
+		}
+	}
+  return std::nullopt;
 }
 
 //============================================================================

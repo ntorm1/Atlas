@@ -78,7 +78,7 @@ public:
     return false;
   }
   void
-  evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override {}
+  evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> _) noexcept override {}
   void reset() noexcept override {}
 };
 
@@ -93,8 +93,8 @@ public:
   LagNode(StrategyBufferOpNode *parent, size_t lag) noexcept;
   ATLAS_API ~LagNode() noexcept {}
 
-  ATLAS_API [[nodiscard]] size_t getWarmup() const noexcept override;
-  ATLAS_API [[nodiscard]] bool
+  [[nodiscard]] ATLAS_API size_t getWarmup() const noexcept override;
+  [[nodiscard]] ATLAS_API bool
   isSame(StrategyBufferOpNode const* other) const noexcept override;
   ATLAS_API void
   evaluate(LinAlg::EigenRef<LinAlg::EigenVectorXd> target) noexcept override;

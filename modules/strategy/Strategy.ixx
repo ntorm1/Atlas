@@ -32,9 +32,9 @@ private:
   ATLAS_API void step(LinAlg::EigenRef<LinAlg::EigenVectorXd>
                           target_weights_buffer) noexcept override;
   ATLAS_API void reset() noexcept override;
-  ATLAS_API void load()  override;
+  ATLAS_API void load() override;
   ATLAS_API void enableCopyWeightsBuffer() noexcept override;
-  ATLAS_API [[nodiscard]] size_t getWarmup() const noexcept override;
+  [[nodiscard]] ATLAS_API size_t getWarmup() const noexcept override;
   [[nodiscard]] SharedPtr<Tracer> getTracerPtr() const noexcept;
   [[nodiscard]] Option<SharedPtr<AST::TradeLimitNode>>
   getTradeLimitNode() const noexcept;
@@ -53,9 +53,9 @@ public:
   ATLAS_API const LinAlg::EigenRef<const LinAlg::EigenVectorXd>
   getAllocationBuffer() const noexcept override;
 
-   ATLAS_API [[nodiscard]] Option<SharedPtr<AST::StrategyGrid>>
+  [[nodiscard]] ATLAS_API Option<SharedPtr<AST::StrategyGrid>>
   getGrid() const noexcept;
-  ATLAS_API [[nodiscard]] SharedPtr<CommisionManager>
+  [[nodiscard]] ATLAS_API SharedPtr<CommisionManager>
   initCommissionManager() noexcept;
 
   ATLAS_API

@@ -166,13 +166,8 @@ Option<SharedPtr<Allocator>> Allocator::getParent() const noexcept {
 }
 
 //============================================================================
-Eigen::VectorXd const &Allocator::getHistory(TracerType t) const noexcept {
-  return m_tracer->getHistory(t);
-}
-
-//============================================================================
-Eigen::MatrixXd const &Allocator::getWeightHistory() const noexcept {
-  return m_tracer->m_weight_history;
+Option<SharedPtr<Measure>> Allocator::getMeasure(TracerType t) const noexcept {
+  return m_tracer->getMeasure(t);
 }
 
 //============================================================================
@@ -188,7 +183,7 @@ void Allocator::lateRebalance(
 }
 
 //============================================================================
-void Allocator::pyEnableTracerHistory(TracerType t) {
+void Allocator::pyEnableMeasure(TracerType t) {
   auto res = enableTracerHistory(t);
   if (!res) {
     throw std::runtime_error(res.error().what());
@@ -196,7 +191,8 @@ void Allocator::pyEnableTracerHistory(TracerType t) {
 }
 
 //============================================================================
-void Allocator::setVolTracer(SharedPtr<AST::CovarianceNodeBase> node) noexcept {
+void Allocator::setVolMeasure(
+    SharedPtr<AST::CovarianceNodeBase> node) noexcept {
   assert(node);
   m_tracer->setCovarianceNode(node);
   auto res = m_tracer->enableTracerHistory(TracerType::VOLATILITY);

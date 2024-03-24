@@ -5,6 +5,7 @@ module;
 #else
 #define ATLAS_API  __declspec(dllimport)
 #endif
+#include "pch.h"
 export module AllocationNodeModule;
 
 import AtlasCore;
