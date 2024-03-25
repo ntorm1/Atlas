@@ -1,20 +1,20 @@
 # Atlas
 ![alt text](https://github.com/ntorm1/Atlas/blob/main/util/AtlasXV2.png)
 ## About
-Atlas is a high performance Algorthmic Trading Backtesting library written in C++23 with a Python wrapper build using pybind11 and a GUI based on QT. It is split into five parts
+Atlas is a high performance Algorthmic Trading Backtesting library written in C++20 with a Python wrapper build using pybind11 and a GUI based on QT. It is split into five parts
 
 1. Atlas (core c++ runtime build is Visual Studio DLL Project)
-2. AtlasTest (c++ test suite)
+2. AtlasTest (c++ test suite (tests moved to AtlasPy))
 3. AtlasPy (pybind11 wrapper)
 3. AtlasPerf (dummy c++ project)
-4. AtlasX (GUI based on Qt)
+4. AtlasX (GUI based on Qt, currently being refactored)
 
 
 ## Building
 Install requires visual studio and vcpkg manager and the following packages installed:
 1. Eigen
-2. H5CPP
-3. Pybind11 (AtlasPy)
+2. H5CPP (optional)
+3. Pybind11 (required for python bindings)
 4. Qt (AtlasX)
 
 To build
