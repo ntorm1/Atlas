@@ -1,9 +1,5 @@
-module;
-#include <Eigen/Dense>
-module CommissionsModule;
-
-
-import StrategyModule;
+#include "Commissions.hpp"
+#include "strategy/Strategy.hpp"
 
 namespace Atlas
 {

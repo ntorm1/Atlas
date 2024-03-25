@@ -1,7 +1,5 @@
-module;
 #include "AtlasMacros.hpp"
-#include <Eigen/Dense>
-module AssetLogicalModule;
+#include "AssetLogical.hpp"
 
 namespace Atlas {
 

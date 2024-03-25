@@ -1,4 +1,3 @@
-module;
 #include "AtlasFeature.hpp"
 #include "AtlasMacros.hpp"
 #include <cassert>
@@ -9,10 +8,9 @@ module;
 #ifdef ATLAS_HDF5
 #include <H5Cpp.h>
 #endif
-module ExchangeModule;
-
-import ExchangePrivateModule;
-import AtlasTimeModule;
+#include "standard/AtlasTime.hpp"
+#include "exchange/Exchange.hpp"
+#include "exchange/ExchangePrivate.hpp"
 
 namespace Atlas {
 
@@ -227,18 +225,18 @@ Result<bool, AtlasException> Exchange::init() noexcept {
       auto &asset_ref = m_impl->assets.back();
       loadH5(asset_ref, dataset, dataspace, datasetIndex, dataspaceIndex);
     } catch (H5::Exception &e) {
-      return std::unexpected<AtlasException>("Error loading asset: " +
+      return Err<AtlasException>("Error loading asset: " +
                                              std::string(e.getCDetailMsg()));
     } catch (const std::exception &e) {
-      return std::unexpected<AtlasException>("Error loading asset: " +
+      return Err<AtlasException>("Error loading asset: " +
                                              std::string(e.what()));
     } catch (...) {
-      return std::unexpected<AtlasException>(
+      return Err<AtlasException>(
           "Error loading asset: Unknown error");
     }
   }
 #else
-  return std::unexpected<AtlasException>("HDF5 support is not enabled");
+  return Err<AtlasException>("HDF5 support is not enabled");
 #endif
 
   return true;

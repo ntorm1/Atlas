@@ -1,12 +1,9 @@
-module;
-#include <Eigen/dense>
 #include <omp.h>
-module OptimizeNodeModule;
-
-import ExchangeModule;
-import TracerModule;
-import StrategyModule;
-import ObserverNodeBaseModule;
+#include "exchange/Exchange.hpp"
+#include "strategy/Tracer.hpp"
+#include "strategy/Strategy.hpp"
+#include "ast/ObserverNodeBase.hpp"
+#include "ast/Optimize.hpp"
 
 namespace Atlas {
 

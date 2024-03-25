@@ -1,6 +1,6 @@
 #pragma once
-#include <filesystem>
 #include "AtlasXTypes.hpp"
+#include <filesystem>
 
 namespace fs = std::filesystem;
 
@@ -20,15 +20,13 @@ static void deleteFilesRecursively(const fs::path &directory) {
   }
 }
 
-
 static String const &componentTypeToString(ComponentType type) noexcept {
-  static String const file_browser = "file_browser";
-  switch (type) {
-  case FILE_BROWSER:
-    return file_browser;
-  default:
-    return file_browser;
-  }
+  static const Map<ComponentType, std::string> typeMap = {
+      {ComponentType::FILE_BROWSER, "File Browser"},
+      {ComponentType::EDITOR, "Editor"},
+      {ComponentType::NETWORK, "Network"}};
+  assert(typeMap.contains(type));
+  return typeMap.at(type);
 }
 
 END_NAMESPACE_ATLASX

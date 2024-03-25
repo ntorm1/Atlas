@@ -1,10 +1,6 @@
-module;
-#include <Eigen/Dense>
-#include <iostream>
-module ExchangeNodeModule;
-
-import ExchangeModule;
-import AssetNodeModule;
+#include "exchange/Exchange.hpp"
+#include "ast/AssetNode.hpp"
+#include "ast/ExchangeNode.hpp"
 
 namespace Atlas {
 

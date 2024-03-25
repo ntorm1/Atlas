@@ -1,9 +1,8 @@
-module;
-#include <Eigen/Dense>
 #include <random>
-module ClusterNodeModule;
 
-import HelperNodesModule;
+#include "ClusterNode.hpp"
+
+#include "ast/HelperNodes.hpp"
 
 namespace Atlas {
 

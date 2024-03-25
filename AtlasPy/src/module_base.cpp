@@ -3,18 +3,15 @@
 
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
-
-import AtlasEnumsModule;
-import AtlasAllocatorModule;
-import CommissionsModule;
-import ExchangeModule;
-import HydraModule;
-import ModelBaseModule;
-import MetaStrategyModule;
-import StrategyModule;
-import ObserverNodeBaseModule;
-import HelperNodesModule;
-import RiskNodeModule;
+#include "hydra/Commissions.hpp"
+#include "strategy/Allocator.hpp"
+#include "strategy/MetaStrategy.hpp"
+#include "model/ModelBase.hpp"
+#include "hydra/Hydra.hpp"
+#include "exchange/Exchange.hpp"
+#include "ast/RiskNode.hpp"
+#include "ast/ObserverNodeBase.hpp"
+#include "ast/HelperNodes.hpp"
 
 void wrap_base(py::module &m_core) {
   py::class_<Atlas::Hydra, std::shared_ptr<Atlas::Hydra>>(m_core, "Hydra")

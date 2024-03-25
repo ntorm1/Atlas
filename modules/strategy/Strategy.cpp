@@ -1,18 +1,14 @@
-module;
 #define NOMINMAX
 #include "AtlasMacros.hpp"
-#include <Eigen/Dense>
 #include <pybind11/pybind11.h>
-module StrategyModule;
+#include "exchange/Exchange.hpp"
+#include "ast/StrategyNode.hpp"
+#include "ast/Optimize.hpp"
+#include "hydra/Commissions.hpp"
 
-import ExchangeModule;
-import StrategyNodeModule;
-import CommissionsModule;
-import OptimizeNodeModule;
-import MetaStrategyModule;
-import TracerModule;
-
-import AtlasLinAlg;
+#include "strategy/MetaStrategy.hpp"
+#include "strategy/Tracer.hpp"
+#include "strategy/Strategy.hpp"
 
 namespace py = pybind11;
 

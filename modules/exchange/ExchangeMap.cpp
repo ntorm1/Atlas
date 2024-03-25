@@ -1,10 +1,8 @@
-module;
 #include <cassert>
 #include "AtlasMacros.hpp"
-module ExchangeMapModule;
-
-import ExchangeModule;
-import AtlasUtilsModule;
+#include "exchange/ExchangeMap.hpp"
+#include "exchange/Exchange.hpp"
+#include "standard/AtlasUtils.hpp"
 
 namespace Atlas
 {
@@ -171,7 +169,7 @@ ExchangeMap::getExchange(String const& name) const noexcept
 	{
 		return m_impl->exchanges[m_impl->exchange_id_map[name]];
 	}
-	return std::unexpected<AtlasException>("Exchange not found");
+	return Err<AtlasException>("Exchange not found");
 }
 
 

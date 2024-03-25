@@ -2,7 +2,6 @@
 
 #include "ui_AtlasX.h"
 #include <QtWidgets/QMainWindow>
-#include "DockManager.h"
 #include "AtlasXTypes.hpp"
 
 QT_BEGIN_NAMESPACE
@@ -21,7 +20,6 @@ class App : public QMainWindow {
 private:
   UniquePtr<AppImpl> m_impl;
   Ui::AtlasXClass *ui;
-  ads::CDockManager *m_DockManager;
 
   void initState() noexcept;
   void initStyle() noexcept;

@@ -1,13 +1,11 @@
-module;
 #include "AtlasFeature.hpp"
-
 #ifdef ATLAS_TORCH
 
 #pragma warning(push, 0)
 #include "TorchModelImpl.hpp"
 #pragma warning(pop)
 
-module TorchModule;
+#include "TorchModel.hpp"
 
 namespace Atlas {
 
@@ -89,5 +87,4 @@ bool TorchModel::isSame(StrategyBufferOpNode const* other) const noexcept {
 } // namespace Atlas
 
 #else
-module TorchModule;
 #endif

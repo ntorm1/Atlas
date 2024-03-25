@@ -18,6 +18,8 @@
 
 #include "AtlasXTree.hpp"
 
+#include "DockManager.h"
+
 namespace fs = std::filesystem;
 using namespace ads;
 
@@ -27,6 +29,7 @@ BEGIN_NAMESPACE_ATLASX
 struct AppImpl {
   String exe_path;
   fs::path env_path;
+  ads::CDockManager *m_DockManager;
   Map<String, UniquePtr<AtlasXComponent>> components;
 
   fs::path envBase() const noexcept {
@@ -44,9 +47,6 @@ struct AppImpl {
       ATLASX_CRITICAL("expected dir: {}", env_path.string());
       return;
     }
-
-    deleteFilesRecursively(env_path);
-
     static const char *hydra_toml = R"([hydra]
 version = "0.11.0"
 )";
@@ -76,7 +76,7 @@ App::App(QWidget *parent) noexcept
   CDockManager::setConfigFlag(CDockManager::DragPreviewIsDynamic, true);
   CDockManager::setConfigFlag(CDockManager::DragPreviewHasWindowFrame, false);
   CDockManager::setConfigFlag(CDockManager::FocusHighlighting, true);
-  m_DockManager = new ads::CDockManager(this);
+  m_impl->m_DockManager = new ads::CDockManager(this);
 
   initState();
   initStyle();
@@ -95,7 +95,8 @@ void App::initState() noexcept {
   auto tree = std::make_unique<AtlasXFileBrowser>(
       nextComponentId(AtlasXFileBrowser::compType()), dock, m_impl->envBase());
   dock->setWidget(tree.get());
-  auto dock_area = m_DockManager->addDockWidget(ads::LeftDockWidgetArea, dock);
+  auto dock_area =
+      m_impl->m_DockManager->addDockWidget(ads::LeftDockWidgetArea, dock);
   dock->setIcon(QIcon("./styles/icons/fileopen.png"));
   linkComponent(std::move(tree));
 }
@@ -108,7 +109,7 @@ void App::initStyle() noexcept {
     QTextStream stream(&file);
     QString stylesheet = stream.readAll();
     file.close();
-    m_DockManager->setStyleSheet(stylesheet);
+    m_impl->m_DockManager->setStyleSheet(stylesheet);
   } else {
     qCritical() << "Failed to open stylesheet file";
   }

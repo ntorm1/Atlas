@@ -1,9 +1,6 @@
-module;
 #include "AtlasMacros.hpp"
-#include <Eigen/Dense>
-module AssetNodeModule;
-
-import ExchangeModule;
+#include "exchange/Exchange.hpp"
+#include "AssetNode.hpp"
 
 namespace Atlas {
 

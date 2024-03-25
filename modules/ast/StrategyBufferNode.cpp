@@ -1,9 +1,5 @@
-module;
-#include <Eigen/Dense>
-module StrategyBufferModule;
-
-import AllocationNodeModule;
-import ExchangeModule;
+#include "ast/AllocationNode.hpp"
+#include "exchange/Exchange.hpp"
 
 namespace Atlas {
 

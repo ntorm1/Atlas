@@ -6,32 +6,26 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-import AllocationNodeModule;
-import AssetNodeModule;
-import AssetLogicalModule;
-import AtlasAllocatorModule;
-import AtlasEnumsModule;
-import AtlasException;
-import AtlasLinAlg;
-import AtlasCore;
-import BaseNodeModule;
-import CommissionsModule;
-import ExchangeNodeModule;
-import ExchangeModule;
-import HelperNodesModule;
-import HydraModule;
-import MeasureModule;
-import MetaStrategyModule;
-import OptimizeNodeModule;
-import ObserverNodeModule;
-import ObserverNodeBaseModule;
-import RankNodeModule;
-import StrategyModule;
-import StrategyNodeModule;
-import StrategyBufferModule;
-import TradeNodeModule;
-import TracerModule;
-import RiskNodeModule;
+
+#include "ast/AllocationNode.hpp"
+#include "ast/AssetLogical.hpp"
+#include "ast/RankNode.hpp"
+#include "ast/AssetNode.hpp"
+#include "ast/ExchangeNode.hpp"
+#include "ast/ObserverNode.hpp"
+#include "ast/StrategyBufferNode.hpp"
+#include "ast/StrategyNode.hpp"
+#include "ast/RiskNode.hpp"
+#include "ast/Optimize.hpp"
+#include "ast/HelperNodes.hpp"
+#include "ast/TradeNode.hpp"
+#include "strategy/Strategy.hpp"
+#include "strategy/MetaStrategy.hpp"
+#include "strategy/Tracer.hpp"
+#include "strategy/Measure.hpp"
+#include "exchange/Exchange.hpp"
+#include "hydra/Commissions.hpp"
+
 
 #include "module_base.h"
 #include "module_model.h"

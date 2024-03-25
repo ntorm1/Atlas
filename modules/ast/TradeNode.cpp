@@ -1,18 +1,13 @@
-module;
-#ifdef _DEBUG
-#include <iostream>
-#endif // _DEBUG
-
-#include <Eigen/Dense>
-module TradeNodeModule;
-
-import AllocationNodeModule;
-import AtlasEnumsModule;
-import ExchangeModule;
+#include "standard/AtlasEnums.hpp"
+#include "exchange/Exchange.hpp"
+#include "ast/AllocationNode.hpp"
+#include "ast/TradeNode.hpp"
 
 namespace Atlas {
 
 namespace AST {
+
+
 
 //============================================================================
 struct TradeLimitNodeImpl {

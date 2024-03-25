@@ -1,10 +1,8 @@
-module;
 #include <Eigen/Dense>
 #include <mutex>
 
-module PCAModule;
-
-import RiskNodeModule;
+#include "ast/RiskNode.hpp"
+#include "ast/PCA.hpp"
 
 namespace Atlas {
 

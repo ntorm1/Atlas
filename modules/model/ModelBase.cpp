@@ -1,8 +1,6 @@
-module;
 #include <Eigen/Dense>
-module ModelBaseModule;
-
-import ExchangeModule;
+#include "exchange/Exchange.hpp"
+#include "model/ModelBase.hpp"
 
 namespace Atlas {
 

@@ -1,11 +1,10 @@
-module;
 #include "AtlasMacros.hpp"
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
-module ExchangeModule;
 
-import ExchangePrivateModule;
+#include "exchange/ExchangePrivate.hpp"
+#include "exchange/Exchange.hpp"
 
 namespace Atlas {
 

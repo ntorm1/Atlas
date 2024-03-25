@@ -5,11 +5,9 @@
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
 
-import ExchangeModule;
-import LinearRegressionModule;
-import ModelBaseModule;
-import StrategyBufferModule;
-import TorchModule;
+#include "exchange/Exchange.hpp"
+#include "model/ModelBase.hpp"
+#include "model/LinearRegression.hpp"
 
 using namespace Atlas::AST;
 using namespace Atlas::Model;

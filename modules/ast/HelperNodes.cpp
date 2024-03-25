@@ -1,10 +1,7 @@
-module;
 #include "AtlasMacros.hpp"
-#include <Eigen/Dense>
-module HelperNodesModule;
-
-import ExchangeModule;
-import AtlasTimeModule;
+#include "exchange/Exchange.hpp"
+#include "standard/AtlasTime.hpp"
+#include "HelperNodes.hpp"
 
 namespace Atlas {
 

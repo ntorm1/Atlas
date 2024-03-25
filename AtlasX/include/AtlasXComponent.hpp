@@ -2,6 +2,7 @@
 #include <QtWidgets/QWidget>
 
 #include "AtlasXTypes.hpp"
+#include "AppUtil.hpp"
 
 BEGIN_NAMESPACE_ATLASX
 

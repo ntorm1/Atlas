@@ -4,9 +4,6 @@ import time
 
 from context import *
 
-DATA_PATH = r"C:\Users\natha\OneDrive\Desktop\C++\Atlas\AtlasPy\tests\files\data.csv"
-
-
 hydra_path = os.path.join(os.path.dirname(__file__), HYDRA_DIR_SP500)
 
 counts = [10, 20, 50, 75, 100, 200, 300, 500, 700, 1000, 2000]
@@ -18,9 +15,6 @@ for strategy_count in counts:
     intial_cash = 100.0
     root_strategy = MetaStrategy("root", exchange, None, intial_cash)
     hydra.addStrategy(root_strategy, True)
-    data = pd.read_csv(DATA_PATH)
-    data["Date"] = pd.to_datetime(data["Date"])
-    data.set_index("Date", inplace=True)
 
     for i in range(strategy_count):
         asset_read_node = AssetReadNode.make("close", 0, exchange)
@@ -29,7 +23,7 @@ for strategy_count in counts:
             asset_read_node, asser_read_previouse_node, AssetOpType.DIVIDE
         )
         spread_filter = ExchangeViewFilter(ExchangeViewFilterType.GREATER_THAN, 1, None)
-        exchange_view = ExchangeViewNode.make(exchange, spread, spread_filter)
+        exchange_view = ExchangeViewNode.make(exchange, asset_read_node)
         allocation = AllocationNode.make(exchange_view)
         strategy_node = StrategyNode.make(allocation)
         strategy = ImmediateStrategy(

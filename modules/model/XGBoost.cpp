@@ -1,4 +1,3 @@
-module;
 #include "AtlasFeature.hpp"
 #include <cassert>
 
@@ -6,7 +5,7 @@ module;
 #include <xgboost/c_api.h>
 #endif
 
-module XGBoostModule;
+#include "model/XGBoost.hpp"
 
 #ifdef ATLAS_XGBOOST
 

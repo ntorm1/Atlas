@@ -1,7 +1,4 @@
-module;
-module BaseNodeModule;
-
-import StrategyBufferModule;
+#include "ast/StrategyBufferNode.hpp"
 
 namespace Atlas {
 

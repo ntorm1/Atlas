@@ -1,8 +1,5 @@
-module;
-#include <Eigen/Dense>
-module RankNodeModule;
-
-import ExchangeNodeModule;
+#include "ast/RankNode.hpp"
+#include "ast/ExchangeNode.hpp"
 
 namespace Atlas {
 

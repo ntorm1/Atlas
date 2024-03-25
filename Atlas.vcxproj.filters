@@ -36,123 +36,174 @@
     <ClInclude Include="include\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\Downloads\expected.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\AllocationNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\AssetLogical.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\AssetNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\BaseNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\ClusterNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\ExchangeNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\HelperNodes.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\ObserverNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\ObserverNodeBase.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\Optimize.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\PCA.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\RankNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\RiskNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\StrategyBufferNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\StrategyNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ast\TradeNode.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\exchange\Exchange.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\exchange\ExchangeMap.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\exchange\ExchangePrivate.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\hydra\Commissions.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\hydra\Hydra.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\model\LinearRegression.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\model\ModelBase.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\model\TorchModel.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\model\XGBoost.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\standard\AtlasCore.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\standard\AtlasEnums.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\standard\AtlasException.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\standard\AtlasLinAlg.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\standard\AtlasSerialize.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\standard\AtlasStats.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\standard\AtlasTime.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\standard\AtlasUtils.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\strategy\Tracer.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\strategy\Strategy.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\strategy\MetaStrategy.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\strategy\Measure.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\strategy\Allocator.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\exchange\Exchange.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\exchange\Exchange.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\standard\AtlasTypes.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\exchange\ExchangeMap.ixx">
+    <ClCompile Include="modules\standard\AtlasTypes.hpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\exchange\ExchangeMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\standard\AtlasException.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\standard\AtlasCore.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\exchange\ExchangeIO.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\exchange\ExchangePrivate.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\standard\AtlasUtils.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\hydra\Hydra.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\hydra\Hydra.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\strategy\Strategy.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\strategy\Strategy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\strategy\Tracer.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\strategy\Tracer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ast\BaseNode.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\AssetNode.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ast\AssetNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\standard\AtlasLinAlg.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\ExchangeNode.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\ast\ExchangNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ast\StrategyNode.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ast\StrategyNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\HelperNodes.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\ast\HelperNodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\standard\AtlasEnums.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\RiskNode.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ast\RiskNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\standard\AtlasTime.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\standard\AtlasTime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\hydra\Commissions.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\hydra\Commissions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\RankNode.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\ast\RankNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ast\StrategyBufferNode.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ast\StrategyBufferNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\AllocationNode.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\exchange\ExchangePyIO.cpp">
@@ -161,82 +212,31 @@
     <ClCompile Include="modules\ast\AllocationNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ast\TradeNode.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ast\TradeNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\standard\AtlasSerialize.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\standard\AtlasSerialize.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ast\Optimize.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ast\Optimize.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\ObserverNode.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\ast\ObserverNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ast\AssetLogical.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ast\AssetLogical.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\interpreter\AtlasLangTypes.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\interpreter\AtlasLexer.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\interpreter\AtlasLexer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\interpreter\AtlasToken.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\interpreter\AtlasParser.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\interpreter\AtlasParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\interpreter\AtlasFunction.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\ObserverNodeBase.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\ast\ObserverNodeBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\model\ModelBase.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\model\ModelBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\model\LinearRegression.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\model\LinearRegression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\model\XGBoost.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\model\XGBoost.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\model\TorchModel.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\model\TorchModel.cpp">
@@ -245,13 +245,7 @@
     <ClCompile Include="modules\model\TorchModelImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\ast\PCA.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\ast\PCA.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ast\ClusterNode.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\ast\ClusterNode.cpp">
@@ -260,25 +254,13 @@
     <ClCompile Include="modules\ast\BaseNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\strategy\Allocator.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\strategy\Allocator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\strategy\MetaStrategy.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\strategy\MetaStrategy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="modules\standard\AtlasStats.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="modules\standard\AtlasStats.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\strategy\Measure.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="modules\strategy\Measure.cpp">

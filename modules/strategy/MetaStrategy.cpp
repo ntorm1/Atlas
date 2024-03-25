@@ -1,7 +1,6 @@
-module;
 #include "AtlasMacros.hpp"
-#include <Eigen/Dense>
-module MetaStrategyModule;
+#include "strategy/MetaStrategy.hpp"
+#include "standard/AtlasLinAlg.hpp"
 
 namespace Atlas {
 

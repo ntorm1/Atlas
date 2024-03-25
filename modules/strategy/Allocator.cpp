@@ -1,11 +1,11 @@
-module;
 #include <Eigen/Dense>
 #include <cassert>
-module AtlasAllocatorModule;
+#include "Allocator.hpp"
 
-import TracerModule;
-import ExchangeModule;
-import MetaStrategyModule;
+
+#include "strategy/Tracer.hpp"
+#include "exchange/Exchange.hpp"
+#include "strategy/MetaStrategy.hpp"
 
 namespace Atlas {
 

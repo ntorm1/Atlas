@@ -1,12 +1,10 @@
-module;
 #include "AtlasMacros.hpp"
 #include <cassert>
 #include <stdexcept>
-module HydraModule;
-
-import ExchangeMapModule;
-import AtlasAllocatorModule;
-import MetaStrategyModule;
+#include "exchange/ExchangeMap.hpp"
+#include "strategy/Allocator.hpp"
+#include "strategy/MetaStrategy.hpp"
+#include "hydra/Hydra.hpp"
 
 namespace Atlas {
 

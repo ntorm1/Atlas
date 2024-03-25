@@ -1,11 +1,9 @@
-module;
 #include "AtlasMacros.hpp"
-#include <Eigen/Dense>
-module TracerModule;
 
-import ExchangeModule;
-import AtlasAllocatorModule;
-import MeasureModule;
+#include "exchange/Exchange.hpp"
+#include "strategy/Allocator.hpp"
+#include "strategy/Measure.hpp"
+#include "strategy/Tracer.hpp"
 
 namespace Atlas {
 

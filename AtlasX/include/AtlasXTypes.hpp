@@ -29,6 +29,8 @@ BEGIN_NAMESPACE_ATLASX
 
 enum ComponentType {
   FILE_BROWSER,
+  EDITOR,
+  NETWORK,
 };
 
 template <typename T>

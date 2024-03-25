@@ -8,11 +8,11 @@
 #define EXPECT_FALSE(expr, msg) \
     do { \
         if (expr) { \
-            return std::unexpected<AtlasException>(msg); \
+            return Err<AtlasException>(msg); \
         } \
     } while (false)
 
-#define Err(msg) std::unexpected<AtlasException>(msg)
+#define Err(msg) Err<AtlasException>(msg)
 
 
 #define SAFE_MAP_INSERT(map, key, value) \
@@ -20,7 +20,7 @@
         try { \
             (map)[key] = value; \
         } catch (...) { \
-            return std::unexpected<AtlasException>("MAP ALLOC FAILURE"); \
+            return Err<AtlasException>("MAP ALLOC FAILURE"); \
         } \
     } while (false)
 
@@ -28,7 +28,7 @@
 #define EXPECT_TRUE(val, expr) \
 	auto CONCAT(val, _opt) = expr; \
     if (!CONCAT(val, _opt)) { \
-		return std::unexpected<Atlas::AtlasException>(CONCAT(val, _opt).error()); \
+		return Err<Atlas::AtlasException>(CONCAT(val, _opt).error()); \
 	} \
 
 #define EXPECT_ALLOC(val, expr) \
@@ -41,7 +41,7 @@
     }(); \
     \
     if (!val##_opt.has_value()) { \
-        return std::unexpected<Atlas::AtlasException>("ALLOC FAILURE"); \
+        return Err<Atlas::AtlasException>("ALLOC FAILURE"); \
     } \
     \
     auto val = std::move(val##_opt.value());
@@ -49,7 +49,7 @@
 #define EXPECT_ASSIGN(val, expr) \
 	auto CONCAT(val, _opt) = expr; \
     if (!CONCAT(val, _opt)) { \
-		return std::unexpected<Atlas::AtlasException>(CONCAT(val, _opt).error()); \
+		return Err<Atlas::AtlasException>(CONCAT(val, _opt).error()); \
 	} \
 	auto val = std::move(CONCAT(val, _opt).value());
 
@@ -57,6 +57,6 @@
 #define ATLAS_ASSIGN_OR_RETURN(val, function) \
 	auto CONCAT(val, _opt) = function; \
     if (!CONCAT(val, _opt)) { \
-		return std::unexpected<Atlas::AtlasException>(CONCAT(val, _opt).error()); \
+		return Err<Atlas::AtlasException>(CONCAT(val, _opt).error()); \
 	} \
 	auto val = std::move(CONCAT(val, _opt).value());

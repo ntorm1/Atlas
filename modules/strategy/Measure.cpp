@@ -1,11 +1,8 @@
-module;
-#include <Eigen/Dense>
-module MeasureModule;
-
-import ExchangeModule;
-import TracerModule;
-import AtlasAllocatorModule;
-import RiskNodeModule;
+#include "exchange/Exchange.hpp"
+#include "ast/RiskNode.hpp"
+#include "strategy/Tracer.hpp"
+#include "strategy/Measure.hpp"
+#include "strategy/Allocator.hpp"
 
 namespace Atlas {
 

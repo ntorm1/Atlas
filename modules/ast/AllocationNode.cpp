@@ -1,16 +1,13 @@
-module;
-#include <Eigen/Dense>
-
 #include "AtlasMacros.hpp"
 
-module AllocationNodeModule;
+#include "exchange/Exchange.hpp"
+#include "hydra/Commissions.hpp"
+#include "ast/ExchangeNode.hpp"
+#include "ast/TradeNode.hpp"
+#include "strategy/Tracer.hpp"
+#include "ast/RiskNode.hpp"
+#include "ast/AllocationNode.hpp"
 
-import ExchangeModule;
-import CommissionsModule;
-import ExchangeNodeModule;
-import TradeNodeModule;
-import TracerModule;
-import RiskNodeModule;
 
 namespace Atlas {
 

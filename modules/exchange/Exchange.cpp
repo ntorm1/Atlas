@@ -1,17 +1,16 @@
-module;
+#include <format>
 #include "AtlasMacros.hpp"
-#include <Eigen/Dense>
-module ExchangeModule;
+#include "standard/AtlasUtils.hpp"
+#include "standard/AtlasTime.hpp"
+#include "ast/HelperNodes.hpp"
+#include "model/ModelBase.hpp"
+#include "ast/ObserverNodeBase.hpp"
+#include "ast/RiskNode.hpp"
+#include "ast/StrategyBufferNode.hpp"
+#include "strategy/Allocator.hpp"
 
-import AtlasUtilsModule;
-import AtlasTimeModule;
-import ExchangePrivateModule;
-import HelperNodesModule;
-import ModelBaseModule;
-import ObserverNodeBaseModule;
-import RiskNodeModule;
-import StrategyBufferModule;
-import AtlasAllocatorModule;
+#include "exchange/ExchangePrivate.hpp"
+#include "exchange/Exchange.hpp"
 
 namespace Atlas {
 

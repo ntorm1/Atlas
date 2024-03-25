@@ -1,9 +1,7 @@
-module;
 #include <chrono>
 #include <cassert>
 #include "AtlasMacros.hpp"
-module AtlasTimeModule;
-
+#include "AtlasTime.hpp"
 
 namespace Atlas
 {

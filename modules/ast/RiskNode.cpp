@@ -1,13 +1,7 @@
-module;
-#include <Eigen/Dense>
-#ifdef _DEBUG
-#include <iostream>
-#endif _DEBUG
-module RiskNodeModule;
-
-import HelperNodesModule;
-import ExchangeModule;
-import AllocationNodeModule;
+#include "exchange/Exchange.hpp"
+#include "ast/HelperNodes.hpp"
+#include "ast/AllocationNode.hpp"
+#include "ast/RiskNode.hpp"
 
 namespace Atlas {
 

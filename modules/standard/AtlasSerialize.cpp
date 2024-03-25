@@ -1,10 +1,3 @@
-module;
-#pragma once
-#ifdef ATLAS_EXPORTS
-#define ATLAS_API __declspec(dllexport)
-#else
-#define ATLAS_API __declspec(dllimport)
-#endif
 #include <fstream>
 #include <filesystem>
 #include <rapidjson/allocators.h>
@@ -15,11 +8,10 @@ module;
 #include <rapidjson/stringbuffer.h>
 #include <AtlasMacros.hpp>
 
-module AtlasSerializeModule;
-
-import HydraModule;
-import ExchangeModule;
-import ExchangeMapModule;
+#include "standard/AtlasSerialize.hpp"
+#include "hydra/Hydra.hpp"
+#include "exchange/Exchange.hpp"
+#include "exchange/ExchangeMap.hpp"
 
 namespace Atlas 
 {
@@ -46,7 +38,7 @@ serialize_hydra(
 		std::ofstream out(*out_path);
 		if (!out.is_open())
 		{
-			return std::unexpected(AtlasException("Failed to open file: " + *out_path));
+			return Err(AtlasException("Failed to open file: " + *out_path));
 		}
 		out << buffer.GetString();
 		out.close();
@@ -63,12 +55,12 @@ deserialize_hydra(String const& path) noexcept
 	// validate path exists
 	if (!std::filesystem::exists(path))
 	{
-		return std::unexpected(AtlasException("File does not exist: " + path));
+		return Err(AtlasException("File does not exist: " + path));
 	}
 	// validate it is json file
 	if (std::filesystem::path(path).extension() != ".json")
 	{
-		return std::unexpected(AtlasException("File is not a json file: " + path));
+		return Err(AtlasException("File is not a json file: " + path));
 	}
 	// read it into rapidjson document
 	std::ifstream in(path);
@@ -77,11 +69,11 @@ deserialize_hydra(String const& path) noexcept
 	doc.Parse(json_str.c_str());
 	if (doc.HasParseError())
 	{
-		return std::unexpected(AtlasException("Failed to parse json file: " + path));
+		return Err(AtlasException("Failed to parse json file: " + path));
 	}
 	if (!doc.HasMember("hydra_config"))
 	{
-		return std::unexpected(AtlasException("Json file does not have hydra_config key"));
+		return Err(AtlasException("Json file does not have hydra_config key"));
 	}
 
 	UniquePtr<Hydra> hydra = std::make_unique<Hydra>();
@@ -128,12 +120,12 @@ deserialize_exchange_map(
 	auto& hydra_config = json["hydra_config"];
 	if (!hydra_config.HasMember("exchanges"))
 	{
-		return std::unexpected(AtlasException("Json file does not have exchanges"));
+		return Err(AtlasException("Json file does not have exchanges"));
 	}
 	auto& exchanges = hydra_config["exchanges"];
 	if (!exchanges.IsObject())
 	{
-		return std::unexpected(AtlasException("Json file does not have exchanges: "));
+		return Err(AtlasException("Json file does not have exchanges: "));
 	}
 	for (auto& exchange : exchanges.GetObject())
 	{
@@ -152,7 +144,7 @@ deserialize_exchange_map(
 			auto& symbols = exchange.value["symbols"];
 			if (!symbols.IsArray())
 			{
-				return std::unexpected(AtlasException("expected symbols to be array"));
+				return Err(AtlasException("expected symbols to be array"));
 			}
 			std::vector<std::string> symbols_vec;
 			for (auto& symbol : symbols.GetArray())
@@ -165,7 +157,7 @@ deserialize_exchange_map(
 		auto res = hydra->addExchange(exchange_id, source, datetime_format);
 		if (!res)
 		{
-			return std::unexpected(res.error());
+			return Err(res.error());
 		}
 	}
 	return true;

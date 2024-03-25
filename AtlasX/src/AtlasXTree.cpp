@@ -71,6 +71,7 @@ void AtlasXFileBrowser::loadSpace() noexcept {
   m_impl->tree_view->setEditTriggers(QAbstractItemView::SelectedClicked |
                                      QAbstractItemView::DoubleClicked);
 
+  m_impl->tree_view->setColumnWidth(0, 200);
   newLayout->addWidget(m_impl->tree_view.get());
   m_impl->layout = std::move(newLayout);
   setLayout(m_impl->layout.get());

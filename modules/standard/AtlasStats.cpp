@@ -1,10 +1,8 @@
-module;
-#include <Eigen/Dense>
 #include <cmath>
-module AtlasStatsModule;
+#include "strategy/Allocator.hpp"
+#include "strategy/Measure.hpp"
+#include "standard/AtlasStats.hpp"
 
-import AtlasAllocatorModule;
-import MeasureModule;
 
 namespace Atlas {
 

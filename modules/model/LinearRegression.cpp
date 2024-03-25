@@ -1,8 +1,7 @@
-module;
 #include <Eigen/Dense>
 #include <Eigen/IterativeLinearSolvers>
 #include <boost/math/distributions/students_t.hpp>
-module LinearRegressionModule;
+#include "model/LinearRegression.hpp"
 
 namespace Atlas {
 

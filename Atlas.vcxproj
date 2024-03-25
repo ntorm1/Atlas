@@ -73,14 +73,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CodeAnalysisRuleSet>MixedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include;C:\Program Files\Python312\include</IncludePath>
+    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(SolutionDir)modules;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include;C:\Program Files\Python312\include</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch_$(Configuration)\lib;C:\Program Files\Python312\libs</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CodeAnalysisRuleSet>MixedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include;C:\Program Files\Python312\include</IncludePath>
+    <IncludePath>$(ProjectDir)external\xgboost\include;$(ProjectDir)include;$(ProjectDir)external;$(IncludePath);C:\libtorch_Release\include;C:\libtorch_Release\include\torch\csrc\api\include;$(SolutionDir)modules;C:\Program Files\Python312\include</IncludePath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)external\xgboost\lib;C:\libtorch_$(Configuration)\lib;C:\Program Files\Python312\libs</LibraryPath>
   </PropertyGroup>
@@ -127,14 +127,15 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <EnableModules>true</EnableModules>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <EnableModules>false</EnableModules>
       <EnablePREfast>false</EnablePREfast>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ExceptionHandling>Sync</ExceptionHandling>
       <DisableSpecificWarnings>4530</DisableSpecificWarnings>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <OpenMPSupport>true</OpenMPSupport>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -154,11 +155,11 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <EnableModules>true</EnableModules>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <EnableModules>false</EnableModules>
       <EnablePREfast>false</EnablePREfast>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>
       </FloatingPointModel>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
@@ -176,6 +177,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\Downloads\expected.hpp" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\AtlasFeature.hpp" />
     <ClInclude Include="include\AtlasMacros.hpp" />
@@ -187,86 +189,79 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="modules\ast\AllocationNode.cpp" />
-    <ClCompile Include="modules\ast\AllocationNode.ixx" />
-    <ClCompile Include="modules\ast\AssetLogical.ixx" />
+    <ClInclude Include="modules\ast\AllocationNode.hpp" />
+    <ClInclude Include="modules\ast\AssetLogical.hpp" />
     <ClCompile Include="modules\ast\BaseNode.cpp" />
     <ClCompile Include="modules\ast\ClusterNode.cpp" />
-    <ClCompile Include="modules\ast\ClusterNode.ixx" />
+    <ClInclude Include="modules\ast\ClusterNode.hpp" />
     <ClCompile Include="modules\ast\HelperNodes.cpp" />
-    <ClCompile Include="modules\ast\HelperNodes.ixx" />
-    <ClCompile Include="modules\ast\ObserverNode.ixx" />
+    <ClInclude Include="modules\ast\HelperNodes.hpp" />
+    <ClInclude Include="modules\ast\ObserverNode.hpp" />
     <ClCompile Include="modules\ast\ObserverNode.cpp" />
     <ClCompile Include="modules\ast\ObserverNodeBase.cpp" />
-    <ClCompile Include="modules\ast\ObserverNodeBase.ixx" />
+    <ClInclude Include="modules\ast\ObserverNodeBase.hpp" />
     <ClCompile Include="modules\ast\Optimize.cpp" />
-    <ClCompile Include="modules\ast\Optimize.ixx" />
+    <ClInclude Include="modules\ast\Optimize.hpp" />
     <ClCompile Include="modules\ast\RankNode.cpp" />
-    <ClCompile Include="modules\ast\RankNode.ixx" />
+    <ClInclude Include="modules\ast\RankNode.hpp" />
     <ClCompile Include="modules\ast\RiskNode.cpp" />
-    <ClCompile Include="modules\ast\RiskNode.ixx" />
+    <ClInclude Include="modules\ast\RiskNode.hpp" />
     <ClCompile Include="modules\ast\AssetLogical.cpp" />
     <ClCompile Include="modules\ast\StrategyBufferNode.cpp" />
-    <ClCompile Include="modules\ast\StrategyBufferNode.ixx" />
+    <ClInclude Include="modules\ast\StrategyBufferNode.hpp" />
     <ClCompile Include="modules\ast\StrategyNode.cpp" />
-    <ClCompile Include="modules\ast\StrategyNode.ixx" />
+    <ClInclude Include="modules\ast\StrategyNode.hpp" />
     <ClCompile Include="modules\ast\AssetNode.cpp" />
-    <ClCompile Include="modules\ast\AssetNode.ixx" />
-    <ClCompile Include="modules\ast\BaseNode.ixx" />
-    <ClCompile Include="modules\ast\ExchangeNode.ixx" />
+    <ClInclude Include="modules\ast\AssetNode.hpp" />
+    <ClInclude Include="modules\ast\BaseNode.hpp" />
+    <ClInclude Include="modules\ast\ExchangeNode.hpp" />
     <ClCompile Include="modules\ast\ExchangNode.cpp" />
     <ClCompile Include="modules\ast\TradeNode.cpp" />
-    <ClCompile Include="modules\ast\TradeNode.ixx" />
+    <ClInclude Include="modules\ast\TradeNode.hpp" />
     <ClCompile Include="modules\exchange\Exchange.cpp" />
-    <ClCompile Include="modules\exchange\Exchange.ixx" />
+    <ClInclude Include="modules\exchange\Exchange.hpp" />
     <ClCompile Include="modules\exchange\ExchangeIO.cpp" />
     <ClCompile Include="modules\exchange\ExchangeMap.cpp" />
-    <ClCompile Include="modules\exchange\ExchangeMap.ixx" />
-    <ClCompile Include="modules\exchange\ExchangePrivate.ixx" />
+    <ClInclude Include="modules\exchange\ExchangeMap.hpp" />
+    <ClInclude Include="modules\exchange\ExchangePrivate.hpp" />
     <ClCompile Include="modules\exchange\ExchangePyIO.cpp" />
-    <ClCompile Include="modules\interpreter\AtlasFunction.ixx" />
-    <ClCompile Include="modules\interpreter\AtlasLexer.cpp" />
-    <ClCompile Include="modules\interpreter\AtlasLangTypes.ixx" />
     <ClCompile Include="modules\hydra\Commissions.cpp" />
-    <ClCompile Include="modules\hydra\Commissions.ixx" />
+    <ClInclude Include="modules\hydra\Commissions.hpp" />
     <ClCompile Include="modules\hydra\Hydra.cpp" />
-    <ClCompile Include="modules\hydra\Hydra.ixx" />
-    <ClCompile Include="modules\interpreter\AtlasLexer.ixx" />
-    <ClCompile Include="modules\interpreter\AtlasParser.cpp" />
-    <ClCompile Include="modules\interpreter\AtlasParser.ixx" />
-    <ClCompile Include="modules\interpreter\AtlasToken.ixx" />
+    <ClInclude Include="modules\hydra\Hydra.hpp" />
     <ClCompile Include="modules\model\LinearRegression.cpp" />
-    <ClCompile Include="modules\model\LinearRegression.ixx" />
+    <ClInclude Include="modules\model\LinearRegression.hpp" />
     <ClCompile Include="modules\model\ModelBase.cpp" />
-    <ClCompile Include="modules\model\ModelBase.ixx" />
+    <ClInclude Include="modules\model\ModelBase.hpp" />
     <ClCompile Include="modules\ast\PCA.cpp" />
-    <ClCompile Include="modules\ast\PCA.ixx" />
+    <ClInclude Include="modules\ast\PCA.hpp" />
     <ClCompile Include="modules\model\TorchModel.cpp" />
-    <ClCompile Include="modules\model\TorchModel.ixx" />
+    <ClInclude Include="modules\model\TorchModel.hpp" />
     <ClCompile Include="modules\model\TorchModelImpl.cpp" />
     <ClCompile Include="modules\model\XGBoost.cpp" />
-    <ClCompile Include="modules\model\XGBoost.ixx" />
-    <ClCompile Include="modules\standard\AtlasCore.ixx" />
-    <ClCompile Include="modules\standard\AtlasEnums.ixx" />
-    <ClCompile Include="modules\standard\AtlasLinAlg.ixx" />
+    <ClInclude Include="modules\model\XGBoost.hpp" />
+    <ClInclude Include="modules\standard\AtlasCore.hpp" />
+    <ClInclude Include="modules\standard\AtlasEnums.hpp" />
+    <ClInclude Include="modules\standard\AtlasLinAlg.hpp" />
     <ClCompile Include="modules\standard\AtlasSerialize.cpp" />
-    <ClCompile Include="modules\standard\AtlasSerialize.ixx" />
+    <ClInclude Include="modules\standard\AtlasSerialize.hpp" />
     <ClCompile Include="modules\standard\AtlasStats.cpp" />
     <ClCompile Include="modules\standard\AtlasTime.cpp" />
-    <ClCompile Include="modules\standard\AtlasTime.ixx" />
-    <ClCompile Include="modules\standard\AtlasTypes.ixx" />
-    <ClCompile Include="modules\standard\AtlasException.ixx" />
-    <ClCompile Include="modules\standard\AtlasUtils.ixx" />
-    <ClCompile Include="modules\standard\AtlasStats.ixx" />
-    <ClCompile Include="modules\strategy\Allocator.ixx" />
+    <ClInclude Include="modules\standard\AtlasTime.hpp" />
+    <ClCompile Include="modules\standard\AtlasTypes.hpp" />
+    <ClInclude Include="modules\standard\AtlasException.hpp" />
+    <ClInclude Include="modules\standard\AtlasUtils.hpp" />
+    <ClInclude Include="modules\standard\AtlasStats.hpp" />
+    <ClInclude Include="modules\strategy\Allocator.hpp" />
     <ClCompile Include="modules\strategy\Allocator.cpp" />
     <ClCompile Include="modules\strategy\Measure.cpp" />
-    <ClCompile Include="modules\strategy\Measure.ixx" />
+    <ClInclude Include="modules\strategy\Measure.hpp" />
     <ClCompile Include="modules\strategy\MetaStrategy.cpp" />
-    <ClCompile Include="modules\strategy\MetaStrategy.ixx" />
+    <ClInclude Include="modules\strategy\MetaStrategy.hpp" />
     <ClCompile Include="modules\strategy\Strategy.cpp" />
-    <ClCompile Include="modules\strategy\Strategy.ixx" />
+    <ClInclude Include="modules\strategy\Strategy.hpp" />
     <ClCompile Include="modules\strategy\Tracer.cpp" />
-    <ClCompile Include="modules\strategy\Tracer.ixx" />
+    <ClInclude Include="modules\strategy\Tracer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

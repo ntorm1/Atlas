@@ -1,14 +1,10 @@
-module;
 #include "AtlasMacros.hpp"
-#include <Eigen/Dense>
-#include <iostream>
-module StrategyNodeModule;
+#include "exchange/Exchange.hpp"
 
-import ExchangeModule;
-
-import HelperNodesModule;
-import ExchangeNodeModule;
-import RiskNodeModule;
+#include "ast/HelperNodes.hpp"
+#include "ast/ExchangeNode.hpp"
+#include "ast/RiskNode.hpp"
+#include "ast/StrategyNode.hpp"
 
 namespace Atlas {
 
