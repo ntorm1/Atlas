@@ -4,7 +4,10 @@
 #include <string>
 #include <vector>
 #include <format>
+#include <filesystem>
 #include <unordered_map>
+
+namespace fs = std::filesystem;
 
 #define BEGIN_NAMESPACE_ATLASX namespace AtlasX {
 #define END_NAMESPACE_ATLASX }
@@ -53,5 +56,6 @@ using String = std::string;
 class AtlasXComponent;
 class App;
 class AtlasXFileBrowser;
+class AtlasXEditor;
 
 END_NAMESPACE_ATLASX

@@ -7,9 +7,6 @@
 #include <QStandardItemModel>
 #include <QStyledItemDelegate>
 #include <QTreeView>
-#include <filesystem>
-
-namespace fs = std::filesystem;
 
 BEGIN_NAMESPACE_ATLASX
 
@@ -31,6 +28,8 @@ signals:
 //============================================================================
 class AtlasXFileBrowser : public AtlasXComponent {
   Q_OBJECT
+  friend class App;
+
 private:
   std::unique_ptr<AtlasXTreeImpl> m_impl;
 
@@ -44,6 +43,10 @@ private slots:
   void showContextMenu(QContextMenuEvent const *event);
   void onNewSpace(String const &env_dir) noexcept override;
   void onDirectoryChanged(QString change) noexcept;
+  void onEditorIdsRequest(Vector<String> const &ids) noexcept;
+
+signals:
+  void fileOpenRequest(String const& editor_id, fs::path const &file);
 
 public:
   AtlasXFileBrowser(String id, QWidget *parent,

@@ -25,6 +25,7 @@ struct AtlasXTreeImpl {
   QFileSystemWatcher watcher;
   UniquePtr<QVBoxLayout> layout;
   UniquePtr<AtlasXTree> tree_view;
+  Vector<String> editor_ids;
 
   AtlasXTreeImpl(fs::path const &_env_dir) noexcept : env_dir(_env_dir) {
     watcher.addPath(QFORMAT("{}", env_dir.string()));
@@ -89,6 +90,12 @@ void AtlasXFileBrowser::onNewSpace(String const &env_dir) noexcept {
 }
 
 //============================================================================
+void AtlasXFileBrowser::onEditorIdsRequest(
+    std::vector<String> const &ids) noexcept {
+  m_impl->editor_ids = ids;
+}
+
+//============================================================================
 void AtlasXFileBrowser::showContextMenu(QContextMenuEvent const *event) {
   QPoint pos = event->pos();
   QPoint globalPos = m_impl->tree_view->viewport()->mapToGlobal(pos);
@@ -111,6 +118,39 @@ void AtlasXFileBrowser::showContextMenu(QContextMenuEvent const *event) {
   QMenu contextMenu;
   QAction *addFolderAction = contextMenu.addAction("Add New Folder");
   QAction *addFileAction = contextMenu.addAction("Add New File");
+
+  if (!fs::is_directory(file_path)) {
+    auto separator = new QAction(&contextMenu);
+    separator->setSeparator(true);
+    contextMenu.addAction(separator);
+
+    QAction *openAction = contextMenu.addAction("Open");
+
+    // Create a submenu for the "Open" action
+    QMenu *openSubMenu = new QMenu("Open With", &contextMenu);
+    openAction->setMenu(openSubMenu);
+
+    // Assuming 'ids' is your vector of string IDs
+    for (const auto &id : m_impl->editor_ids) {
+      QAction *openWithAction = openSubMenu->addAction(id.c_str());
+      connect(openWithAction, &QAction::triggered, this,
+              [this, id, file_path]() {
+                // Emit the fileOpenRequest signal with the chosen ID and file
+                // path
+                emit fileOpenRequest(id, file_path);
+              });
+    }
+    QAction *deleteAction = contextMenu.addAction("Delete");
+    connect(openAction, &QAction::triggered, this, [=]() {
+      if (QMessageBox::question(this, "Delete", "Are you sure?") ==
+          QMessageBox::Yes) {
+        if (fs::remove(file_path)) {
+        } else {
+          QMessageBox::critical(this, "Error", "Failed to delete file");
+        }
+      }
+    });
+  }
 
   // Connect actions to slots
   connect(addFolderAction, &QAction::triggered, this,

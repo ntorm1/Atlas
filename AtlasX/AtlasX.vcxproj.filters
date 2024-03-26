@@ -52,12 +52,18 @@
     <ClCompile Include="src\AtlasXTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\AtlasXEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\AtlasXComponent.hpp">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="include\AtlasXTree.hpp">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="include\AtlasXEditor.hpp">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

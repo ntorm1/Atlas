@@ -14,6 +14,7 @@ namespace AtlasX {
 
 struct AppImpl;
 
+//============================================================================
 class App : public QMainWindow {
   Q_OBJECT
 
@@ -25,13 +26,27 @@ private:
   void initStyle() noexcept;
   void initToolbar() noexcept;
   void initMenu() noexcept;
+
+  void build() noexcept;
+  void step() noexcept;
+  void run() noexcept;
+  void reset() noexcept;
+
+  AtlasXEditor* createEditor() noexcept;
   void createNewSpace() noexcept;
 
   String nextComponentId(ComponentType type) noexcept;
+  void linkEditor(AtlasXEditor* editor) noexcept;
+  void linkFileBrowser(AtlasXFileBrowser* tree) noexcept;
   void linkComponent(UniquePtr<AtlasXComponent> component) noexcept;
+  void onEditorIdsRequest() noexcept;
+
+private slots:
+  void onFileOpenRequest(String const& editor_id, fs::path const &path) noexcept;
 
 signals:
   void onNewSpace(String const &env_dir);
+  void onEditorIds(Vector<String> ids);
 
 public:
   App(QWidget *parent = nullptr) noexcept;

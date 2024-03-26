@@ -61,12 +61,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)AtlasX\external\Qt-Advanced-Docking-System\src;$(SolutionDir)AtlasX\include;</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)AtlasX\external\Qt-Advanced-Docking-System\out\build\x64\lib;</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)AtlasX\external\Qt-Advanced-Docking-System\src;$(SolutionDir)AtlasX\external\QScintilla\src;$(SolutionDir)AtlasX\include;</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)AtlasX\external\Qt-Advanced-Docking-System\out\build\x64\lib;$(SolutionDir)AtlasX\external\QScintilla\src\debug;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)AtlasX\external\Qt-Advanced-Docking-System\src;$(SolutionDir)AtlasX\include;</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)AtlasX\external\Qt-Advanced-Docking-System\out\build\x64\lib</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)AtlasX\external\Qt-Advanced-Docking-System\src;$(SolutionDir)AtlasX\external\QScintilla\src;$(SolutionDir)AtlasX\include;</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)AtlasX\external\Qt-Advanced-Docking-System\out\build\x64\lib;$(SolutionDir)AtlasX\external\QScintilla\src\release;</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -75,7 +75,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);$(Qt_LIBS_);qt6advanceddockingd.lib;</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);$(Qt_LIBS_);qt6advanceddockingd.lib;qscintilla2_qt6d.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -85,7 +85,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);qt6advanceddocking.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);qt6advanceddocking.lib;qscintilla2_qt6.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -113,6 +113,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\AtlasXEditor.cpp" />
     <ClCompile Include="src\AtlasXTree.cpp" />
     <QtRcc Include="AtlasX.qrc" />
     <QtRcc Include="external\Qt-Advanced-Docking-System\src\ads.qrc" />
@@ -125,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\AppUtil.hpp" />
+    <QtMoc Include="include\AtlasXEditor.hpp" />
     <ClInclude Include="include\nodes\AtlasXNodeModel.hpp" />
     <QtMoc Include="include\AtlasXTree.hpp" />
     <ClInclude Include="include\AtlasXTypes.hpp" />
